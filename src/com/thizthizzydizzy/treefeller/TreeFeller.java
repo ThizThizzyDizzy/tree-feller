@@ -38,16 +38,16 @@ public class TreeFeller extends JavaPlugin{
     public boolean startupLogs;
     public boolean diagonalLeaves;
     public void fellTree(BlockBreakEvent event){
-        fellTree(event.getBlock(), event.getPlayer());
+        if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
     }
-    public void fellTree(Block block, Player player){
-        fellTree(block, player.getInventory().getItemInMainHand(), player);
+    public boolean fellTree(Block block, Player player){
+        return fellTree(block, player.getInventory().getItemInMainHand(), player);
     }
-    public void fellTree(Block block, ItemStack axe, Player player){
-        fellTree(block, player, axe, player.getGameMode(), player.isSneaking());
+    public boolean fellTree(Block block, ItemStack axe, Player player){
+        return fellTree(block, player, axe, player.getGameMode(), player.isSneaking());
     }
-    public void fellTree(Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking){
-        fellTree(block, player, axe, gamemode, sneaking, true);
+    public boolean fellTree(Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking){
+        return fellTree(block, player, axe, gamemode, sneaking, true)!=null;
     }
     /**
      * Fells a tree
@@ -288,25 +288,13 @@ public class TreeFeller extends JavaPlugin{
                                 }.runTaskLater(this, delay);
                                 Ttl += blocks.get(i).size();
                             }
-                            if(spawnSaplings==1){
+                            if(spawnSaplings>=1){
                                 new BukkitRunnable() {
                                     @Override
                                     public void run(){
                                         for(Block b : possibleSaplings.keySet()){
                                             Sapling s = getSapling(b);
                                             if(s!=null)s.place();
-                                        }
-                                    }
-                                }.runTaskLater(this, delay+1);
-                            }
-                            if(spawnSaplings==2){
-                                new BukkitRunnable() {
-                                    @Override
-                                    public void run(){
-                                        for(Block b : possibleSaplings.keySet()){
-                                            if(b.getType()==Material.AIR){
-                                                b.setType(tree.sapling);
-                                            }
                                         }
                                     }
                                 }.runTaskLater(this, delay+1);
@@ -333,11 +321,10 @@ public class TreeFeller extends JavaPlugin{
                                     total--;
                                 }
                             }
-                            if(spawnSaplings==2){
+                            if(spawnSaplings>=1){
                                 for(Block b : possibleSaplings.keySet()){
-                                    if(b.getType()==Material.AIR){
-                                        b.setType(tree.sapling);
-                                    }
+                                    Sapling s = getSapling(b);
+                                    if(s!=null)s.place();
                                 }
                             }
                         }
