@@ -24,6 +24,7 @@ public class BlockBreak implements Listener{
                 if(sapling.isDead()){
                     it.remove();
                 }else{
+                    if(!sapling.autofill)return;
                     ItemStack stack = event.getEntity().getItemStack();
                     if(sapling.getMaterial()==stack.getType()&&stack.getAmount()>=1){
                         if(sapling.place()){

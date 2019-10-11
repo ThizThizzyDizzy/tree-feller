@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.6.1
+# Version 1.7
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -124,6 +124,16 @@ directional-fall-behavior: RANDOM
 # Should _WOOD blocks in trees be converted to _LOG when they drop as items?
 convert-wood-to-log: true
 
+# How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)
+leaf-drop-chance: 1.0
+
+# How often should logs drop items? Set this to 0.0 to stop logs from dropping items altogether (Only works with BREAK behavior)
+log-drop-chance: 1.0
+
+# When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)
+# NOTE: This may cause issues with custom trees that have multiple trunks or branches that extend very low
+leave-stump: false
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -158,6 +168,9 @@ convert-wood-to-log: true
 # directionalFallVelocity: <value>              If set, this velocity will be added to the tree's directional velocity
 # worlds: [<values>]                            limits in what worlds this tool can be used. Values can be world names or UUIDs
 # convertWoodToLog: <value>                     If set, this tool will always convert wood to log when used to fell a tree
+# leafDropChance: <value>                       If set, this will override the leaf drop chance (This is multiplied by the tree's drop chance)
+# logDropChance: <value>                        If set, this will override the log drop chance (This is multiplied by the tree's drop chance)
+# leaveStump: (true|false)                      If set to true, this tool will always leave a stump when used to fell a tree
 # Any tool-specific values will override global defaults.
 # An asterisk (*) or AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
@@ -196,6 +209,9 @@ tools:
 # directionalFallBehavior: <value> see directional-fall-behavior above
 # worlds: [<values>]               limits in what worlds this tree can be felled. Values can be world names or UUIDs
 # convertWoodToLog: <value>        If set, this tree will always convert wood to log when felled
+# leafDropChance: <value>          (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the tool's drop chance)
+# logDropChance: <value>           (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the log's drop chance
+# leaveStump: (true|false)         If set to true, this tree will always leave a stump when felled
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
