@@ -1,5 +1,5 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.7
+version: 1.7.1
 api-version: 1.13
 name: TreeFeller
 softdepend: [MCMMO]

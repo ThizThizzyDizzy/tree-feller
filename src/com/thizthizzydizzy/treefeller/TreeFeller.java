@@ -11,14 +11,18 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -275,6 +279,28 @@ public class TreeFeller extends JavaPlugin{
                         int i = block.getY()-minY-(tool.maxHeight-1);
                         debug(player, true, false, "Tree was cut "+i+" blocks too high for tool!");
                         return null;
+                    }
+                    if(tool.requireCrossSection){
+                        for(int x = -1; x<=1; x++){
+                            for(int z = -1; z<=1; z++){
+                                if(x==0&&z==0)continue;
+                                if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
+                                    debug(player, true, false, "A full cross-section has not been cut for tool!");
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                    if(tree.requireCrossSection){
+                        for(int x = -1; x<=1; x++){
+                            for(int z = -1; z<=1; z++){
+                                if(x==0&&z==0)continue;
+                                if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
+                                    debug(player, true, false, "A full cross-section has not been cut!");
+                                    return null;
+                                }
+                            }
+                        }
                     }
                     debug(player, true, true, "Tree cut position is valid!");
                     int durabilityCost = total;
@@ -674,6 +700,8 @@ public class TreeFeller extends JavaPlugin{
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
 //</editor-fold>
+        pm.addPermission(new Permission("treefeller.reload"));
+        pm.addPermission(new Permission("treefeller.debug"));
         getCommand("treefeller").setExecutor(new CommandTreeFeller(this));
         logger.log(Level.INFO, "{0} has been enabled! (Version {1}) by ThizThizzyDizzy", new Object[]{pdfFile.getName(), pdfFile.getVersion()});
         reload();
@@ -871,6 +899,8 @@ public class TreeFeller extends JavaPlugin{
         Tool.DEFAULT.leafDropChance = getConfig().getDouble("leaf-drop-chance");
         Tool.DEFAULT.logDropChance = getConfig().getDouble("log-drop-chance");
         Tool.DEFAULT.leaveStump = getConfig().getBoolean("leave-stump");
+        Tool.DEFAULT.requireCrossSection = getConfig().getBoolean("require-cross-section");
+        Tool.DEFAULT.rotateLogs = getConfig().getBoolean("rotate-logs");
         Tree.DEFAULT.allowPartial = true;
         Tree.DEFAULT.damageMult = 1;
         Tree.DEFAULT.maxHeight = Integer.MAX_VALUE;
@@ -890,6 +920,8 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.leafDropChance = 1;
         Tree.DEFAULT.logDropChance = 1;
         Tree.DEFAULT.leaveStump = false;
+        Tree.DEFAULT.requireCrossSection = false;
+        Tree.DEFAULT.rotateLogs = false;
         ArrayList<Material> grass = new ArrayList<>();
         grass.add(Material.DIRT);
         grass.add(Material.GRASS_BLOCK);
@@ -1011,6 +1043,12 @@ public class TreeFeller extends JavaPlugin{
                                 break;
                             case "leavestump":
                                 tree.leaveStump = (boolean)map.get(key);
+                                break;
+                            case "requirecrosssection":
+                                tree.requireCrossSection = (boolean)map.get(key);
+                                break;
+                            case "rotatelogs":
+                                tree.rotateLogs = (boolean)map.get(key);
                                 break;
                             default:
                                 logger.log(Level.WARNING, "Unknown tree setting: {0}", key);
@@ -1205,6 +1243,11 @@ public class TreeFeller extends JavaPlugin{
                         case "leavestump":
                             tool.leaveStump = (boolean)map.get(key);
                             break;
+                        case "requirecrosssection":
+                            tool.requireCrossSection = (boolean)map.get(key);
+                            break;
+                        case "rotatelogs":
+                            tool.rotateLogs = (boolean)map.get(key);
                     }
                 }
                 if(startupLogs)tool.print(logger);
@@ -1244,6 +1287,8 @@ public class TreeFeller extends JavaPlugin{
         public boolean enableCreative;
         public boolean withoutSneak;
         public boolean withSneak;
+        public boolean requireCrossSection;
+        public boolean rotateLogs;
         public HashMap<Enchantment, Integer> requiredEnchantments = new HashMap<>();
         public HashMap<Enchantment, Integer> bannedEnchantments = new HashMap<>();
         public ArrayList<Tree> allowedTrees = new ArrayList<>();
@@ -1291,6 +1336,8 @@ public class TreeFeller extends JavaPlugin{
                 leafDropChance = DEFAULT.leafDropChance;
                 logDropChance = DEFAULT.logDropChance;
                 leaveStump = DEFAULT.leaveStump;
+                requireCrossSection = DEFAULT.requireCrossSection;
+                rotateLogs = DEFAULT.rotateLogs;
             }
         }
         private void print(Logger logger){
@@ -1345,8 +1392,8 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Required permissions: {0}", requiredPerms);
             logger.log(Level.INFO, "- Cooldown: {0}", cooldown);
             logger.log(Level.INFO, "- Leaf enchantments: {0}", leafEnchantments);
-            logger.log(Level.INFO, "- Random Fall Velocity: {0}", randomFallVelocity);
-            logger.log(Level.INFO, "- Directional Fall Velocity: {0}", directionalFallVelocity);
+            logger.log(Level.INFO, "- Random fall velocity: {0}", randomFallVelocity);
+            logger.log(Level.INFO, "- Directional fall velocity: {0}", directionalFallVelocity);
             String worldses = "";//<editor-fold defaultstate="collapsed">
             if(worlds==null){
                 worldses = "ANY";
@@ -1361,6 +1408,8 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
             logger.log(Level.INFO, "- Log drop chance: {0}", logDropChance);
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
+            logger.log(Level.INFO, "- Require cross section: {0}", requireCrossSection);
+            logger.log(Level.INFO, "- Rotate logs: {0}", rotateLogs);
         }
     }
     public static class Tree{
@@ -1388,6 +1437,8 @@ public class TreeFeller extends JavaPlugin{
         public double leafDropChance;
         public double logDropChance;
         public boolean leaveStump;
+        public boolean requireCrossSection;
+        public boolean rotateLogs;
         public Tree(ArrayList<Material> trunk, ArrayList<Material> leaves){
             this.trunk = trunk;
             this.leaves = leaves;
@@ -1412,6 +1463,8 @@ public class TreeFeller extends JavaPlugin{
                 leafDropChance = DEFAULT.leafDropChance;
                 logDropChance = DEFAULT.logDropChance;
                 leaveStump = DEFAULT.leaveStump;
+                requireCrossSection = DEFAULT.requireCrossSection;
+                rotateLogs = DEFAULT.rotateLogs;
             }
         }
         private void print(Logger logger){
@@ -1456,6 +1509,8 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
             logger.log(Level.INFO, "- Log drop chance: {0}", logDropChance);
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
+            logger.log(Level.INFO, "- Require cross section: {0}", requireCrossSection);
+            logger.log(Level.INFO, "- Rotate logs: {0}", rotateLogs);
         }
     }
     public static class Sapling{
@@ -1618,11 +1673,14 @@ public class TreeFeller extends JavaPlugin{
                     directionalVel = directionalVel.multiply(tree.directionalFallVelocity+tool.directionalFallVelocity);
                     v.add(directionalVel);
                 }
-                v.add(new Vector((Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity), (tree.randomFallVelocity+tool.randomFallVelocity)/5, (Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity)));
+                v.add(new Vector((Math.random()*2-1)*(tree.randomFallVelocity+tool.randomFallVelocity), (tree.randomFallVelocity+tool.randomFallVelocity)/5, (Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity)));
                 falling.setVelocity(v);
                 falling.setHurtEntities(tree.logBehavior==FellBehavior.FALL_HURT||tree.logBehavior==FellBehavior.FALL_HURT_BREAK);
                 if(tree.logBehavior==FellBehavior.FALL_BREAK||tree.logBehavior==FellBehavior.FALL_HURT_BREAK)falling.addScoreboardTag("TreeFeller_Break");
                 if(tree.convertWoodToLog||tool.convertWoodToLog)falling.addScoreboardTag("TreeFeller_Convert");
+                if(falling.getBlockData() instanceof Orientable&&(tool.rotateLogs||tree.rotateLogs)){
+                    falling.addScoreboardTag("TreeFeller_R"+((Orientable)falling.getBlockData()).getAxis().name()+"_"+origin.getX()+"_"+origin.getY()+"_"+origin.getZ());
+                }
                 log.setType(Material.AIR);
                 fallingBlocks.add(falling.getUniqueId());
                 break;
@@ -1739,11 +1797,14 @@ public class TreeFeller extends JavaPlugin{
                     directionalVel = directionalVel.multiply(tree.directionalFallVelocity+tool.directionalFallVelocity);
                     v.add(directionalVel);
                 }
-                v.add(new Vector((Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity), (tree.randomFallVelocity+tool.randomFallVelocity)/5, (Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity)));
+                v.add(new Vector((Math.random()*2-1)*(tree.randomFallVelocity+tool.randomFallVelocity), (tree.randomFallVelocity+tool.randomFallVelocity)/5, (Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity)));
                 falling.setVelocity(v);
                 falling.setHurtEntities(tree.leafBehavior==FellBehavior.FALL_HURT||tree.leafBehavior==FellBehavior.FALL_HURT_BREAK);
                 if(tree.leafBehavior==FellBehavior.FALL_BREAK||tree.leafBehavior==FellBehavior.FALL_HURT_BREAK)falling.addScoreboardTag("TreeFeller_Break");
                 if(tree.convertWoodToLog||tool.convertWoodToLog)falling.addScoreboardTag("TreeFeller_Convert");
+                if(falling.getBlockData() instanceof Orientable&&(tool.rotateLogs||tree.rotateLogs)){
+                    falling.addScoreboardTag("TreeFeller_R"+((Orientable)falling.getBlockData()).getAxis().name()+"_"+origin.getX()+"_"+origin.getY()+"_"+origin.getZ());
+                }
                 leaf.setType(Material.AIR);
                 fallingBlocks.add(falling.getUniqueId());
                 break;

@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.7
+# Version 1.7.1
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -121,6 +121,9 @@ directional-fall-velocity: .35
 # WEST      The tree will fall to the west
 directional-fall-behavior: RANDOM
 
+#When trees FALL, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)
+rotate-logs: true
+
 # Should _WOOD blocks in trees be converted to _LOG when they drop as items?
 convert-wood-to-log: true
 
@@ -133,6 +136,9 @@ log-drop-chance: 1.0
 # When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)
 # NOTE: This may cause issues with custom trees that have multiple trunks or branches that extend very low
 leave-stump: false
+
+# Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)
+require-cross-section: false
 
 # What tools can be used to cut down trees?
 # Format:
@@ -171,6 +177,8 @@ leave-stump: false
 # leafDropChance: <value>                       If set, this will override the leaf drop chance (This is multiplied by the tree's drop chance)
 # logDropChance: <value>                        If set, this will override the log drop chance (This is multiplied by the tree's drop chance)
 # leaveStump: (true|false)                      If set to true, this tool will always leave a stump when used to fell a tree
+# requireCrossSection: (true|false) `           If set to true, this tool will always require a cross-section to be cut to fell a tree
+# rotateLogs: (true|false)                      If set to true, the logs of trees felled by this tool will always rotate before hitting the ground.
 # Any tool-specific values will override global defaults.
 # An asterisk (*) or AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
@@ -191,27 +199,29 @@ tools:
 # Format:
 #    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]
 #  Possible variables include:
-# damageMult: <value>              Any tool used to cut down this tree will take <value>X damage (Multiplied by tool-specific multiplier)
-# maxLogs: <value>                 This tree can not be cut down if it has more than <value> logs in size
-# allowPartial: (true|false)       If true, the tool will partially destroy this tree if it has insufficient durability (overriden by tool value)
-# maxHeight: <value>               This tree can only be destroyed if you break a block within <value> blocks of the bottom of the tree
-# playerLeaves: (true|false)       If true, the tree will include leaves that were placed by players (This only works for _LEAVES materials)
-# requiredLogs: <value>            This tree must have at least <value> logs to be cut down
-# requiredLeaves: <value>          This tree must have at least <value> leaves to be cut down
-# sapling: <value>                 If replant-saplings is enabled, this will replant the tree with this type of sapling
-# maxSaplings: <value>             If replant-saplings is enabled, this will limit the number of saplings that can be replanted
-# grass: [<values>]                This is the list of blocks that saplings can be planted on; defaults to [GRASS,DIRT,PODZOL]
-# cooldown: <value>                If set, this tree has a specific per player cooldown
-# logBehavior: <value>             See log-behavior above
-# leafBehavior: <value>            See leaf-behavior above
-# randomFallVelocity: <value>      see random-fall-velocity above
-# directionalFallVelocity: <value> see directional-fall-velocity above
-# directionalFallBehavior: <value> see directional-fall-behavior above
-# worlds: [<values>]               limits in what worlds this tree can be felled. Values can be world names or UUIDs
-# convertWoodToLog: <value>        If set, this tree will always convert wood to log when felled
-# leafDropChance: <value>          (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the tool's drop chance)
-# logDropChance: <value>           (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the log's drop chance
-# leaveStump: (true|false)         If set to true, this tree will always leave a stump when felled
+# damageMult: <value>               Any tool used to cut down this tree will take <value>X damage (Multiplied by tool-specific multiplier)
+# maxLogs: <value>                  This tree can not be cut down if it has more than <value> logs in size
+# allowPartial: (true|false)        If true, the tool will partially destroy this tree if it has insufficient durability (overriden by tool value)
+# maxHeight: <value>                This tree can only be destroyed if you break a block within <value> blocks of the bottom of the tree
+# playerLeaves: (true|false)        If true, the tree will include leaves that were placed by players (This only works for _LEAVES materials)
+# requiredLogs: <value>             This tree must have at least <value> logs to be cut down
+# requiredLeaves: <value>           This tree must have at least <value> leaves to be cut down
+# sapling: <value>                  If replant-saplings is enabled, this will replant the tree with this type of sapling
+# maxSaplings: <value>              If replant-saplings is enabled, this will limit the number of saplings that can be replanted
+# grass: [<values>]                 This is the list of blocks that saplings can be planted on; defaults to [GRASS,DIRT,PODZOL]
+# cooldown: <value>                 If set, this tree has a specific per player cooldown
+# logBehavior: <value>              See log-behavior above
+# leafBehavior: <value>             See leaf-behavior above
+# randomFallVelocity: <value>       see random-fall-velocity above
+# directionalFallVelocity: <value>  see directional-fall-velocity above
+# directionalFallBehavior: <value>  see directional-fall-behavior above
+# worlds: [<values>]                limits in what worlds this tree can be felled. Values can be world names or UUIDs
+# convertWoodToLog: <value>         If set, this tree will always convert wood to log when felled
+# leafDropChance: <value>           (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the tool's drop chance)
+# logDropChance: <value>            (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the log's drop chance
+# leaveStump: (true|false)          If set to true, this tree will always leave a stump when felled
+# requireCrossSection: (true|false) If set to true, this tree will always require a cross-section to be cut before felling
+# rotateLogs: (true|false)          If set to true, the logs of this tree will always rotate before hitting the ground.
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]

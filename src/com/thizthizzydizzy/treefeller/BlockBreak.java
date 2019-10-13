@@ -1,7 +1,9 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.TreeFeller.Sapling;
 import java.util.Iterator;
+import org.bukkit.Axis;
 import org.bukkit.Material;
+import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.event.EventHandler;
@@ -66,6 +68,50 @@ public class BlockBreak implements Listener{
                         event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
                     }
                     plugin.fallingBlocks.remove(event.getEntity().getUniqueId());
+                    for(String tag : event.getEntity().getScoreboardTags()){
+                        if(tag.startsWith("TreeFeller_R")){
+                            Axis axis = Axis.valueOf(tag.substring(12, 13));
+                            int x = Integer.parseInt(tag.split("_")[2]);
+                            int y = Integer.parseInt(tag.split("_")[3]);
+                            int z = Integer.parseInt(tag.split("_")[4]);
+                            double xDiff = Math.abs(x-event.getEntity().getLocation().getX());
+                            double yDiff = Math.abs(y-event.getEntity().getLocation().getY());
+                            double zDiff = Math.abs(z-event.getEntity().getLocation().getZ());
+                            Axis newAxis = Axis.Y;
+                            if(Math.max(Math.max(xDiff, yDiff), zDiff)==xDiff)newAxis = Axis.X;
+                            if(Math.max(Math.max(xDiff, yDiff), zDiff)==zDiff)newAxis = Axis.Z;
+                            if(newAxis==Axis.X){
+                                switch(axis){
+                                    case X:
+                                        axis = Axis.Y;
+                                        break;
+                                    case Y:
+                                        axis = Axis.X;
+                                        break;
+                                    case Z:
+                                        break;
+                                }
+                            }
+                            if(newAxis==Axis.Z){
+                                switch(axis){
+                                    case X:
+                                        break;
+                                    case Y:
+                                        axis = Axis.Z;
+                                        break;
+                                    case Z:
+                                        axis = Axis.X;
+                                        break;
+                                }
+                            }
+                            Orientable data = (Orientable)event.getBlockData();
+                            data.setAxis(axis);
+                            event.setCancelled(true);
+                            event.getBlock().setType(event.getTo());
+                            event.getBlock().setBlockData(data);
+                            break;
+                        }
+                    }
                 }
             }
         }
