@@ -11,10 +11,8 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
@@ -243,7 +241,83 @@ public class TreeFeller extends JavaPlugin{
                         }
                         debug(player, false, true, "Tool durability is valid!");
                     }
+                    long dayTime = block.getWorld().getTime();
+                    long gameTime = block.getWorld().getFullTime();
+                    long day = gameTime/24000;
+                    long phase = day%8;
+                    if(tool.minTime!=-1&&tool.maxTime!=-1&&tool.maxTime<tool.minTime){
+                        if(dayTime>tool.maxTime&&dayTime<tool.minTime){
+                            debug(player, false, false, "Day time does not fit into tool's allowed range: "+tool.minTime+" - "+tool.maxTime+" (currently "+dayTime+")");
+                            continue;
+                        }
+                    }else{
+                        if(tool.minTime!=-1&&dayTime<tool.minTime){
+                            debug(player, false, false, "Day time does not fit into tool's allowed range: "+tool.minTime+" - "+tool.maxTime+" (currently "+dayTime+")");
+                            continue;
+                        }
+                        if(tool.maxTime!=-1&&dayTime>tool.maxTime){
+                            debug(player, false, false, "Day time does not fit into tool's allowed range: "+tool.minTime+" - "+tool.maxTime+" (currently "+dayTime+")");
+                            continue;
+                        }
+                    }
+                    if(tool.minTime!=-1||tool.maxTime!=-1){
+                        debug(player, false, true, "Day time is valid for tool");
+                    }
+                    if(tool.minPhase!=-1&&tool.maxPhase!=-1&&tool.maxPhase<tool.minPhase){
+                        if(phase>tool.maxPhase&&phase<tool.minPhase){
+                            debug(player, false, false, "Moon phase does not fit into tool's allowed range: "+tool.minPhase+" - "+tool.maxPhase+" (currently "+phase+")");
+                            continue;
+                        }
+                    }else{
+                        if(tool.minPhase!=-1&&phase<tool.minPhase){
+                            debug(player, false, false, "Moon phase does not fit into tool's allowed range: "+tool.minPhase+" - "+tool.maxPhase+" (currently "+phase+")");
+                            continue;
+                        }
+                        if(tool.maxPhase!=-1&&phase>tool.maxPhase){
+                            debug(player, false, false, "Moon phase does not fit into tool's allowed range: "+tool.minPhase+" - "+tool.maxPhase+" (currently "+phase+")");
+                            continue;
+                        }
+                    }
+                    if(tool.minPhase!=-1||tool.maxPhase!=-1){
+                        debug(player, false, true, "Moon phase is valid for tool");
+                    }
                     debug(player, true, true, "Tool is valid! (Tool #"+tools.indexOf(tool)+") Beinning tree felling checks...");
+                    if(tree.minTime!=-1&&tree.maxTime!=-1&&tree.maxTime<tree.minTime){
+                        if(dayTime>tree.maxTime&&dayTime<tree.minTime){
+                            debug(player, false, false, "Day time does not fit into tree's allowed range: "+tree.minTime+" - "+tree.maxTime+" (currently "+dayTime+")");
+                            continue;
+                        }
+                    }else{
+                        if(tree.minTime!=-1&&dayTime<tree.minTime){
+                            debug(player, false, false, "Day time does not fit into tree's allowed range: "+tree.minTime+" - "+tree.maxTime+" (currently "+dayTime+")");
+                            continue;
+                        }
+                        if(tree.maxTime!=-1&&dayTime>tree.maxTime){
+                            debug(player, false, false, "Day time does not fit into tree's allowed range: "+tree.minTime+" - "+tree.maxTime+" (currently "+dayTime+")");
+                            continue;
+                        }
+                    }
+                    if(tree.minTime!=-1||tree.maxTime!=-1){
+                        debug(player, false, true, "Day time is valid for tree");
+                    }
+                    if(tree.minPhase!=-1&&tree.maxPhase!=-1&&tree.maxPhase<tree.minPhase){
+                        if(phase>tree.maxPhase&&phase<tree.minPhase){
+                            debug(player, false, false, "Moon phase does not fit into tree's allowed range: "+tree.minPhase+" - "+tree.maxPhase+" (currently "+phase+")");
+                            continue;
+                        }
+                    }else{
+                        if(tree.minPhase!=-1&&phase<tree.minPhase){
+                            debug(player, false, false, "Moon phase does not fit into tree's allowed range: "+tree.minPhase+" - "+tree.maxPhase+" (currently "+phase+")");
+                            continue;
+                        }
+                        if(tree.maxPhase!=-1&&phase>tree.maxPhase){
+                            debug(player, false, false, "Moon phase does not fit into tree's allowed range: "+tree.minPhase+" - "+tree.maxPhase+" (currently "+phase+")");
+                            continue;
+                        }
+                    }
+                    if(tree.minPhase!=-1||tree.maxPhase!=-1){
+                        debug(player, false, true, "Moon phase is valid for tree");
+                    }
                     //do calculations and stuff here
                     HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, true, false);
                     int total = getTotal(blocks);
@@ -336,6 +410,50 @@ public class TreeFeller extends JavaPlugin{
                             }
                         }
                     }
+                    if(Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention")!=null){
+                        try{
+                            for(Block b : toList(blocks)){
+                                String s = me.ryanhamshire.GriefPrevention.GriefPrevention.instance.allowBreak(player, b, b.getLocation());
+                                if(s!=null){
+                                    debug(player, true, false, "This tree is protected by GriefPrevention at "+b.getX()+" "+b.getY()+" "+b.getZ());
+                                    player.sendMessage(s);
+                                    return null;
+                                }
+                            }
+                            for(Block b : toList(allLeaves)){
+                                String s = me.ryanhamshire.GriefPrevention.GriefPrevention.instance.allowBreak(player, b, b.getLocation());
+                                if(s!=null){
+                                    debug(player, true, false, "This tree is protected by GriefPrevention at "+b.getX()+" "+b.getY()+" "+b.getZ());
+                                    player.sendMessage(s);
+                                    return null;
+                                }
+                            }
+                        }catch(Exception ex){}
+                    }
+//                    if(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard")!=null&&Bukkit.getServer().getPluginManager().getPlugin("WorldEdit")!=null){
+//                        try{
+//                            
+//                            boolean canBypass = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(lp, lp.getWorld());
+//                            if(!canBypass){
+//                                com.sk89q.worldguard.protection.regions.RegionContainer container = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getRegionContainer();
+//                                com.sk89q.worldguard.protection.regions.RegionQuery query = container.createQuery();
+//                                for(Block b : toList(blocks)){
+//                                    com.sk89q.worldedit.util.Location loc = new com.sk89q.worldedit.util.Location((com.sk89q.worldedit.extent.Extent)lp.getWorld(), b.getX(), b.getY(), b.getZ());
+//                                    if(!query.testState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)){
+//                                        debug(player, true, false, "This tree is protected by WorldGuard at "+b.getX()+" "+b.getY()+" "+b.getZ());
+//                                        return null;
+//                                    }
+//                                }
+//                                for(Block b : toList(allLeaves)){
+//                                    com.sk89q.worldedit.util.Location loc = new com.sk89q.worldedit.util.Location((com.sk89q.worldedit.extent.Extent)lp.getWorld(), b.getX(), b.getY(), b.getZ());
+//                                    if(!query.testState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)){
+//                                        debug(player, true, false, "This tree is protected by WorldGuard at "+b.getX()+" "+b.getY()+" "+b.getZ());
+//                                        return null;
+//                                    }
+//                                }
+//                            }
+//                        }catch(Exception ex){}
+//                    }
                     if(leaves<tree.requiredLeaves){
                         debug(player, true, false, "Tree has too few leaves: "+leaves+"<"+tree.requiredLeaves);
                         return null;
@@ -901,6 +1019,10 @@ public class TreeFeller extends JavaPlugin{
         Tool.DEFAULT.leaveStump = getConfig().getBoolean("leave-stump");
         Tool.DEFAULT.requireCrossSection = getConfig().getBoolean("require-cross-section");
         Tool.DEFAULT.rotateLogs = getConfig().getBoolean("rotate-logs");
+        Tool.DEFAULT.minTime = getConfig().getInt("min-time");
+        Tool.DEFAULT.maxTime = getConfig().getInt("max-time");
+        Tool.DEFAULT.minPhase = getConfig().getInt("min-phase");
+        Tool.DEFAULT.maxPhase = getConfig().getInt("max-phase");
         Tree.DEFAULT.allowPartial = true;
         Tree.DEFAULT.damageMult = 1;
         Tree.DEFAULT.maxHeight = Integer.MAX_VALUE;
@@ -922,6 +1044,7 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.leaveStump = false;
         Tree.DEFAULT.requireCrossSection = false;
         Tree.DEFAULT.rotateLogs = false;
+        Tree.DEFAULT.minTime = Tree.DEFAULT.maxTime = Tree.DEFAULT.minPhase = Tree.DEFAULT.maxPhase = -1;
         ArrayList<Material> grass = new ArrayList<>();
         grass.add(Material.DIRT);
         grass.add(Material.GRASS_BLOCK);
@@ -1049,6 +1172,18 @@ public class TreeFeller extends JavaPlugin{
                                 break;
                             case "rotatelogs":
                                 tree.rotateLogs = (boolean)map.get(key);
+                                break;
+                            case "mintime":
+                                tree.minTime = ((Number)map.get(key)).intValue();
+                                break;
+                            case "maxtime":
+                                tree.maxTime = ((Number)map.get(key)).intValue();
+                                break;
+                            case "minphase":
+                                tree.minPhase = ((Number)map.get(key)).intValue();
+                                break;
+                            case "maxphase":
+                                tree.maxPhase = ((Number)map.get(key)).intValue();
                                 break;
                             default:
                                 logger.log(Level.WARNING, "Unknown tree setting: {0}", key);
@@ -1248,6 +1383,19 @@ public class TreeFeller extends JavaPlugin{
                             break;
                         case "rotatelogs":
                             tool.rotateLogs = (boolean)map.get(key);
+                            break;
+                        case "mintime":
+                            tool.minTime = ((Number)map.get(key)).intValue();
+                            break;
+                        case "maxtime":
+                            tool.maxTime = ((Number)map.get(key)).intValue();
+                            break;
+                        case "minphase":
+                            tool.minPhase = ((Number)map.get(key)).intValue();
+                            break;
+                        case "maxphase":
+                            tool.maxPhase = ((Number)map.get(key)).intValue();
+                            break;
                     }
                 }
                 if(startupLogs)tool.print(logger);
@@ -1304,6 +1452,7 @@ public class TreeFeller extends JavaPlugin{
         public double leafDropChance;
         public double logDropChance;
         public boolean leaveStump;
+        public int minTime, maxTime, minPhase, maxPhase;
         public Tool(Material material){
             this.material = material;
             if(DEFAULT!=null){
@@ -1338,6 +1487,10 @@ public class TreeFeller extends JavaPlugin{
                 leaveStump = DEFAULT.leaveStump;
                 requireCrossSection = DEFAULT.requireCrossSection;
                 rotateLogs = DEFAULT.rotateLogs;
+                minTime = DEFAULT.minTime;
+                maxTime = DEFAULT.maxTime;
+                minPhase = DEFAULT.minPhase;
+                maxPhase = DEFAULT.maxPhase;
             }
         }
         private void print(Logger logger){
@@ -1410,6 +1563,10 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
             logger.log(Level.INFO, "- Require cross section: {0}", requireCrossSection);
             logger.log(Level.INFO, "- Rotate logs: {0}", rotateLogs);
+            logger.log(Level.INFO, "- Minimum time: {0}", minTime);
+            logger.log(Level.INFO, "- Maximum time: {0}", maxTime);
+            logger.log(Level.INFO, "- Minimum phase: {0}", minPhase);
+            logger.log(Level.INFO, "- Maximum phase: {0}", maxPhase);
         }
     }
     public static class Tree{
@@ -1439,6 +1596,7 @@ public class TreeFeller extends JavaPlugin{
         public boolean leaveStump;
         public boolean requireCrossSection;
         public boolean rotateLogs;
+        public int minTime, maxTime, minPhase, maxPhase;
         public Tree(ArrayList<Material> trunk, ArrayList<Material> leaves){
             this.trunk = trunk;
             this.leaves = leaves;
@@ -1465,6 +1623,10 @@ public class TreeFeller extends JavaPlugin{
                 leaveStump = DEFAULT.leaveStump;
                 requireCrossSection = DEFAULT.requireCrossSection;
                 rotateLogs = DEFAULT.rotateLogs;
+                minTime = DEFAULT.minTime;
+                maxTime = DEFAULT.maxTime;
+                minPhase = DEFAULT.minPhase;
+                maxPhase = DEFAULT.maxPhase;
             }
         }
         private void print(Logger logger){
@@ -1511,6 +1673,10 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
             logger.log(Level.INFO, "- Require cross section: {0}", requireCrossSection);
             logger.log(Level.INFO, "- Rotate logs: {0}", rotateLogs);
+            logger.log(Level.INFO, "- Minimum time: {0}", minTime);
+            logger.log(Level.INFO, "- Maximum time: {0}", maxTime);
+            logger.log(Level.INFO, "- Minimum phase: {0}", minPhase);
+            logger.log(Level.INFO, "- Maximum phase: {0}", maxPhase);
         }
     }
     public static class Sapling{

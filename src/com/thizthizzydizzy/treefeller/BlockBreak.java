@@ -40,6 +40,7 @@ public class BlockBreak implements Listener{
     }
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event){
+        if(event.isCancelled())return;
         plugin.fellTree(event);
     }
     @EventHandler

@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.7.1
+# Version 1.8.1
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -140,6 +140,28 @@ leave-stump: false
 # Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)
 require-cross-section: false
 
+#Min time can be greater than max, in that case time must be < max or > min
+# What should the minimum time be for felling trees? (0-24000, -1 to disable)
+min-time: -1
+
+# What should the maximum time be for felling trees? (0-24000, -1 to disable)
+max-time: -1
+
+# Phases:
+# 0 = full moon
+# 1 = waning gibbous
+# 2 = first quarter
+# 3 = waning crescent
+# 4 = new moon
+# 5 = waxing crescent
+# 6 = third quarter
+# 7 = waxing gibbous
+# What should the minimum phase be for felling trees? (0-8, -1 to disable)
+min-phase: -1
+
+# What should the maximum phase be for felling trees? (0-8, -1 to disable)
+max-phase: -1
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -179,6 +201,10 @@ require-cross-section: false
 # leaveStump: (true|false)                      If set to true, this tool will always leave a stump when used to fell a tree
 # requireCrossSection: (true|false) `           If set to true, this tool will always require a cross-section to be cut to fell a tree
 # rotateLogs: (true|false)                      If set to true, the logs of trees felled by this tool will always rotate before hitting the ground.
+# minTime: <value>                              If set, this tool can only cut down trees at or after this time of day (0-24000)
+# maxTime: <value>                              If set, this tool can only cut down trees at or before this time of day (0-24000)
+# minPhase: <value>                             If set, this tool can only cut down trees at or after this phase of the moon (0-7, see min-phase)
+# maxPhase: <value>                             If set, this tool can only cut down trees at or before this phase of the moon (0-7, see min-phase)
 # Any tool-specific values will override global defaults.
 # An asterisk (*) or AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
@@ -222,6 +248,10 @@ tools:
 # leaveStump: (true|false)          If set to true, this tree will always leave a stump when felled
 # requireCrossSection: (true|false) If set to true, this tree will always require a cross-section to be cut before felling
 # rotateLogs: (true|false)          If set to true, the logs of this tree will always rotate before hitting the ground.
+# minTime: <value>                  If set, this tree can only be cut down at or after this time of day (0-24000)
+# maxTime: <value>                  If set, this tree can only be cut down at or before this time of day (0-24000)
+# minPhase: <value>                 If set, this tree can only be cut down at or after this phase of the moon (0-7, see min-phase)
+# maxPhase: <value>                 If set, this tree can only be cut down at or before this phase of the moon (0-7, see min-phase)
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
