@@ -430,30 +430,15 @@ public class TreeFeller extends JavaPlugin{
                             }
                         }catch(Exception ex){}
                     }
-//                    if(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard")!=null&&Bukkit.getServer().getPluginManager().getPlugin("WorldEdit")!=null){
-//                        try{
-//                            
-//                            boolean canBypass = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getSessionManager().hasBypass(lp, lp.getWorld());
-//                            if(!canBypass){
-//                                com.sk89q.worldguard.protection.regions.RegionContainer container = com.sk89q.worldguard.WorldGuard.getInstance().getPlatform().getRegionContainer();
-//                                com.sk89q.worldguard.protection.regions.RegionQuery query = container.createQuery();
-//                                for(Block b : toList(blocks)){
-//                                    com.sk89q.worldedit.util.Location loc = new com.sk89q.worldedit.util.Location((com.sk89q.worldedit.extent.Extent)lp.getWorld(), b.getX(), b.getY(), b.getZ());
-//                                    if(!query.testState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)){
-//                                        debug(player, true, false, "This tree is protected by WorldGuard at "+b.getX()+" "+b.getY()+" "+b.getZ());
-//                                        return null;
-//                                    }
-//                                }
-//                                for(Block b : toList(allLeaves)){
-//                                    com.sk89q.worldedit.util.Location loc = new com.sk89q.worldedit.util.Location((com.sk89q.worldedit.extent.Extent)lp.getWorld(), b.getX(), b.getY(), b.getZ());
-//                                    if(!query.testState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)){
-//                                        debug(player, true, false, "This tree is protected by WorldGuard at "+b.getX()+" "+b.getY()+" "+b.getZ());
-//                                        return null;
-//                                    }
-//                                }
-//                            }
-//                        }catch(Exception ex){}
-//                    }
+                    if(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard")!=null){
+                        try{
+                            Block b = WorldGuardCompat.test(player, toList(blocks), toList(allLeaves));
+                            if(b!=null){
+                                debug(player, true, false, "This tree is protected by WorldGuard at "+b.getX()+" "+b.getY()+" "+b.getZ());
+                                return null;
+                            }
+                        }catch(Exception ex){}
+                    }
                     if(leaves<tree.requiredLeaves){
                         debug(player, true, false, "Tree has too few leaves: "+leaves+"<"+tree.requiredLeaves);
                         return null;
