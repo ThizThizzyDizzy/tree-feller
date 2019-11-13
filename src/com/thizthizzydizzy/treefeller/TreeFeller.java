@@ -1127,119 +1127,126 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.grasses = grass;
         startupLogs = getConfig().getBoolean("startup-logs");
         diagonalLeaves = getConfig().getBoolean("diagonal-leaves");
+        ArrayList<Object> effects = null;
         //<editor-fold defaultstate="collapsed" desc="Effects">
-        ArrayList<Object> effects = new ArrayList<>(getConfig().getList("effects"));
-        for(Object o : effects){
-            if(o instanceof LinkedHashMap){
-                LinkedHashMap map = (LinkedHashMap) o;
-                if(!map.containsKey("name")||!(map.get("name") instanceof String)){
-                    logger.log(Level.WARNING, "Cannot find effect name! Skipping...");
-                    continue;
+        try{
+            effects = new ArrayList<>(getConfig().getList("effects"));
+        }catch(NullPointerException ex){
+            logger.log(Level.WARNING, "Failed to load effects!");
+        }
+        if(effects!=null){
+            for(Object o : effects){
+                if(o instanceof LinkedHashMap){
+                    LinkedHashMap map = (LinkedHashMap) o;
+                    if(!map.containsKey("name")||!(map.get("name") instanceof String)){
+                        logger.log(Level.WARNING, "Cannot find effect name! Skipping...");
+                        continue;
+                    }
+                    String name = (String)map.get("name");
+                    String typ = (String) map.get("type");
+                    Effect.EffectType type = Effect.EffectType.valueOf(typ.toUpperCase().trim());
+                    if(type==null){
+                        logger.log(Level.WARNING, "Invalid effect type: {0}! Skipping...", typ);
+                        continue;
+                    }
+                    String loc = (String) map.get("location");
+                    Effect.EffectLocation location = Effect.EffectLocation.valueOf(loc.toUpperCase().trim());
+                    if(location==null){
+                        logger.log(Level.WARNING, "Invalid effect location: {0}! Skipping...", loc);
+                        continue;
+                    }
+                    double chance = 1;
+                    if(map.containsKey("chance")){
+                        chance = ((Number)map.get("chance")).doubleValue();
+                    }
+                    Effect effect;
+                    switch(type){
+                        case PARTICLE:
+                            Particle particle = getParticle((String) map.get("particle"));
+                            double x = 0;
+                            if(map.containsKey("x")){
+                                x = ((Number)map.get("x")).doubleValue();
+                            }
+                            double y = 0;
+                            if(map.containsKey("y")){
+                                y = ((Number)map.get("y")).doubleValue();
+                            }
+                            double z = 0;
+                            if(map.containsKey("z")){
+                                z = ((Number)map.get("z")).doubleValue();
+                            }
+                            double dx = 0;
+                            if(map.containsKey("dx")){
+                                dx = ((Number)map.get("dx")).doubleValue();
+                            }
+                            double dy = 0;
+                            if(map.containsKey("dy")){
+                                dy = ((Number)map.get("dy")).doubleValue();
+                            }
+                            double dz = 0;
+                            if(map.containsKey("dz")){
+                                dz = ((Number)map.get("dz")).doubleValue();
+                            }
+                            double speed = 0;
+                            if(map.containsKey("speed")){
+                                speed = ((Number)map.get("speed")).doubleValue();
+                            }
+                            int count = 1;
+                            if(map.containsKey("count")){
+                                count = ((Number)map.get("count")).intValue();
+                            }
+                            Object extra = null;
+                            switch(particle){
+                                case REDSTONE:
+                                    extra = new Particle.DustOptions(Color.fromRGB(((Number)map.get("r")).intValue(), ((Number)map.get("g")).intValue(), ((Number)map.get("b")).intValue()), ((Number)map.get("size")).floatValue());
+                                    break;
+                                case ITEM_CRACK:
+                                    extra = new ItemStack(Material.matchMaterial((String)map.get("item")));
+                                    break;
+                                case BLOCK_CRACK:
+                                case BLOCK_DUST:
+                                case FALLING_DUST:
+                                    extra = Bukkit.createBlockData(Material.matchMaterial((String)map.get("block")));
+                                    break;
+                            }
+                            effect = new Effect(name, location, chance, particle, x, y, z, dx, dy, dz, speed, count, extra);
+                            break;
+                        case SOUND:
+                            String sound = (String)map.get("sound");
+                            float volume = 1;
+                            if(map.containsKey("volume")){
+                                volume = ((Number)map.get("volume")).floatValue();
+                            }
+                            float pitch = 1;
+                            if(map.containsKey("pitch")){
+                                pitch = ((Number)map.get("pitch")).floatValue();
+                            }
+                            effect = new Effect(name, location, chance, sound, volume, pitch);
+                            break;
+                        case EXPLOSION:
+                            float power = ((Number)map.get("power")).floatValue();
+                            boolean fire = false;
+                            if(map.containsKey("fire")){
+                                fire = (boolean)map.get("fire");
+                            }
+                            effect = new Effect(name, location, chance, power, fire);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Unknown effect typpe: "+type+"!");
+                    }
+                    if(startupLogs)effect.print(logger);
+                    this.effects.add(effect);
+                }else if(o instanceof String){
+                    Material m = Material.matchMaterial((String)o);
+                    if(m==null){
+                        logger.log(Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
+                    }
+                    Tool tool = new Tool(m);
+                    if(startupLogs)tool.print(logger);
+                    this.tools.add(tool);
+                }else{
+                    logger.log(Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
                 }
-                String name = (String)map.get("name");
-                String typ = (String) map.get("type");
-                Effect.EffectType type = Effect.EffectType.valueOf(typ.toUpperCase().trim());
-                if(type==null){
-                    logger.log(Level.WARNING, "Invalid effect type: {0}! Skipping...", typ);
-                    continue;
-                }
-                String loc = (String) map.get("location");
-                Effect.EffectLocation location = Effect.EffectLocation.valueOf(loc.toUpperCase().trim());
-                if(location==null){
-                    logger.log(Level.WARNING, "Invalid effect location: {0}! Skipping...", loc);
-                    continue;
-                }
-                double chance = 1;
-                if(map.containsKey("chance")){
-                    chance = ((Number)map.get("chance")).doubleValue();
-                }
-                Effect effect;
-                switch(type){
-                    case PARTICLE:
-                        Particle particle = getParticle((String) map.get("particle"));
-                        double x = 0;
-                        if(map.containsKey("x")){
-                            x = ((Number)map.get("x")).doubleValue();
-                        }
-                        double y = 0;
-                        if(map.containsKey("y")){
-                            y = ((Number)map.get("y")).doubleValue();
-                        }
-                        double z = 0;
-                        if(map.containsKey("z")){
-                            z = ((Number)map.get("z")).doubleValue();
-                        }
-                        double dx = 0;
-                        if(map.containsKey("dx")){
-                            dx = ((Number)map.get("dx")).doubleValue();
-                        }
-                        double dy = 0;
-                        if(map.containsKey("dy")){
-                            dy = ((Number)map.get("dy")).doubleValue();
-                        }
-                        double dz = 0;
-                        if(map.containsKey("dz")){
-                            dz = ((Number)map.get("dz")).doubleValue();
-                        }
-                        double speed = 0;
-                        if(map.containsKey("speed")){
-                            speed = ((Number)map.get("speed")).doubleValue();
-                        }
-                        int count = 1;
-                        if(map.containsKey("count")){
-                            count = ((Number)map.get("count")).intValue();
-                        }
-                        Object extra = null;
-                        switch(particle){
-                            case REDSTONE:
-                                extra = new Particle.DustOptions(Color.fromRGB(((Number)map.get("r")).intValue(), ((Number)map.get("g")).intValue(), ((Number)map.get("b")).intValue()), ((Number)map.get("size")).floatValue());
-                                break;
-                            case ITEM_CRACK:
-                                extra = new ItemStack(Material.matchMaterial((String)map.get("item")));
-                                break;
-                            case BLOCK_CRACK:
-                            case BLOCK_DUST:
-                            case FALLING_DUST:
-                                extra = Bukkit.createBlockData(Material.matchMaterial((String)map.get("block")));
-                                break;
-                        }
-                        effect = new Effect(name, location, chance, particle, x, y, z, dx, dy, dz, speed, count, extra);
-                        break;
-                    case SOUND:
-                        String sound = (String)map.get("sound");
-                        float volume = 1;
-                        if(map.containsKey("volume")){
-                            volume = ((Number)map.get("volume")).floatValue();
-                        }
-                        float pitch = 1;
-                        if(map.containsKey("pitch")){
-                            pitch = ((Number)map.get("pitch")).floatValue();
-                        }
-                        effect = new Effect(name, location, chance, sound, volume, pitch);
-                        break;
-                    case EXPLOSION:
-                        float power = ((Number)map.get("power")).floatValue();
-                        boolean fire = false;
-                        if(map.containsKey("fire")){
-                            fire = (boolean)map.get("fire");
-                        }
-                        effect = new Effect(name, location, chance, power, fire);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Unknown effect typpe: "+type+"!");
-                }
-                if(startupLogs)effect.print(logger);
-                this.effects.add(effect);
-            }else if(o instanceof String){
-                Material m = Material.matchMaterial((String)o);
-                if(m==null){
-                    logger.log(Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
-                }
-                Tool tool = new Tool(m);
-                if(startupLogs)tool.print(logger);
-                this.tools.add(tool);
-            }else{
-                logger.log(Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
             }
         }
 //</editor-fold>
