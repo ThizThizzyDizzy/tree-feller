@@ -10,9 +10,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Particle;
+import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
@@ -523,10 +527,11 @@ public class TreeFeller extends JavaPlugin{
                                         if(tTl<=0)break;
                                         for(Block leaf : toList(getBlocks(tree.leaves, b, tool.leafRange, diagonalLeaves, tool.playerLeaves&&tree.playerLeaves))){
                                             if(dropItems){
-                                                breakLeaf(tree, tool, axe, leaf, block, player,seed);
+                                                
+                                                breakLeaf(tree, tool, axe, leaf, block, player, seed);
                                             }else leaf.setType(Material.AIR);
                                         }
-                                        if(dropItems)breakLog(tree, tool, axe, b, block, player,seed);
+                                        if(dropItems)breakLog(tree, tool, axe, b, block, player, seed);
                                         else b.setType(Material.AIR);
                                         tTl--;
                                     }
@@ -551,13 +556,13 @@ public class TreeFeller extends JavaPlugin{
                                 if(total<=0)break;
                                     for(Block leaf : toList(getBlocks(tree.leaves, b, tool.leafRange, diagonalLeaves, tool.playerLeaves&&tree.playerLeaves))){
                                         if(dropItems){
-                                            breakLeaf(tree, tool, axe, leaf, block, player,seed);
+                                            breakLeaf(tree, tool, axe, leaf, block, player, seed);
                                         }else{
                                             droppedItems.addAll(tool.leafEnchantments?leaf.getDrops(axe):leaf.getDrops());
                                             leaf.setType(Material.AIR);
                                         }
                                     }
-                                if(dropItems)breakLog(tree, tool, axe, b, block, player,seed);
+                                if(dropItems)breakLog(tree, tool, axe, b, block, player, seed);
                                 else{
                                     droppedItems.addAll(b.getDrops(axe));
                                     b.setType(Material.AIR);
@@ -575,6 +580,14 @@ public class TreeFeller extends JavaPlugin{
                     if(player!=null){
                         setLastTime(player, tree, System.currentTimeMillis());
                         setLastTime(player, tool, System.currentTimeMillis());
+                    }
+                    ArrayList<Effect> effects = new ArrayList<>();
+                    effects.addAll(tree.effects);
+                    effects.addAll(tool.effects);
+                    for(Effect e : effects){
+                        if(e.location==Effect.EffectLocation.TOOL){
+                            if(new Random().nextDouble()<e.chance)e.play(block);
+                        }
                     }
                     return droppedItems;
                 }
@@ -792,6 +805,7 @@ public class TreeFeller extends JavaPlugin{
     }
     public ArrayList<Tool> tools = new ArrayList<>();
     public ArrayList<Tree> trees = new ArrayList<>();
+    public ArrayList<Effect> effects = new ArrayList<>();
     public void onEnable(){
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = getLogger();
@@ -913,6 +927,81 @@ public class TreeFeller extends JavaPlugin{
                 return null;
         }
     }
+    private Particle getParticle(String string){
+        Particle p = null;
+        try{
+            p = Particle.valueOf(string.toUpperCase().replace(" ", "-").replace("-", "_"));
+        }catch(IllegalArgumentException ex){}
+        if(p!=null)return p;
+        switch(string.toLowerCase().replaceAll("_", " ")){
+            case "barrier":
+                return Particle.BARRIER;
+            case "block":
+//                return Particle.BLOCK_CRACK;
+                return Particle.BLOCK_DUST;
+            case "enchanted hit":
+                return Particle.CRIT_MAGIC;
+            case "dripping lava":
+                return Particle.DRIP_LAVA;
+            case "dripping water":
+                return Particle.DRIP_WATER;
+            case "enchant":
+                return Particle.ENCHANTMENT_TABLE;
+            case "explosion emitter":
+                return Particle.EXPLOSION_HUGE;
+            case "explode":
+                return Particle.EXPLOSION_LARGE;
+            case "poof":
+                return Particle.EXPLOSION_NORMAL;
+            case "firework":
+                return Particle.FIREWORKS_SPARK;
+            case "item":
+                return Particle.ITEM_CRACK;
+            case "elder guardian":
+                return Particle.MOB_APPEARANCE;
+            case "dust":
+                return Particle.REDSTONE;
+            case "item slime":
+                return Particle.SLIME;
+            case "large smoke":
+                return Particle.SMOKE_LARGE;
+            case "smoke":
+                return Particle.SMOKE_NORMAL;
+            case "item snowball":
+                return Particle.SNOWBALL;
+            case "effect":
+                return Particle.SPELL;
+            case "instant effect":
+                return Particle.SPELL_INSTANT;
+            case "entity effect":
+                return Particle.SPELL_MOB;
+            case "mob spell ambient":
+            case "ambient entity effect":
+                return Particle.SPELL_MOB_AMBIENT;
+            case "witch":
+                return Particle.SPELL_WITCH;
+            case "underwater":
+                return Particle.SUSPENDED;
+            case "totem of undying":
+                return Particle.TOTEM;
+            case "mycelium":
+                return Particle.TOWN_AURA;
+            case "angry villager":
+                return Particle.VILLAGER_ANGRY;
+            case "happy villager":
+                return Particle.VILLAGER_HAPPY;
+            case "bubble":
+                return Particle.WATER_BUBBLE;
+            case "rain":
+                return Particle.WATER_DROP;
+            case "splash":
+                return Particle.WATER_SPLASH;
+            case "fishing":
+                return Particle.WATER_WAKE;
+            default:
+                return null;
+        }
+    }
     public ArrayList<Sapling> saplings = new ArrayList<>();
     public void addSapling(Block b, Material sapling, boolean autofill){
         saplings.add(new Sapling(b, sapling, autofill, System.currentTimeMillis()));
@@ -959,6 +1048,7 @@ public class TreeFeller extends JavaPlugin{
         Logger logger = getLogger();
         trees.clear();
         tools.clear();
+        effects.clear();
         saplings.clear();
         fallingBlocks.clear();
         itemCooldowns.clear();
@@ -1037,6 +1127,122 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.grasses = grass;
         startupLogs = getConfig().getBoolean("startup-logs");
         diagonalLeaves = getConfig().getBoolean("diagonal-leaves");
+        //<editor-fold defaultstate="collapsed" desc="Effects">
+        ArrayList<Object> effects = new ArrayList<>(getConfig().getList("effects"));
+        for(Object o : effects){
+            if(o instanceof LinkedHashMap){
+                LinkedHashMap map = (LinkedHashMap) o;
+                if(!map.containsKey("name")||!(map.get("name") instanceof String)){
+                    logger.log(Level.WARNING, "Cannot find effect name! Skipping...");
+                    continue;
+                }
+                String name = (String)map.get("name");
+                String typ = (String) map.get("type");
+                Effect.EffectType type = Effect.EffectType.valueOf(typ.toUpperCase().trim());
+                if(type==null){
+                    logger.log(Level.WARNING, "Invalid effect type: {0}! Skipping...", typ);
+                    continue;
+                }
+                String loc = (String) map.get("location");
+                Effect.EffectLocation location = Effect.EffectLocation.valueOf(loc.toUpperCase().trim());
+                if(location==null){
+                    logger.log(Level.WARNING, "Invalid effect location: {0}! Skipping...", loc);
+                    continue;
+                }
+                double chance = 1;
+                if(map.containsKey("chance")){
+                    chance = ((Number)map.get("chance")).doubleValue();
+                }
+                Effect effect;
+                switch(type){
+                    case PARTICLE:
+                        Particle particle = getParticle((String) map.get("particle"));
+                        double x = 0;
+                        if(map.containsKey("x")){
+                            x = ((Number)map.get("x")).doubleValue();
+                        }
+                        double y = 0;
+                        if(map.containsKey("y")){
+                            y = ((Number)map.get("y")).doubleValue();
+                        }
+                        double z = 0;
+                        if(map.containsKey("z")){
+                            z = ((Number)map.get("z")).doubleValue();
+                        }
+                        double dx = 0;
+                        if(map.containsKey("dx")){
+                            dx = ((Number)map.get("dx")).doubleValue();
+                        }
+                        double dy = 0;
+                        if(map.containsKey("dy")){
+                            dy = ((Number)map.get("dy")).doubleValue();
+                        }
+                        double dz = 0;
+                        if(map.containsKey("dz")){
+                            dz = ((Number)map.get("dz")).doubleValue();
+                        }
+                        double speed = 0;
+                        if(map.containsKey("speed")){
+                            speed = ((Number)map.get("speed")).doubleValue();
+                        }
+                        int count = 1;
+                        if(map.containsKey("count")){
+                            count = ((Number)map.get("count")).intValue();
+                        }
+                        Object extra = null;
+                        switch(particle){
+                            case REDSTONE:
+                                extra = new Particle.DustOptions(Color.fromRGB(((Number)map.get("r")).intValue(), ((Number)map.get("g")).intValue(), ((Number)map.get("b")).intValue()), ((Number)map.get("size")).floatValue());
+                                break;
+                            case ITEM_CRACK:
+                                extra = new ItemStack(Material.matchMaterial((String)map.get("item")));
+                                break;
+                            case BLOCK_CRACK:
+                            case BLOCK_DUST:
+                            case FALLING_DUST:
+                                extra = Bukkit.createBlockData(Material.matchMaterial((String)map.get("block")));
+                                break;
+                        }
+                        effect = new Effect(name, location, chance, particle, x, y, z, dx, dy, dz, speed, count, extra);
+                        break;
+                    case SOUND:
+                        String sound = (String)map.get("sound");
+                        float volume = 1;
+                        if(map.containsKey("volume")){
+                            volume = ((Number)map.get("volume")).floatValue();
+                        }
+                        float pitch = 1;
+                        if(map.containsKey("pitch")){
+                            pitch = ((Number)map.get("pitch")).floatValue();
+                        }
+                        effect = new Effect(name, location, chance, sound, volume, pitch);
+                        break;
+                    case EXPLOSION:
+                        float power = ((Number)map.get("power")).floatValue();
+                        boolean fire = false;
+                        if(map.containsKey("fire")){
+                            fire = (boolean)map.get("fire");
+                        }
+                        effect = new Effect(name, location, chance, power, fire);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Unknown effect typpe: "+type+"!");
+                }
+                if(startupLogs)effect.print(logger);
+                this.effects.add(effect);
+            }else if(o instanceof String){
+                Material m = Material.matchMaterial((String)o);
+                if(m==null){
+                    logger.log(Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
+                }
+                Tool tool = new Tool(m);
+                if(startupLogs)tool.print(logger);
+                this.tools.add(tool);
+            }else{
+                logger.log(Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
+            }
+        }
+//</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="Trees">
         ArrayList<Object> trees = new ArrayList<>(getConfig().getList("trees"));
         for(Object o : trees){
@@ -1169,6 +1375,18 @@ public class TreeFeller extends JavaPlugin{
                                 break;
                             case "maxphase":
                                 tree.maxPhase = ((Number)map.get(key)).intValue();
+                                break;
+                            case "effects":
+                                ArrayList<Effect> effectses = new ArrayList<>();
+                                if(map.get(key) instanceof String){
+                                    effectses.add(getEffect((String)map.get(key)));
+                                }else{
+                                    ArrayList theEffects = (ArrayList) map.get(key);
+                                    for(Object ob : theEffects){
+                                        effectses.add(getEffect((String)ob));
+                                    }
+                                }
+                                tree.effects = effectses;
                                 break;
                             default:
                                 logger.log(Level.WARNING, "Unknown tree setting: {0}", key);
@@ -1381,6 +1599,18 @@ public class TreeFeller extends JavaPlugin{
                         case "maxphase":
                             tool.maxPhase = ((Number)map.get(key)).intValue();
                             break;
+                        case "effects":
+                            ArrayList<Effect> effectses = new ArrayList<>();
+                            if(map.get(key) instanceof String){
+                                effectses.add(getEffect((String)map.get(key)));
+                            }else{
+                                ArrayList theEffects = (ArrayList) map.get(key);
+                                for(Object obj : theEffects){
+                                    effectses.add(getEffect((String)obj));
+                                }
+                            }
+                            tool.effects = effectses;
+                            break;
                     }
                 }
                 if(startupLogs)tool.print(logger);
@@ -1398,6 +1628,18 @@ public class TreeFeller extends JavaPlugin{
             }
         }
 //</editor-fold>
+    }
+    private Effect getEffect(String string){
+        for(Effect e : effects){
+            if(e.name.equals(string))return e;
+        }
+        for(Effect e : effects){
+            if(e.name.trim().equals(string))return e;
+        }
+        for(Effect e : effects){
+            if(e.name.trim().equalsIgnoreCase(string))return e;
+        }
+        return null;
     }
     public static class Tool{
         public static Tool DEFAULT;
@@ -1438,6 +1680,7 @@ public class TreeFeller extends JavaPlugin{
         public double logDropChance;
         public boolean leaveStump;
         public int minTime, maxTime, minPhase, maxPhase;
+        public ArrayList<Effect> effects = new ArrayList<>();
         public Tool(Material material){
             this.material = material;
             if(DEFAULT!=null){
@@ -1552,6 +1795,13 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Maximum time: {0}", maxTime);
             logger.log(Level.INFO, "- Minimum phase: {0}", minPhase);
             logger.log(Level.INFO, "- Maximum phase: {0}", maxPhase);
+            String effects = "";//<editor-fold defaultstate="collapsed">
+            for(Effect e : this.effects){
+                effects+=e.name+", ";
+            }
+            if(!effects.isEmpty())effects = effects.substring(0, effects.length()-2);
+//</editor-fold>
+            logger.log(Level.INFO, "- Effects: {0}", effects);
         }
     }
     public static class Tree{
@@ -1582,6 +1832,7 @@ public class TreeFeller extends JavaPlugin{
         public boolean requireCrossSection;
         public boolean rotateLogs;
         public int minTime, maxTime, minPhase, maxPhase;
+        public ArrayList<Effect> effects = new ArrayList<>();
         public Tree(ArrayList<Material> trunk, ArrayList<Material> leaves){
             this.trunk = trunk;
             this.leaves = leaves;
@@ -1662,6 +1913,112 @@ public class TreeFeller extends JavaPlugin{
             logger.log(Level.INFO, "- Maximum time: {0}", maxTime);
             logger.log(Level.INFO, "- Minimum phase: {0}", minPhase);
             logger.log(Level.INFO, "- Maximum phase: {0}", maxPhase);
+            String effects = "";//<editor-fold defaultstate="collapsed">
+            for(Effect e : this.effects){
+                effects+=e.name+", ";
+            }
+            if(!effects.isEmpty())effects = effects.substring(0, effects.length()-2);
+//</editor-fold>
+            logger.log(Level.INFO, "- Effects: {0}", effects);
+        }
+    }
+    public static class Effect{
+        private final String name;
+        private final EffectLocation location;
+        private final EffectType type;
+        private final double chance;
+        private Particle particle;
+        private double x;
+        private double y;
+        private double z;
+        private double dx;
+        private double dy;
+        private double dz;
+        private double speed;
+        private int count;
+        private Object extra;
+        private String sound;
+        private float volume;
+        private float pitch;
+        private float power;
+        private boolean fire;
+        private Effect(String name, EffectLocation location, EffectType type, double chance){
+            this.name = name;
+            this.location = location;
+            this.type = type;
+            this.chance = chance;
+        }
+        public Effect(String name, EffectLocation location, double chance, Particle particle, double x, double y, double z, double dx, double dy, double dz, double speed, int count, Object extra){
+            this(name, location, EffectType.PARTICLE, chance);
+            this.particle = particle;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.dx = dx;
+            this.dy = dy;
+            this.dz = dz;
+            this.speed = speed;
+            this.count = count;
+            this.extra = extra;
+        }
+        public Effect(String name, EffectLocation location, double chance, String sound, float volume, float pitch){
+            this(name, location, EffectType.SOUND, chance);
+            this.sound = sound;
+            this.volume = volume;
+            this.pitch = pitch;
+        }
+        public Effect(String name, EffectLocation location, double chance, float power, boolean fire){
+            this(name, location, EffectType.EXPLOSION, chance);
+            this.power = power;
+            this.fire = fire;
+        }
+        private void print(Logger logger){
+            logger.log(Level.INFO, "Loaded effect: {0}", name);
+            logger.log(Level.INFO, "- Location: {0}", location);
+            logger.log(Level.INFO, "- Type: {0}", type);
+            logger.log(Level.INFO, "- Chance: {0}", chance);
+            switch(type){
+                case PARTICLE:
+                    logger.log(Level.INFO, "- Particle: {0}", particle);
+                    logger.log(Level.INFO, "- x: {0}", x);
+                    logger.log(Level.INFO, "- y: {0}", y);
+                    logger.log(Level.INFO, "- z: {0}", z);
+                    logger.log(Level.INFO, "- dx: {0}", dx);
+                    logger.log(Level.INFO, "- dy: {0}", dy);
+                    logger.log(Level.INFO, "- dz: {0}", dz);
+                    logger.log(Level.INFO, "- Speed: {0}", speed);
+                    logger.log(Level.INFO, "- Count: {0}", count);
+                    logger.log(Level.INFO, "- Extra: {0}", extra);
+                    break;
+                case SOUND:
+                    logger.log(Level.INFO, "- Sound: {0}", sound);
+                    logger.log(Level.INFO, "- Volume: {0}", volume);
+                    logger.log(Level.INFO, "- Pitch: {0}", pitch);
+                    break;
+                case EXPLOSION:
+                    logger.log(Level.INFO, "- Power: {0}", power);
+                    logger.log(Level.INFO, "- Fire: {0}", fire);
+                    break;
+            }
+        }
+        private void play(Block block){
+            switch(type){
+                case EXPLOSION:
+                    block.getWorld().createExplosion(block.getLocation().add(0.5, 0.5, 0.5), power, fire);
+                    break;
+                case SOUND:
+                    block.getWorld().playSound(block.getLocation().add(0.5,0.5,0.5), sound, SoundCategory.BLOCKS, volume, pitch);
+                    break;
+                case PARTICLE:
+                    block.getWorld().spawnParticle(particle, block.getLocation().add(x+.5,y+.5,z+.5), count, dx, dy, dz, speed, extra);
+                    break;
+            }
+        }
+        public static enum EffectLocation{
+            LOGS,LEAVES,TREE,TOOL;
+        }
+        public static enum EffectType{
+            PARTICLE,SOUND,EXPLOSION;
         }
     }
     public static class Sapling{
@@ -1707,7 +2064,7 @@ public class TreeFeller extends JavaPlugin{
         return null;
     }
     public static enum FellBehavior{
-        BREAK,FALL,FALL_HURT,FALL_BREAK,FALL_HURT_BREAK;
+        BREAK,FALL,FALL_HURT,FALL_BREAK,FALL_HURT_BREAK,INVENTORY,FALL_INVENTORY,FALL_HURT_INVENTORY,NATURAL;
         public static FellBehavior match(String s){
             return valueOf(s.toUpperCase().trim().replace("-", "_"));
         }
@@ -1719,202 +2076,132 @@ public class TreeFeller extends JavaPlugin{
         }
     }
     private void breakLog(Tree tree, Tool tool, ItemStack axe, Block log, Block origin, Player player, long seed){
-        switch(tree.logBehavior){
-            case BREAK:
-                if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
-                    try{
-                        if(log!=origin)com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(log.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
-                    }catch(Exception ex){}
-                }
-                double chance = tree.logDropChance*tool.logDropChance;
-                boolean drop = true;
-                int bonus = 0;
-                if(chance<=1){
-                    drop = new Random().nextDouble()<chance;
-                }else{
-                    while(chance>1){
-                        chance--;
-                        bonus++;
-                    }
-                    if(new Random().nextDouble()<chance)bonus++;
-                }
-                if(tree.convertWoodToLog||tool.convertWoodToLog){
-                    if(drop){
-                        for(int i = 0; i<bonus+1; i++){
-                            for(ItemStack s : log.getDrops(axe)){
-                                if(s.getType().name().contains("_WOOD")){
-                                    s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
-                                }
-                                log.getWorld().dropItemNaturally(log.getLocation(), s);
-                            }
-                        }
-                    }
-                    log.setType(Material.AIR);
-                }else{
-                    for(int i = 0; i<bonus; i++){
-                        for(ItemStack s : log.getDrops(axe)){
-                            log.getWorld().dropItemNaturally(log.getLocation(), s);
-                        }
-                    }
-                    if(drop)log.breakNaturally(axe);
-                    else log.setType(Material.AIR);
-                }
-                break;
-            case FALL_HURT:
-            case FALL:
-            case FALL_BREAK:
-            case FALL_HURT_BREAK:
-                FallingBlock falling = log.getWorld().spawnFallingBlock(log.getLocation().add(.5,.5,.5), log.getBlockData());
-                Vector v = falling.getVelocity();
-                if(tree.directionalFallVelocity+tool.directionalFallVelocity>0){
-                    Vector directionalVel = new Vector(0, 0, 0);
-                    switch(tree.directionalFallBehavior){
-                        case RANDOM:
-                            double angle = new Random(seed).nextDouble()*Math.PI*2;
-                            directionalVel = new Vector(Math.cos(angle),0,Math.sin(angle));
-                            break;
-                        case TOWARD:
-                            if(player!=null){
-                                directionalVel = new Vector(player.getLocation().getX()-log.getLocation().getX(),player.getLocation().getY()-log.getLocation().getY(),player.getLocation().getZ()-log.getLocation().getZ());
-                            }
-                            break;
-                        case AWAY:
-                            if(player!=null){
-                                directionalVel = new Vector(player.getLocation().getX()-log.getLocation().getX(),player.getLocation().getY()-log.getLocation().getY(),player.getLocation().getZ()-log.getLocation().getZ()).multiply(-1);
-                            }
-                            break;
-                        case LEFT:
-                            if(player!=null){
-                                directionalVel = new Vector(-(player.getLocation().getZ()-log.getLocation().getZ()),player.getLocation().getY()-log.getLocation().getY(),player.getLocation().getX()-log.getLocation().getX());
-                            }
-                            break;
-                        case RIGHT:
-                            if(player!=null){
-                                directionalVel = new Vector(-(player.getLocation().getZ()-log.getLocation().getZ()),player.getLocation().getY()-log.getLocation().getY(),player.getLocation().getX()-log.getLocation().getX()).multiply(-1);
-                            }
-                            break;
-                        case NORTH:
-                            directionalVel = new Vector(0, 0, -1);
-                            break;
-                        case SOUTH:
-                            directionalVel = new Vector(0, 0, 1);
-                            break;
-                        case EAST:
-                            directionalVel = new Vector(1, 0, 0);
-                            break;
-                        case WEST:
-                            directionalVel = new Vector(-1, 0, 0);
-                            break;
-                        case NORTH_EAST:
-                            directionalVel = new Vector(1, 0, -1);
-                            break;
-                        case SOUTH_EAST:
-                            directionalVel = new Vector(1, 0, 1);
-                            break;
-                        case SOUTH_WEST:
-                            directionalVel = new Vector(-1, 0, 1);
-                            break;
-                        case NORTH_WEST:
-                            directionalVel = new Vector(-1, 0, -1);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Invalid fall behavior: "+tree.directionalFallBehavior);
-                    }
-                    directionalVel = new Vector(directionalVel.getX()/Math.abs(directionalVel.length()), directionalVel.getY()/Math.abs(directionalVel.length()), directionalVel.getZ()/Math.abs(directionalVel.length()));
-                    directionalVel = directionalVel.multiply(tree.directionalFallVelocity+tool.directionalFallVelocity);
-                    v.add(directionalVel);
-                }
-                v.add(new Vector((Math.random()*2-1)*(tree.randomFallVelocity+tool.randomFallVelocity), (tree.randomFallVelocity+tool.randomFallVelocity)/5, (Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity)));
-                falling.setVelocity(v);
-                falling.setHurtEntities(tree.logBehavior==FellBehavior.FALL_HURT||tree.logBehavior==FellBehavior.FALL_HURT_BREAK);
-                if(tree.logBehavior==FellBehavior.FALL_BREAK||tree.logBehavior==FellBehavior.FALL_HURT_BREAK)falling.addScoreboardTag("TreeFeller_Break");
-                if(tree.convertWoodToLog||tool.convertWoodToLog)falling.addScoreboardTag("TreeFeller_Convert");
-                if(falling.getBlockData() instanceof Orientable&&(tool.rotateLogs||tree.rotateLogs)){
-                    falling.addScoreboardTag("TreeFeller_R"+((Orientable)falling.getBlockData()).getAxis().name()+"_"+origin.getX()+"_"+origin.getY()+"_"+origin.getZ());
-                }
-                log.setType(Material.AIR);
-                fallingBlocks.add(falling.getUniqueId());
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid log behavior: "+tree.logBehavior);
+        ArrayList<Effect> effects = new ArrayList<>();
+        for(Effect e : tree.effects){
+            if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
         }
+        breakBlock(tree.logBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.logDropChance*tool.logDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, true, axe, log, origin, player, seed, effects);
     }
     private void breakLeaf(Tree tree, Tool tool, ItemStack axe, Block leaf, Block origin, Player player, long seed){
-        switch(tree.leafBehavior){
+        ArrayList<Effect> effects = new ArrayList<>();
+        for(Effect e : tree.effects){
+            if(e.location==Effect.EffectLocation.LEAVES||e.location==Effect.EffectLocation.TREE)effects.add(e);
+        }
+        breakBlock(tree.leafBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.leafDropChance*tool.leafDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, tool.leafEnchantments, axe, leaf, origin, player, seed, effects);
+    }
+    private void breakBlock(FellBehavior behavior, boolean convert, double dropChance, double directionalFallVelocity, double randomFallVelocity, boolean rotate, DirectionalFallBehavior directionalFallBehavior, boolean applyEnchantments, ItemStack axe, Block block, Block origin, Player player, long seed, Iterable<Effect> effects){
+        switch(behavior){
+            case INVENTORY:
+                if(player!=null){
+                    do{
+                        if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
+                            try{
+                                if(block!=origin)com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
+                            }catch(Exception ex){}
+                        }
+                        boolean drop = true;
+                        int bonus = 0;
+                        if(dropChance<=1){
+                            drop = new Random().nextDouble()<dropChance;
+                        }else{
+                            while(dropChance>1){
+                                dropChance--;
+                                bonus++;
+                            }
+                            if(new Random().nextDouble()<dropChance)bonus++;
+                        }
+                        if(drop){
+                            for(int i = 0; i<bonus+1; i++){
+                                for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
+                                    if(convert){
+                                        if(s.getType().name().contains("_WOOD")){
+                                            s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
+                                        }
+                                    }
+                                    for(ItemStack st : player.getInventory().addItem(s).values()){
+                                        block.getWorld().dropItemNaturally(block.getLocation(), st);
+                                    }
+                                }
+                            }
+                        }
+                        block.setType(Material.AIR);
+                    }while(false);
+                }
             case BREAK:
                 if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
                     try{
-                        if(leaf!=origin)com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(leaf.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
+                        if(block!=origin)com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
                     }catch(Exception ex){}
                 }
-                double chance = tree.leafDropChance*tool.leafDropChance;
                 boolean drop = true;
                 int bonus = 0;
-                if(chance<=1){
-                    drop = new Random().nextDouble()<chance;
+                if(dropChance<=1){
+                    drop = new Random().nextDouble()<dropChance;
                 }else{
-                    while(chance>1){
-                        chance--;
+                    while(dropChance>1){
+                        dropChance--;
                         bonus++;
                     }
-                    if(new Random().nextDouble()<chance)bonus++;
+                    if(new Random().nextDouble()<dropChance)bonus++;
                 }
-                if(tree.convertWoodToLog||tool.convertWoodToLog){
+                if(convert){
                     if(drop){
                         for(int i = 0; i<bonus+1; i++){
-                            for(ItemStack s : tool.leafEnchantments?leaf.getDrops(axe):leaf.getDrops()){
+                            for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
                                 if(s.getType().name().contains("_WOOD")){
                                     s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
                                 }
-                                leaf.getWorld().dropItemNaturally(leaf.getLocation(), s);
+                                block.getWorld().dropItemNaturally(block.getLocation(), s);
                             }
                         }
                     }
-                    leaf.setType(Material.AIR);
+                    block.setType(Material.AIR);
                 }else{
                     for(int i = 0; i<bonus; i++){
-                        for(ItemStack s : tool.leafEnchantments?leaf.getDrops(axe):leaf.getDrops()){
-                            leaf.getWorld().dropItemNaturally(leaf.getLocation(), s);
+                        for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
+                            block.getWorld().dropItemNaturally(block.getLocation(), s);
                         }
                     }
                     if(drop){
-                        if(tool.leafEnchantments)leaf.breakNaturally(axe);
-                        else leaf.breakNaturally();
+                        if(applyEnchantments)block.breakNaturally(axe);
+                        else block.breakNaturally();
                     }
-                    else leaf.setType(Material.AIR);
+                    else block.setType(Material.AIR);
                 }
                 break;
             case FALL_HURT:
             case FALL:
             case FALL_BREAK:
             case FALL_HURT_BREAK:
-                FallingBlock falling = leaf.getWorld().spawnFallingBlock(leaf.getLocation().add(.5,.5,.5), leaf.getBlockData());
+            case FALL_INVENTORY:
+            case FALL_HURT_INVENTORY:
+                FallingBlock falling = block.getWorld().spawnFallingBlock(block.getLocation().add(.5,.5,.5), block.getBlockData());
                 Vector v = falling.getVelocity();
-                if(tree.directionalFallVelocity+tool.directionalFallVelocity>0){
+                if(directionalFallVelocity>0){
                     Vector directionalVel = new Vector(0, 0, 0);
-                    switch(tree.directionalFallBehavior){
+                    switch(directionalFallBehavior){
                         case RANDOM:
                             double angle = new Random(seed).nextDouble()*Math.PI*2;
                             directionalVel = new Vector(Math.cos(angle),0,Math.sin(angle));
                             break;
                         case TOWARD:
                             if(player!=null){
-                                directionalVel = new Vector(player.getLocation().getX()-leaf.getLocation().getX(),player.getLocation().getY()-leaf.getLocation().getY(),player.getLocation().getZ()-leaf.getLocation().getZ());
+                                directionalVel = new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ());
                             }
                             break;
                         case AWAY:
                             if(player!=null){
-                                directionalVel = new Vector(player.getLocation().getX()-leaf.getLocation().getX(),player.getLocation().getY()-leaf.getLocation().getY(),player.getLocation().getZ()-leaf.getLocation().getZ()).multiply(-1);
+                                directionalVel = new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ()).multiply(-1);
                             }
                             break;
                         case LEFT:
                             if(player!=null){
-                                directionalVel = new Vector(-(player.getLocation().getZ()-leaf.getLocation().getZ()),player.getLocation().getY()-leaf.getLocation().getY(),player.getLocation().getX()-leaf.getLocation().getX());
+                                directionalVel = new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX());
                             }
                             break;
                         case RIGHT:
                             if(player!=null){
-                                directionalVel = new Vector(-(player.getLocation().getZ()-leaf.getLocation().getZ()),player.getLocation().getY()-leaf.getLocation().getY(),player.getLocation().getX()-leaf.getLocation().getX()).multiply(-1);
+                                directionalVel = new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX()).multiply(-1);
                             }
                             break;
                         case NORTH:
@@ -1942,25 +2229,32 @@ public class TreeFeller extends JavaPlugin{
                             directionalVel = new Vector(-1, 0, -1);
                             break;
                         default:
-                            throw new IllegalArgumentException("Invalid fall behavior: "+tree.directionalFallBehavior);
+                            throw new IllegalArgumentException("Invalid fall behavior: "+directionalFallBehavior);
                     }
                     directionalVel = new Vector(directionalVel.getX()/Math.abs(directionalVel.length()), directionalVel.getY()/Math.abs(directionalVel.length()), directionalVel.getZ()/Math.abs(directionalVel.length()));
-                    directionalVel = directionalVel.multiply(tree.directionalFallVelocity+tool.directionalFallVelocity);
+                    directionalVel = directionalVel.multiply(directionalFallVelocity);
                     v.add(directionalVel);
                 }
-                v.add(new Vector((Math.random()*2-1)*(tree.randomFallVelocity+tool.randomFallVelocity), (tree.randomFallVelocity+tool.randomFallVelocity)/5, (Math.random()-.5)*(tree.randomFallVelocity+tool.randomFallVelocity)));
+                v.add(new Vector((Math.random()*2-1)*randomFallVelocity, randomFallVelocity/5, (Math.random()-.5)*randomFallVelocity));
                 falling.setVelocity(v);
-                falling.setHurtEntities(tree.leafBehavior==FellBehavior.FALL_HURT||tree.leafBehavior==FellBehavior.FALL_HURT_BREAK);
-                if(tree.leafBehavior==FellBehavior.FALL_BREAK||tree.leafBehavior==FellBehavior.FALL_HURT_BREAK)falling.addScoreboardTag("TreeFeller_Break");
-                if(tree.convertWoodToLog||tool.convertWoodToLog)falling.addScoreboardTag("TreeFeller_Convert");
-                if(falling.getBlockData() instanceof Orientable&&(tool.rotateLogs||tree.rotateLogs)){
+                falling.setHurtEntities(behavior.name().contains("HURT"));
+                if(behavior.name().contains("BREAK"))falling.addScoreboardTag("TreeFeller_Break");
+                if(behavior.name().contains("INVENTORY")){
+                    if(player==null)falling.addScoreboardTag("TreeFeller_Break");
+                    else falling.addScoreboardTag("TreeFeller_Inventory_"+player.getUniqueId().toString());
+                }
+                if(convert)falling.addScoreboardTag("TreeFeller_Convert");
+                if(falling.getBlockData() instanceof Orientable&&rotate){
                     falling.addScoreboardTag("TreeFeller_R"+((Orientable)falling.getBlockData()).getAxis().name()+"_"+origin.getX()+"_"+origin.getY()+"_"+origin.getZ());
                 }
-                leaf.setType(Material.AIR);
+                block.setType(Material.AIR);
                 fallingBlocks.add(falling.getUniqueId());
                 break;
             default:
-                throw new IllegalArgumentException("Invalid leaf behavior: "+tree.leafBehavior);
+                throw new IllegalArgumentException("Invalid block behavior: "+behavior);
+        }
+        for(Effect e : effects){
+            if(new Random().nextDouble()<e.chance)e.play(block);
         }
     }
     private void debug(Player player, String text){

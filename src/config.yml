@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.8.2
+# Version 1.9
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -80,21 +80,27 @@ cooldown: 0
 
 # What felling behavior should logs have?
 # Valid options:
-# BREAK (default) The logs will break and fall as items
-# FALL            The logs will fall as falling blocks
-# FALL_HURT       The logs will fall as falling blocks and hurt any entity they land on
-# FALL_BREAK      The logs will fall as falling blocks and break when they reach the ground
-# FALL_HURT_BREAK The logs will fall as falling brocks, hurt entities they land on, and break when they reach the ground.
+# BREAK (default)     The logs will break and fall as items
+# FALL                The logs will fall as falling blocks
+# FALL_HURT           The logs will fall as falling blocks and hurt any entity they land on
+# FALL_BREAK          The logs will fall as falling blocks and break when they reach the ground
+# FALL_HURT_BREAK     The logs will fall as falling brocks, hurt entities they land on, and break when they reach the ground
+# INVENTORY           The logs will appear in the player's inventory as items
+# FALL_INVENTORY      The logs will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
+# FALL_HURT_INVENTORY The logs will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
 # Note that falling blocks occasionally drop as items if they land wrong
 log-behavior: BREAK
 
 # What felling behavior should leaves have?
 # Valid options:
-# BREAK (default) The leaves will break and fall as items
-# FALL            The leaves will fall as falling blocks
-# FALL_HURT       The leaves will fall as falling blocks and hurt any entity they land on
-# FALL_BREAK      The leaves will fall as falling blocks and break when they reach the ground (Leaf blocks will be dropped)
-# FALL_HURT_BREAK The leaves will fall as falling brocks, hurt entities they land on, and break when they reach the ground. (Leaf blocks will be dropped)
+# BREAK (default)     The leaves will break and fall as items
+# FALL                The leaves will fall as falling blocks
+# FALL_HURT           The leaves will fall as falling blocks and hurt any entity they land on
+# FALL_BREAK          The leaves will fall as falling blocks and break when they reach the ground (Leaf blocks will be dropped)
+# FALL_HURT_BREAK     The leaves will fall as falling brocks, hurt entities they land on, and break when they reach the ground. (Leaf blocks will be dropped)
+# INVENTORY           The leaves will appear in the player's inventory as items
+# FALL_INVENTORY      The leaves will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
+# FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
 # Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do
 leaf-behavior: BREAK
 
@@ -110,15 +116,19 @@ directional-fall-velocity: .35
 # Which direction should the tree fall in?
 # (Only used when log or leaf behavior is set to FALL or similar)
 # Valid options:
-# RANDOM    The tree will fall in a random direction
-# TOWARD    The tree will fall towards the player
-# AWAY      The tree will fall away from the player
-# LEFT      The tree will fall to the player's left
-# RIGHT     The tree will fall to the player's right
-# NORTH     The tree will fall to the north
-# SOUTH     The tree will fall to the south
-# EAST      The tree will fall to the east
-# WEST      The tree will fall to the west
+# RANDOM     The tree will fall in a random direction
+# TOWARD     The tree will fall towards the player
+# AWAY       The tree will fall away from the player
+# LEFT       The tree will fall to the player's left
+# RIGHT      The tree will fall to the player's right
+# NORTH      The tree will fall to the north
+# SOUTH      The tree will fall to the south
+# EAST       The tree will fall to the east
+# WEST       The tree will fall to the west
+# NORTH_WEST The tree fill fall to the northwest
+# NORTH_EAST The tree fill fall to the northeast
+# SOUTH_WEST The tree fill fall to the southwest
+# SOUTH_EAST The tree fill fall to the southeast
 directional-fall-behavior: RANDOM
 
 #When trees FALL, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)
@@ -205,6 +215,7 @@ max-phase: -1
 # maxTime: <value>                              If set, this tool can only cut down trees at or before this time of day (0-24000)
 # minPhase: <value>                             If set, this tool can only cut down trees at or after this phase of the moon (0-7, see min-phase)
 # maxPhase: <value>                             If set, this tool can only cut down trees at or before this phase of the moon (0-7, see min-phase)
+# effects: [<values>]                           If set, this tool will create the listed effects when used to fell a tree
 # Any tool-specific values will override global defaults.
 # An asterisk (*) or AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
@@ -252,6 +263,7 @@ tools:
 # maxTime: <value>                  If set, this tree can only be cut down at or before this time of day (0-24000)
 # minPhase: <value>                 If set, this tree can only be cut down at or after this phase of the moon (0-7, see min-phase)
 # maxPhase: <value>                 If set, this tree can only be cut down at or before this phase of the moon (0-7, see min-phase)
+# effects: [<values>]               If set, this tree will create the listed effects when felled
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
@@ -264,3 +276,49 @@ trees:
     - [[JUNGLE_LOG, JUNGLE_WOOD], JUNGLE_LEAVES, {sapling: JUNGLE_SAPLING, maxSaplings: 4}]
     - [[DARK_OAK_LOG, DARK_OAK_WOOD], DARK_OAK_LEAVES, {sapling: DARK_OAK_SAPLING, maxSaplings: 4}]
     - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, maxSaplings: 1}]
+
+# Here, you can create custom effects for trees or tools
+# Fields:
+# name: <value>        This is the effect's name. It is used to assign the effect to a tree or tool
+# chance: <value>      This is the chance of the effect happening (0-1, default 1)
+# location: <value>    This is where the effect will occur. valid options:
+#   logs    The effect will occur at every log in the tree
+#   leaves  The effect will occur at every block of leaves in the tree
+#   tree    The effect will occur at every block in the tree
+#   tool    The effect will occur at the block that was cut down
+# type: <value>     This is what type of effect should occur. Valid options:
+#   particle  A particle effect, such as flame, block, etc. particles
+#   sound     Any sound
+#   explosion An explosion that Will destroy blocks and items- This will occur after the block is destroyed
+# Particle settings:
+#   particle: <value> The particle to display
+#   x: <value>        The X offset from the center of the block to display the particle (default 0)
+#   y: <value>        The Y offset from the center of the block to display the particle (default 0)
+#   z: <value>        The Z offset from the center of the block to display the particle (default 0)
+#   dx: <value>       The delta X of the particle field (default 0)
+#   dy: <value>       The delta Y of the particle field (default 0)
+#   dz: <value>       The delta Z of the particle field (default 0)
+#   speed: <value>    The speed of the particles (default 0)
+#   count: <value>    The number of particles to display (default 1)
+#   Extra information is required for some particles
+#   For Dust particles:
+#     r: <value>    The Red color channel for this particle, 0-255
+#     g: <value>    The Green color channel for this particle, 0-255
+#     b: <value>    The Blue color channel for this particle, 0-255
+#     size: <value> The size of the particle
+#   for Item particles:
+#     item: <value> The item to be used for this particle
+#   for Block or Falling Dust particles:
+#     block: <value> The block to be used for this particle
+# Sound settings:
+#   sound: <value>     The sound to play
+#   volume: <value>    The volume at which to play the sound (Default 1)
+#   pitch: <value>     The pitch at which to play the sound (0.5-2, Default 1)
+# Explosion settings:
+#   power: <value>     The explosion power, where creepers are 3, tnt 4, charged creepers 5
+#   fire: (true|false) Weather or not to light fires with the explosion (Default false)
+# Examples of valid effects:
+#   - {name: smoke, chance: 1, location: logs, type: particle, particle: smoke, dx: 0.5, dy: 0.5, dz: 0.5, speed: .01, count: 10}
+#   - {name: explosion, chance: .01, location: tool, type: explosion, power: 4}
+#   - {name: ghost sound, chance: .1, location: tree, type: sound, sound: ambient.cave, volume: 10, pitch: 0.5}
+effects:

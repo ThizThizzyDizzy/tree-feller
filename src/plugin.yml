@@ -1,5 +1,5 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.8.2
+version: 1.9
 api-version: 1.13
 name: TreeFeller
 softdepend: [MCMMO,GriefProtection]

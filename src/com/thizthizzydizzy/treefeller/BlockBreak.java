@@ -1,11 +1,13 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.TreeFeller.Sapling;
 import java.util.Iterator;
+import java.util.UUID;
 import org.bukkit.Axis;
 import org.bukkit.Material;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -68,7 +70,40 @@ public class BlockBreak implements Listener{
                         }
                         event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
                     }
+                    for(String s : event.getEntity().getScoreboardTags()){
+                        if(s.startsWith("TreeFeller_Inventory_")){
+                            event.setCancelled(true);
+                            Player player = null;
+                            for(Player p : event.getBlock().getWorld().getPlayers()){
+                                if(p.getUniqueId().equals(UUID.fromString(s.substring("TreeFeller_Inventory_".length())))){
+                                    player = p;
+                                    break;
+                                }
+                            }
+                            if(player!=null){
+                                ItemStack stack = new ItemStack(event.getTo());
+                                if(event.getEntity().getScoreboardTags().contains("TreeFeller_Convert")){
+                                    if(stack.getType().name().contains("_WOOD")){
+                                        stack.setType(Material.matchMaterial(stack.getType().name().replace("_WOOD", "_LOG")));
+                                    }
+                                }
+                                for(ItemStack st : player.getInventory().addItem(stack).values()){
+                                    event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), st);
+                                }
+                            }else{
+                                ItemStack stack = new ItemStack(event.getTo());
+                                if(event.getEntity().getScoreboardTags().contains("TreeFeller_Convert")){
+                                    if(stack.getType().name().contains("_WOOD")){
+                                        stack.setType(Material.matchMaterial(stack.getType().name().replace("_WOOD", "_LOG")));
+                                    }
+                                }
+                                event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
+                            }
+                            break;
+                        }
+                    }
                     plugin.fallingBlocks.remove(event.getEntity().getUniqueId());
+                    if(event.isCancelled())return;
                     for(String tag : event.getEntity().getScoreboardTags()){
                         if(tag.startsWith("TreeFeller_R")){
                             Axis axis = Axis.valueOf(tag.substring(12, 13));
