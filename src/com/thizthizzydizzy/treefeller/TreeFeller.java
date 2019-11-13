@@ -16,7 +16,6 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
@@ -34,6 +33,10 @@ public class TreeFeller extends JavaPlugin{
     public HashMap<UUID, HashMap<Tree, Long>> treeCooldowns = new HashMap<>();
     public HashMap<UUID, HashMap<Tool, Long>> itemCooldowns = new HashMap<>();
     public ArrayList<UUID> fallingBlocks = new ArrayList<>();
+    public ArrayList<Tool> tools = new ArrayList<>();
+    public ArrayList<Tree> trees = new ArrayList<>();
+    public ArrayList<Effect> effects = new ArrayList<>();
+    public ArrayList<Effect> globalEffects = new ArrayList<>();
     public int spawnSaplings;
     public boolean replantSaplings;
     public boolean respectUnbreaking;
@@ -584,6 +587,7 @@ public class TreeFeller extends JavaPlugin{
                     ArrayList<Effect> effects = new ArrayList<>();
                     effects.addAll(tree.effects);
                     effects.addAll(tool.effects);
+                    effects.addAll(globalEffects);
                     for(Effect e : effects){
                         if(e.location==Effect.EffectLocation.TOOL){
                             if(new Random().nextDouble()<e.chance)e.play(block);
@@ -803,9 +807,6 @@ public class TreeFeller extends JavaPlugin{
         }
         return list;
     }
-    public ArrayList<Tool> tools = new ArrayList<>();
-    public ArrayList<Tree> trees = new ArrayList<>();
-    public ArrayList<Effect> effects = new ArrayList<>();
     public void onEnable(){
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = getLogger();
@@ -1127,8 +1128,8 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.grasses = grass;
         startupLogs = getConfig().getBoolean("startup-logs");
         diagonalLeaves = getConfig().getBoolean("diagonal-leaves");
-        ArrayList<Object> effects = null;
         //<editor-fold defaultstate="collapsed" desc="Effects">
+        ArrayList<Object> effects = null;
         try{
             effects = new ArrayList<>(getConfig().getList("effects"));
         }catch(NullPointerException ex){
@@ -1246,6 +1247,24 @@ public class TreeFeller extends JavaPlugin{
                     this.tools.add(tool);
                 }else{
                     logger.log(Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
+                }
+            }
+        }
+        ArrayList<Object> globalEffects = null;
+        try{
+            globalEffects = new ArrayList<>(getConfig().getList("global-effects"));
+        }catch(NullPointerException ex){}
+        if(globalEffects!=null){
+            for(Object o : globalEffects){
+                if(o instanceof String){
+                    String s = (String)o;
+                    if(s.trim().equals("*")){
+                        this.globalEffects.clear();
+                        this.globalEffects.addAll(this.effects);
+                        break;
+                    }
+                    Effect e = getEffect(s);
+                    if(e!=null)this.globalEffects.add(e);
                 }
             }
         }
@@ -2084,7 +2103,13 @@ public class TreeFeller extends JavaPlugin{
     }
     private void breakLog(Tree tree, Tool tool, ItemStack axe, Block log, Block origin, Player player, long seed){
         ArrayList<Effect> effects = new ArrayList<>();
+        for(Effect e : globalEffects){
+            if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
+        }
         for(Effect e : tree.effects){
+            if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
+        }
+        for(Effect e : tool.effects){
             if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
         }
         breakBlock(tree.logBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.logDropChance*tool.logDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, true, axe, log, origin, player, seed, effects);
@@ -2092,6 +2117,12 @@ public class TreeFeller extends JavaPlugin{
     private void breakLeaf(Tree tree, Tool tool, ItemStack axe, Block leaf, Block origin, Player player, long seed){
         ArrayList<Effect> effects = new ArrayList<>();
         for(Effect e : tree.effects){
+            if(e.location==Effect.EffectLocation.LEAVES||e.location==Effect.EffectLocation.TREE)effects.add(e);
+        }
+        for(Effect e : tool.effects){
+            if(e.location==Effect.EffectLocation.LEAVES||e.location==Effect.EffectLocation.TREE)effects.add(e);
+        }
+        for(Effect e : globalEffects){
             if(e.location==Effect.EffectLocation.LEAVES||e.location==Effect.EffectLocation.TREE)effects.add(e);
         }
         breakBlock(tree.leafBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.leafDropChance*tool.leafDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, tool.leafEnchantments, axe, leaf, origin, player, seed, effects);

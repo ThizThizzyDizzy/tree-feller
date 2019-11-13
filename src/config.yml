@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.9.1
+# Version 1.9.2
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -171,6 +171,14 @@ min-phase: -1
 
 # What should the maximum phase be for felling trees? (0-8, -1 to disable)
 max-phase: -1
+
+# Global effects are applied every time a tree is felled, regardless of tree type or tool
+# use * for all effects
+# ex:
+#   - ghost sound
+#   - smoke
+global-effects:
+    - *
 
 # What tools can be used to cut down trees?
 # Format:
