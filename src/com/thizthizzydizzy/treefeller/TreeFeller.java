@@ -1258,7 +1258,7 @@ public class TreeFeller extends JavaPlugin{
             for(Object o : globalEffects){
                 if(o instanceof String){
                     String s = (String)o;
-                    if(s.trim().equals("*")){
+                    if(s.trim().equals("ALL")){
                         this.globalEffects.clear();
                         this.globalEffects.addAll(this.effects);
                         break;
@@ -1450,7 +1450,7 @@ public class TreeFeller extends JavaPlugin{
                     continue;
                 }
                 String typ = (String) map.get("type");
-                Material type = typ.trim().equals("*")?Material.AIR:Material.matchMaterial(typ.trim());
+                Material type = Material.matchMaterial(typ.trim());
                 if(type==null){
                     logger.log(Level.WARNING, "Unknown tool material: {0}! Skipping...", map.get("type"));
                     continue;

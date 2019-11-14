@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.9.2
+# Version 1.9.3
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -173,12 +173,12 @@ min-phase: -1
 max-phase: -1
 
 # Global effects are applied every time a tree is felled, regardless of tree type or tool
-# use * for all effects
+# use ALL for all effects
 # ex:
 #   - ghost sound
 #   - smoke
 global-effects:
-    - *
+    - ALL
 
 # What tools can be used to cut down trees?
 # Format:
@@ -225,7 +225,7 @@ global-effects:
 # maxPhase: <value>                             If set, this tool can only cut down trees at or before this phase of the moon (0-7, see min-phase)
 # effects: [<values>]                           If set, this tool will create the listed effects when used to fell a tree
 # Any tool-specific values will override global defaults.
-# An asterisk (*) or AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
+# AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
 #    - {type: WOODEN_AXE, requiredEnchantments: {efficiency: 4, unbreaking: 1}, bannedEnchantments: {unbreaking: 2}, minDurability: 4, maxDurabilityPercent: 0.9}
 #    - {type: DIAMOND_AXE, requiredEnchantments: {efficiency: 4}, bannedEnchantments: {unbreaking: 2}, requiredLore: [A line of lore, Another line of lore]}
