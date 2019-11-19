@@ -12,9 +12,14 @@ public class WorldGuardCompat{
             for(ArrayList<Block> blocks : blockses){
                 for(Block b : blocks){
                     com.sk89q.worldedit.util.Location loc = new com.sk89q.worldedit.util.Location(lp.getWorld(), b.getX(), b.getY(), b.getZ());
-                    if(!query.testState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)){
-                        return b;
+                    if(query.queryState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)==com.sk89q.worldguard.protection.flags.StateFlag.State.ALLOW){
+                        continue;
                     }
+                    if(query.queryState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BLOCK_BREAK)==com.sk89q.worldguard.protection.flags.StateFlag.State.DENY)return b;
+                    if(query.queryState(loc, lp, com.sk89q.worldguard.protection.flags.Flags.BUILD)==com.sk89q.worldguard.protection.flags.StateFlag.State.ALLOW){
+                        continue;
+                    }
+                    return b;
                 }
             }
         }
