@@ -84,7 +84,7 @@ public class TreeFeller extends JavaPlugin{
                             break;
                         }
                     }
-                    if(!isInWorld){
+                    if((tree.worldBlacklist&&isInWorld)||(!tree.worldBlacklist&&!isInWorld)){
                         debug(player, false, false, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is invalid for this tree!");
                         continue;
                     }
@@ -116,8 +116,8 @@ public class TreeFeller extends JavaPlugin{
                                 break;
                             }
                         }
-                        if(!isInWorld){
-                            debug(player, false, false, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is invalid for this tree!");
+                        if((tool.worldBlacklist&&isInWorld)||(!tool.worldBlacklist&&!isInWorld)){
+                            debug(player, false, false, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is invalid for this tool!");
                             continue;
                         }
                     }
@@ -604,7 +604,9 @@ public class TreeFeller extends JavaPlugin{
      * @param block the block that was broken
      * @param axe the tool used to break it
      * @return the size of the tree, in logs (0 if no tree can be felled)
+     * @deprecated This does not behave exactly like fellTree, although no replacement is currently available
      */
+    @Deprecated
     public int getTreeSize(Block block, ItemStack axe){
         Material material = block.getType();
         for(Tree tree : trees){
@@ -1090,6 +1092,7 @@ public class TreeFeller extends JavaPlugin{
         Tool.DEFAULT.randomFallVelocity = 0;
         Tool.DEFAULT.directionalFallVelocity = 0;
         Tool.DEFAULT.worlds = null;
+        Tool.DEFAULT.worldBlacklist = false;
         Tool.DEFAULT.leafDropChance = getConfig().getDouble("leaf-drop-chance");
         Tool.DEFAULT.logDropChance = getConfig().getDouble("log-drop-chance");
         Tool.DEFAULT.leaveStump = getConfig().getBoolean("leave-stump");
@@ -1114,6 +1117,7 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.randomFallVelocity = getConfig().getDouble("random-fall-velocity");
         Tree.DEFAULT.directionalFallVelocity = getConfig().getDouble("directional-fall-velocity");
         Tree.DEFAULT.directionalFallBehavior = DirectionalFallBehavior.match(getConfig().getString("directional-fall-behavior"));
+        Tree.DEFAULT.worldBlacklist = false;
         Tree.DEFAULT.convertWoodToLog = Tool.DEFAULT.convertWoodToLog = getConfig().getBoolean("convert-wood-to-log");
         Tree.DEFAULT.leafDropChance = 1;
         Tree.DEFAULT.logDropChance = 1;
@@ -1356,13 +1360,13 @@ public class TreeFeller extends JavaPlugin{
                             case "leafbehavior":
                                 tree.leafBehavior = FellBehavior.match((String)map.get(key));
                                 break;
-                            case "randomFallVelocity":
+                            case "randomfallvelocity":
                                 tree.randomFallVelocity = ((Number)map.get(key)).doubleValue();
                                 break;
-                            case "directionalFallVelocity":
+                            case "directionalfallvelocity":
                                 tree.directionalFallVelocity = ((Number)map.get(key)).doubleValue();
                                 break;
-                            case "directionalFallBehavior":
+                            case "directionalfallbehavior":
                                 tree.directionalFallBehavior = DirectionalFallBehavior.match((String)map.get(key));
                                 break;
                             case "worlds":
@@ -1374,6 +1378,9 @@ public class TreeFeller extends JavaPlugin{
                                     worlds.addAll(theGrasses);
                                 }
                                 tree.worlds = worlds;
+                                break;
+                            case "worldblacklist":
+                                tree.worldBlacklist = (boolean)map.get(key);
                                 break;
                             case "leafdropchance":
                                 tree.leafDropChance = ((Number)map.get(key)).doubleValue();
@@ -1582,10 +1589,10 @@ public class TreeFeller extends JavaPlugin{
                         case "leafenchantments":
                             tool.leafEnchantments = (boolean)map.get(ob);
                             break;
-                        case "randomFallVelocity":
+                        case "randomfallvelocity":
                             tool.randomFallVelocity = ((Number)map.get(key)).doubleValue();
                             break;
-                        case "directionalFallVelocity":
+                        case "directionalfallvelocity":
                             tool.directionalFallVelocity = ((Number)map.get(key)).doubleValue();
                             break;
                         case "worlds":
@@ -1597,6 +1604,9 @@ public class TreeFeller extends JavaPlugin{
                                 worlds.addAll(theGrasses);
                             }
                             tool.worlds = worlds;
+                            break;
+                        case "worldblacklist":
+                            tool.worldBlacklist = (boolean)map.get(key);
                             break;
                         case "leafdropchance":
                             tool.leafDropChance = ((Number)map.get(key)).doubleValue();
@@ -1707,6 +1717,7 @@ public class TreeFeller extends JavaPlugin{
         public boolean leaveStump;
         public int minTime, maxTime, minPhase, maxPhase;
         public ArrayList<Effect> effects = new ArrayList<>();
+        public boolean worldBlacklist = false;
         public Tool(Material material){
             this.material = material;
             if(DEFAULT!=null){
@@ -1812,6 +1823,7 @@ public class TreeFeller extends JavaPlugin{
             }
 //</editor-fold>
             logger.log(Level.INFO, "- Worlds: {0}", worldses);
+            logger.log(Level.INFO, "- World Blacklist: {0}", worldBlacklist);
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
             logger.log(Level.INFO, "- Log drop chance: {0}", logDropChance);
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
@@ -1858,6 +1870,7 @@ public class TreeFeller extends JavaPlugin{
         public boolean requireCrossSection;
         public boolean rotateLogs;
         public int minTime, maxTime, minPhase, maxPhase;
+        public boolean worldBlacklist = false;
         public ArrayList<Effect> effects = new ArrayList<>();
         public Tree(ArrayList<Material> trunk, ArrayList<Material> leaves){
             this.trunk = trunk;
@@ -1930,6 +1943,7 @@ public class TreeFeller extends JavaPlugin{
             }
 //</editor-fold>
             logger.log(Level.INFO, "- Worlds: {0}", worldses);
+            logger.log(Level.INFO, "- World Blacklist: {0}", worldBlacklist);
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
             logger.log(Level.INFO, "- Log drop chance: {0}", logDropChance);
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);

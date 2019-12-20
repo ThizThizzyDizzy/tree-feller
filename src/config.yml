@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.9.4
+# Version 1.9.5
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -213,6 +213,7 @@ global-effects:
 # randomFallVelocity: <value>                   If set, this velocity will be added to the tree's random velocity
 # directionalFallVelocity: <value>              If set, this velocity will be added to the tree's directional velocity
 # worlds: [<values>]                            limits in what worlds this tool can be used. Values can be world names or UUIDs
+# worldBlacklist: (true|false)                  If set to true, this tree can be cut down in every world except those specified in the worlds: variable
 # convertWoodToLog: <value>                     If set, this tool will always convert wood to log when used to fell a tree
 # leafDropChance: <value>                       If set, this will override the leaf drop chance (This is multiplied by the tree's drop chance)
 # logDropChance: <value>                        If set, this will override the log drop chance (This is multiplied by the tree's drop chance)
@@ -261,6 +262,7 @@ tools:
 # directionalFallVelocity: <value>  see directional-fall-velocity above
 # directionalFallBehavior: <value>  see directional-fall-behavior above
 # worlds: [<values>]                limits in what worlds this tree can be felled. Values can be world names or UUIDs
+# worldBlacklist: (true|false)      If set to true, this tree can be cut down in every world except those specified in the worlds: variable
 # convertWoodToLog: <value>         If set, this tree will always convert wood to log when felled
 # leafDropChance: <value>           (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the tool's drop chance)
 # logDropChance: <value>            (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the log's drop chance
