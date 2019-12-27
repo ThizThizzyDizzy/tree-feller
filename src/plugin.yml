@@ -1,8 +1,8 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.9.5
+version: 1.10
 api-version: 1.13
 name: TreeFeller
-softdepend: [MCMMO,GriefProtection]
+softdepend: [MCMMO,GriefProtection,CoreProtect]
 commands:
     treefeller:
         description: Reloads the tree feller or toggles debug mode

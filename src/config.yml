@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.9.5
+# Version 1.10
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -88,6 +88,7 @@ cooldown: 0
 # INVENTORY           The logs will appear in the player's inventory as items
 # FALL_INVENTORY      The logs will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
 # FALL_HURT_INVENTORY The logs will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
+# NATURAL             The logs will instantly fall in a more natural way (May not work with cutting-animation)
 # Note that falling blocks occasionally drop as items if they land wrong
 log-behavior: BREAK
 
@@ -101,8 +102,22 @@ log-behavior: BREAK
 # INVENTORY           The leaves will appear in the player's inventory as items
 # FALL_INVENTORY      The leaves will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
 # FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
+# NATURAL             The leaves will instantly fall in a more natural way (May not work with cutting-animation)
 # Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do
 leaf-behavior: BREAK
+
+# This is the list of blocks that may be overridden when a tree falls onto them (i.e air, grass, water)
+# (Only used for NATURAL fell type)
+overridables:
+    - GRASS
+    - AIR
+    - CAVE_AIR
+    - WATER
+    - TALL_GRASS
+    - SEAGRASS
+    - TALL_SEAGRASS
+    - FERN
+    - LARGE_FERN
 
 # How much random sideways velocity should falling blocks get?
 # (Only used when log or leaf behavior is set to FALL or similar)
@@ -130,6 +145,9 @@ directional-fall-velocity: .35
 # SOUTH_WEST The tree fill fall to the southwest
 # SOUTH_EAST The tree fill fall to the southeast
 directional-fall-behavior: RANDOM
+
+# If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
+lock-fall-cardinal: false
 
 #When trees FALL, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)
 rotate-logs: true
@@ -212,6 +230,7 @@ global-effects:
 # leafEnchantments: (true|false)                If true, the tool will apply enchantments such as Fortune and Silk Touch to the leaves of trees when mined.
 # randomFallVelocity: <value>                   If set, this velocity will be added to the tree's random velocity
 # directionalFallVelocity: <value>              If set, this velocity will be added to the tree's directional velocity
+# lockFallCardinal: (true|false)                If set to true, trees felled by this tool will always fall in one of the cardinal directions
 # worlds: [<values>]                            limits in what worlds this tool can be used. Values can be world names or UUIDs
 # worldBlacklist: (true|false)                  If set to true, this tree can be cut down in every world except those specified in the worlds: variable
 # convertWoodToLog: <value>                     If set, this tool will always convert wood to log when used to fell a tree
@@ -261,6 +280,7 @@ tools:
 # randomFallVelocity: <value>       see random-fall-velocity above
 # directionalFallVelocity: <value>  see directional-fall-velocity above
 # directionalFallBehavior: <value>  see directional-fall-behavior above
+# lockFallCardinal: (true|false)    If set to true, this tree will always fall in one of the cardinal directions
 # worlds: [<values>]                limits in what worlds this tree can be felled. Values can be world names or UUIDs
 # worldBlacklist: (true|false)      If set to true, this tree can be cut down in every world except those specified in the worlds: variable
 # convertWoodToLog: <value>         If set, this tree will always convert wood to log when felled

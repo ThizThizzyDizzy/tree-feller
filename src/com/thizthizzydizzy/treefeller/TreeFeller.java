@@ -4,18 +4,22 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Color;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
@@ -46,7 +50,10 @@ public class TreeFeller extends JavaPlugin{
     public boolean ignoreLeafData;
     public boolean startupLogs;
     public boolean diagonalLeaves;
+    public boolean lockFallCardinal;
     boolean debug = false;
+    private ArrayList<NaturalFall> naturalFalls = new ArrayList<>();
+    private ArrayList<Material> overridables = new ArrayList<>();
     public void fellTree(BlockBreakEvent event){
         if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
     }
@@ -463,6 +470,14 @@ public class TreeFeller extends JavaPlugin{
                             }
                         }
                     }
+                    int lower = block.getY();
+                    for(int i : blocks.keySet()){
+                        for(Iterator<Block> it = blocks.get(i).iterator(); it.hasNext();){
+                            Block b = it.next();
+                            if(b.getY()<lower)lower = b.getY();
+                        }
+                    }
+                    int lowest = lower;
                     if(gamemode!=GameMode.CREATIVE){
                         if(axe.getType().getMaxDurability()>0){
                             axe.setDurability((short)(axe.getDurability()+durabilityCost));
@@ -530,14 +545,17 @@ public class TreeFeller extends JavaPlugin{
                                         if(tTl<=0)break;
                                         for(Block leaf : toList(getBlocks(tree.leaves, b, tool.leafRange, diagonalLeaves, tool.playerLeaves&&tree.playerLeaves))){
                                             if(dropItems){
-                                                
-                                                breakLeaf(tree, tool, axe, leaf, block, player, seed);
+                                                breakLeaf(tree, tool, axe, leaf, block, lowest, player, seed, toList(blocks));
                                             }else leaf.setType(Material.AIR);
                                         }
-                                        if(dropItems)breakLog(tree, tool, axe, b, block, player, seed);
+                                        if(dropItems)breakLog(tree, tool, axe, b, block, lowest, player, seed, toList(blocks));
                                         else b.setType(Material.AIR);
                                         tTl--;
                                     }
+                                    for(NaturalFall fall : naturalFalls){
+                                        fall.fall();
+                                    }
+                                    naturalFalls.clear();
                                 }
                             }.runTaskLater(this, delay);
                             Ttl += blocks.get(i).size();
@@ -559,13 +577,13 @@ public class TreeFeller extends JavaPlugin{
                                 if(total<=0)break;
                                     for(Block leaf : toList(getBlocks(tree.leaves, b, tool.leafRange, diagonalLeaves, tool.playerLeaves&&tree.playerLeaves))){
                                         if(dropItems){
-                                            breakLeaf(tree, tool, axe, leaf, block, player, seed);
+                                            breakLeaf(tree, tool, axe, leaf, block, lowest, player, seed, toList(blocks));
                                         }else{
                                             droppedItems.addAll(tool.leafEnchantments?leaf.getDrops(axe):leaf.getDrops());
                                             leaf.setType(Material.AIR);
                                         }
                                     }
-                                if(dropItems)breakLog(tree, tool, axe, b, block, player, seed);
+                                if(dropItems)breakLog(tree, tool, axe, b, block, lowest, player, seed, toList(blocks));
                                 else{
                                     droppedItems.addAll(b.getDrops(axe));
                                     b.setType(Material.AIR);
@@ -579,6 +597,10 @@ public class TreeFeller extends JavaPlugin{
                                 if(s!=null)s.place();
                             }
                         }
+                        for(NaturalFall fall : naturalFalls){
+                            fall.fall();
+                        }
+                        naturalFalls.clear();
                     }
                     if(player!=null){
                         setLastTime(player, tree, System.currentTimeMillis());
@@ -1056,6 +1078,7 @@ public class TreeFeller extends JavaPlugin{
         fallingBlocks.clear();
         itemCooldowns.clear();
         treeCooldowns.clear();
+        overridables.clear();
         replantSaplings = getConfig().getBoolean("replant-saplings");
         respectUnbreaking = getConfig().getBoolean("respect-unbreaking");
         scanDistance = getConfig().getInt("scan-distance");
@@ -1091,6 +1114,7 @@ public class TreeFeller extends JavaPlugin{
         Tool.DEFAULT.maxLogs = getConfig().getInt("max-logs");
         Tool.DEFAULT.randomFallVelocity = 0;
         Tool.DEFAULT.directionalFallVelocity = 0;
+        Tool.DEFAULT.lockFallCardinal = false;
         Tool.DEFAULT.worlds = null;
         Tool.DEFAULT.worldBlacklist = false;
         Tool.DEFAULT.leafDropChance = getConfig().getDouble("leaf-drop-chance");
@@ -1117,6 +1141,7 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.randomFallVelocity = getConfig().getDouble("random-fall-velocity");
         Tree.DEFAULT.directionalFallVelocity = getConfig().getDouble("directional-fall-velocity");
         Tree.DEFAULT.directionalFallBehavior = DirectionalFallBehavior.match(getConfig().getString("directional-fall-behavior"));
+        Tree.DEFAULT.lockFallCardinal = false;
         Tree.DEFAULT.worldBlacklist = false;
         Tree.DEFAULT.convertWoodToLog = Tool.DEFAULT.convertWoodToLog = getConfig().getBoolean("convert-wood-to-log");
         Tree.DEFAULT.leafDropChance = 1;
@@ -1132,6 +1157,30 @@ public class TreeFeller extends JavaPlugin{
         Tree.DEFAULT.grasses = grass;
         startupLogs = getConfig().getBoolean("startup-logs");
         diagonalLeaves = getConfig().getBoolean("diagonal-leaves");
+        lockFallCardinal = getConfig().getBoolean("lock-fall-cardinal");
+        
+        //<editor-fold defaultstate="collapsed" desc="Overridables">
+        ArrayList<Object> overridables = null;
+        try{
+            overridables = new ArrayList<>(getConfig().getList("overridables"));
+        }catch(NullPointerException ex){
+            logger.log(Level.WARNING, "Failed to load overridable blocks!");
+        }
+        if(overridables!=null){
+            for(Object o : overridables){
+                if(o instanceof String){
+                    Material m = Material.matchMaterial((String)o);
+                    if(m==null){
+                        logger.log(Level.WARNING, "Unknown material: {0}", (String)o);
+                    }else{
+                        this.overridables.add(m);
+                    }
+                }else{
+                    logger.log(Level.WARNING, "Unknown material: {0} of type {1}", new Object[]{o, o.getClass().getName()});
+                }
+            }
+        }
+        //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="Effects">
         ArrayList<Object> effects = null;
         try{
@@ -1382,6 +1431,9 @@ public class TreeFeller extends JavaPlugin{
                             case "worldblacklist":
                                 tree.worldBlacklist = (boolean)map.get(key);
                                 break;
+                            case "lockfallcardinal":
+                                tree.lockFallCardinal = (boolean)map.get(key);
+                                break;
                             case "leafdropchance":
                                 tree.leafDropChance = ((Number)map.get(key)).doubleValue();
                                 break;
@@ -1608,6 +1660,9 @@ public class TreeFeller extends JavaPlugin{
                         case "worldblacklist":
                             tool.worldBlacklist = (boolean)map.get(key);
                             break;
+                        case "lockfallcardinal":
+                            tool.lockFallCardinal = (boolean)map.get(key);
+                            break;
                         case "leafdropchance":
                             tool.leafDropChance = ((Number)map.get(key)).doubleValue();
                             break;
@@ -1718,6 +1773,7 @@ public class TreeFeller extends JavaPlugin{
         public int minTime, maxTime, minPhase, maxPhase;
         public ArrayList<Effect> effects = new ArrayList<>();
         public boolean worldBlacklist = false;
+        public boolean lockFallCardinal = false;
         public Tool(Material material){
             this.material = material;
             if(DEFAULT!=null){
@@ -1824,6 +1880,7 @@ public class TreeFeller extends JavaPlugin{
 //</editor-fold>
             logger.log(Level.INFO, "- Worlds: {0}", worldses);
             logger.log(Level.INFO, "- World Blacklist: {0}", worldBlacklist);
+            logger.log(Level.INFO, "- Lock Fall Cardinal: {0}", lockFallCardinal);
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
             logger.log(Level.INFO, "- Log drop chance: {0}", logDropChance);
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
@@ -1871,6 +1928,7 @@ public class TreeFeller extends JavaPlugin{
         public boolean rotateLogs;
         public int minTime, maxTime, minPhase, maxPhase;
         public boolean worldBlacklist = false;
+        public boolean lockFallCardinal = false;
         public ArrayList<Effect> effects = new ArrayList<>();
         public Tree(ArrayList<Material> trunk, ArrayList<Material> leaves){
             this.trunk = trunk;
@@ -1944,6 +2002,7 @@ public class TreeFeller extends JavaPlugin{
 //</editor-fold>
             logger.log(Level.INFO, "- Worlds: {0}", worldses);
             logger.log(Level.INFO, "- World Blacklist: {0}", worldBlacklist);
+            logger.log(Level.INFO, "- Lock Fall Cardinal: {0}", lockFallCardinal);
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
             logger.log(Level.INFO, "- Log drop chance: {0}", logDropChance);
             logger.log(Level.INFO, "- Leave stump: {0}", leaveStump);
@@ -2114,8 +2173,75 @@ public class TreeFeller extends JavaPlugin{
         public static DirectionalFallBehavior match(String s){
             return valueOf(s.toUpperCase().trim().replace("-", "_"));
         }
+        public Vector getDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
+            Vector directionalVel = new Vector(0, 0, 0);
+            switch(this){
+                case RANDOM:
+                    double angle = new Random(seed).nextDouble()*Math.PI*2;
+                    directionalVel = new Vector(Math.cos(angle),0,Math.sin(angle));
+                    break;
+                case TOWARD:
+                    if(player!=null){
+                        directionalVel = new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ());
+                    }
+                    break;
+                case AWAY:
+                    if(player!=null){
+                        directionalVel = new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ()).multiply(-1);
+                    }
+                    break;
+                case LEFT:
+                    if(player!=null){
+                        directionalVel = new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX());
+                    }
+                    break;
+                case RIGHT:
+                    if(player!=null){
+                        directionalVel = new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX()).multiply(-1);
+                    }
+                    break;
+                case NORTH:
+                    directionalVel = new Vector(0, 0, -1);
+                    break;
+                case SOUTH:
+                    directionalVel = new Vector(0, 0, 1);
+                    break;
+                case EAST:
+                    directionalVel = new Vector(1, 0, 0);
+                    break;
+                case WEST:
+                    directionalVel = new Vector(-1, 0, 0);
+                    break;
+                case NORTH_EAST:
+                    directionalVel = new Vector(1, 0, -1);
+                    break;
+                case SOUTH_EAST:
+                    directionalVel = new Vector(1, 0, 1);
+                    break;
+                case SOUTH_WEST:
+                    directionalVel = new Vector(-1, 0, 1);
+                    break;
+                case NORTH_WEST:
+                    directionalVel = new Vector(-1, 0, -1);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid fall behavior: "+this);
+            }
+            if(lockCardinal){
+                if(Math.abs(directionalVel.getX())>Math.abs(directionalVel.getZ())){
+                    if(directionalVel.getX()>0)directionalVel = new Vector(1, 0, 0);
+                    else directionalVel = new Vector(-1, 0, 0);
+                }else{
+                    if(directionalVel.getZ()>0)directionalVel = new Vector(0, 0, 1);
+                    else directionalVel = new Vector(0, 0, -1);
+                }
+            }
+            directionalVel = directionalVel.normalize();
+            directionalVel = directionalVel.multiply(directionalFallVelocity);
+            return directionalVel;
+        }
     }
-    private void breakLog(Tree tree, Tool tool, ItemStack axe, Block log, Block origin, Player player, long seed){
+    private void breakLog(Tree tree, Tool tool, ItemStack axe, Block log, Block origin, int lowest, Player player, long seed, List<Block> blocks){
         ArrayList<Effect> effects = new ArrayList<>();
         for(Effect e : globalEffects){
             if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
@@ -2126,9 +2252,9 @@ public class TreeFeller extends JavaPlugin{
         for(Effect e : tool.effects){
             if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
         }
-        breakBlock(tree.logBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.logDropChance*tool.logDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, true, axe, log, origin, player, seed, effects);
+        breakBlock(tree.logBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.logDropChance*tool.logDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, true, lockFallCardinal||tool.lockFallCardinal||tree.lockFallCardinal, axe, log, origin, lowest, player, seed, effects, blocks);
     }
-    private void breakLeaf(Tree tree, Tool tool, ItemStack axe, Block leaf, Block origin, Player player, long seed){
+    private void breakLeaf(Tree tree, Tool tool, ItemStack axe, Block leaf, Block origin, int lowest, Player player, long seed, List<Block> blocks){
         ArrayList<Effect> effects = new ArrayList<>();
         for(Effect e : tree.effects){
             if(e.location==Effect.EffectLocation.LEAVES||e.location==Effect.EffectLocation.TREE)effects.add(e);
@@ -2139,52 +2265,52 @@ public class TreeFeller extends JavaPlugin{
         for(Effect e : globalEffects){
             if(e.location==Effect.EffectLocation.LEAVES||e.location==Effect.EffectLocation.TREE)effects.add(e);
         }
-        breakBlock(tree.leafBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.leafDropChance*tool.leafDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, tool.leafEnchantments, axe, leaf, origin, player, seed, effects);
+        breakBlock(tree.leafBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.leafDropChance*tool.leafDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, tool.leafEnchantments, lockFallCardinal||tool.lockFallCardinal||tree.lockFallCardinal, axe, leaf, origin, lowest, player, seed, effects, blocks);
     }
-    private void breakBlock(FellBehavior behavior, boolean convert, double dropChance, double directionalFallVelocity, double randomFallVelocity, boolean rotate, DirectionalFallBehavior directionalFallBehavior, boolean applyEnchantments, ItemStack axe, Block block, Block origin, Player player, long seed, Iterable<Effect> effects){
+    private void breakBlock(FellBehavior behavior, boolean convert, double dropChance, double directionalFallVelocity, double randomFallVelocity, boolean rotate, DirectionalFallBehavior directionalFallBehavior, boolean applyEnchantments, boolean lockCardinal, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, Iterable<Effect> effects, List<Block> blocks){
+        if(block!=origin){
+            if(player!=null&&behavior!=FellBehavior.FALL&&behavior!=FellBehavior.FALL_HURT&&behavior!=FellBehavior.NATURAL){
+                if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
+                    try{
+                        com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
+                    }catch(Exception ex){
+                        debug(player, false, false, "Failed to add McMMO XP: "+ex.getMessage());
+                    }
+                }
+            }
+        }
+        CoreProtectCompat.remove(player, block);
         switch(behavior){
             case INVENTORY:
                 if(player!=null){
-                    do{
-                        if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
-                            try{
-                                if(block!=origin)com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
-                            }catch(Exception ex){}
+                    boolean drop = true;
+                    int bonus = 0;
+                    if(dropChance<=1){
+                        drop = new Random().nextDouble()<dropChance;
+                    }else{
+                        while(dropChance>1){
+                            dropChance--;
+                            bonus++;
                         }
-                        boolean drop = true;
-                        int bonus = 0;
-                        if(dropChance<=1){
-                            drop = new Random().nextDouble()<dropChance;
-                        }else{
-                            while(dropChance>1){
-                                dropChance--;
-                                bonus++;
-                            }
-                            if(new Random().nextDouble()<dropChance)bonus++;
-                        }
-                        if(drop){
-                            for(int i = 0; i<bonus+1; i++){
-                                for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
-                                    if(convert){
-                                        if(s.getType().name().contains("_WOOD")){
-                                            s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
-                                        }
+                        if(new Random().nextDouble()<dropChance)bonus++;
+                    }
+                    if(drop){
+                        for(int i = 0; i<bonus+1; i++){
+                            for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
+                                if(convert){
+                                    if(s.getType().name().contains("_WOOD")){
+                                        s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
                                     }
-                                    for(ItemStack st : player.getInventory().addItem(s).values()){
-                                        block.getWorld().dropItemNaturally(block.getLocation(), st);
-                                    }
+                                }
+                                for(ItemStack st : player.getInventory().addItem(s).values()){
+                                    block.getWorld().dropItemNaturally(block.getLocation(), st);
                                 }
                             }
                         }
-                        block.setType(Material.AIR);
-                    }while(false);
+                    }
+                    block.setType(Material.AIR);
                 }
             case BREAK:
-                if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
-                    try{
-                        if(block!=origin)com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
-                    }catch(Exception ex){}
-                }
                 boolean drop = true;
                 int bonus = 0;
                 if(dropChance<=1){
@@ -2230,62 +2356,7 @@ public class TreeFeller extends JavaPlugin{
                 FallingBlock falling = block.getWorld().spawnFallingBlock(block.getLocation().add(.5,.5,.5), block.getBlockData());
                 Vector v = falling.getVelocity();
                 if(directionalFallVelocity>0){
-                    Vector directionalVel = new Vector(0, 0, 0);
-                    switch(directionalFallBehavior){
-                        case RANDOM:
-                            double angle = new Random(seed).nextDouble()*Math.PI*2;
-                            directionalVel = new Vector(Math.cos(angle),0,Math.sin(angle));
-                            break;
-                        case TOWARD:
-                            if(player!=null){
-                                directionalVel = new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ());
-                            }
-                            break;
-                        case AWAY:
-                            if(player!=null){
-                                directionalVel = new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ()).multiply(-1);
-                            }
-                            break;
-                        case LEFT:
-                            if(player!=null){
-                                directionalVel = new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX());
-                            }
-                            break;
-                        case RIGHT:
-                            if(player!=null){
-                                directionalVel = new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX()).multiply(-1);
-                            }
-                            break;
-                        case NORTH:
-                            directionalVel = new Vector(0, 0, -1);
-                            break;
-                        case SOUTH:
-                            directionalVel = new Vector(0, 0, 1);
-                            break;
-                        case EAST:
-                            directionalVel = new Vector(1, 0, 0);
-                            break;
-                        case WEST:
-                            directionalVel = new Vector(-1, 0, 0);
-                            break;
-                        case NORTH_EAST:
-                            directionalVel = new Vector(1, 0, -1);
-                            break;
-                        case SOUTH_EAST:
-                            directionalVel = new Vector(1, 0, 1);
-                            break;
-                        case SOUTH_WEST:
-                            directionalVel = new Vector(-1, 0, 1);
-                            break;
-                        case NORTH_WEST:
-                            directionalVel = new Vector(-1, 0, -1);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Invalid fall behavior: "+directionalFallBehavior);
-                    }
-                    directionalVel = new Vector(directionalVel.getX()/Math.abs(directionalVel.length()), directionalVel.getY()/Math.abs(directionalVel.length()), directionalVel.getZ()/Math.abs(directionalVel.length()));
-                    directionalVel = directionalVel.multiply(directionalFallVelocity);
-                    v.add(directionalVel);
+                    v.add(directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity));
                 }
                 v.add(new Vector((Math.random()*2-1)*randomFallVelocity, randomFallVelocity/5, (Math.random()-.5)*randomFallVelocity));
                 falling.setVelocity(v);
@@ -2302,11 +2373,93 @@ public class TreeFeller extends JavaPlugin{
                 block.setType(Material.AIR);
                 fallingBlocks.add(falling.getUniqueId());
                 break;
+            case NATURAL:
+                v = directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity).normalize();
+                naturalFalls.add(new NaturalFall(player, v, origin, block, block.getY()-lowest, rotate));
+                block.setType(Material.AIR);
+                break;
             default:
                 throw new IllegalArgumentException("Invalid block behavior: "+behavior);
         }
         for(Effect e : effects){
             if(new Random().nextDouble()<e.chance)e.play(block);
+        }
+    }
+    public boolean isOverridable(Block b){
+        return isOverridable(b.getType());
+    }
+    public boolean isOverridable(Material m){
+        return overridables.contains(m);
+    }
+    private class NaturalFall{
+        private static final double interval = 0.1;
+        private final Player player;
+        private final Vector v;
+        private final Block origin;
+        private final Block block;
+        private final int height;
+        private final Material material;
+        private Axis axis = null;
+        public NaturalFall(Player player, Vector v, Block origin, Block block, int height, boolean rotate){
+            this.player = player;
+            this.v = v.multiply(interval);
+            this.origin = origin;
+            this.block = block;
+            this.height = height;
+            this.material = block.getType();
+            if(rotate&&block.getBlockData() instanceof Orientable){
+                axis = ((Orientable)block.getBlockData()).getAxis();
+            }
+        }
+        public void fall(){
+            double dist = 0;
+            Block target = block;
+            Location l = block.getLocation().add(.5,.5,.5);
+            while(dist<height){
+                dist+=interval;
+                l = l.add(v);
+                Block b = l.getBlock();
+                if(isOverridable(b))target = b;
+                else break;
+            }
+            while(isOverridable(target.getRelative(0, -1, 0)))target = target.getRelative(0,-1,0);
+            target.setType(material);
+            if(axis!=null){
+                double xDiff = Math.abs(origin.getX()-target.getX());
+                double yDiff = Math.abs(origin.getY()-target.getY());
+                double zDiff = Math.abs(origin.getZ()-target.getZ());
+                Axis newAxis = Axis.Y;
+                if(Math.max(Math.max(xDiff, yDiff), zDiff)==xDiff)newAxis = Axis.X;
+                if(Math.max(Math.max(xDiff, yDiff), zDiff)==zDiff)newAxis = Axis.Z;
+                if(newAxis==Axis.X){
+                    switch(axis){
+                        case X:
+                            axis = Axis.Y;
+                            break;
+                        case Y:
+                            axis = Axis.X;
+                            break;
+                        case Z:
+                            break;
+                    }
+                }
+                if(newAxis==Axis.Z){
+                    switch(axis){
+                        case X:
+                            break;
+                        case Y:
+                            axis = Axis.Z;
+                            break;
+                        case Z:
+                            axis = Axis.X;
+                            break;
+                    }
+                }
+                BlockData data = target.getBlockData();
+                ((Orientable)data).setAxis(axis);
+                target.setBlockData(data);
+            }
+            CoreProtectCompat.place(player, target);
         }
     }
     private void debug(Player player, String text){
