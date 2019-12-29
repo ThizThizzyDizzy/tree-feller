@@ -424,34 +424,13 @@ public class TreeFeller extends JavaPlugin{
                             }
                         }
                     }
-                    if(Bukkit.getServer().getPluginManager().getPlugin("GriefPrevention")!=null){
-                        try{
-                            for(Block b : toList(blocks)){
-                                String s = me.ryanhamshire.GriefPrevention.GriefPrevention.instance.allowBreak(player, b, b.getLocation());
-                                if(s!=null){
-                                    debug(player, true, false, "This tree is protected by GriefPrevention at "+b.getX()+" "+b.getY()+" "+b.getZ());
-                                    player.sendMessage(s);
-                                    return null;
-                                }
-                            }
-                            for(Block b : toList(allLeaves)){
-                                String s = me.ryanhamshire.GriefPrevention.GriefPrevention.instance.allowBreak(player, b, b.getLocation());
-                                if(s!=null){
-                                    debug(player, true, false, "This tree is protected by GriefPrevention at "+b.getX()+" "+b.getY()+" "+b.getZ());
-                                    player.sendMessage(s);
-                                    return null;
-                                }
-                            }
-                        }catch(Exception ex){}
-                    }
-                    if(Bukkit.getServer().getPluginManager().getPlugin("WorldGuard")!=null){
-                        try{
-                            Block b = WorldGuardCompat.test(player, toList(blocks), toList(allLeaves));
-                            if(b!=null){
-                                debug(player, true, false, "This tree is protected by WorldGuard at "+b.getX()+" "+b.getY()+" "+b.getZ());
-                                return null;
-                            }
-                        }catch(Exception ex){}
+                    ArrayList<Block> everything = new ArrayList<>();
+                    everything.addAll(toList(blocks));
+                    everything.addAll(toList(allLeaves));
+                    TestResult result = TreeFellerCompat.test(player, everything);
+                    if(result!=null){
+                        debug(player, true, false, "This tree is protected by "+result.plugin+" at "+result.block.getX()+" "+result.block.getY()+" "+result.block.getZ());
+                        return null;
                     }
                     if(leaves<tree.requiredLeaves){
                         debug(player, true, false, "Tree has too few leaves: "+leaves+"<"+tree.requiredLeaves);
@@ -2268,18 +2247,11 @@ public class TreeFeller extends JavaPlugin{
         breakBlock(tree.leafBehavior, tree.convertWoodToLog||tool.convertWoodToLog, tree.leafDropChance*tool.leafDropChance, tree.directionalFallVelocity+tool.directionalFallVelocity, tree.randomFallVelocity+tool.randomFallVelocity, tree.rotateLogs||tool.rotateLogs, tree.directionalFallBehavior, tool.leafEnchantments, lockFallCardinal||tool.lockFallCardinal||tree.lockFallCardinal, axe, leaf, origin, lowest, player, seed, effects, blocks);
     }
     private void breakBlock(FellBehavior behavior, boolean convert, double dropChance, double directionalFallVelocity, double randomFallVelocity, boolean rotate, DirectionalFallBehavior directionalFallBehavior, boolean applyEnchantments, boolean lockCardinal, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, Iterable<Effect> effects, List<Block> blocks){
-        if(block!=origin){
-            if(player!=null&&behavior!=FellBehavior.FALL&&behavior!=FellBehavior.FALL_HURT&&behavior!=FellBehavior.NATURAL){
-                if(Bukkit.getServer().getPluginManager().getPlugin("McMMO")!=null){
-                    try{
-                        com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), com.gmail.nossr50.util.player.UserManager.getPlayer(player));
-                    }catch(Exception ex){
-                        debug(player, false, false, "Failed to add McMMO XP: "+ex.getMessage());
-                    }
-                }
-            }
+        if(behavior==FellBehavior.FALL||behavior==FellBehavior.FALL_HURT||behavior==FellBehavior.NATURAL){
+            TreeFellerCompat.removeBlock(player, block);
+        }else{
+            TreeFellerCompat.breakBlock(player, block);
         }
-        CoreProtectCompat.remove(player, block);
         switch(behavior){
             case INVENTORY:
                 if(player!=null){
@@ -2459,7 +2431,7 @@ public class TreeFeller extends JavaPlugin{
                 ((Orientable)data).setAxis(axis);
                 target.setBlockData(data);
             }
-            CoreProtectCompat.place(player, target);
+            TreeFellerCompat.addBlock(player, target);
         }
     }
     private void debug(Player player, String text){

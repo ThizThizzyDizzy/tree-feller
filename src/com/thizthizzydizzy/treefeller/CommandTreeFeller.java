@@ -46,6 +46,7 @@ public class CommandTreeFeller implements TabExecutor{
             if(args.length==1){
                 plugin.debug = !plugin.debug;
                 sender.sendMessage("Debug mode "+(plugin.debug?"enabled":"disabled"));
+                return true;
             }else{
                 if(args[1].equals("on")){
                     plugin.debug = true;
@@ -69,11 +70,11 @@ public class CommandTreeFeller implements TabExecutor{
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args){
         ArrayList<String> strs = new ArrayList<>();
         if(args.length==1){
-            if("reloa".startsWith(args[0]))strs.add("reload");
-            if("debu".startsWith(args[0]))strs.add("debug");
+            if("reloa".startsWith(args[0])&&sender.hasPermission("treefeller.reload"))strs.add("reload");
+            if("debu".startsWith(args[0])&&sender.hasPermission("treefeller.debug"))strs.add("debug");
         }
         if(args.length==2){
-            if(args[0].equals("debug")){
+            if(args[0].equals("debug")&&sender.hasPermission("treefeller.debug")){
                 if("of".startsWith(args[1]))strs.add("off");
                 if("o".startsWith(args[1]))strs.add("on");
             }
