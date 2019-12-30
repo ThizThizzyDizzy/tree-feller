@@ -77,9 +77,8 @@ public class TreeFeller extends JavaPlugin{
      * @return the items that would have been dropped, only <code>dropItems</code> is false. Returns null if the tree was not felled.
      */
     public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-        ArrayList<ItemStack> droppedItems = new ArrayList<>();
         Material material = block.getType();
-        for(Tree tree : trees){
+        TREE:for(Tree tree : trees){
             if(tree.trunk.contains(material)){
                 debug(player, "Attempting to fell tree #"+trees.indexOf(tree)+" ("+material.toString()+")");
                 if(tree.worlds!=null){
@@ -342,39 +341,39 @@ public class TreeFeller extends JavaPlugin{
                         }
                     }
                     if(total<tree.requiredLogs){
-                        debug(player, true, false, "Tree has too few logs: "+total+"<"+tree.requiredLogs);
-                        return null;
+                        debug(player, false, false, "Tree has too few logs: "+total+"<"+tree.requiredLogs);
+                        continue TREE;
                     }
                     if(total<tool.requiredLogs){
-                        debug(player, true, false, "Tree has too few logs for tool: "+total+"<"+tool.requiredLogs);
-                        return null;
+                        debug(player, false, false, "Tree has too few logs for tool: "+total+"<"+tool.requiredLogs);
+                        continue TREE;
                     }
                     if(total>tree.maxLogs){
-                        debug(player, true, false, "Tree is too big: "+total+">"+tree.maxLogs);
-                        return null;
+                        debug(player, false, false, "Tree is too big: "+total+">"+tree.maxLogs);
+                        continue TREE;
                     }
                     if(total>tool.maxLogs){
-                        debug(player, true, false, "Tree is too big for tool: "+total+">"+tool.maxLogs);
-                        return null;
+                        debug(player, false, false, "Tree is too big for tool: "+total+">"+tool.maxLogs);
+                        continue TREE;
                     }
                     debug(player, true, true, "Tree size is valid!");
                     if(block.getY()-minY>tree.maxHeight-1){
                         int i = block.getY()-minY-(tree.maxHeight-1);
-                        debug(player, true, false, "Tree was cut "+i+" blocks too high!");
-                        return null;
+                        debug(player, false, false, "Tree was cut "+i+" blocks too high!");
+                        continue TREE;
                     }
                     if(block.getY()-minY>tool.maxHeight-1){
                         int i = block.getY()-minY-(tool.maxHeight-1);
-                        debug(player, true, false, "Tree was cut "+i+" blocks too high for tool!");
-                        return null;
+                        debug(player, false, false, "Tree was cut "+i+" blocks too high for tool!");
+                        continue TREE;
                     }
                     if(tool.requireCrossSection){
                         for(int x = -1; x<=1; x++){
                             for(int z = -1; z<=1; z++){
                                 if(x==0&&z==0)continue;
                                 if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
-                                    debug(player, true, false, "A full cross-section has not been cut for tool!");
-                                    return null;
+                                    debug(player, false, false, "A full cross-section has not been cut for tool!");
+                                    continue TREE;
                                 }
                             }
                         }
@@ -384,8 +383,8 @@ public class TreeFeller extends JavaPlugin{
                             for(int z = -1; z<=1; z++){
                                 if(x==0&&z==0)continue;
                                 if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
-                                    debug(player, true, false, "A full cross-section has not been cut!");
-                                    return null;
+                                    debug(player, false, false, "A full cross-section has not been cut!");
+                                    continue TREE;
                                 }
                             }
                         }
@@ -402,7 +401,7 @@ public class TreeFeller extends JavaPlugin{
                     if(durabilityCost>durability){
                         if(!tool.allowPartial||!tree.allowPartial){
                             debug(player, false, false, "Tool durability is too low: "+durability+"<"+durabilityCost);
-                            return null;
+                            continue TREE;
                         }
                         debug(player, "Tool is cutting partial tree!");
                         durabilityCost = total = durability;
@@ -429,16 +428,16 @@ public class TreeFeller extends JavaPlugin{
                     everything.addAll(toList(allLeaves));
                     TestResult result = TreeFellerCompat.test(player, everything);
                     if(result!=null){
-                        debug(player, true, false, "This tree is protected by "+result.plugin+" at "+result.block.getX()+" "+result.block.getY()+" "+result.block.getZ());
-                        return null;
+                        debug(player, false, false, "This tree is protected by "+result.plugin+" at "+result.block.getX()+" "+result.block.getY()+" "+result.block.getZ());
+                        continue TREE;
                     }
                     if(leaves<tree.requiredLeaves){
-                        debug(player, true, false, "Tree has too few leaves: "+leaves+"<"+tree.requiredLeaves);
-                        return null;
+                        debug(player, false, false, "Tree has too few leaves: "+leaves+"<"+tree.requiredLeaves);
+                        continue TREE;
                     }
                     if(leaves<tool.requiredLeaves){
-                        debug(player, true, false, "Tree has too few leaves for tool: "+leaves+"<"+tool.requiredLeaves);
-                        return null;
+                        debug(player, false, false, "Tree has too few leaves for tool: "+leaves+"<"+tool.requiredLeaves);
+                        continue TREE;
                     }
                     debug(player, true, true, "Success! Felling tree...");
                     if(tree.leaveStump||tool.leaveStump){
@@ -496,6 +495,7 @@ public class TreeFeller extends JavaPlugin{
                         }
                     }
                     //now the blocks
+                    ArrayList<ItemStack> droppedItems = new ArrayList<>();
                     final int t = total;
                     long seed = new Random().nextLong();
                     if(cuttingAnimation){
