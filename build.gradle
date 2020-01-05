@@ -6,13 +6,21 @@ targetCompatibility = 1.8
 
 repositories {
     jcenter()
+    mavenCentral()
     maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
     maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
-    maven { url "http://maven.sk89q.com/repo/" }
+    maven { url "https://maven.enginehub.org/repo/" }
+    maven { url "https://jitpack.io" }
+    maven { url "http://maven.playpro.com/" }
+    maven { url "https://repo.codemc.org/repository/maven-public/" }
 }
 
 dependencies {
     "implementation"("org.spigotmc:spigot-api:1.15.1-R0.1-SNAPSHOT")
+    "implementation"("com.sk89q.worldguard:worldguard-bukkit:7.0.1")
+    "implementation"("com.github.TechFortress:GriefPrevention:16.7.1")
+    "implementation"("net.coreprotect:coreprotect:2.16.3")
+    "implementation"("com.gmail.nossr50.mcMMO:mcMMO:2.1.111")
 }
 
 processResources {
