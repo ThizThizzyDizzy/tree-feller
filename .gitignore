@@ -7,7 +7,6 @@ build/
 */.project
 */.settings
 */bin
-*/*.jar
 */lib/spigot*.jar
 */libs/spigot*.jar
 */dist/lib/spigot*.jar
