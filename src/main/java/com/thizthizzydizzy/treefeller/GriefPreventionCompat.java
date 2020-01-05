@@ -11,6 +11,6 @@ public class GriefPreventionCompat extends InternalCompatibility {
 
     @Override
     public boolean test(Player player, Block block) {
-        return me.ryanhamshire.GriefPrevention.GriefPrevention.instance.allowBreak(player, block, block.getLocation()) != null;
+        return me.ryanhamshire.GriefPrevention.GriefPrevention.instance.allowBreak(player, block, block.getLocation()) = null;
     }
 }
