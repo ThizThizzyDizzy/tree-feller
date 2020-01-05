@@ -1,5 +1,5 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.10.3
+version: 1.10.4
 api-version: 1.13
 name: TreeFeller
 commands:
