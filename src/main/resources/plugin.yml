@@ -1,0 +1,8 @@
+main: com.thizthizzydizzy.treefeller.TreeFeller
+version: 1.10.3
+api-version: 1.13
+name: TreeFeller
+commands:
+    treefeller:
+        description: Reloads the tree feller or toggles debug mode
+        usage: /treefeller reload|debug [on|off]

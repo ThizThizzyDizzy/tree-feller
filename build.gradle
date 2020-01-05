@@ -1,0 +1,29 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots/" }
+    maven { url "https://hub.spigotmc.org/nexus/content/repositories/snapshots/" }
+    maven { url "http://maven.sk89q.com/repo/" }
+}
+
+dependencies {
+    "implementation"("org.spigotmc:spigot-api:1.15.1-R0.1-SNAPSHOT")
+}
+
+processResources {
+    from('src/main/resources') {
+        include 'plugin.yml'
+        include 'config.yml'
+    }
+}
+
+clean.doFirst {
+    delete "../target"
+}
+
+jar.destinationDirectory = file('./target')
