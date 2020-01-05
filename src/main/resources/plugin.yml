@@ -8,8 +8,3 @@ commands:
   treefeller:
     description: Reloads the tree feller or toggles debug mode
     usage: /treefeller reload|debug [on|off]
-permissions:
-  treefeller.reload:
-    default: op
-  treefeller.debug:
-    default: op
