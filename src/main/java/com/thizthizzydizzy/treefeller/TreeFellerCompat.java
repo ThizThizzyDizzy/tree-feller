@@ -62,7 +62,7 @@ public class TreeFellerCompat {
                     override = compat;
                     break;
                 } else {
-                    Bukkit.getLogger().log(Level.SEVERE, "External compatiblity already exists for {0}! Ignoring...", compat.getPluginName());
+                    Bukkit.getLogger().log(Level.SEVERE, "External compatibility already exists for {0}! Ignoring...", compat.getPluginName());
                     return;
                 }
             }
