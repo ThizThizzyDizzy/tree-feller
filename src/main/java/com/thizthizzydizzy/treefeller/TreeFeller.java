@@ -440,16 +440,12 @@ public class TreeFeller extends JavaPlugin {
                     debug(player, true, true, "Success! Felling tree...");
                     if (tree.leaveStump || tool.leaveStump) {
                         for (int i : blocks.keySet()) {
-                            for (Iterator<Block> it = blocks.get(i).iterator(); it.hasNext(); ) {
-                                Block b = it.next();
-                                if (b.getY() < block.getY()) it.remove();
-                            }
+                            blocks.get(i).removeIf(b -> b.getY() < block.getY());
                         }
                     }
                     int lower = block.getY();
                     for (int i : blocks.keySet()) {
-                        for (Iterator<Block> it = blocks.get(i).iterator(); it.hasNext(); ) {
-                            Block b = it.next();
+                        for (Block b : blocks.get(i)) {
                             if (b.getY() < lower) lower = b.getY();
                         }
                     }
@@ -644,10 +640,7 @@ public class TreeFeller extends JavaPlugin {
                         ArrayList<String> pendingLores = new ArrayList<>(tool.requiredLore);
                         if (axe.hasItemMeta() && axe.getItemMeta().hasLore()) {
                             for (String loreStr : axe.getItemMeta().getLore()) {
-                                for (Iterator<String> it = pendingLores.iterator(); it.hasNext(); ) {
-                                    String lore = it.next();
-                                    if (loreStr.contains(lore)) it.remove();
-                                }
+                                pendingLores.removeIf(loreStr::contains);
                             }
                         }
                         if (!pendingLores.isEmpty()) continue;
@@ -685,7 +678,6 @@ public class TreeFeller extends JavaPlugin {
                         Collections.sort(distances);
                         int leaves = 0;
                         HashMap<Integer, ArrayList<Block>> allLeaves = new HashMap<>();
-                        FOR:
                         for (int i : distances) {
                             for (Block b : blocks.get(i)) {
                                 HashMap<Integer, ArrayList<Block>> someLeaves = getBlocks(tree.leaves, b, tool.leafRange, diagonalLeaves, tool.playerLeaves && tree.playerLeaves);
@@ -951,7 +943,7 @@ public class TreeFeller extends JavaPlugin {
         Particle p = null;
         try {
             p = Particle.valueOf(string.toUpperCase().replace(" ", "-").replace("-", "_"));
-        } catch (IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ignored) {
         }
         if (p != null) return p;
         switch (string.toLowerCase().replaceAll("_", " ")) {
@@ -1334,9 +1326,9 @@ public class TreeFeller extends JavaPlugin {
                     Material t = Material.matchMaterial((String) ((ArrayList) o).get(0));
                     if (t != null) trunk.add(t);
                 } else {
-                    for (Object obj : (ArrayList) ((ArrayList) o).get(0)) {
+                    for (String obj : (ArrayList<? extends String>) ((ArrayList) o).get(0)) {
                         if (obj instanceof String) {
-                            Material t = Material.matchMaterial((String) obj);
+                            Material t = Material.matchMaterial(obj);
                             if (t != null) trunk.add(t);
                         }
                     }
@@ -1345,9 +1337,9 @@ public class TreeFeller extends JavaPlugin {
                     Material l = Material.matchMaterial((String) ((ArrayList) o).get(1));
                     if (l != null) leaves.add(l);
                 } else {
-                    for (Object obj : (ArrayList) ((ArrayList) o).get(1)) {
+                    for (String obj : (ArrayList<? extends String>) ((ArrayList) o).get(1)) {
                         if (obj instanceof String) {
-                            Material l = Material.matchMaterial((String) obj);
+                            Material l = Material.matchMaterial(obj);
                             if (l != null) leaves.add(l);
                         }
                     }
@@ -2079,22 +2071,23 @@ public class TreeFeller extends JavaPlugin {
         }
 
         private void print(Logger logger) {
-            String requiredEnchants = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder requiredEnchants = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (Enchantment e : requiredEnchantments.keySet()) {
-                requiredEnchants += e.toString() + ": " + requiredEnchantments.get(e) + ", ";
+                requiredEnchants.append(e.toString()).append(": ").append(requiredEnchantments.get(e)).append(", ");
             }
-            if (!requiredEnchants.isEmpty())
-                requiredEnchants = requiredEnchants.substring(0, requiredEnchants.length() - 2);
+            if (requiredEnchants.length() > 0)
+                requiredEnchants = new StringBuilder(requiredEnchants.substring(0, requiredEnchants.length() - 2));
 //</editor-fold>
-            String bannedEnchants = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder bannedEnchants = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (Enchantment e : bannedEnchantments.keySet()) {
-                bannedEnchants += e.toString() + ": " + bannedEnchantments.get(e) + ", ";
+                bannedEnchants.append(e.toString()).append(": ").append(bannedEnchantments.get(e)).append(", ");
             }
-            if (!bannedEnchants.isEmpty()) bannedEnchants = bannedEnchants.substring(0, bannedEnchants.length() - 2);
+            if (bannedEnchants.length() > 0)
+                bannedEnchants = new StringBuilder(bannedEnchants.substring(0, bannedEnchants.length() - 2));
 //</editor-fold>
             logger.log(Level.INFO, "Loaded tool: {0}", material);
-            logger.log(Level.INFO, "- Required enchantments: {0}", requiredEnchants);
-            logger.log(Level.INFO, "- Banned enchantments: {0}", bannedEnchants);
+            logger.log(Level.INFO, "- Required enchantments: {0}", requiredEnchants.toString());
+            logger.log(Level.INFO, "- Banned enchantments: {0}", bannedEnchants.toString());
             logger.log(Level.INFO, "- Maximum logs: {0}", maxLogs);
             logger.log(Level.INFO, "- Damage Multiplier: {0}", damageMult);
             logger.log(Level.INFO, "- Minimum durability: {0}", minDurability);
@@ -2114,36 +2107,36 @@ public class TreeFeller extends JavaPlugin {
             logger.log(Level.INFO, "- Without sneak: {0}", withoutSneak);
             logger.log(Level.INFO, "- With sneak: {0}", withSneak);
             logger.log(Level.INFO, "- Allowed trees: {0}", allowedTrees.isEmpty() ? "ALL" : allowedTrees.size());
-            String requiredLores = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder requiredLores = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (String str : requiredLore) {
-                requiredLores += ", " + str;
+                requiredLores.append(", ").append(str);
             }
-            if (!requiredLores.isEmpty()) requiredLores = requiredLores.substring(2);
+            if (requiredLores.length() > 0) requiredLores = new StringBuilder(requiredLores.substring(2));
 //</editor-fold>
-            String requiredPerms = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder requiredPerms = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (String str : requiredPermissions) {
-                requiredPerms += ", " + str;
+                requiredPerms.append(", ").append(str);
             }
-            if (!requiredPerms.isEmpty()) requiredPerms = requiredPerms.substring(2);
+            if (requiredPerms.length() > 0) requiredPerms = new StringBuilder(requiredPerms.substring(2));
 //</editor-fold>
-            logger.log(Level.INFO, "- Required lore: {0}", requiredLores);
+            logger.log(Level.INFO, "- Required lore: {0}", requiredLores.toString());
             if (name != null) logger.log(Level.INFO, "- Required name: {0}", name);
-            logger.log(Level.INFO, "- Required permissions: {0}", requiredPerms);
+            logger.log(Level.INFO, "- Required permissions: {0}", requiredPerms.toString());
             logger.log(Level.INFO, "- Cooldown: {0}", cooldown);
             logger.log(Level.INFO, "- Leaf enchantments: {0}", leafEnchantments);
             logger.log(Level.INFO, "- Random fall velocity: {0}", randomFallVelocity);
             logger.log(Level.INFO, "- Directional fall velocity: {0}", directionalFallVelocity);
-            String worldses = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder worldses = new StringBuilder();//<editor-fold defaultstate="collapsed">
             if (worlds == null) {
-                worldses = "ANY";
+                worldses = new StringBuilder("ANY");
             } else {
                 for (String w : worlds) {
-                    worldses += w + ", ";
+                    worldses.append(w).append(", ");
                 }
-                if (!worldses.isEmpty()) worldses = worldses.substring(0, worldses.length() - 2);
+                if (worldses.length() > 0) worldses = new StringBuilder(worldses.substring(0, worldses.length() - 2));
             }
 //</editor-fold>
-            logger.log(Level.INFO, "- Worlds: {0}", worldses);
+            logger.log(Level.INFO, "- Worlds: {0}", worldses.toString());
             logger.log(Level.INFO, "- World Blacklist: {0}", worldBlacklist);
             logger.log(Level.INFO, "- Lock Fall Cardinal: {0}", lockFallCardinal);
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
@@ -2155,13 +2148,13 @@ public class TreeFeller extends JavaPlugin {
             logger.log(Level.INFO, "- Maximum time: {0}", maxTime);
             logger.log(Level.INFO, "- Minimum phase: {0}", minPhase);
             logger.log(Level.INFO, "- Maximum phase: {0}", maxPhase);
-            String effects = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder effects = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (Effect e : this.effects) {
-                effects += e.name + ", ";
+                effects.append(e.name).append(", ");
             }
-            if (!effects.isEmpty()) effects = effects.substring(0, effects.length() - 2);
+            if (effects.length() > 0) effects = new StringBuilder(effects.substring(0, effects.length() - 2));
 //</editor-fold>
-            logger.log(Level.INFO, "- Effects: {0}", effects);
+            logger.log(Level.INFO, "- Effects: {0}", effects.toString());
         }
     }
 
@@ -2231,21 +2224,21 @@ public class TreeFeller extends JavaPlugin {
         }
 
         private void print(Logger logger) {
-            String trunks = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder trunks = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (Material m : trunk) {
-                trunks += m + ", ";
+                trunks.append(m).append(", ");
             }
-            if (!trunks.isEmpty()) trunks = trunks.substring(0, trunks.length() - 2);
+            if (trunks.length() > 0) trunks = new StringBuilder(trunks.substring(0, trunks.length() - 2));
 //</editor-fold>
-            String leaveses = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder leaveses = new StringBuilder();//<editor-fold defaultstate="collapsed">
             for (Material m : leaves) {
-                leaveses += m + ", ";
+                leaveses.append(m).append(", ");
             }
-            if (!leaveses.isEmpty()) leaveses = leaveses.substring(0, leaveses.length() - 2);
+            if (leaveses.length() > 0) leaveses = new StringBuilder(leaveses.substring(0, leaveses.length() - 2));
 //</editor-fold>
             logger.log(Level.INFO, "Loaded Tree!");
-            logger.log(Level.INFO, "- Trunk: {0}", trunks);
-            logger.log(Level.INFO, "- Leaves: {0}", leaveses);
+            logger.log(Level.INFO, "- Trunk: {0}", trunks.toString());
+            logger.log(Level.INFO, "- Leaves: {0}", leaveses.toString());
             logger.log(Level.INFO, "- Maximum logs: {0}", maxLogs);
             logger.log(Level.INFO, "- Damage Multiplier: {0}", damageMult);
             logger.log(Level.INFO, "- Allow parital: {0}", allowPartial);
@@ -2258,17 +2251,17 @@ public class TreeFeller extends JavaPlugin {
             logger.log(Level.INFO, "- Random Fall Velocity: {0}", randomFallVelocity);
             logger.log(Level.INFO, "- Directional Fall Velocity: {0}", directionalFallVelocity);
             logger.log(Level.INFO, "- Directional Fall Behavior: {0}", directionalFallBehavior.toString());
-            String worldses = "";//<editor-fold defaultstate="collapsed">
+            StringBuilder worldses = new StringBuilder();//<editor-fold defaultstate="collapsed">
             if (worlds == null) {
-                worldses = "ANY";
+                worldses = new StringBuilder("ANY");
             } else {
                 for (String w : worlds) {
-                    worldses += w + ", ";
+                    worldses.append(w).append(", ");
                 }
-                if (!worldses.isEmpty()) worldses = worldses.substring(0, worldses.length() - 2);
+                if (worldses.length() > 0) worldses = new StringBuilder(worldses.substring(0, worldses.length() - 2));
             }
 //</editor-fold>
-            logger.log(Level.INFO, "- Worlds: {0}", worldses);
+            logger.log(Level.INFO, "- Worlds: {0}", worldses.toString());
             logger.log(Level.INFO, "- World Blacklist: {0}", worldBlacklist);
             logger.log(Level.INFO, "- Lock Fall Cardinal: {0}", lockFallCardinal);
             logger.log(Level.INFO, "- Leaf drop chance: {0}", leafDropChance);
