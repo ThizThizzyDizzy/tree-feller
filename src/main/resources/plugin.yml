@@ -1,5 +1,5 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.10.3
+version: "${version}"
 api-version: 1.13
 author: Thiz
 website: "https://www.spigotmc.org/resources/thizzyz-tree-feller.64346/"

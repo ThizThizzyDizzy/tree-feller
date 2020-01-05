@@ -1,3 +1,9 @@
+import org.ajoberstar.grgit.Grgit
+
+plugins {
+    id "org.ajoberstar.grgit" version "4.0.0"
+}
+
 apply plugin: 'java'
 apply plugin: 'maven'
 
@@ -5,6 +11,28 @@ sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
 group = "com.thizthizzydizzy.treefeller"
+
+def rootVersion = "1.10"
+def revision = ""
+def buildNumber = ""
+def date = ""
+ext {
+    git = Grgit.open(dir: new File(rootDir.toString() + "/.git"))
+    date = git.head().getDate().format("yy.MM.dd")
+    revision = "${git.head().abbreviatedId}"
+    parents = git.head().parentIds
+    if (project.hasProperty("buildnumber")) {
+        buildNumber = "$buildnumber"
+    } else {
+        index = -1  // Offset to match CI
+        for (; parents != null && !parents.isEmpty(); index++) {
+            parents = git.getResolve().toCommit(parents.get(0)).getParentIds()
+        }
+        buildNumber = "${index}"
+    }
+}
+
+version = String.format("%s.%s", rootVersion, buildNumber)
 
 repositories {
     jcenter()
@@ -26,12 +54,23 @@ dependencies {
     "implementation"("com.github.TechFortress:GriefPrevention:16.7.1")
     "implementation"("net.coreprotect:coreprotect:2.16.3")
     "implementation"("com.gmail.nossr50.mcMMO:mcMMO:2.1.111")
-    "implementation"("name:Jobs4.15.1")}
+    "implementation"("name:Jobs4.15.1")
+}
 
 processResources {
     from('src/main/resources') {
         include 'plugin.yml'
+        expand(
+                version: "${project.version}",
+        )
         include 'config.yml'
+        include 'plugin.properties'
+        expand(
+                version: "${project.version}",
+                name: project.name,
+                commit: "${git.head().abbreviatedId}",
+                date: "${git.head().getDate().format("yy.MM.dd")}",
+        )
     }
 }
 
