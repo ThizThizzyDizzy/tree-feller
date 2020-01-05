@@ -1,7 +1,7 @@
 import org.ajoberstar.grgit.Grgit
 
 plugins {
-    id "org.ajoberstar.grgit" version "4.0.0"
+    id "org.ajoberstar.grgit" version "4.0.1"
 }
 
 apply plugin: 'java'
@@ -50,7 +50,7 @@ repositories {
 
 dependencies {
     "implementation"("org.spigotmc:spigot-api:1.15.1-R0.1-SNAPSHOT")
-    "implementation"("com.sk89q.worldguard:worldguard-bukkit:7.0.1")
+    "implementation"("name:worldguard-bukkit-7.0.2-SNAPSHOT-dist")
     "implementation"("com.github.TechFortress:GriefPrevention:16.7.1")
     "implementation"("net.coreprotect:coreprotect:2.16.3")
     "implementation"("com.gmail.nossr50.mcMMO:mcMMO:2.1.111")
@@ -64,13 +64,6 @@ processResources {
                 version: "${project.version}",
         )
         include 'config.yml'
-        include 'plugin.properties'
-        expand(
-                version: "${project.version}",
-                name: project.name,
-                commit: "${git.head().abbreviatedId}",
-                date: "${git.head().getDate().format("yy.MM.dd")}",
-        )
     }
 }
 

@@ -17,3 +17,4 @@ build/
 .project
 /bin
 idea/*
+target/*
