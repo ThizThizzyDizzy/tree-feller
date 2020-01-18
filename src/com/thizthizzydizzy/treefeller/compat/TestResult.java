@@ -1,6 +1,6 @@
-package com.thizthizzydizzy.treefeller;
+package com.thizthizzydizzy.treefeller.compat;
 import org.bukkit.block.Block;
-class TestResult{
+public class TestResult{
     public final String plugin;
     public final Block block;
     TestResult(String pugin, Block block){

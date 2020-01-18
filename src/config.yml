@@ -1,46 +1,18 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.10.4
+# Version 1.11
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
 
 ## If a tree cannot be felled for any reason, the plugin will do nothing and the axe will act like vanilla ##
 
+# Some options are disabled, such as min-durability and min-durability. To enable them, remove the # at the beginning of the line
+
 # How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)
 scan-distance: 256
 
-# Should the tree cut down with an animation?
-cutting-animation: false
-
-# Animation delay, in ticks
-anim-delay: 1
-
-# If a tool has unbreaking, should it take less damage from cutting trees?
-respect-unbreaking: true
-
-# How far away from logs should leaf blocks be destroyed? (set to 0 to prevent leaves from being destroyed) (Values over 6 are pointless, as these leaves will naturally decay anyway)
+# How far away from logs should leaf blocks be destroyed? (set to 0 to prevent leaves from being destroyed) (Values over 6 are useless for vanilla trees, as these leaves would naturally decay anyway)
 leaf-range: 6
-
-# Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!
-allow-partial: false
-
-# How far from the bottom can you cut down a tree? (Prevents you from cutting it down from the top) 1 = bottom block
-max-height: 5
-
-# How many logs may be felled at with one stroke?
-max-logs: 250
-
-# How much damage should tools take per log? (Multiplier)
-damage-mult: 1.0
-
-# Should leaves placed by players be cut down also? (Only works with _LEAVES materials)
-player-leaves: false
-
-# If set to true, leaves' blockdata will be ignored. This should only be set if custom trees' leaves are not being destroyed when they should.
-ignore-leaf-data: false
-
-# If set to true, leaves will be detected diagonally; May require ignore-leaf-data to work properly
-diagonal-leaves: false
 
 # How many logs should be required for logs to be counted as a tree?
 required-logs: 4
@@ -48,20 +20,32 @@ required-logs: 4
 # How many leaves should be required for logs to be counted as a tree?
 required-leaves: 10
 
-# Should the tree feller work in adventure mode?
-enable-adventure: false
+# How many logs may be felled at with one stroke?
+max-logs: 250
 
-# Should the tree feller work in survival mode?
-enable-survival: true
+# How far from the bottom can you cut down a tree? (Prevents you from cutting it down from the top) 1 = bottom block
+max-height: 5
 
-# Should the tree feller work in creative mode?
-enable-creative: false
+# Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!
+allow-partial: false
 
-# Should the tree feller work when not sneaking?
-without-sneak: true
+# Should leaves placed by players be cut down also? (Only works with _LEAVES materials)
+player-leaves: false
 
-# Should the tree feller work when sneaking?
-with-sneak: false
+# If set to true, leaves will be detected diagonally; May require ignore-leaf-data to work properly
+diagonal-leaves: false
+
+# If set to true, leaves' blockdata will be ignored. This should only be set if custom trees' leaves are not being destroyed when they should.
+ignore-leaf-data: false
+
+# Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)
+#require-cross-section: false
+
+# Should the tree cut down with an animation?
+cutting-animation: false
+
+# Animation delay, in ticks
+anim-delay: 1
 
 # Should saplings be replanted?
 replant-saplings: false
@@ -72,11 +56,11 @@ replant-saplings: false
 # 2 = Yes, always spawn new saplings
 spawn-saplings: 0
 
-# Should axe enchantments such as Fortune and Silk Touch be applied to leaves?
-leaf-enchantments: false
-
-# How long (in ticks) should players have to wait before felling another tree?
-cooldown: 0
+# What blocks can saplings be planted on?
+grass:
+    - GRASS_BLOCK
+    - DIRT
+    - PODZOL
 
 # What felling behavior should logs have?
 # Valid options:
@@ -106,28 +90,6 @@ log-behavior: BREAK
 # Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do
 leaf-behavior: BREAK
 
-# This is the list of blocks that may be overridden when a tree falls onto them (i.e air, grass, water)
-# (Only used for NATURAL fell type)
-overridables:
-    - GRASS
-    - AIR
-    - CAVE_AIR
-    - WATER
-    - TALL_GRASS
-    - SEAGRASS
-    - TALL_SEAGRASS
-    - FERN
-    - LARGE_FERN
-
-# How much random sideways velocity should falling blocks get?
-# (Only used when log or leaf behavior is set to FALL or similar)
-random-fall-velocity: 0
-
-# How much velocity should falling trees get?
-# (Only used when log or leaf behavior is set to FALL or similar)
-# All of the blocks in the tree will fall in the same direction with this velocity.
-directional-fall-velocity: .35
-
 # Which direction should the tree fall in?
 # (Only used when log or leaf behavior is set to FALL or similar)
 # Valid options:
@@ -146,10 +108,46 @@ directional-fall-velocity: .35
 # SOUTH_EAST The tree fill fall to the southeast
 directional-fall-behavior: RANDOM
 
+# This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
+# (Only used for NATURAL fell behavior)
+overridables:
+    - GRASS
+    - AIR
+    - CAVE_AIR
+    - WATER
+    - TALL_GRASS
+    - SEAGRASS
+    - TALL_SEAGRASS
+    - FERN
+    - LARGE_FERN
+
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
 
-#When trees FALL, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)
+# How much velocity should falling trees get?
+# (Only used when log or leaf behavior is set to FALL or similar)
+# All of the blocks in the tree will fall in the same direction with this velocity.
+directional-fall-velocity: .35
+
+# How much random sideways velocity should falling blocks get?
+# (Only used when log or leaf behavior is set to FALL or similar)
+random-fall-velocity: 0
+
+# If a tool has unbreaking, should it take less damage from cutting trees?
+respect-unbreaking: true
+
+# How much damage should tools take per log? (Multiplier)
+damage-mult: 1.0
+
+# Should axe enchantments such as Fortune and Silk Touch be applied to leaves?
+leaf-enchantments: false
+
+# When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)
+# This may cause issues with custom trees that have multiple trunks or branches that extend very low
+leave-stump: false
+
+# When trees fall, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)
+# (Only used when log or leaf behavior is set to FALL or similar)
 rotate-logs: true
 
 # Should _WOOD blocks in trees be converted to _LOG when they drop as items?
@@ -161,20 +159,58 @@ leaf-drop-chance: 1.0
 # How often should logs drop items? Set this to 0.0 to stop logs from dropping items altogether (Only works with BREAK behavior)
 log-drop-chance: 1.0
 
-# When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)
-# NOTE: This may cause issues with custom trees that have multiple trunks or branches that extend very low
-leave-stump: false
+# Global effects are applied every time a tree is felled, regardless of tree type or tool
+# use ALL for all effects
+# ex:
+#   - ghost sound
+#   - smoke
+global-effects:
+    - ALL
 
-# Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)
-require-cross-section: false
+# Tools must have these enchantments at this level or higher to fell trees
+# ex:
+# - unbreaking: 2
+# - efficiency: 5
+#required-enchantments:
 
-#Min time can be greater than max, in that case time must be < max or > min
-# What should the minimum time be for felling trees? (0-24000, -1 to disable)
-min-time: -1
+# Tools must not have these enchantments or have them lower than this level to fell trees
+# ex:
+# - silk_touch: 1
+# - unbreaking: 3
+#banned-enchantments:
 
-# What should the maximum time be for felling trees? (0-24000, -1 to disable)
-max-time: -1
+# Tools with less than this much durability will be unable to fell trees
+#min-durability:
 
+# Tools with more than this much durability will be unable to fell trees
+#max-durability:
+
+# Tools with less than this percentage of durability will be unable to fell trees
+#min-durability-percent:
+
+# Tools with more than this percentage of durability will be unable to fell trees
+#max-durability-percent:
+
+# Tools must have all literal strings in this list in order to fell trees
+# ex:
+# - Can fell trees
+#required-lore:
+
+# A tool's name must match exactly in order to fell trees (colors can be designated with &)
+#required-name:
+
+# Trees can only be cut down by players who have all permissons listed here
+# ex:
+# - treefeller.example
+#required-permissions:
+
+# What should the minimum time be for felling trees? (0-24000)
+#min-time: 0
+
+# What should the maximum time be for felling trees? (0-24000)
+#max-time: 24000
+
+# What should the maximum phase be for felling trees? (0-7)
 # Phases:
 # 0 = full moon
 # 1 = waning gibbous
@@ -184,75 +220,106 @@ max-time: -1
 # 5 = waxing crescent
 # 6 = third quarter
 # 7 = waxing gibbous
-# What should the minimum phase be for felling trees? (0-8, -1 to disable)
-min-phase: -1
+#min-phase: 0
 
-# What should the maximum phase be for felling trees? (0-8, -1 to disable)
-max-phase: -1
+# What should the minimum phase be for felling trees? (0-7)
+# Phases:
+# 0 = full moon
+# 1 = waning gibbous
+# 2 = first quarter
+# 3 = waning crescent
+# 4 = new moon
+# 5 = waxing crescent
+# 6 = third quarter
+# 7 = waxing gibbous
+#max-phase: 7
 
-# Global effects are applied every time a tree is felled, regardless of tree type or tool
-# use ALL for all effects
-# ex:
-#   - ghost sound
-#   - smoke
-global-effects:
-    - ALL
+# Should the tree feller work in adventure mode?
+enable-adventure: false
+
+# Should the tree feller work in survival mode?
+enable-survival: true
+
+# Should the tree feller work in creative mode?
+enable-creative: false
+
+# Should the tree feller work when not sneaking?
+without-sneak: true
+
+# Should the tree feller work when sneaking?
+with-sneak: false
+
+# In what worlds should the tree feller work? (Inverted if world-blacklist is set to true)
+#worlds:
+
+world-blacklist: false
+
+# How long (in ticks) should players have to wait before felling another tree?
+#cooldown: 0
 
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
-#  Possible variables include:
-# requiredEnchantments: {<enchantment>: <lvl>}  The tool must have the enchantment <enchantment> at or greater than level <lvl>
-# bannedEnchantments: {<enchantment>: <lvl>}    The tool must not have the enchantment <enchantment> or have it less than level <lvl>
-# minDurability: <durability>                   The tool must have at least <durability> durability left
-# maxDurability: <durability>                   The tool must have at most <durability> durability left
-# minDurabilityPercent: <value>                 The tool must have at least <value>% of its total durability left
-# maxDurabilityPercent: <value>                 The tool must have at most <value>% of its total durability left
-# damageMult: <value>                           When the tool is used. it will take <value>X normal damage
-# maxLogs: <value>                              The tool can only fell trees with <value> logs or less
-# allowedTrees: [<values>]                      The tool can only fell specific trees. <values> is a list of tree indexes (the first tree defined is 0, the second is 1, etc.)
-# respectUnbreaking: (true|false)               If the tool has unbreaking, should it take less damage from cutting trees?
-# leafRange: <value>                            The tool will destroy leaves up to <value> blocks away from the trunk
-# allowPartial: (true|false)                    If true, the tool will partially destroy a tree if it has insufficient durability
-# maxHeight: <value>                            The tool can only destroy a tree if you break a block within <value> blocks of the bottom of the tree
-# playerLeaves: (true|false)                    If true, the tool can destroy leaves that were placed by players (This only works for _LEAVES materials)
-# requiredLogs: <value>                         The tool can only destroy a tree with at least <value> logs
-# requiredLeaves: <value>                       The tool can only destroy a tree with at least <value> leaves
-# enableAdventure: (true|false)                 If true, the tool can be used in adventure mode
-# enableSurvival: (true|false)                  If true, the tool can be used in survival mode
-# enableCreative: (true|false)                  If true, the tool can be used in creative mode
-# withoutSneak: (true|false)                    If true, the tool can be used without sneaking
-# withSneak: (true|false)                       If true, the tool can be used while sneaking
-# requiredLore: [<values>]                      The tool can only be used if it has all literal strings in <values> within its lore
-# requiredName: <value>                         The tool's display name must exactly match <value> (Colors can be designated with & )
-# requiredPermissions: [<values>]               The tool can only be used by players who have ALL permissions in <values>
-# cooldown: <value>                             If set, this tool has a specific per-item cooldown
-# leafEnchantments: (true|false)                If true, the tool will apply enchantments such as Fortune and Silk Touch to the leaves of trees when mined.
-# randomFallVelocity: <value>                   If set, this velocity will be added to the tree's random velocity
-# directionalFallVelocity: <value>              If set, this velocity will be added to the tree's directional velocity
-# lockFallCardinal: (true|false)                If set to true, trees felled by this tool will always fall in one of the cardinal directions
-# worlds: [<values>]                            limits in what worlds this tool can be used. Values can be world names or UUIDs
-# worldBlacklist: (true|false)                  If set to true, this tree can be cut down in every world except those specified in the worlds: variable
-# convertWoodToLog: <value>                     If set, this tool will always convert wood to log when used to fell a tree
-# leafDropChance: <value>                       If set, this will override the leaf drop chance (This is multiplied by the tree's drop chance)
-# logDropChance: <value>                        If set, this will override the log drop chance (This is multiplied by the tree's drop chance)
-# leaveStump: (true|false)                      If set to true, this tool will always leave a stump when used to fell a tree
-# requireCrossSection: (true|false) `           If set to true, this tool will always require a cross-section to be cut to fell a tree
-# rotateLogs: (true|false)                      If set to true, the logs of trees felled by this tool will always rotate before hitting the ground.
-# minTime: <value>                              If set, this tool can only cut down trees at or after this time of day (0-24000)
-# maxTime: <value>                              If set, this tool can only cut down trees at or before this time of day (0-24000)
-# minPhase: <value>                             If set, this tool can only cut down trees at or after this phase of the moon (0-7, see min-phase)
-# maxPhase: <value>                             If set, this tool can only cut down trees at or before this phase of the moon (0-7, see min-phase)
-# effects: [<values>]                           If set, this tool will create the listed effects when used to fell a tree
-# Any tool-specific values will override global defaults.
+# Any of the following variables may be used: (See above for descriptions)
+# scan-distance:
+# leaf-range:
+# required-logs:
+# required-leaves:
+# max-logs:
+# max-height:
+# allow-partial:
+# player-leaves:
+# require-cross-section:
+# cutting-animation:
+# anim-delay:
+# replant-saplings:
+# spawn-saplings:
+# log-behavior:
+# leaf-behavior:
+# directional-fall-behavior:
+# overridables:
+# lock-fall-cardinal:
+# directional-fall-velocity:
+# random-fall-velocity:
+# respect-unbreaking:
+# damage-mult:
+# leaf-enchantments:
+# leave-stump:
+# rotate-logs:
+# convert-wood-to-log:
+# leaf-drop-chance:
+# log-drop-chance:
+# global-effects:
+# required-enchantments:
+# banned-enchantments:
+# min-durability:
+# max-durability:
+# min-durability-percent:
+# max-durability-percent:
+# required-lore:
+# required-name:
+# required-permissions:
+# min-time:
+# max-time:
+# min-phase:
+# max-phase:
+# allowed-trees:         The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
+# enable-adventure:
+# enable-survival:
+# enable-creative:
+# without-sneak:
+# with-sneak:
+# worlds:
+# world-blacklist:
+# cooldown:
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
-#    - {type: WOODEN_AXE, requiredEnchantments: {efficiency: 4, unbreaking: 1}, bannedEnchantments: {unbreaking: 2}, minDurability: 4, maxDurabilityPercent: 0.9}
-#    - {type: DIAMOND_AXE, requiredEnchantments: {efficiency: 4}, bannedEnchantments: {unbreaking: 2}, requiredLore: [A line of lore, Another line of lore]}
-#    - {type: GOLDEN_AXE, requiredPermissions: [treefeller.example,treefeller.anotherexample]}
+#    - {type: WOODEN_AXE, required-enchantments: {efficiency: 4, unbreaking: 1}, banned-enchantments: {unbreaking: 2}, min-durability: 4, max-durability-percent: 0.9}
+#    - {type: DIAMOND_AXE, required-enchantments: {efficiency: 4}, banned-enchantments: {unbreaking: 2}, required-lore: [A line of lore, Another line of lore]}
+#    - {type: GOLDEN_AXE, required-permissions: [treefeller.example,treefeller.anotherexample]}
 #    - STONE_AXE
-#    - {type: IRON_AXE, allowedTrees: [0,1,3]} <-this tool can only cut down the first, second, and fourth trees defined.
-#    - {type: AIR, damageMult: 0}
+#    - {type: IRON_AXE, allowed-trees: [0,1,3]} <-this tool can only cut down the first, second, and fourth trees defined.
+#    - {type: AIR, damage-mult: 0}
 tools:
     - WOODEN_AXE
     - STONE_AXE
@@ -263,50 +330,74 @@ tools:
 # What materials count as trees?
 # Format:
 #    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]
-#  Possible variables include:
-# damageMult: <value>               Any tool used to cut down this tree will take <value>X damage (Multiplied by tool-specific multiplier)
-# maxLogs: <value>                  This tree can not be cut down if it has more than <value> logs in size
-# allowPartial: (true|false)        If true, the tool will partially destroy this tree if it has insufficient durability (overriden by tool value)
-# maxHeight: <value>                This tree can only be destroyed if you break a block within <value> blocks of the bottom of the tree
-# playerLeaves: (true|false)        If true, the tree will include leaves that were placed by players (This only works for _LEAVES materials)
-# requiredLogs: <value>             This tree must have at least <value> logs to be cut down
-# requiredLeaves: <value>           This tree must have at least <value> leaves to be cut down
-# sapling: <value>                  If replant-saplings is enabled, this will replant the tree with this type of sapling
-# maxSaplings: <value>              If replant-saplings is enabled, this will limit the number of saplings that can be replanted
-# grass: [<values>]                 This is the list of blocks that saplings can be planted on; defaults to [GRASS,DIRT,PODZOL]
-# cooldown: <value>                 If set, this tree has a specific per player cooldown
-# logBehavior: <value>              See log-behavior above
-# leafBehavior: <value>             See leaf-behavior above
-# randomFallVelocity: <value>       see random-fall-velocity above
-# directionalFallVelocity: <value>  see directional-fall-velocity above
-# directionalFallBehavior: <value>  see directional-fall-behavior above
-# lockFallCardinal: (true|false)    If set to true, this tree will always fall in one of the cardinal directions
-# worlds: [<values>]                limits in what worlds this tree can be felled. Values can be world names or UUIDs
-# worldBlacklist: (true|false)      If set to true, this tree can be cut down in every world except those specified in the worlds: variable
-# convertWoodToLog: <value>         If set, this tree will always convert wood to log when felled
-# leafDropChance: <value>           (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the tool's drop chance)
-# logDropChance: <value>            (Defaults to 1.0) If set, this will override the leaf drop chance (This is multiplied by the log's drop chance
-# leaveStump: (true|false)          If set to true, this tree will always leave a stump when felled
-# requireCrossSection: (true|false) If set to true, this tree will always require a cross-section to be cut before felling
-# rotateLogs: (true|false)          If set to true, the logs of this tree will always rotate before hitting the ground.
-# minTime: <value>                  If set, this tree can only be cut down at or after this time of day (0-24000)
-# maxTime: <value>                  If set, this tree can only be cut down at or before this time of day (0-24000)
-# minPhase: <value>                 If set, this tree can only be cut down at or after this phase of the moon (0-7, see min-phase)
-# maxPhase: <value>                 If set, this tree can only be cut down at or before this phase of the moon (0-7, see min-phase)
-# effects: [<values>]               If set, this tree will create the listed effects when felled
+# Any of the following variables may be used: (See above for descriptions)
+# leaf-range:
+# required-logs:
+# required-leaves:
+# max-logs:
+# max-height:
+# allow-partial:
+# player-leaves:
+# diagonal-leaves:
+# ignore-leaf-data:
+# require-cross-section:
+# cutting-animation:
+# anim-delay:
+# replant-saplings:
+# spawn-saplings:
+# sapling:        If replant-saplings is enabled, this will replant the tree with this type of sapling
+# max-saplings:   If replant-saplings is enabled, this will limit the number of saplings that can be replanted
+# grass:
+# log-behavior:
+# leaf-behavior:
+# directional-fall-behavior:
+# overridables:
+# lock-fall-cardinal:
+# directional-fall-velocity:
+# random-fall-velocity:
+# respect-unbreaking:
+# damage-mult:
+# leaf-enchantments:
+# leave-stump:
+# rotate-logs:
+# convert-wood-to-log:
+# leaf-drop-chance:
+# log-drop-chance:
+# global-effects:
+# required-enchantments:
+# banned-enchantments:
+# minimum-durability:
+# maximum-durability:
+# minimum-durability-percent:
+# maximum-durability-percent:
+# required-lore:
+# required-name:
+# required-permissions:
+# min-time:
+# max-time:
+# min-phase:
+# max-phase:
+# enable-adventure:
+# enable-survival:
+# enable-creative:
+# without-sneak:
+# with-sneak:
+# worlds:
+# world-blacklist:
+# cooldown:
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
-#    - [STONE, NETHERRACK, {damageMult: 50, allowPartial: false, sapling: OAK_SAPLING}]
+#    - [STONE, NETHERRACK, {damage-mult: 50, allow-partial: false, sapling: OAK_SAPLING}]
 #    - SPRUCE_LOG           <-This will attempt to automatically detect the leaf material.
 trees:
-    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES, {sapling: OAK_SAPLING, maxSaplings: 1}]
-    - [[BIRCH_LOG, BIRCH_WOOD], BIRCH_LEAVES, {sapling: BIRCH_SAPLING, maxSaplings: 1}]
-    - [[SPRUCE_LOG, SPRUCE_WOOD], SPRUCE_LEAVES, {sapling: SPRUCE_SAPLING, maxSaplings: 1}]
-    - [[JUNGLE_LOG, JUNGLE_WOOD], JUNGLE_LEAVES, {sapling: JUNGLE_SAPLING, maxSaplings: 4}]
-    - [[DARK_OAK_LOG, DARK_OAK_WOOD], DARK_OAK_LEAVES, {sapling: DARK_OAK_SAPLING, maxSaplings: 4}]
-    - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, maxSaplings: 1}]
-
+    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES, {sapling: OAK_SAPLING, max-saplings: 1}]
+    - [[BIRCH_LOG, BIRCH_WOOD], BIRCH_LEAVES, {sapling: BIRCH_SAPLING, max-saplings: 1}]
+    - [[SPRUCE_LOG, SPRUCE_WOOD], SPRUCE_LEAVES, {sapling: SPRUCE_SAPLING, max-saplings: 1}]
+    - [[JUNGLE_LOG, JUNGLE_WOOD], JUNGLE_LEAVES, {sapling: JUNGLE_SAPLING, max-saplings: 4}]
+    - [[DARK_OAK_LOG, DARK_OAK_WOOD], DARK_OAK_LEAVES, {sapling: DARK_OAK_SAPLING, max-saplings: 4}]
+    - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, max-saplings: 1}]
+        
 # Here, you can create custom effects for trees or tools
 # Fields:
 # name: <value>        This is the effect's name. It is used to assign the effect to a tree or tool

@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller;
+package com.thizthizzydizzy.treefeller.compat;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 /**

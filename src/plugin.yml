@@ -1,6 +1,8 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.10.4
+version: 1.11
 api-version: 1.13
+author: ThizThizzyDizzy
+website: "https://www.spigotmc.org/resources/thizzyz-tree-feller.64346/"
 name: TreeFeller
 commands:
     treefeller:

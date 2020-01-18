@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller;
-import com.thizthizzydizzy.treefeller.TreeFeller.Sapling;
 import java.util.Iterator;
 import java.util.UUID;
 import org.bukkit.Axis;

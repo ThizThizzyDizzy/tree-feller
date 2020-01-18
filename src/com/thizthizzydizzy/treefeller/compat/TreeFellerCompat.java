@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller;
+package com.thizthizzydizzy.treefeller.compat;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
@@ -13,17 +13,17 @@ public class TreeFellerCompat{
         compatibilities.add(new WorldGuardCompat());
         compatibilities.add(new GriefPreventionCompat());
     }
-    static void breakBlock(Player player, Block block){
+    public static void breakBlock(Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
             compat.breakBlock(player, block);
         }
     }
-    static void addBlock(Player player, Block block){
+    public static void addBlock(Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
             compat.addBlock(player, block);
         }
     }
-    static void removeBlock(Player player, Block block){
+    public static void removeBlock(Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
             compat.removeBlock(player, block);
         }
@@ -34,7 +34,7 @@ public class TreeFellerCompat{
         }
         return null;
     }
-    static TestResult test(Player player, Iterable<Block> blocks){
+    public static TestResult test(Player player, Iterable<Block> blocks){
         for(PluginCompatibility compat : getCompatibilities()){
             Block block = compat.test(player, blocks);
             if(block!=null){
@@ -52,7 +52,7 @@ public class TreeFellerCompat{
                     override = compat;
                     break;
                 }else{
-                    Bukkit.getLogger().log(Level.SEVERE, "External compatiblity already exists for {0}! Ignoring...", compat.getPluginName());
+                    Bukkit.getLogger().log(Level.SEVERE, "External compatibility already exists for {0}! Ignoring...", compat.getPluginName());
                     return;
                 }
             }
