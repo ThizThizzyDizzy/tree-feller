@@ -13,6 +13,10 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
 public abstract class Option<E>{
     private static HashSet<Material> defaultOverridables = new HashSet<>();
     static{
@@ -69,19 +73,23 @@ public abstract class Option<E>{
         public DebugResult doCheckTrunk(Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
             int total = getTotal(blocks);
             if(globalValue!=null&&total<globalValue){
-                return new DebugResult(false, "Tree has too few logs: "+total+"<"+globalValue);
-            }
-            if(treeValues.get(tree)!=null&&total<treeValues.get(tree)){
-                return new DebugResult(false, "Tree has too few logs for tree: "+total+"<"+treeValues.get(tree));
+                return new DebugResult(this, GLOBAL, total, globalValue);
             }
             if(toolValues.get(tool)!=null&&total<toolValues.get(tool)){
-                return new DebugResult(false, "Tree has too few logs for tool: "+total+"<"+toolValues.get(tool));
+                return new DebugResult(this, TOOL, total, toolValues.get(tool));
             }
-            return new DebugResult(true, "Tree has enough logs");
+            if(treeValues.get(tree)!=null&&total<treeValues.get(tree)){
+                return new DebugResult(this, TREE, total, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS, total);
         }
         @Override
         public String getDesc(){
             return "How many logs should be required for logs to be counted as a tree?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree has too few logs$: {0}<{1}", "Tree has enough logs");
         }
     };
     public static Option<Integer> REQUIRED_LEAVES = new Option<Integer>("Required Leaves", true, true, true, 10){
@@ -92,19 +100,23 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheckTree(Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
             if(globalValue!=null&&leaves<globalValue){
-                return new DebugResult(false, "Tree has too few leaves: "+leaves+"<"+globalValue);
+                return new DebugResult(this, GLOBAL, leaves, globalValue);
             }
             if(toolValues.get(tool)!=null&&leaves<toolValues.get(tool)){
-                return new DebugResult(false, "Tree has too few leaves for tool: "+leaves+"<"+toolValues.get(tool));
+                return new DebugResult(this, TOOL, leaves, toolValues.get(tool));
             }
             if(treeValues.get(tree)!=null&&leaves<treeValues.get(tree)){
-                return new DebugResult(false, "Tree has too few leaves for tree: "+leaves+"<"+treeValues.get(tree));
+                return new DebugResult(this, TREE, leaves, treeValues.get(tree));
             }
-            return new DebugResult(true, "Tree has enough leaves");
+            return new DebugResult(this, SUCCESS, leaves);
         }
         @Override
         public String getDesc(){
             return "How many leaves should be required for logs to be counted as a tree?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree has too few leaves$: {0}<{1}", "Tree has enough leaves");
         }
     };
     public static Option<Integer> MAX_LOGS = new Option<Integer>("Max Logs", true, true, true, 250){
@@ -116,19 +128,23 @@ public abstract class Option<E>{
         public DebugResult doCheckTrunk(Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
             int total = getTotal(blocks);
             if(globalValue!=null&&total>globalValue){
-                return new DebugResult(false, "Tree has too many logs: "+total+"<"+globalValue);
-            }
-            if(treeValues.get(tree)!=null&&total>treeValues.get(tree)){
-                return new DebugResult(false, "Tree has too many logs for tree: "+total+"<"+treeValues.get(tree));
+                return new DebugResult(this, GLOBAL, total, globalValue);
             }
             if(toolValues.get(tool)!=null&&total>toolValues.get(tool)){
-                return new DebugResult(false, "Tree has too many logs for tool: "+total+"<"+toolValues.get(tool));
+                return new DebugResult(this, TOOL, total, toolValues.get(tool));
             }
-            return new DebugResult(true, "Tree has few enough logs");
+            if(treeValues.get(tree)!=null&&total>treeValues.get(tree)){
+                return new DebugResult(this, TREE, total, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS, total);
         }
         @Override
         public String getDesc(){
             return "How many logs may be felled at with one stroke?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree has too many logs$: {0}>{1}", "Tree has few enough logs");
         }
     };
     public static Option<Integer> MAX_HEIGHT = new Option<Integer>("Max Height", true, true, true, 5){
@@ -146,21 +162,25 @@ public abstract class Option<E>{
             }
             if(globalValue!=null&&block.getY()-minY>globalValue-1){
                 int i = block.getY()-minY-(globalValue-1);
-                return new DebugResult(false, "Tree was cut "+i+" blocks too high!");
+                return new DebugResult(this, GLOBAL, i);
             }
             if(toolValues.containsKey(tool)&&block.getY()-minY>toolValues.get(tool)-1){
                 int i = block.getY()-minY-(toolValues.get(tool)-1);
-                return new DebugResult(false, "Tree was cut "+i+" blocks too high for tool!");
+                return new DebugResult(this, TOOL, i);
             }
             if(treeValues.containsKey(tree)&&block.getY()-minY>treeValues.get(tree)-1){
                 int i = block.getY()-minY-(treeValues.get(tree)-1);
-                return new DebugResult(false, "Tree was cut "+i+" blocks too high for tree!");
+                return new DebugResult(this, TREE, i);
             }
-            return new DebugResult(true, "Tree was cut low enough");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "How far from the bottom can you cut down a tree? (Prevents you from cutting it down from the top) 1 = bottom block";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree was cut {0} blocks too high$", "Tree was cut low enough");
         }
     };
     public static OptionBoolean ALLOW_PARTIAL = new OptionBoolean("Allow Partial", true, true, true, false){
@@ -195,18 +215,22 @@ public abstract class Option<E>{
                     for(int z = -1; z<=1; z++){
                         if(x==0&&z==0)continue;
                         if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
-                            if(Objects.equals(globalValue, true))return new DebugResult(false, "A full cross-section has not been cut!");
-                            if(Objects.equals(toolValues.get(tool), true))return new DebugResult(false, "A full cross-section has not been cut for tool!");
-                            if(Objects.equals(treeValues.get(tree), true))return new DebugResult(false, "A full cross-section has not been cut for tree!");
+                            if(Objects.equals(globalValue, true))return new DebugResult(this, GLOBAL);
+                            if(Objects.equals(toolValues.get(tool), true))return new DebugResult(this, TOOL);
+                            if(Objects.equals(treeValues.get(tree), true))return new DebugResult(this, TREE);
                         }
                     }
                 }
             }
-            return new DebugResult(true, "A full cross-section has been cut!");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("A full cross-section has not been cut$", "A full cross-section has been cut");
         }
     };
     
@@ -232,7 +256,7 @@ public abstract class Option<E>{
             return "Should saplings be replanted?";
         }
     };
-    public static Option<Integer> SPAWN_SAPLINGS = new Option<Integer>("Spawn Saplings", true, true, true, 1){
+    public static Option<Integer> SPAWN_SAPLINGS = new Option<Integer>("Spawn Saplings", true, true, true, 0){
         @Override
         public Integer load(Object o){
             return loadInt(o);
@@ -246,7 +270,6 @@ public abstract class Option<E>{
             }
             return globalValue;
         }
-
         @Override
         public String getDesc(){
             return "Should saplings be spawned?\n" +
@@ -474,10 +497,28 @@ public abstract class Option<E>{
             return "How much damage should tools take per log? (Multiplier)";
         }
     };
-    public static OptionBoolean LEAF_ENCHANTMENTS = new OptionBoolean("Leaf Enchantments", true, true, true, false){
+    public static OptionBoolean LEAF_FORTUNE = new OptionBoolean("Leaf Fortune", true, true, true, true){
         @Override
         public String getDesc(){
-            return "Should axe enchantments such as Fortune and Silk Touch be applied to leaves?";
+            return "Should Fortune on an axe be applied to leaves?";
+        }
+    };
+    public static OptionBoolean LEAF_SILK_TOUCH = new OptionBoolean("Leaf Silk Touch", true, true, true, false){
+        @Override
+        public String getDesc(){
+            return "Should Silk Touch on an axe be applied to leaves?";
+        }
+    };
+    public static OptionBoolean LOG_FORTUNE = new OptionBoolean("Log Fortune", true, true, true, true){
+        @Override
+        public String getDesc(){
+            return "Should Fortune on an axe be applied to logs?";
+        }
+    };
+    public static OptionBoolean LOG_SILK_TOUCH = new OptionBoolean("Log Silk Touch", true, true, true, true){
+        @Override
+        public String getDesc(){
+            return "Should Silk Touch on an axe be applied to leaves?";
         }
     };
     public static OptionBoolean LEAVE_STUMP = new OptionBoolean("Leave Stump", true, true, true, false){
@@ -532,7 +573,7 @@ public abstract class Option<E>{
             return "How often should logs drop items? Set this to 0.0 to stop logs from dropping items altogether (Only works with BREAK behavior)";
         }
     };
-    public static Option<ArrayList<Effect>> EFFECTS = new Option<ArrayList<Effect>>("Effects", true, true, true, null){
+    public static Option<ArrayList<Effect>> EFFECTS = new Option<ArrayList<Effect>>("Effects", true, true, true, null, "\n    - ALL"){
         @Override
         public ArrayList<Effect> load(Object o){
             if(o instanceof Iterable){
@@ -611,7 +652,7 @@ public abstract class Option<E>{
             if(globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)<globalValue.get(e)){
-                        return new DebugResult(false, "Enchantment missing: "+e.toString()+" at minimum level "+globalValue.get(e)+"!");
+                        return new DebugResult(this, GLOBAL, e.toString(), globalValue.get(e));
                     }
                 }
             }
@@ -619,7 +660,7 @@ public abstract class Option<E>{
             if(values!=null){
                 for(Enchantment e : values.keySet()){
                     if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(false, "Enchantment missing for tool: "+e.toString()+" at minimum level "+values.get(e)+"!");
+                        return new DebugResult(this, TOOL, e.toString(), values.get(e));
                     }
                 }
             }
@@ -627,11 +668,11 @@ public abstract class Option<E>{
             if(values!=null){
                 for(Enchantment e : values.keySet()){
                     if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(false, "Enchantment missing for tree: "+e.toString()+" at minimum level "+values.get(e)+"!");
+                        return new DebugResult(this, TREE, e.toString(), values.get(e));
                     }
                 }
             }
-            return new DebugResult(true, "All required enchantments met!");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
@@ -640,7 +681,10 @@ public abstract class Option<E>{
                 + "- unbreaking: 2\n"
                 + "- efficiency: 5";
         }
-        
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Enchantment missing$: {0} at minimum level {1}", "All required enchantments met");
+        }
     };
     public static Option<HashMap<Enchantment, Integer>> BANNED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Banned Enchantments", true, true, true, null){
         @Override
@@ -674,7 +718,7 @@ public abstract class Option<E>{
             if(globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)>=globalValue.get(e)){
-                        return new DebugResult(false, "Tool contains banned enchantment: "+e.toString()+" above level "+(globalValue.get(e)-1)+"!");
+                        return new DebugResult(this, GLOBAL, e.toString(), globalValue.get(e)-1);
                     }
                 }
             }
@@ -682,7 +726,7 @@ public abstract class Option<E>{
             if(values!=null){
                 for(Enchantment e : values.keySet()){
                     if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(false, "Tool contains banned enchantment for tool: "+e.toString()+" above level "+(globalValue.get(e)-1)+"!");
+                        return new DebugResult(this, TOOL, e.toString(), globalValue.get(e)-1);
                     }
                 }
             }
@@ -690,11 +734,11 @@ public abstract class Option<E>{
             if(values!=null){
                 for(Enchantment e : values.keySet()){
                     if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(false, "Tool contains banned enchantment for tree: "+e.toString()+" above level "+(globalValue.get(e)-1)+"!");
+                        return new DebugResult(this, TREE, e.toString(), globalValue.get(e)-1);
                     }
                 }
             }
-            return new DebugResult(true, "No banned enchantments found!");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
@@ -702,6 +746,10 @@ public abstract class Option<E>{
                 + "ex:\n"
                 + "- silk_touch: 1\n"
                 + "- unbreaking: 3";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool contains banned enchantment$: {0} above level {1}", "No banned enchantments found");
         }
     };
     public static Option<Integer> MIN_DURABILITY = new Option<Integer>("Min Durability", true, true, true, null){
@@ -714,20 +762,24 @@ public abstract class Option<E>{
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(durability<globalValue)return new DebugResult(false, "Tool durability is less than minimum allowed: "+globalValue);
+                    if(durability<globalValue)return new DebugResult(this, GLOBAL, durability, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(durability<toolValues.get(tool))return new DebugResult(false, "Tool durability is less than minimum allowed for tool: "+toolValues.get(tool));
+                    if(durability<toolValues.get(tool))return new DebugResult(this, TOOL, durability, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(durability<treeValues.get(tree))return new DebugResult(false, "Tool durability is less than minimum allowed for tree: "+treeValues.get(tree));
+                    if(durability<treeValues.get(tree))return new DebugResult(this, TREE, durability, treeValues.get(tree));
                 }
             }
-            return new DebugResult(true, "Tool meets minimum durability requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Tools with less than this much durability will be unable to fell trees";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
         }
     };
     public static Option<Integer> MAX_DURABILITY = new Option<Integer>("Max Durability", true, true, true, null){
@@ -740,20 +792,24 @@ public abstract class Option<E>{
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(durability>globalValue)return new DebugResult(false, "Tool durability is greater than maximum allowed: "+globalValue);
+                    if(durability>globalValue)return new DebugResult(this, GLOBAL, durability, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(durability>toolValues.get(tool))return new DebugResult(false, "Tool durability is greater than maximum allowed for tool: "+toolValues.get(tool));
+                    if(durability>toolValues.get(tool))return new DebugResult(this, TOOL, durability, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(durability>treeValues.get(tree))return new DebugResult(false, "Tool durability is greater than maximum allowed for tree: "+treeValues.get(tree));
+                    if(durability>treeValues.get(tree))return new DebugResult(this, TREE, durability, treeValues.get(tree));
                 }
             }
-            return new DebugResult(true, "Tool meets maximum durability requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Tools with more than this much durability will be unable to fell trees";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
         }
     };
     public static Option<Double> MIN_DURABILITY_PERCENT = new Option<Double>("Min Durability Percent", true, true, true, null){
@@ -767,20 +823,24 @@ public abstract class Option<E>{
             double durabilityPercent = durability/(double)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(durabilityPercent<globalValue)return new DebugResult(false, "Tool durability is less than minimum allowed: "+globalValue*100+"%");
+                    if(durabilityPercent<globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
                 }
                 if(toolValues.containsKey(tool)){
-                    if(durabilityPercent<toolValues.get(tool))return new DebugResult(false, "Tool durability is less than minimum allowed for tool: "+toolValues.get(tool)*100+"%");
+                    if(durabilityPercent<toolValues.get(tool))return new DebugResult(this, TOOL, durability, toolValues.get(tool)*100+"%");
                 }
                 if(treeValues.containsKey(tree)){
-                    if(durabilityPercent<treeValues.get(tree))return new DebugResult(false, "Tool durability is less than minimum allowed for tree: "+treeValues.get(tree)*100+"%");
+                    if(durabilityPercent<treeValues.get(tree))return new DebugResult(this, TREE, durability, treeValues.get(tree)*100+"%");
                 }
             }
-            return new DebugResult(true, "Tool meets minimum durability percentage requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Tools with less than this percentage of durability will be unable to fell trees";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
         }
     };
     public static Option<Double> MAX_DURABILITY_PERCENT = new Option<Double>("Max Durability Percent", true, true, true, null){
@@ -794,20 +854,30 @@ public abstract class Option<E>{
             double durabilityPercent = durability/(double)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(durabilityPercent>globalValue)return new DebugResult(false, "Tool durability is greater than maximum allowed: "+globalValue*100+"%");
+                    if(durabilityPercent>globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
                 }
                 if(toolValues.containsKey(tool)){
-                    if(durabilityPercent>toolValues.get(tool))return new DebugResult(false, "Tool durability is greater than maximum allowed for tool: "+toolValues.get(tool)*100+"%");
+                    if(durabilityPercent>toolValues.get(tool))return new DebugResult(this, TOOL, durability, toolValues.get(tool)*100+"%");
                 }
                 if(treeValues.containsKey(tree)){
-                    if(durabilityPercent>treeValues.get(tree))return new DebugResult(false, "Tool durability is greater than maximum allowed for tree: "+treeValues.get(tree)*100+"%");
+                    if(durabilityPercent>treeValues.get(tree))return new DebugResult(this, TREE, durability, treeValues.get(tree)*100+"%");
                 }
             }
-            return new DebugResult(true, "Tool meets maximum durability percentage requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Tools with more than this percentage of durability will be unable to fell trees";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
+        }
+    };
+    public static OptionBoolean PREVENT_BREAKAGE = new OptionBoolean("Prevent Breakage", true, true, true, false){
+        @Override
+        public String getDesc(){
+            return "If set to true, tools will not be able to fell a tree if doing so would break the tool.";
         }
     };
     public static Option<ArrayList<String>> REQUIRED_LORE = new Option<ArrayList<String>>("Required Lore", true, true, true, null){
@@ -843,16 +913,7 @@ public abstract class Option<E>{
                     for(String lor : lore){
                         if(lor.contains(s))has = true;
                     }
-                    if(!has)return new DebugResult(false, "Tool is missing required lore: "+s+"!");
-                }
-            }
-            if(treeValues.containsKey(tree)){
-                for(String s : treeValues.get(tree)){
-                    boolean has = false;
-                    for(String lor : lore){
-                        if(lor.contains(s))has = true;
-                    }
-                    if(!has)return new DebugResult(false, "Tool is missing required lore for tree: "+s+"!");
+                    if(!has)return new DebugResult(this, GLOBAL, s);
                 }
             }
             if(toolValues.containsKey(tool)){
@@ -861,16 +922,29 @@ public abstract class Option<E>{
                     for(String lor : lore){
                         if(lor.contains(s))has = true;
                     }
-                    if(!has)return new DebugResult(false, "Tool is missing required lore for tool: "+s+"!");
+                    if(!has)return new DebugResult(this, TOOL, s);
                 }
             }
-            return new DebugResult(true, "Tool has all required lore");
+            if(treeValues.containsKey(tree)){
+                for(String s : treeValues.get(tree)){
+                    boolean has = false;
+                    for(String lor : lore){
+                        if(lor.contains(s))has = true;
+                    }
+                    if(!has)return new DebugResult(this, TREE, s);
+                }
+            }
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Tools must have all literal strings in this list in order to fell trees\n"
                 + "ex:\n"
                 + "- Can fell trees";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool is missing required lore$: {0}", "Tool has all required lore");
         }
     };
     public static Option<String> REQUIRED_NAME = new Option<String>("Required Name", true, true, true, null){
@@ -886,22 +960,26 @@ public abstract class Option<E>{
                 name = meta.getDisplayName();
             }
             if(globalValue!=null){
-                if(!globalValue.equals(name))return new DebugResult(false, "Tool name does not match required name: "+globalValue+"!");
-            }
-            if(treeValues.containsKey(tree)){
-                if(!treeValues.get(tree).equals(name))return new DebugResult(false, "Tool name does not match required name for tree: "+treeValues.get(tree)+"!");
+                if(!globalValue.equals(name))return new DebugResult(this, GLOBAL, globalValue);
             }
             if(toolValues.containsKey(tool)){
-                if(!toolValues.get(tool).equals(name))return new DebugResult(false, "Tool name does not match required name for tool: "+toolValues.get(tool)+"!");
+                if(!toolValues.get(tool).equals(name))return new DebugResult(this, TOOL, toolValues.get(tool));
             }
-            return new DebugResult(true, "Tool name matches");
+            if(treeValues.containsKey(tree)){
+                if(!treeValues.get(tree).equals(name))return new DebugResult(this, TREE, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "A tool's name must match exactly in order to fell trees (colors can be designated with &)";
         }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tool name does not match required name$: {0}", "Tool name matches");
+        }
     };
-    public static Option<HashSet<String>> REQUIRED_PERMISSIONS = new Option<HashSet<String>>("Required Permissions", true, true, true, new HashSet<>()){
+    public static Option<HashSet<String>> REQUIRED_PERMISSIONS = new Option<HashSet<String>>("Required Permissions", true, true, true, new HashSet<>(), null){
         @Override
         public HashSet<String> load(Object o){
             if(o instanceof Iterable){
@@ -924,31 +1002,35 @@ public abstract class Option<E>{
             if(globalValue!=null){
                 for(String s : globalValue){
                     if(!player.hasPermission(s)){
-                        return new DebugResult(false, "Player is missing required permission: "+s+"!");
-                    }
-                }
-            }
-            if(treeValues.containsKey(tree)){
-                for(String s : treeValues.get(tree)){
-                    if(!player.hasPermission(s)){
-                        return new DebugResult(false, "Player is missing required permission for tree: "+s+"!");
+                        return new DebugResult(this, GLOBAL, s);
                     }
                 }
             }
             if(toolValues.containsKey(tool)){
                 for(String s : toolValues.get(tool)){
                     if(!player.hasPermission(s)){
-                        return new DebugResult(false, "Player is missing required permission for tool: "+s+"!");
+                        return new DebugResult(this, TOOL, s);
                     }
                 }
             }
-            return new DebugResult(true, "Tool has all required permissions");
+            if(treeValues.containsKey(tree)){
+                for(String s : treeValues.get(tree)){
+                    if(!player.hasPermission(s)){
+                        return new DebugResult(this, TREE, s);
+                    }
+                }
+            }
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Trees can only be cut down by players who have all permissons listed here\n"
                 + "ex:\n"
                 + "- treefeller.example";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Player is missing required permission$: {0}", "Player has all required permissions");
         }
     };
     public static Option<Integer> MIN_TIME = new Option<Integer>("Min Time", true, true, true, null){
@@ -961,20 +1043,24 @@ public abstract class Option<E>{
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(dayTime<globalValue)return new DebugResult(false, "Time is less than minimum allowed: "+globalValue);
+                    if(dayTime<globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(dayTime<toolValues.get(tool))return new DebugResult(false, "Time is less than minimum allowed for tool: "+toolValues.get(tool));
+                    if(dayTime<toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(dayTime<treeValues.get(tree))return new DebugResult(false, "Time is less than minimum allowed for tree: "+treeValues.get(tree));
+                    if(dayTime<treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
                 }
             }
-            return new DebugResult(true, "Time meets minimum requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "What should the minimum time be for felling trees? (0-24000)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Time is less than minimum allowed$: {0}", "Time meets minimum requirement");
         }
     };
     public static Option<Integer> MAX_TIME = new Option<Integer>("Max Time", true, true, true, null){
@@ -987,20 +1073,24 @@ public abstract class Option<E>{
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(dayTime>globalValue)return new DebugResult(false, "Time is greater than maximum allowed: "+globalValue);
+                    if(dayTime>globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(dayTime>toolValues.get(tool))return new DebugResult(false, "Time is greater than maximum allowed for tool: "+toolValues.get(tool));
+                    if(dayTime>toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(dayTime>treeValues.get(tree))return new DebugResult(false, "Time is greater than maximum allowed for tree: "+treeValues.get(tree));
+                    if(dayTime>treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
                 }
             }
-            return new DebugResult(true, "Time meets maximum requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "What should the maximum time be for felling trees? (0-24000)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Time is greater than maximum allowed$: {0}", "Time meets maximum requirement");
         }
     };
     public static Option<Integer> MIN_PHASE = new Option<Integer>("Min Phase", true, true, true, null){
@@ -1015,16 +1105,16 @@ public abstract class Option<E>{
             long phase = day%8;
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(phase<globalValue)return new DebugResult(false, "Phase is less than minimum allowed: "+globalValue);
+                    if(phase<globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(phase<toolValues.get(tool))return new DebugResult(false, "Phase is less than minimum allowed for tool: "+toolValues.get(tool));
+                    if(phase<toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(phase<treeValues.get(tree))return new DebugResult(false, "Phase is less than minimum allowed for tree: "+treeValues.get(tree));
+                    if(phase<treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
                 }
             }
-            return new DebugResult(true, "Phase meets minimum requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
@@ -1039,6 +1129,10 @@ public abstract class Option<E>{
                 "6 = third quarter\n" +
                 "7 = waxing gibbous\n";
         }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Phase is less than minimum allowed$: {0}", "Phase meets minimum requirement");
+        }
     };
     public static Option<Integer> MAX_PHASE = new Option<Integer>("Max Phase", true, true, true, null){
         @Override
@@ -1052,16 +1146,16 @@ public abstract class Option<E>{
             long phase = day%8;
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
-                    if(phase>globalValue)return new DebugResult(false, "Phase is greater than minimum allowed: "+globalValue);
+                    if(phase>globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(phase>toolValues.get(tool))return new DebugResult(false, "Phase is greater than minimum allowed for tool: "+toolValues.get(tool));
+                    if(phase>toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(phase>treeValues.get(tree))return new DebugResult(false, "Phase is greater than minimum allowed for tree: "+treeValues.get(tree));
+                    if(phase>treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
                 }
             }
-            return new DebugResult(true, "Phase meets maximum requirement");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
@@ -1075,6 +1169,10 @@ public abstract class Option<E>{
                 "5 = waxing crescent\n" +
                 "6 = third quarter\n" +
                 "7 = waxing gibbous\n";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Phase is greater than maximum allowed$: {0}", "Phase meets maximum requirement");
         }
     };
     public static Option<ArrayList<Tree>> ALLOWED_TREES = new Option<ArrayList<Tree>>("Allowed Trees", false, true, false, null){
@@ -1119,84 +1217,108 @@ public abstract class Option<E>{
         public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             if(toolValues.containsKey(tool)){
                 if(!toolValues.get(tool).contains(tree)){
-                    return new DebugResult(false, "Tree not allowed for tool: "+tree.toString()+"!");
+                    return new DebugResult(this, TOOL, tree.toString());
                 }
             }
-            return new DebugResult(true, "Tree is allowed for tool");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree is not allowed$: {0}", "Tree is allowed for tool");
         }
     };
     public static OptionBoolean ENABLE_ADVENTURE = new OptionBoolean("Enable Adventure", true, true, true, false){
         @Override
         public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             if(player.getGameMode()!=GameMode.ADVENTURE)return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(false, "TreeFeller is disabled in adventure mode");
-            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(false, "Tree is disabled in adventure mode");
-            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(false, "Tool is disabled in adventure mode");
-            return new DebugResult(true, "All components OK for adventure mode");
+            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
+            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Should the tree feller work in adventure mode?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("TreeFeller is disabled in adventure mode", "Tool is disabled in adventure mode", "Tree is disabled in adventure mode", "All components OK for adventure mode");
         }
     };
     public static OptionBoolean ENABLE_SURVIVAL = new OptionBoolean("Enable Survival", true, true, true, true){
         @Override
         public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             if(player.getGameMode()!=GameMode.SURVIVAL)return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(false, "TreeFeller is disabled in survival mode");
-            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(false, "Tree is disabled in survival mode");
-            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(false, "Tool is disabled in survival mode");
-            return new DebugResult(true, "All components OK for survival mode");
+            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
+            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Should the tree feller work in survival mode?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("TreeFeller is disabled in survival mode", "Tool is disabled in survival mode", "Tree is disabled in survival mode", "All components OK for survival mode");
         }
     };
     public static OptionBoolean ENABLE_CREATIVE = new OptionBoolean("Enable Creative", true, true, true, false){
         @Override
         public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             if(player.getGameMode()!=GameMode.CREATIVE)return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(false, "TreeFeller is disabled in creative mode");
-            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(false, "Tree is disabled in creative mode");
-            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(false, "Tool is disabled in creative mode");
-            return new DebugResult(true, "All components OK for creative mode");
+            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
+            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Should the tree feller work in creative mode?";
         }
-    };
-    public static OptionBoolean WITHOUT_SNEAK = new OptionBoolean("Without Sneak", true, true, true, true){
         @Override
-        public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-            if(player.isSneaking())return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(false, "TreeFeller is disabled when not sneaking");
-            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(false, "Tree is disabled when not sneaking");
-            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(false, "Tool is disabled when not sneaking");
-            return new DebugResult(true, "Felling allowed when not sneaking");
-        }
-        @Override
-        public String getDesc(){
-            return "Should the tree feller work when not sneaking?";
+        public String[] getDebugText(){
+            return generateDebugText("TreeFeller is disabled in creative mode", "Tool is disabled in creative mode", "Tree is disabled in creative mode", "All components OK for creative mode");
         }
     };
     public static OptionBoolean WITH_SNEAK = new OptionBoolean("With Sneak", true, true, true, false){
         @Override
         public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             if(!player.isSneaking())return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(false, "TreeFeller is disabled when sneaking");
-            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(false, "Tree is disabled when sneaking");
-            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(false, "Tool is disabled when sneaking");
-            return new DebugResult(true, "Felling allowed when sneaking");
+            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
+            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "Should the tree feller work when sneaking?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("TreeFeller is disabled when sneaking", "Tool is disabled when sneaking", "Tree is disabled when sneaking", "Felling allowed when sneaking");
+        }
+    };
+    public static OptionBoolean WITHOUT_SNEAK = new OptionBoolean("Without Sneak", true, true, true, true){
+        @Override
+        public DebugResult doCheck(Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+            if(player.isSneaking())return null;
+            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
+            if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String getDesc(){
+            return "Should the tree feller work when not sneaking?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("TreeFeller is disabled when not sneaking", "Tool is disabled when not sneaking", "Tree is disabled when not sneaking", "Felling allowed when not sneaking");
         }
     };
     public static Option<HashSet<String>> WORLDS = new Option<HashSet<String>>("Worlds", true, true, true, null){
@@ -1208,7 +1330,7 @@ public abstract class Option<E>{
                 for(String world : worlds){
                     if(world.equalsIgnoreCase(block.getWorld().getName())||world.equalsIgnoreCase(block.getWorld().getUID().toString())){
                         if(blacklist){
-                            return new DebugResult(false, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is invalid for this tool!");
+                            return new DebugResult(this, TOOL, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
                         }else{
                             break;
                         }
@@ -1221,7 +1343,7 @@ public abstract class Option<E>{
                 for(String world : worlds){
                     if(world.equalsIgnoreCase(block.getWorld().getName())||world.equalsIgnoreCase(block.getWorld().getUID().toString())){
                         if(blacklist){
-                            return new DebugResult(false, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is invalid for this tree!");
+                            return new DebugResult(this, TREE, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
                         }else{
                             break;
                         }
@@ -1234,14 +1356,14 @@ public abstract class Option<E>{
                 for(String world : globalValue){
                     if(world.equalsIgnoreCase(block.getWorld().getName())||world.equalsIgnoreCase(block.getWorld().getUID().toString())){
                         if(blacklist){
-                            return new DebugResult(false, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is invalid!");
+                            return new DebugResult(this, GLOBAL, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
                         }else{
                             break;
                         }
                     }
                 }
             }
-            return new DebugResult(true, "World "+block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+") is valid!");
+            return new DebugResult(this, SUCCESS, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
         }
         @Override
         public HashSet<String> load(Object o){
@@ -1265,6 +1387,10 @@ public abstract class Option<E>{
         public String getDesc(){
             return "In what worlds should the tree feller work? (Inverted if world-blacklist is set to true)";
         }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("World {0} is invalid$", "World {0} is valid");
+        }
     };
     public static OptionBoolean WORLD_BLACKLIST = new OptionBoolean("World Blacklist", true, true, true, false){
         @Override
@@ -1286,27 +1412,31 @@ public abstract class Option<E>{
                 if(globalValue!=null){
                     long diff = now-cooldown.globalCooldown;
                     if(diff/50<=globalValue){
-                        return new DebugResult(false, "Cooldown remaining: "+(globalValue-diff)+"ms");
-                    }
-                }
-                if(treeValues.containsKey(tree)&&cooldown.treeCooldowns.containsKey(tree)){
-                    long diff = now-cooldown.treeCooldowns.get(tree);
-                    if(diff/50<=treeValues.get(tree)){
-                        return new DebugResult(false, "Tree Cooldown remaining: "+(treeValues.get(tree)-diff)+"ms");
+                        return new DebugResult(this, GLOBAL, (globalValue-diff), (globalValue-diff)/50, (globalValue-diff)/1000);
                     }
                 }
                 if(toolValues.containsKey(tool)&&cooldown.toolCooldowns.containsKey(tool)){
                     long diff = now-cooldown.toolCooldowns.get(tool);
                     if(diff/50<=toolValues.get(tool)){
-                        return new DebugResult(false, "Tool Cooldown remaining: "+(toolValues.get(tool)-diff)+"ms");
+                        return new DebugResult(this, TOOL, (toolValues.get(tool)-diff), (toolValues.get(tool)-diff)/50, (toolValues.get(tool)-diff)/1000);
+                    }
+                }
+                if(treeValues.containsKey(tree)&&cooldown.treeCooldowns.containsKey(tree)){
+                    long diff = now-cooldown.treeCooldowns.get(tree);
+                    if(diff/50<=treeValues.get(tree)){
+                        return new DebugResult(this, TREE, (treeValues.get(tree)-diff), (treeValues.get(tree)-diff)/50, (treeValues.get(tree)-diff)/1000);
                     }
                 }
             }
-            return new DebugResult(true, "Cooldown ready!");
+            return new DebugResult(this, SUCCESS);
         }
         @Override
         public String getDesc(){
             return "How long (in ticks) should players have to wait before felling another tree?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Cooldown remaining: {0}ms", "Tool cooldown remaining: {0}ms", "Tree cooldown remaining: {0}ms", "Cooldown ready");
         }
     };
     protected final String name;
@@ -1320,13 +1450,18 @@ public abstract class Option<E>{
     public E globalValue;
     public HashMap<Tool, E> toolValues = new HashMap<>();
     public HashMap<Tree, E> treeValues = new HashMap<>();
+    private final Object defaultConfigValue;
     protected Option(String name, boolean global, boolean tool, boolean tree, E defaultValue){
+        this(name, global, tool, tree, defaultValue, defaultValue);
+    }
+    protected Option(String name, boolean global, boolean tool, boolean tree, E defaultValue, Object defaultConfigValue){
         this.name = name;
         this.global = global;
         this.tool = tool;
         this.tree = tree;
         this.defaultValue = defaultValue;
         options.add(this);
+        this.defaultConfigValue = defaultConfigValue;
     }
     public String getFriendlyName(){
         return name;
@@ -1362,7 +1497,7 @@ public abstract class Option<E>{
      * @return the loaded value
      */
     public abstract E load(Object o);
-    public E loadFromconfig(FileConfiguration config){
+    public E loadFromConfig(FileConfiguration config){
         return load(config.get(getGlobalName()));
     }
     private static Material loadMaterial(Object o){
@@ -1563,5 +1698,40 @@ public abstract class Option<E>{
             total+=blocks.get(i).size();
         }
         return total;
+    }
+    public String getDefaultConfigValue(){
+        if(defaultConfigValue==null)return null;
+        if(defaultConfigValue instanceof HashSet){
+            String s = "";
+            for(Object o : (HashSet)defaultConfigValue){
+                s+="\n    - "+o;
+            }
+            return s;
+        }
+        return defaultConfigValue.toString();
+    }
+    public boolean hasDebugText(){
+        return getGlobalDebugText()!=null||getToolDebugText()!=null||getTreeDebugText()!=null||getSuccessDebugText()!=null;
+    }
+    public String[] getDebugText(){
+        return new String[]{null,null,null,null};
+    }
+    public String getGlobalDebugText(){
+        return getDebugText()[0];
+    }
+    public String getToolDebugText(){
+        return getDebugText()[1];
+    }
+    public String getTreeDebugText(){
+        return getDebugText()[2];
+    }
+    public String getSuccessDebugText(){
+        return getDebugText()[3];
+    }
+    private static String[] generateDebugText(String globalWith$, String success){
+        return new String[]{globalWith$.replace("$", ""),globalWith$.replace("$", " for tool"),globalWith$.replace("$", " for tree"),success};
+    }
+    private static String[] generateDebugText(String global, String tool, String tree, String success){
+        return new String[]{global,tool,tree,success};
     }
 }

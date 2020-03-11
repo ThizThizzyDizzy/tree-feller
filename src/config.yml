@@ -1,12 +1,10 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.11
+# Version 1.12
+
+# Some options are disabled, such as min-durability and min-durability. To enable them, remove the # at the beginning of the line
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
-
-## If a tree cannot be felled for any reason, the plugin will do nothing and the axe will act like vanilla ##
-
-# Some options are disabled, such as min-durability and min-durability. To enable them, remove the # at the beginning of the line
 
 # How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)
 scan-distance: 256
@@ -39,7 +37,7 @@ diagonal-leaves: false
 ignore-leaf-data: false
 
 # Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)
-#require-cross-section: false
+require-cross-section: false
 
 # Should the tree cut down with an animation?
 cutting-animation: false
@@ -57,10 +55,10 @@ replant-saplings: false
 spawn-saplings: 0
 
 # What blocks can saplings be planted on?
-grass:
-    - GRASS_BLOCK
+grass: 
     - DIRT
     - PODZOL
+    - GRASS_BLOCK
 
 # What felling behavior should logs have?
 # Valid options:
@@ -110,16 +108,16 @@ directional-fall-behavior: RANDOM
 
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
-overridables:
-    - GRASS
-    - AIR
+overridables: 
     - CAVE_AIR
     - WATER
     - TALL_GRASS
-    - SEAGRASS
-    - TALL_SEAGRASS
     - FERN
     - LARGE_FERN
+    - SEAGRASS
+    - GRASS
+    - AIR
+    - TALL_SEAGRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -127,11 +125,11 @@ lock-fall-cardinal: false
 # How much velocity should falling trees get?
 # (Only used when log or leaf behavior is set to FALL or similar)
 # All of the blocks in the tree will fall in the same direction with this velocity.
-directional-fall-velocity: .35
+directional-fall-velocity: 0.35
 
 # How much random sideways velocity should falling blocks get?
 # (Only used when log or leaf behavior is set to FALL or similar)
-random-fall-velocity: 0
+random-fall-velocity: 0.0
 
 # If a tool has unbreaking, should it take less damage from cutting trees?
 respect-unbreaking: true
@@ -139,8 +137,17 @@ respect-unbreaking: true
 # How much damage should tools take per log? (Multiplier)
 damage-mult: 1.0
 
-# Should axe enchantments such as Fortune and Silk Touch be applied to leaves?
-leaf-enchantments: false
+# Should Fortune on an axe be applied to leaves?
+leaf-fortune: true
+
+# Should Silk Touch on an axe be applied to leaves?
+leaf-silk-touch: false
+
+# Should Fortune on an axe be applied to logs?
+log-fortune: true
+
+# Should Silk Touch on an axe be applied to leaves?
+log-silk-touch: true
 
 # When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)
 # This may cause issues with custom trees that have multiple trunks or branches that extend very low
@@ -164,7 +171,7 @@ log-drop-chance: 1.0
 # ex:
 #   - ghost sound
 #   - smoke
-global-effects:
+global-effects: 
     - ALL
 
 # Tools must have these enchantments at this level or higher to fell trees
@@ -191,6 +198,9 @@ global-effects:
 # Tools with more than this percentage of durability will be unable to fell trees
 #max-durability-percent:
 
+# If set to true, tools will not be able to fell a tree if doing so would break the tool.
+prevent-breakage: false
+
 # Tools must have all literal strings in this list in order to fell trees
 # ex:
 # - Can fell trees
@@ -205,10 +215,10 @@ global-effects:
 #required-permissions:
 
 # What should the minimum time be for felling trees? (0-24000)
-#min-time: 0
+#min-time:
 
 # What should the maximum time be for felling trees? (0-24000)
-#max-time: 24000
+#max-time:
 
 # What should the maximum phase be for felling trees? (0-7)
 # Phases:
@@ -220,7 +230,7 @@ global-effects:
 # 5 = waxing crescent
 # 6 = third quarter
 # 7 = waxing gibbous
-#min-phase: 0
+#min-phase:
 
 # What should the minimum phase be for felling trees? (0-7)
 # Phases:
@@ -232,7 +242,7 @@ global-effects:
 # 5 = waxing crescent
 # 6 = third quarter
 # 7 = waxing gibbous
-#max-phase: 7
+#max-phase:
 
 # Should the tree feller work in adventure mode?
 enable-adventure: false
@@ -243,11 +253,11 @@ enable-survival: true
 # Should the tree feller work in creative mode?
 enable-creative: false
 
-# Should the tree feller work when not sneaking?
-without-sneak: true
-
 # Should the tree feller work when sneaking?
 with-sneak: false
+
+# Should the tree feller work when not sneaking?
+without-sneak: true
 
 # In what worlds should the tree feller work? (Inverted if world-blacklist is set to true)
 #worlds:
@@ -255,7 +265,7 @@ with-sneak: false
 world-blacklist: false
 
 # How long (in ticks) should players have to wait before felling another tree?
-#cooldown: 0
+#cooldown:
 
 # What tools can be used to cut down trees?
 # Format:
@@ -283,7 +293,10 @@ world-blacklist: false
 # random-fall-velocity:
 # respect-unbreaking:
 # damage-mult:
-# leaf-enchantments:
+# leaf-fortune:
+# leaf-silk-touch:
+# log-fortune:
+# log-silk-touch:
 # leave-stump:
 # rotate-logs:
 # convert-wood-to-log:
@@ -296,6 +309,7 @@ world-blacklist: false
 # max-durability:
 # min-durability-percent:
 # max-durability-percent:
+# prevent-breakage:
 # required-lore:
 # required-name:
 # required-permissions:
@@ -303,12 +317,12 @@ world-blacklist: false
 # max-time:
 # min-phase:
 # max-phase:
-# allowed-trees:         The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
+# allowed-trees:        The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # enable-adventure:
 # enable-survival:
 # enable-creative:
-# without-sneak:
 # with-sneak:
+# without-sneak:
 # worlds:
 # world-blacklist:
 # cooldown:
@@ -326,7 +340,7 @@ tools:
     - IRON_AXE
     - GOLDEN_AXE
     - DIAMOND_AXE
-    
+
 # What materials count as trees?
 # Format:
 #    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]
@@ -346,7 +360,7 @@ tools:
 # replant-saplings:
 # spawn-saplings:
 # sapling:        If replant-saplings is enabled, this will replant the tree with this type of sapling
-# max-saplings:   If replant-saplings is enabled, this will limit the number of saplings that can be replanted
+# max-saplings:        If replant-saplings is enabled, this will limit the number of saplings that can be replanted
 # grass:
 # log-behavior:
 # leaf-behavior:
@@ -357,7 +371,10 @@ tools:
 # random-fall-velocity:
 # respect-unbreaking:
 # damage-mult:
-# leaf-enchantments:
+# leaf-fortune:
+# leaf-silk-touch:
+# log-fortune:
+# log-silk-touch:
 # leave-stump:
 # rotate-logs:
 # convert-wood-to-log:
@@ -366,10 +383,11 @@ tools:
 # global-effects:
 # required-enchantments:
 # banned-enchantments:
-# minimum-durability:
-# maximum-durability:
-# minimum-durability-percent:
-# maximum-durability-percent:
+# min-durability:
+# max-durability:
+# min-durability-percent:
+# max-durability-percent:
+# prevent-breakage:
 # required-lore:
 # required-name:
 # required-permissions:
@@ -380,8 +398,8 @@ tools:
 # enable-adventure:
 # enable-survival:
 # enable-creative:
-# without-sneak:
 # with-sneak:
+# without-sneak:
 # worlds:
 # world-blacklist:
 # cooldown:
@@ -397,7 +415,7 @@ trees:
     - [[JUNGLE_LOG, JUNGLE_WOOD], JUNGLE_LEAVES, {sapling: JUNGLE_SAPLING, max-saplings: 4}]
     - [[DARK_OAK_LOG, DARK_OAK_WOOD], DARK_OAK_LEAVES, {sapling: DARK_OAK_SAPLING, max-saplings: 4}]
     - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, max-saplings: 1}]
-        
+
 # Here, you can create custom effects for trees or tools
 # Fields:
 # name: <value>        This is the effect's name. It is used to assign the effect to a tree or tool
@@ -443,3 +461,135 @@ trees:
 #   - {name: explosion, chance: .01, location: tool, type: explosion, power: 4}
 #   - {name: ghost sound, chance: .1, location: tree, type: sound, sound: ambient.cave, volume: 10, pitch: 0.5}
 effects:
+
+# Here, you can customize what messages are sent the tree feller is unable to cut down a tree. Most options are customizable; The debug messages are provided for reference
+# Format:  prefix-<option name>-suffix: "<text>"
+# Valid prefixes are:
+# debug        This is the message used when debug mode is on
+# actionbar    This will be sent to the player's actionbar
+# chat         This will be sent to the player in the chat
+# Valid suffixes are:
+# <no suffix>  This defines what message is sent when this option's global requirement is not met
+# -tool        This defines what message is sent when a tool requirement is not met
+# -tree        This defines what message is sent when a tree requirement is not met
+# -success     This defines what message is sent when global, tree, and tool requirements for are all met
+# In addition to the options, there are a few additional messages that can be customized:
+# toggle           This is sent when the player cuts down a tree when the tree feller is off
+# checking         This is sent for each tree/tool pair the tree feller checks
+# durability-low   This is sent when the tool's durability is too low to fell the tree
+# partial          This is sent when a tree is being partially cut
+# protected        This is sent when a tree cannot be felled due to a protection plugin (This may be on top of that plugin's protected message)
+# success          This is sent when a tree is successfully felled
+# For example, if you want a player to be sent a message in the chat if the tree is too small:
+# chat-required-logs: The tree's too small!
+
+debug-toggle: "Tree feller is currently toggled off"
+debug-checking: "Checking tree #{0} with tool #{1}"
+debug-prevent-breakage: "Felling this tree would break the tool"
+debug-prevent-breakage-success: "Felling this tree won't break the tool"
+debug-durability-low: "Tool durability is too low: {0}<{1}"
+debug-partial: "Tool is cutting partial tree"
+debug-protected: "This tree is protected by {0} at {1} {2} {3}"
+debug-success: "Success! Felling tree..."
+debug-required-logs: "Tree has too few logs: {0}<{1}"
+debug-required-logs-tool: "Tree has too few logs for tool: {0}<{1}"
+debug-required-logs-tree: "Tree has too few logs for tree: {0}<{1}"
+debug-required-logs-success: "Tree has enough logs"
+debug-required-leaves: "Tree has too few leaves: {0}<{1}"
+debug-required-leaves-tool: "Tree has too few leaves for tool: {0}<{1}"
+debug-required-leaves-tree: "Tree has too few leaves for tree: {0}<{1}"
+debug-required-leaves-success: "Tree has enough leaves"
+debug-max-logs: "Tree has too many logs: {0}>{1}"
+debug-max-logs-tool: "Tree has too many logs for tool: {0}>{1}"
+debug-max-logs-tree: "Tree has too many logs for tree: {0}>{1}"
+debug-max-logs-success: "Tree has few enough logs"
+debug-max-height: "Tree was cut {0} blocks too high"
+debug-max-height-tool: "Tree was cut {0} blocks too high for tool"
+debug-max-height-tree: "Tree was cut {0} blocks too high for tree"
+debug-max-height-success: "Tree was cut low enough"
+debug-require-cross-section: "A full cross-section has not been cut"
+debug-require-cross-section-tool: "A full cross-section has not been cut for tool"
+debug-require-cross-section-tree: "A full cross-section has not been cut for tree"
+debug-require-cross-section-success: "A full cross-section has been cut"
+debug-required-enchantments: "Enchantment missing: {0} at minimum level {1}"
+debug-required-enchantments-tool: "Enchantment missing for tool: {0} at minimum level {1}"
+debug-required-enchantments-tree: "Enchantment missing for tree: {0} at minimum level {1}"
+debug-required-enchantments-success: "All required enchantments met"
+debug-banned-enchantments: "Tool contains banned enchantment: {0} above level {1}"
+debug-banned-enchantments-tool: "Tool contains banned enchantment for tool: {0} above level {1}"
+debug-banned-enchantments-tree: "Tool contains banned enchantment for tree: {0} above level {1}"
+debug-banned-enchantments-success: "No banned enchantments found"
+debug-min-durability: "Tool durability is less than minimum allowed: {1}"
+debug-min-durability-tool: "Tool durability is less than minimum allowed for tool: {1}"
+debug-min-durability-tree: "Tool durability is less than minimum allowed for tree: {1}"
+debug-min-durability-success: "Tool meets minimum durability requirement"
+debug-max-durability: "Tool durability is greater than maximum allowed: {1}"
+debug-max-durability-tool: "Tool durability is greater than maximum allowed: {1}"
+debug-max-durability-tree: "Tool durability is greater than maximum allowed: {1}"
+debug-max-durability-success: "Tool meets maximum durability requirement"
+debug-min-durability-percent: "Tool durability is less than minimum allowed: {1}"
+debug-min-durability-percent-tool: "Tool durability is less than minimum allowed for tool: {1}"
+debug-min-durability-percent-tree: "Tool durability is less than minimum allowed for tree: {1}"
+debug-min-durability-percent-success: "Tool meets minimum durability requirement"
+debug-max-durability-percent: "Tool durability is greater than maximum allowed: {1}"
+debug-max-durability-percent-tool: "Tool durability is greater than maximum allowed: {1}"
+debug-max-durability-percent-tree: "Tool durability is greater than maximum allowed: {1}"
+debug-max-durability-percent-success: "Tool meets maximum durability requirement"
+debug-required-lore: "Tool is missing required lore: {0}"
+debug-required-lore-tool: "Tool is missing required lore for tool: {0}"
+debug-required-lore-tree: "Tool is missing required lore for tree: {0}"
+debug-required-lore-success: "Tool has all required lore"
+debug-required-name: "Tool name does not match required name: {0}"
+debug-required-name-tool: "Tool name does not match required name for tool: {0}"
+debug-required-name-tree: "Tool name does not match required name for tree: {0}"
+debug-required-name-success: "Tool name matches"
+debug-required-permissions: "Player is missing required permission: {0}"
+debug-required-permissions-tool: "Player is missing required permission for tool: {0}"
+debug-required-permissions-tree: "Player is missing required permission for tree: {0}"
+debug-required-permissions-success: "Player has all required permissions"
+debug-min-time: "Time is less than minimum allowed: {0}"
+debug-min-time-tool: "Time is less than minimum allowed for tool: {0}"
+debug-min-time-tree: "Time is less than minimum allowed for tree: {0}"
+debug-min-time-success: "Time meets minimum requirement"
+debug-max-time: "Time is greater than maximum allowed: {0}"
+debug-max-time-tool: "Time is greater than maximum allowed for tool: {0}"
+debug-max-time-tree: "Time is greater than maximum allowed for tree: {0}"
+debug-max-time-success: "Time meets maximum requirement"
+debug-min-phase: "Phase is less than minimum allowed: {0}"
+debug-min-phase-tool: "Phase is less than minimum allowed for tool: {0}"
+debug-min-phase-tree: "Phase is less than minimum allowed for tree: {0}"
+debug-min-phase-success: "Phase meets minimum requirement"
+debug-max-phase: "Phase is greater than maximum allowed: {0}"
+debug-max-phase-tool: "Phase is greater than maximum allowed for tool: {0}"
+debug-max-phase-tree: "Phase is greater than maximum allowed for tree: {0}"
+debug-max-phase-success: "Phase meets maximum requirement"
+debug-allowed-trees-tool: "Tree is not allowed for tool: {0}"
+debug-allowed-trees-success: "Tree is allowed for tool"
+debug-enable-adventure: "TreeFeller is disabled in adventure mode"
+debug-enable-adventure-tool: "Tool is disabled in adventure mode"
+debug-enable-adventure-tree: "Tree is disabled in adventure mode"
+debug-enable-adventure-success: "All components OK for adventure mode"
+debug-enable-survival: "TreeFeller is disabled in survival mode"
+debug-enable-survival-tool: "Tool is disabled in survival mode"
+debug-enable-survival-tree: "Tree is disabled in survival mode"
+debug-enable-survival-success: "All components OK for survival mode"
+debug-enable-creative: "TreeFeller is disabled in creative mode"
+debug-enable-creative-tool: "Tool is disabled in creative mode"
+debug-enable-creative-tree: "Tree is disabled in creative mode"
+debug-enable-creative-success: "All components OK for creative mode"
+debug-with-sneak: "TreeFeller is disabled when sneaking"
+debug-with-sneak-tool: "Tool is disabled when sneaking"
+debug-with-sneak-tree: "Tree is disabled when sneaking"
+debug-with-sneak-success: "Felling allowed when sneaking"
+debug-without-sneak: "TreeFeller is disabled when not sneaking"
+debug-without-sneak-tool: "Tool is disabled when not sneaking"
+debug-without-sneak-tree: "Tree is disabled when not sneaking"
+debug-without-sneak-success: "Felling allowed when not sneaking"
+debug-worlds: "World {0} is invalid"
+debug-worlds-tool: "World {0} is invalid for tool"
+debug-worlds-tree: "World {0} is invalid for tree"
+debug-worlds-success: "World {0} is valid"
+debug-cooldown: "Cooldown remaining: {0}ms"
+debug-cooldown-tool: "Tool cooldown remaining: {0}ms"
+debug-cooldown-tree: "Tree cooldown remaining: {0}ms"
+debug-cooldown-success: "Cooldown ready"

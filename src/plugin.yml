@@ -1,10 +1,10 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.11
+version: 1.12
 api-version: 1.13
 author: ThizThizzyDizzy
 website: "https://www.spigotmc.org/resources/thizzyz-tree-feller.64346/"
 name: TreeFeller
 commands:
     treefeller:
-        description: Reloads the tree feller or toggles debug mode
-        usage: /treefeller reload|debug [on|off]
+        description: TreeFeller commands
+        usage: /treefeller help | toggle [on|off] | on | off | reload | debug [on|off]

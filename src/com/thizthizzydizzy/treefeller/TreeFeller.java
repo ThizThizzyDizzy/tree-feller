@@ -2,16 +2,16 @@ package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.compat.TestResult;
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.HashSet;
 import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -20,14 +20,18 @@ import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -40,10 +44,21 @@ public class TreeFeller extends JavaPlugin{
     public static ArrayList<Tree> trees = new ArrayList<>();
     public static ArrayList<Effect> effects = new ArrayList<>();
     public static HashMap<UUID, Cooldown> cooldowns = new HashMap<>();
-    public ArrayList<UUID> fallingBlocks = new ArrayList<>();
+    public HashSet<UUID> disabledPlayers = new HashSet<>();
+    public ArrayList<FallingTreeBlock> fallingBlocks = new ArrayList<>();
     public ArrayList<Sapling> saplings = new ArrayList<>();
     boolean debug = false;
     private ArrayList<NaturalFall> naturalFalls = new ArrayList<>();
+    private static final HashMap<Material, int[]> exp = new HashMap<>();
+    static{//Perhaps this should be in the config rather than hard-coded...
+        exp.put(Material.COAL_ORE, new int[]{0, 2});
+        exp.put(Material.DIAMOND_ORE, new int[]{3, 7});
+        exp.put(Material.EMERALD_ORE, new int[]{3, 7});
+        exp.put(Material.LAPIS_ORE, new int[]{2, 5});
+        exp.put(Material.NETHER_QUARTZ_ORE, new int[]{2, 5});
+        exp.put(Material.REDSTONE_ORE, new int[]{1, 5});
+        exp.put(Material.SPAWNER, new int[]{15, 43});
+    }
     public void fellTree(BlockBreakEvent event){
         if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
     }
@@ -64,7 +79,7 @@ public class TreeFeller extends JavaPlugin{
      * @param gamemode  the player's gamemode
      * @param sneaking  weather or not the player was sneaking
      * @param dropItems weather or not to drop items
-     * @return the items that would have been dropped, only <code>dropItems</code> is false. Returns null if the tree was not felled.
+     * @return the items that would have been dropped. <b>This is not the actual dropped items, but possible dropped items</b> Returns null if the tree was not felled.
      */
     public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
         if(gamemode==GameMode.SPECTATOR)return null;
@@ -73,12 +88,16 @@ public class TreeFeller extends JavaPlugin{
         TREE:for(Tree tree : trees){
             if(!tree.trunk.contains(material))continue;
             TOOL:for(Tool tool : tools){
+                if(player!=null&&disabledPlayers.contains(player.getUniqueId())){
+                    debug(player, true, false, "toggle");
+                    return null;
+                }
+                debug(player, "checking", true, trees.indexOf(tree), tools.indexOf(tool));
                 if(tool.material!=Material.AIR&&axe.getType()!=tool.material)continue;
-                debug(player, "Checking tree #"+trees.indexOf(tree)+" with tool #"+tools.indexOf(tool)+"...", true);
                 for(Option o : Option.options){
                     DebugResult result = o.check(tool, tree, block, player, axe, gamemode, sneaking, dropItems);
                     if(result==null)continue;
-                    debug(player, false, result.success, result.message);
+                    debug(player, false, result.success, result.message, result.args);
                     if(!result.success)continue TOOL;
                 }
                 int durability = axe.getType().getMaxDurability()-axe.getDurability();
@@ -87,7 +106,7 @@ public class TreeFeller extends JavaPlugin{
                 for(Option o : Option.options){
                     DebugResult result = o.checkTrunk(tool, tree, blocks, block);
                     if(result==null)continue;
-                    debug(player, false, result.success, result.message);
+                    debug(player, false, result.success, result.message, result.args);
                     if(!result.success)continue TOOL;
                 }
                 int total = getTotal(blocks);
@@ -106,12 +125,19 @@ public class TreeFeller extends JavaPlugin{
                     if(durabilityCost<1)durabilityCost++;
                 }
                 if(gamemode==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
-                if(durabilityCost>durability){
-                    if(!Option.ALLOW_PARTIAL.get(tool, tree)){
-                        debug(player, false, false, "Tool durability is too low: "+durability+"<"+durabilityCost);
+                if(Option.PREVENT_BREAKAGE.get(tool, tree)){
+                    if(durabilityCost==durability){
+                        debug(player, false, false, "prevent-breakage");
                         continue;
                     }
-                    debug(player, "Tool is cutting partial tree!", false);
+                    debug(player, false, true, "prevent-breakage-success");
+                }
+                if(durabilityCost>durability){
+                    if(!Option.ALLOW_PARTIAL.get(tool, tree)){
+                        debug(player, false, false, "durability-low", durability, durabilityCost);
+                        continue;
+                    }
+                    debug(player, "partial", false);
                     durabilityCost = total = durability;
                 }
                 ArrayList<Integer> distances = new ArrayList<>(blocks.keySet());
@@ -136,7 +162,7 @@ public class TreeFeller extends JavaPlugin{
                 everything.addAll(toList(allLeaves));
                 TestResult res = TreeFellerCompat.test(player, everything);
                 if(res!=null){
-                    debug(player, false, false, "This tree is protected by "+res.plugin+" at "+res.block.getX()+" "+res.block.getY()+" "+res.block.getZ());
+                    debug(player, false, false, "protected", res.plugin, res.block.getX(), res.block.getY(), res.block.getZ());
                     continue TREE;
                 }
                 for(Option o : Option.options){
@@ -145,7 +171,7 @@ public class TreeFeller extends JavaPlugin{
                     debug(player, false, result.success, result.message);
                     if(!result.success)continue TOOL;
                 }
-                debug(player, true, true, "Success! Felling tree...");
+                debug(player, true, true, "success");
                 if(Option.LEAVE_STUMP.get(tool, tree)){
                     for(int i : blocks.keySet()){
                         for(Iterator<Block> it = blocks.get(i).iterator(); it.hasNext();){
@@ -209,15 +235,13 @@ public class TreeFeller extends JavaPlugin{
                     for(int i : distances){
                         int TTL = tTL - Ttl;
                         delay+=Option.ANIM_DELAY.get(tool, tree);
-                        if(!dropItems){
-                            for(Block b : blocks.get(i)){
-                                if(ttl<=0)break;
-                                for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
-                                    droppedItems.addAll(Option.LEAF_ENCHANTMENTS.get(tool, tree)?leaf.getDrops(axe):leaf.getDrops());
-                                }
-                                droppedItems.addAll(b.getDrops(axe));
-                                ttl--;
+                        for(Block b : blocks.get(i)){
+                            if(ttl<=0)break;
+                            for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
+                                droppedItems.addAll(getDrops(leaf, tool, tree, axe));
                             }
+                            droppedItems.addAll(getDrops(b, tool, tree, axe));
+                            ttl--;
                         }
                         new BukkitRunnable() {
                             @Override
@@ -226,18 +250,12 @@ public class TreeFeller extends JavaPlugin{
                                 for(Block b : blocks.get(i)){
                                     if(tTl<=0)break;
                                     for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
-                                        if(dropItems){
-                                            breakLeaf(tree, tool, axe, leaf, block, lowest, player, seed, toList(blocks));
-                                        }else leaf.setType(Material.AIR);
+                                        breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
                                     }
-                                    if(dropItems)breakLog(tree, tool, axe, b, block, lowest, player, seed, toList(blocks));
-                                    else b.setType(Material.AIR);
+                                    breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
                                     tTl--;
                                 }
-                                for(NaturalFall fall : naturalFalls){
-                                    fall.fall();
-                                }
-                                naturalFalls.clear();
+                                processNaturalFalls();
                             }
                         }.runTaskLater(this, delay);
                         Ttl += blocks.get(i).size();
@@ -257,19 +275,10 @@ public class TreeFeller extends JavaPlugin{
                     for(int i : distances){
                         for(Block b : blocks.get(i)){
                             if(total<=0)break;
-                                for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
-                                    if(dropItems){
-                                        breakLeaf(tree, tool, axe, leaf, block, lowest, player, seed, toList(blocks));
-                                    }else{
-                                        droppedItems.addAll(Option.LEAF_ENCHANTMENTS.get(tool, tree)?leaf.getDrops(axe):leaf.getDrops());
-                                        leaf.setType(Material.AIR);
-                                    }
-                                }
-                            if(dropItems)breakLog(tree, tool, axe, b, block, lowest, player, seed, toList(blocks));
-                            else{
-                                droppedItems.addAll(b.getDrops(axe));
-                                b.setType(Material.AIR);
+                            for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
+                                breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
                             }
+                            breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
                             total--;
                         }
                     }
@@ -279,10 +288,7 @@ public class TreeFeller extends JavaPlugin{
                             if(s!=null)s.place();
                         }
                     }
-                    for(NaturalFall fall : naturalFalls){
-                        fall.fall();
-                    }
-                    naturalFalls.clear();
+                    processNaturalFalls();
                 }
                 if(player!=null){
                     long time = System.currentTimeMillis();
@@ -655,8 +661,11 @@ public class TreeFeller extends JavaPlugin{
 //</editor-fold>
         for(Option option : Option.options){
             if(option.global){
-                option.setValue(option.loadFromconfig(getConfig()));
+                option.setValue(option.loadFromConfig(getConfig()));
             }
+        }
+        for(Message message : Message.messages){
+            message.load(getConfig());
         }
         if(Option.STARTUP_LOGS.isTrue()){
             logger.log(Level.INFO, "Loaded global values:");
@@ -708,12 +717,15 @@ public class TreeFeller extends JavaPlugin{
                             continue;
                         }
                         String s = ((String)key).toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
+                        boolean found = false;
                         for(Option option : Option.options){
                             if(!option.tree)continue;
                             if(option.getLocalName().equals(s)){
+                                found = true;
                                 option.setValue(tree, option.load(map.get(key)));
                             }
                         }
+                        if(!found)logger.log(Level.WARNING, "Found unknown tree option: {0}", key);
                     }
                 }
                 if(Option.STARTUP_LOGS.isTrue())tree.print(logger);
@@ -759,12 +771,15 @@ public class TreeFeller extends JavaPlugin{
                         continue;
                     }
                     String s = ((String)key).toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
+                    boolean found = false;
                     for(Option option : Option.options){
                         if(!option.tool)continue;
                         if(option.getLocalName().equals(s)){
+                            found = true;
                             option.setValue(tool, option.load(map.get(key)));
                         }
                     }
+                    if(!found)logger.log(Level.WARNING, "Found unknown tool option: {0}", key);
                 }
                 if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
                 this.tools.add(tool);
@@ -782,18 +797,6 @@ public class TreeFeller extends JavaPlugin{
         }
 //</editor-fold>
     }
-    private Effect getEffect(String string){
-        for(Effect e : effects){
-            if(e.name.equals(string))return e;
-        }
-        for(Effect e : effects){
-            if(e.name.trim().equals(string))return e;
-        }
-        for(Effect e : effects){
-            if(e.name.trim().equalsIgnoreCase(string))return e;
-        }
-        return null;
-    }
     public Sapling getSapling(Block b){
         for(Iterator<Sapling> it = saplings.iterator(); it.hasNext();){
             Sapling sapling = it.next();
@@ -805,23 +808,25 @@ public class TreeFeller extends JavaPlugin{
         }
         return null;
     }
-    private void breakLog(Tree tree, Tool tool, ItemStack axe, Block log, Block origin, int lowest, Player player, long seed, List<Block> blocks){
+    private void breakBlock(boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed){
         ArrayList<Material> overridables = new ArrayList<>(Option.OVERRIDABLES.get(tool, tree));
         ArrayList<Effect> effects = new ArrayList<>();
+        boolean isLeaf = !tree.trunk.contains(block.getType());
         for(Effect e : Option.EFFECTS.get(tool, tree)){
-            if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
+            if(e.location==Effect.EffectLocation.TREE)effects.add(e);
+            if(isLeaf){
+                if(e.location==Effect.EffectLocation.LEAVES)effects.add(e);
+            }else{
+                if(e.location==Effect.EffectLocation.LOGS)effects.add(e);
+            }
         }
-        breakBlock(Option.LOG_BEHAVIOR.get(tool, tree), Option.CONVERT_WOOD_TO_LOG.get(tool, tree), Option.LOG_DROP_CHANCE.get(tool, tree), Option.DIRECTIONAL_FALL_VELOCITY.get(tool, tree), Option.RANDOM_FALL_VELOCITY.get(tool, tree), Option.ROTATE_LOGS.get(tool, tree), Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree), true, Option.LOCK_FALL_CARDINAL.get(tool, tree), axe, log, origin, lowest, player, seed, effects, blocks, overridables);
-    }
-    private void breakLeaf(Tree tree, Tool tool, ItemStack axe, Block leaf, Block origin, int lowest, Player player, long seed, List<Block> blocks){
-        ArrayList<Material> overridables = new ArrayList<>(Option.OVERRIDABLES.get(tool, tree));
-        ArrayList<Effect> effects = new ArrayList<>();
-        for(Effect e : Option.EFFECTS.get(tool, tree)){
-            if(e.location==Effect.EffectLocation.LOGS||e.location==Effect.EffectLocation.TREE)effects.add(e);
-        }
-        breakBlock(Option.LEAF_BEHAVIOR.get(tool, tree), Option.CONVERT_WOOD_TO_LOG.get(tool, tree), Option.LEAF_DROP_CHANCE.get(tool, tree), Option.DIRECTIONAL_FALL_VELOCITY.get(tool, tree), Option.RANDOM_FALL_VELOCITY.get(tool, tree), Option.ROTATE_LOGS.get(tool, tree), Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree), Option.LEAF_ENCHANTMENTS.get(tool, tree), Option.LOCK_FALL_CARDINAL.get(tool, tree), axe, leaf, origin, lowest, player, seed, effects, blocks, overridables);
-    }
-    private void breakBlock(FellBehavior behavior, boolean convert, double dropChance, double directionalFallVelocity, double randomFallVelocity, boolean rotate, DirectionalFallBehavior directionalFallBehavior, boolean applyEnchantments, boolean lockCardinal, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, Iterable<Effect> effects, List<Block> blocks, ArrayList<Material> overridables){
+        FellBehavior behavior = isLeaf?Option.LEAF_BEHAVIOR.get(tool, tree):Option.LOG_BEHAVIOR.get(tool, tree);
+//        double dropChance = dropItems?(isLeaf?Option.LEAF_DROP_CHANCE.get(tool, tree):Option.LOG_DROP_CHANCE.get(tool, tree)):0;
+        double directionalFallVelocity = Option.DIRECTIONAL_FALL_VELOCITY.get(tool, tree);
+        double randomFallVelocity = Option.RANDOM_FALL_VELOCITY.get(tool, tree);
+        boolean rotate = Option.ROTATE_LOGS.get(tool, tree);
+        DirectionalFallBehavior directionalFallBehavior = Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree);
+        boolean lockCardinal = Option.LOCK_FALL_CARDINAL.get(tool, tree);
         if(behavior==FellBehavior.FALL||behavior==FellBehavior.FALL_HURT||behavior==FellBehavior.NATURAL){
             TreeFellerCompat.removeBlock(player, block);
         }else{
@@ -830,69 +835,27 @@ public class TreeFeller extends JavaPlugin{
         switch(behavior){
             case INVENTORY:
                 if(player!=null){
-                    boolean drop = true;
-                    int bonus = 0;
-                    if(dropChance<=1){
-                        drop = new Random().nextDouble()<dropChance;
-                    }else{
-                        while(dropChance>1){
-                            dropChance--;
-                            bonus++;
-                        }
-                        if(new Random().nextDouble()<dropChance)bonus++;
-                    }
-                    if(drop){
-                        for(int i = 0; i<bonus+1; i++){
-                            for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
-                                if(convert){
-                                    if(s.getType().name().contains("_WOOD")){
-                                        s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
-                                    }
-                                }
-                                for(ItemStack st : player.getInventory().addItem(s).values()){
-                                    block.getWorld().dropItemNaturally(block.getLocation(), st);
-                                }
+                    if(dropItems){
+                        int[] xp = new int[]{0};
+                        for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp)){
+                            for(ItemStack st : player.getInventory().addItem(s).values()){
+                                block.getWorld().dropItemNaturally(block.getLocation(), st);
                             }
                         }
+                        player.setTotalExperience(player.getTotalExperience()+xp[0]);
                     }
                     block.setType(Material.AIR);
+                    break;
                 }
             case BREAK:
-                boolean drop = true;
-                int bonus = 0;
-                if(dropChance<=1){
-                    drop = new Random().nextDouble()<dropChance;
-                }else{
-                    while(dropChance>1){
-                        dropChance--;
-                        bonus++;
+                if(dropItems){
+                    int[] xp = new int[]{0};
+                    for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp)){
+                        block.getWorld().dropItemNaturally(block.getLocation(), s);
                     }
-                    if(new Random().nextDouble()<dropChance)bonus++;
+                    dropExp(block.getWorld(), block.getLocation(), xp[0]);
                 }
-                if(convert){
-                    if(drop){
-                        for(int i = 0; i<bonus+1; i++){
-                            for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
-                                if(s.getType().name().contains("_WOOD")){
-                                    s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
-                                }
-                                block.getWorld().dropItemNaturally(block.getLocation(), s);
-                            }
-                        }
-                    }
-                    block.setType(Material.AIR);
-                }else{
-                    for(int i = 0; i<bonus; i++){
-                        for(ItemStack s : applyEnchantments?block.getDrops(axe):block.getDrops()){
-                            block.getWorld().dropItemNaturally(block.getLocation(), s);
-                        }
-                    }
-                    if(drop){
-                        if(applyEnchantments)block.breakNaturally(axe);
-                        else block.breakNaturally();
-                    }
-                    else block.setType(Material.AIR);
-                }
+                block.setType(Material.AIR);
                 break;
             case FALL_HURT:
             case FALL:
@@ -908,17 +871,18 @@ public class TreeFeller extends JavaPlugin{
                 v.add(new Vector((Math.random()*2-1)*randomFallVelocity, randomFallVelocity/5, (Math.random()-.5)*randomFallVelocity));
                 falling.setVelocity(v);
                 falling.setHurtEntities(behavior.name().contains("HURT"));
-                if(behavior.name().contains("BREAK"))falling.addScoreboardTag("TreeFeller_Break");
+                boolean doBreak = behavior.name().contains("BREAK");
+                Player inv = null;
                 if(behavior.name().contains("INVENTORY")){
-                    if(player==null)falling.addScoreboardTag("TreeFeller_Break");
-                    else falling.addScoreboardTag("TreeFeller_Inventory_"+player.getUniqueId().toString());
+                    if(player==null)doBreak = true;
+                    else inv = player;
                 }
-                if(convert)falling.addScoreboardTag("TreeFeller_Convert");
+                RotationData rot = null;
                 if(falling.getBlockData() instanceof Orientable&&rotate){
-                    falling.addScoreboardTag("TreeFeller_R"+((Orientable)falling.getBlockData()).getAxis().name()+"_"+origin.getX()+"_"+origin.getY()+"_"+origin.getZ());
+                    rot = new RotationData((Orientable)falling.getBlockData(), origin);
                 }
                 block.setType(Material.AIR);
-                fallingBlocks.add(falling.getUniqueId());
+                fallingBlocks.add(new FallingTreeBlock(falling, tool, tree, axe, doBreak, inv, rot, dropItems));
                 break;
             case NATURAL:
                 v = directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity).normalize();
@@ -932,6 +896,195 @@ public class TreeFeller extends JavaPlugin{
             if(new Random().nextDouble()<e.chance)e.play(block);
         }
     }
+    public int randbetween(int[] minmax){
+        return randbetween(minmax[0], minmax[1]);
+    }
+    public int randbetween(int min, int max){
+        return new Random().nextInt(max-min+1)+min;
+    }
+    private Collection<? extends ItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
+        if(xp.length!=1)throw new IllegalArgumentException("xp must be an array of size 1!");
+        ArrayList<ItemStack> drops = new ArrayList<>();
+        double dropChance = tree.trunk.contains(block.getType())?Option.LOG_DROP_CHANCE.get(tool, tree):Option.LEAF_DROP_CHANCE.get(tool, tree);
+        boolean drop = true;
+        int bonus = 0;
+        if(dropChance<=1){
+            drop = new Random().nextDouble()<dropChance;
+        }else{
+            while(dropChance>1){
+                dropChance--;
+                bonus++;
+            }
+//            if(new Random().nextDouble()<dropChance)bonus++;//what's this for?
+        }
+        if(drop){
+            for(int i = 0; i<bonus+1; i++){
+                drops.addAll(getDrops(block, tool, tree, axe));
+                if(exp.containsKey(block.getType())){
+                    xp[0] += randbetween(exp.get(block.getType()));
+                }
+            }
+        }
+        return drops;
+    }
+    private Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe){
+        ArrayList<ItemStack> drops = new ArrayList<>();
+        boolean convert = Option.CONVERT_WOOD_TO_LOG.get(tool, tree);
+        boolean fortune, silk;
+        if(tree.trunk.contains(block.getType())){
+            fortune = Option.LOG_FORTUNE.get(tool, tree);
+            silk = Option.LOG_SILK_TOUCH.get(tool, tree);
+        }else{
+            fortune = Option.LEAF_FORTUNE.get(tool, tree);
+            silk = Option.LEAF_SILK_TOUCH.get(tool, tree);
+        }
+        ItemStack copy = axe.clone();
+        if(copy.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&!fortune)copy.removeEnchantment(Enchantment.LOOT_BONUS_BLOCKS);
+        if(copy.containsEnchantment(Enchantment.SILK_TOUCH)&&!silk)copy.removeEnchantment(Enchantment.SILK_TOUCH);
+        drops.addAll(block.getDrops(copy));
+        if(convert){
+            for(ItemStack s : drops){
+                if(s.getType().name().endsWith("_WOOD")){
+                    s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
+                }
+            }
+        }
+        return drops;
+    }
+    private static class RotationData{
+        private final Axis axis;
+        private final int x;
+        private final int y;
+        private final int z;
+        public RotationData(Orientable data, Block origin){
+            this(data.getAxis(), origin.getX(), origin.getY(), origin.getZ());
+        }
+        public RotationData(Axis axis, int x, int y, int z){
+            this.axis = axis;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
+    public class FallingTreeBlock{
+        public FallingBlock entity;
+        private final Tool tool;
+        private final Tree tree;
+        private final ItemStack axe;
+        private final boolean doBreak;
+        private final Player inv;
+        private final RotationData rot;
+        private final boolean dropItems;
+        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player inv, RotationData rot, boolean dropItems){
+            this.entity = entity;
+            this.tool = tool;
+            this.tree = tree;
+            this.axe = axe;
+            this.doBreak = doBreak;
+            this.inv = inv;
+            this.rot = rot;
+            this.dropItems = dropItems;
+        }
+        public void land(EntityChangeBlockEvent event){
+            if(event.getTo()==Material.AIR)return;
+            if(event.getBlock().getRelative(0, -1, 0).isPassable()){
+                event.setCancelled(true);
+                FallingBlock falling = event.getBlock().getWorld().spawnFallingBlock(event.getBlock().getLocation().add(.5,.5,.5), event.getBlockData());
+                entity = falling;
+                falling.setVelocity(new Vector(0, event.getEntity().getVelocity().getY(), 0));
+                falling.setHurtEntities(((FallingBlock)event.getEntity()).canHurtEntities());
+                for(String s : event.getEntity().getScoreboardTags()){
+                    falling.addScoreboardTag(s);
+                }
+            }else{
+                int[] xp = new int[]{0};
+                if(!dropItems){
+                    event.setCancelled(true);
+                    fallingBlocks.remove(this);
+                    return;
+                }
+                ArrayList<ItemStack> drops = getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp);
+                if(doBreak){
+                    event.setCancelled(true);
+                    for(ItemStack drop : drops)event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop);
+                    dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
+                }
+                if(inv!=null){
+                    event.setCancelled(true);
+                    for(ItemStack drop : drops){
+                        for(ItemStack stack : inv.getInventory().addItem(drop).values())event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
+                    }
+                    inv.setTotalExperience(inv.getTotalExperience()+xp[0]);
+                }
+                fallingBlocks.remove(this);
+                if(event.isCancelled())return;
+                if(rot!=null){
+                    Axis axis = rot.axis;
+                    double xDiff = Math.abs(rot.x-event.getEntity().getLocation().getX());
+                    double yDiff = Math.abs(rot.y-event.getEntity().getLocation().getY());
+                    double zDiff = Math.abs(rot.z-event.getEntity().getLocation().getZ());
+                    Axis newAxis = Axis.Y;
+                    if(Math.max(Math.max(xDiff, yDiff), zDiff)==xDiff)newAxis = Axis.X;
+                    if(Math.max(Math.max(xDiff, yDiff), zDiff)==zDiff)newAxis = Axis.Z;
+                    if(newAxis==Axis.X){
+                        switch(axis){
+                            case X:
+                                axis = Axis.Y;
+                                break;
+                            case Y:
+                                axis = Axis.X;
+                                break;
+                            case Z:
+                                break;
+                        }
+                    }
+                    if(newAxis==Axis.Z){
+                        switch(axis){
+                            case X:
+                                break;
+                            case Y:
+                                axis = Axis.Z;
+                                break;
+                            case Z:
+                                axis = Axis.X;
+                                break;
+                        }
+                    }
+                    Orientable data = (Orientable)event.getBlockData();
+                    data.setAxis(axis);
+                    event.setCancelled(true);
+                    event.getBlock().setType(event.getTo());
+                    event.getBlock().setBlockData(data);
+                }
+            }
+        }
+    }
+    private ArrayList<ItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp){
+        ArrayList<ItemStack> drops = new ArrayList<>();
+        if(!m.isBlock())return drops;
+        Block block = findAir(location);
+        if(block==null){
+            drops.add(new ItemStack(m));
+            return drops;
+        }
+        block.setType(m);
+        drops.addAll(getDropsWithBonus(block, tool, tree, axe, xp));
+        block.setType(Material.AIR);
+        return drops;
+    }
+    private Block findAir(Block location){
+        if(location.getType()==Material.AIR)return location;
+        for(int x = -8; x<=8; x++){
+            for(int y = 255; y>0; y--){
+                for(int z = -1; z<=8; z++){
+                    Block b = location.getWorld().getBlockAt(x,y,z);
+                    if(b.getType()==Material.AIR)return b;
+                }
+            }
+        }
+        getLogger().log(Level.SEVERE, "Could not find any nearby air blocks to simulate drops!");
+        return null;
+    }
     private class NaturalFall{
         private static final double interval = 0.1;
         private final Player player;
@@ -942,6 +1095,7 @@ public class TreeFeller extends JavaPlugin{
         private final Material material;
         private Axis axis = null;
         private final ArrayList<Material> overridables;
+        private boolean fell = false;
         public NaturalFall(Player player, Vector v, Block origin, Block block, int height, boolean rotate, ArrayList<Material> overridables){
             this.player = player;
             this.v = v.multiply(interval);
@@ -955,6 +1109,8 @@ public class TreeFeller extends JavaPlugin{
             this.overridables = overridables;
         }
         public void fall(){
+            if(fell)return;
+            fell = true;
             double dist = 0;
             Block target = block;
             Location l = block.getLocation().add(.5,.5,.5);
@@ -962,10 +1118,15 @@ public class TreeFeller extends JavaPlugin{
                 dist+=interval;
                 l = l.add(v);
                 Block b = l.getBlock();
+                triggerNaturalFall(b);
                 if(overridables.contains(b.getType()))target = b;
                 else break;
             }
-            while(overridables.contains(target.getRelative(0, -1, 0)))target = target.getRelative(0,-1,0);
+            Block b;
+            while(overridables.contains((b = target.getRelative(0, -1, 0)).getType())){
+                triggerNaturalFall(b);
+                target = b;
+            }
             target.setType(material);
             if(axis!=null){
                 double xDiff = Math.abs(origin.getX()-target.getX());
@@ -1004,16 +1165,38 @@ public class TreeFeller extends JavaPlugin{
             }
             TreeFellerCompat.addBlock(player, target);
         }
+        private void triggerNaturalFall(Block b){
+            for(NaturalFall fall : naturalFalls){
+                if(fall==this)continue;
+                if(fall.block.equals(b))fall.fall();
+            }
+        }
+    }
+    private void processNaturalFalls(){
+        for(NaturalFall fall : naturalFalls){
+            fall.fall();
+        }
+        naturalFalls.clear();
     }
     private int debugIndent = 0;
-    private void debug(Player player, String text, boolean indent){
+    private void debug(Player player, String text, boolean indent, Object... vars){
+        Message message = Message.getMessage(text);
+        if(message!=null){
+            message.send(player, vars);
+            text = message.getDebugText();
+        }
         if(!debug)return;
         if(indent)debugIndent++;
         text = "[TreeFeller] "+getDebugIndent()+" "+text;
         getLogger().log(Level.FINEST, text);
         if(player!=null)player.sendMessage(text);
     }
-    private void debug(Player player, boolean critical, boolean success, String text){
+    private void debug(Player player, boolean critical, boolean success, String text, Object... vars){
+        Message message = Message.getMessage(text);
+        if(message!=null){
+            message.send(player, vars);
+            text = message.getDebugText();
+        }
         if(!debug)return;
         if((critical||!success)&&debugIndent>0)debugIndent--;
         String icon;
@@ -1032,5 +1215,55 @@ public class TreeFeller extends JavaPlugin{
             indent = indent + "-";
         }
         return indent;
+    }
+    private void dropExp(World world, Location location, int xp){
+        while(xp>2477){
+            dropExpOrb(world, location, 2477);
+            xp-=2477;
+        }
+        while(xp>1237){
+            dropExpOrb(world, location, 1237);
+            xp-=1237;
+        }
+        while(xp>617){
+            dropExpOrb(world, location, 617);
+            xp-=617;
+        }
+        while(xp>307){
+            dropExpOrb(world, location, 307);
+            xp-=307;
+        }
+        while(xp>149){
+            dropExpOrb(world, location, 149);
+            xp-=149;
+        }
+        while(xp>73){
+            dropExpOrb(world, location, 73);
+            xp-=73;
+        }
+        while(xp>37){
+            dropExpOrb(world, location, 37);
+            xp-=37;
+        }
+        while(xp>17){
+            dropExpOrb(world, location, 17);
+            xp-=17;
+        }
+        while(xp>7){
+            dropExpOrb(world, location, 7);
+            xp-=7;
+        }
+        while(xp>3){
+            dropExpOrb(world, location, 3);
+            xp-=3;
+        }
+        while(xp>1){
+            dropExpOrb(world, location, 1);
+            xp--;
+        }
+    }
+    public void dropExpOrb(World world, Location location, int xp){
+        ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(location, EntityType.EXPERIENCE_ORB);
+        orb.setExperience(xp);
     }
 }
