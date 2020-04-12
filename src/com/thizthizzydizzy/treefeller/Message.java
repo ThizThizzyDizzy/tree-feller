@@ -1,10 +1,6 @@
 package com.thizthizzydizzy.treefeller;
 import java.util.ArrayList;
-import net.minecraft.server.v1_13_R2.ChatMessageType;
-import net.minecraft.server.v1_13_R2.IChatBaseComponent;
-import net.minecraft.server.v1_13_R2.PacketPlayOutChat;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_13_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 public class Message{
     public static ArrayList<Message> messages = new ArrayList();
@@ -68,11 +64,12 @@ public class Message{
         }
     }
     private void actionbar(Player player, String text){
-        PacketPlayOutChat packet = actionbar(text);
-        ((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
+//        player.spigot().sendMessage(net.md_5.bungee.api.ChatMessageType.ACTION_BAR, net.md_5.bungee.api.chat.TextComponent.fromLegacyText(text));
+//        PacketPlayOutChat packet = actionbar(text);
+//        ((CraftPlayer)player).getHandle().playerConnection.sendPacket(packet);
     }
-    private PacketPlayOutChat actionbar(String text){
-        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\""+text+"\"}"), ChatMessageType.GAME_INFO);
-        return packet;
-    }
+//    private PacketPlayOutChat actionbar(String text){
+//        PacketPlayOutChat packet = new PacketPlayOutChat(IChatBaseComponent.ChatSerializer.a("{\"text\":\""+text+"\"}"), ChatMessageType.GAME_INFO);
+//        return packet;
+//    }
 }

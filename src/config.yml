@@ -1,7 +1,6 @@
 # Tree Feller by ThizThizzyDizzy
 # Version 1.12
 
-# Some options are disabled, such as min-durability and min-durability. To enable them, remove the # at the beginning of the line
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
@@ -122,10 +121,14 @@ overridables:
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
 
-# How much velocity should falling trees get?
+# How much horizontal velocity should falling trees get?
 # (Only used when log or leaf behavior is set to FALL or similar)
 # All of the blocks in the tree will fall in the same direction with this velocity.
 directional-fall-velocity: 0.35
+
+# How much upwards velocity should falling trees get?
+# (Only used when log or leaf behavior is set to FALL or similar)
+vertical-fall-velocity: 0.05
 
 # How much random sideways velocity should falling blocks get?
 # (Only used when log or leaf behavior is set to FALL or similar)
@@ -178,25 +181,25 @@ global-effects:
 # ex:
 # - unbreaking: 2
 # - efficiency: 5
-#required-enchantments:
+required-enchantments:
 
 # Tools must not have these enchantments or have them lower than this level to fell trees
 # ex:
 # - silk_touch: 1
 # - unbreaking: 3
-#banned-enchantments:
+banned-enchantments:
 
 # Tools with less than this much durability will be unable to fell trees
-#min-durability:
+min-durability:
 
 # Tools with more than this much durability will be unable to fell trees
-#max-durability:
+max-durability:
 
 # Tools with less than this percentage of durability will be unable to fell trees
-#min-durability-percent:
+min-durability-percent:
 
 # Tools with more than this percentage of durability will be unable to fell trees
-#max-durability-percent:
+max-durability-percent:
 
 # If set to true, tools will not be able to fell a tree if doing so would break the tool.
 prevent-breakage: false
@@ -204,21 +207,21 @@ prevent-breakage: false
 # Tools must have all literal strings in this list in order to fell trees
 # ex:
 # - Can fell trees
-#required-lore:
+required-lore:
 
 # A tool's name must match exactly in order to fell trees (colors can be designated with &)
-#required-name:
+required-name:
 
 # Trees can only be cut down by players who have all permissons listed here
 # ex:
 # - treefeller.example
-#required-permissions:
+required-permissions:
 
 # What should the minimum time be for felling trees? (0-24000)
-#min-time:
+min-time:
 
 # What should the maximum time be for felling trees? (0-24000)
-#max-time:
+max-time:
 
 # What should the maximum phase be for felling trees? (0-7)
 # Phases:
@@ -230,7 +233,7 @@ prevent-breakage: false
 # 5 = waxing crescent
 # 6 = third quarter
 # 7 = waxing gibbous
-#min-phase:
+min-phase:
 
 # What should the minimum phase be for felling trees? (0-7)
 # Phases:
@@ -242,7 +245,7 @@ prevent-breakage: false
 # 5 = waxing crescent
 # 6 = third quarter
 # 7 = waxing gibbous
-#max-phase:
+max-phase:
 
 # Should the tree feller work in adventure mode?
 enable-adventure: false
@@ -260,72 +263,73 @@ with-sneak: false
 without-sneak: true
 
 # In what worlds should the tree feller work? (Inverted if world-blacklist is set to true)
-#worlds:
+worlds:
 
 world-blacklist: false
 
 # How long (in ticks) should players have to wait before felling another tree?
-#cooldown:
+cooldown:
 
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
 # Any of the following variables may be used: (See above for descriptions)
-# scan-distance:
-# leaf-range:
-# required-logs:
-# required-leaves:
-# max-logs:
-# max-height:
-# allow-partial:
-# player-leaves:
-# require-cross-section:
-# cutting-animation:
-# anim-delay:
-# replant-saplings:
-# spawn-saplings:
-# log-behavior:
-# leaf-behavior:
-# directional-fall-behavior:
-# overridables:
-# lock-fall-cardinal:
-# directional-fall-velocity:
-# random-fall-velocity:
-# respect-unbreaking:
-# damage-mult:
-# leaf-fortune:
-# leaf-silk-touch:
-# log-fortune:
-# log-silk-touch:
-# leave-stump:
-# rotate-logs:
-# convert-wood-to-log:
-# leaf-drop-chance:
-# log-drop-chance:
-# global-effects:
-# required-enchantments:
-# banned-enchantments:
-# min-durability:
-# max-durability:
-# min-durability-percent:
-# max-durability-percent:
-# prevent-breakage:
-# required-lore:
-# required-name:
-# required-permissions:
-# min-time:
-# max-time:
-# min-phase:
-# max-phase:
-# allowed-trees:        The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
-# enable-adventure:
-# enable-survival:
-# enable-creative:
-# with-sneak:
-# without-sneak:
-# worlds:
-# world-blacklist:
-# cooldown:
+# scan-distance
+# leaf-range
+# required-logs
+# required-leaves
+# max-logs
+# max-height
+# allow-partial
+# player-leaves
+# require-cross-section
+# cutting-animation
+# anim-delay
+# replant-saplings
+# spawn-saplings
+# log-behavior
+# leaf-behavior
+# directional-fall-behavior
+# overridables
+# lock-fall-cardinal
+# directional-fall-velocity
+# vertical-fall-velocity
+# random-fall-velocity
+# respect-unbreaking
+# damage-mult
+# leaf-fortune
+# leaf-silk-touch
+# log-fortune
+# log-silk-touch
+# leave-stump
+# rotate-logs
+# convert-wood-to-log
+# leaf-drop-chance
+# log-drop-chance
+# global-effects
+# required-enchantments
+# banned-enchantments
+# min-durability
+# max-durability
+# min-durability-percent
+# max-durability-percent
+# prevent-breakage
+# required-lore
+# required-name
+# required-permissions
+# min-time
+# max-time
+# min-phase
+# max-phase
+# allowed-trees         The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
+# enable-adventure
+# enable-survival
+# enable-creative
+# with-sneak
+# without-sneak
+# worlds
+# world-blacklist
+# cooldown
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
 #    - {type: WOODEN_AXE, required-enchantments: {efficiency: 4, unbreaking: 1}, banned-enchantments: {unbreaking: 2}, min-durability: 4, max-durability-percent: 0.9}
@@ -368,6 +372,7 @@ tools:
 # overridables:
 # lock-fall-cardinal:
 # directional-fall-velocity:
+# vertical-fall-velocity:
 # random-fall-velocity:
 # respect-unbreaking:
 # damage-mult:

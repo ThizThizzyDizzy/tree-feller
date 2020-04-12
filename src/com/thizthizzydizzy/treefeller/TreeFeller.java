@@ -59,6 +59,9 @@ public class TreeFeller extends JavaPlugin{
         exp.put(Material.REDSTONE_ORE, new int[]{1, 5});
         exp.put(Material.SPAWNER, new int[]{15, 43});
     }
+    static boolean watching = false;
+    static ArrayList<ItemStack> watchedDrops = new ArrayList<>();
+    public String serverVersion = null;
     public void fellTree(BlockBreakEvent event){
         if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
     }
@@ -92,7 +95,7 @@ public class TreeFeller extends JavaPlugin{
                     debug(player, true, false, "toggle");
                     return null;
                 }
-                debug(player, "checking", true, trees.indexOf(tree), tools.indexOf(tool));
+                debug(player, "checking", false, trees.indexOf(tree), tools.indexOf(tool));
                 if(tool.material!=Material.AIR&&axe.getType()!=tool.material)continue;
                 for(Option o : Option.options){
                     DebugResult result = o.check(tool, tree, block, player, axe, gamemode, sneaking, dropItems);
@@ -168,7 +171,7 @@ public class TreeFeller extends JavaPlugin{
                 for(Option o : Option.options){
                     DebugResult result = o.checkTree(tool, tree, blocks, leaves);
                     if(result==null)continue;
-                    debug(player, false, result.success, result.message);
+                    debug(player, false, result.success, result.message, result.args);
                     if(!result.success)continue TOOL;
                 }
                 debug(player, true, true, "success");
@@ -530,6 +533,7 @@ public class TreeFeller extends JavaPlugin{
     }
     public void reload(){
         Logger logger = getLogger();
+        serverVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
         trees.clear();
         tools.clear();
         effects.clear();
@@ -541,7 +545,7 @@ public class TreeFeller extends JavaPlugin{
         try{
             effects = new ArrayList<>(getConfig().getList("effects"));
         }catch(NullPointerException ex){
-            logger.log(Level.WARNING, "Failed to load effects!");
+            if(getConfig().get("effects")!=null)logger.log(Level.WARNING, "Failed to load effects!");
         }
         if(effects!=null){
             for(Object o : effects){
@@ -668,6 +672,7 @@ public class TreeFeller extends JavaPlugin{
             message.load(getConfig());
         }
         if(Option.STARTUP_LOGS.isTrue()){
+            logger.log(Level.INFO, "Server version: {0}", serverVersion);
             logger.log(Level.INFO, "Loaded global values:");
             for(Option option : Option.options){
                 Object value = option.getValue();
@@ -823,6 +828,7 @@ public class TreeFeller extends JavaPlugin{
         FellBehavior behavior = isLeaf?Option.LEAF_BEHAVIOR.get(tool, tree):Option.LOG_BEHAVIOR.get(tool, tree);
 //        double dropChance = dropItems?(isLeaf?Option.LEAF_DROP_CHANCE.get(tool, tree):Option.LOG_DROP_CHANCE.get(tool, tree)):0;
         double directionalFallVelocity = Option.DIRECTIONAL_FALL_VELOCITY.get(tool, tree);
+        double verticalFallVelocity = Option.VERTICAL_FALL_VELOCITY.get(tool, tree);
         double randomFallVelocity = Option.RANDOM_FALL_VELOCITY.get(tool, tree);
         boolean rotate = Option.ROTATE_LOGS.get(tool, tree);
         DirectionalFallBehavior directionalFallBehavior = Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree);
@@ -868,7 +874,7 @@ public class TreeFeller extends JavaPlugin{
                 if(directionalFallVelocity>0){
                     v.add(directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity));
                 }
-                v.add(new Vector((Math.random()*2-1)*randomFallVelocity, randomFallVelocity/5, (Math.random()-.5)*randomFallVelocity));
+                v.add(new Vector((Math.random()*2-1)*randomFallVelocity, verticalFallVelocity, (Math.random()*2-1)*randomFallVelocity));
                 falling.setVelocity(v);
                 falling.setHurtEntities(behavior.name().contains("HURT"));
                 boolean doBreak = behavior.name().contains("BREAK");
@@ -915,7 +921,7 @@ public class TreeFeller extends JavaPlugin{
                 dropChance--;
                 bonus++;
             }
-//            if(new Random().nextDouble()<dropChance)bonus++;//what's this for?
+            if(new Random().nextDouble()<dropChance)bonus++;
         }
         if(drop){
             for(int i = 0; i<bonus+1; i++){
@@ -938,10 +944,17 @@ public class TreeFeller extends JavaPlugin{
             fortune = Option.LEAF_FORTUNE.get(tool, tree);
             silk = Option.LEAF_SILK_TOUCH.get(tool, tree);
         }
-        ItemStack copy = axe.clone();
-        if(copy.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&!fortune)copy.removeEnchantment(Enchantment.LOOT_BONUS_BLOCKS);
-        if(copy.containsEnchantment(Enchantment.SILK_TOUCH)&&!silk)copy.removeEnchantment(Enchantment.SILK_TOUCH);
-        drops.addAll(block.getDrops(copy));
+        BlockData data = block.getBlockData();
+        Material type = block.getType();
+        watching = true;
+        watchedDrops.clear();
+        block.breakNaturally(axe);
+        if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, watchedDrops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS));
+        if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, watchedDrops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH));
+        watching = false;
+        drops.addAll(watchedDrops);
+        block.setType(type);
+        block.setBlockData(data);
         if(convert){
             for(ItemStack s : drops){
                 if(s.getType().name().endsWith("_WOOD")){
@@ -950,6 +963,206 @@ public class TreeFeller extends JavaPlugin{
             }
         }
         return drops;
+    }
+    //Bukkit API lacks fortune/silk touch handling, so I have to do it the hard way...
+    private void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel){
+        if(enchantmentLevel==0)return;
+        switch(type){
+            case COAL_ORE:
+            case DIAMOND_ORE:
+            case EMERALD_ORE:
+            case LAPIS_ORE:
+            case NETHER_QUARTZ_ORE:
+            case REDSTONE_ORE://incorrect
+                ArrayList<Integer> mults = new ArrayList<>();
+                mults.add(1);
+                mults.add(1);
+                for(int i = 0; i<enchantmentLevel; i++){
+                    mults.add(i+2);
+                }
+                Random rand = new Random();
+                int mult = mults.get(rand.nextInt(mults.size()));
+                for(ItemStack s : drops){
+                    s.setAmount(s.getAmount()*mult);
+                }
+                break;
+            case OAK_LEAVES:
+            case BIRCH_LEAVES:
+            case SPRUCE_LEAVES:
+            case ACACIA_LEAVES:
+            case DARK_OAK_LEAVES:
+            case JUNGLE_LEAVES:
+                Random r = new Random();
+                int fortune = Math.min(4,enchantmentLevel);
+                Material sapling = Material.matchMaterial(type.name().replace("LEAVES", "SAPLING"));
+                if(type==Material.JUNGLE_LEAVES){
+                    switch(fortune){
+                        case 1:
+                            if(r.nextDouble()<.0023)drops.add(new ItemStack(sapling));
+                            break;
+                        case 2:
+                            if(r.nextDouble()<.00625)drops.add(new ItemStack(sapling));
+                            break;
+                        case 3:
+                        case 4:
+                            if(r.nextDouble()<.0167)drops.add(new ItemStack(sapling));
+                            break;
+                    }
+                }else{
+                    switch(fortune){
+                        case 1:
+                            if(r.nextDouble()<.0125)drops.add(new ItemStack(sapling));
+                            break;
+                        case 2:
+                            if(r.nextDouble()<.0333)drops.add(new ItemStack(sapling));
+                            break;
+                        case 3:
+                        case 4:
+                            if(r.nextDouble()<.05)drops.add(new ItemStack(sapling));
+                            break;
+                    }
+                }
+                if(!serverVersion.startsWith("1_13")){//no sticks in 1.13!
+                    switch(fortune){
+                        case 1:
+                            if(r.nextDouble()<.0022)drops.add(new ItemStack(Material.STICK));
+                            break;
+                        case 2:
+                            if(r.nextDouble()<.005)drops.add(new ItemStack(Material.STICK));
+                            break;
+                        case 3:
+                            if(r.nextDouble()<.0133)drops.add(new ItemStack(Material.STICK));
+                            break;
+                        case 4:
+                            if(r.nextDouble()<.08)drops.add(new ItemStack(Material.STICK));//why, minecraft, why?
+                            break;
+                    }
+                }
+                if(type==Material.OAK_LEAVES){
+                    switch(fortune){
+                        case 1:
+                            if(r.nextDouble()<.00056)drops.add(new ItemStack(Material.APPLE));
+                            break;
+                        case 2:
+                            if(r.nextDouble()<.00125)drops.add(new ItemStack(Material.APPLE));
+                            break;
+                        case 3:
+                        case 4:
+                            if(r.nextDouble()<.00333)drops.add(new ItemStack(Material.APPLE));
+                            break;
+                    }
+                }
+                break;
+        }
+    }
+    private void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel){
+        if(enchantmentLevel==0)return;
+        if(type.name().startsWith("BEE")||type.name().startsWith("CAMPFIRE")){//because I'm still supporting 1.13... We'll see how long that lasts
+            drops.clear();
+            drops.add(new ItemStack(type));
+        }
+        switch(type){
+            case BLUE_ICE:
+            case BOOKSHELF:
+            case CLAY:
+            case BUBBLE_CORAL:
+            case HORN_CORAL:
+            case FIRE_CORAL:
+            case TUBE_CORAL:
+            case BRAIN_CORAL:
+            case BUBBLE_CORAL_FAN:
+            case HORN_CORAL_FAN:
+            case FIRE_CORAL_FAN:
+            case TUBE_CORAL_FAN:
+            case BRAIN_CORAL_FAN:
+            case BUBBLE_CORAL_WALL_FAN:
+            case HORN_CORAL_WALL_FAN:
+            case FIRE_CORAL_WALL_FAN:
+            case TUBE_CORAL_WALL_FAN:
+            case BRAIN_CORAL_WALL_FAN:
+            case GLASS:
+            case BLUE_STAINED_GLASS:
+            case RED_STAINED_GLASS:
+            case ORANGE_STAINED_GLASS:
+            case PINK_STAINED_GLASS:
+            case YELLOW_STAINED_GLASS:
+            case LIME_STAINED_GLASS:
+            case GREEN_STAINED_GLASS:
+            case CYAN_STAINED_GLASS:
+            case LIGHT_BLUE_STAINED_GLASS:
+            case MAGENTA_STAINED_GLASS:
+            case PURPLE_STAINED_GLASS:
+            case GRAY_STAINED_GLASS:
+            case LIGHT_GRAY_STAINED_GLASS:
+            case BLACK_STAINED_GLASS:
+            case WHITE_STAINED_GLASS:
+            case BROWN_STAINED_GLASS:
+            case BLUE_STAINED_GLASS_PANE:
+            case RED_STAINED_GLASS_PANE:
+            case ORANGE_STAINED_GLASS_PANE:
+            case PINK_STAINED_GLASS_PANE:
+            case YELLOW_STAINED_GLASS_PANE:
+            case LIME_STAINED_GLASS_PANE:
+            case GREEN_STAINED_GLASS_PANE:
+            case CYAN_STAINED_GLASS_PANE:
+            case LIGHT_BLUE_STAINED_GLASS_PANE:
+            case MAGENTA_STAINED_GLASS_PANE:
+            case PURPLE_STAINED_GLASS_PANE:
+            case GRAY_STAINED_GLASS_PANE:
+            case LIGHT_GRAY_STAINED_GLASS_PANE:
+            case BLACK_STAINED_GLASS_PANE:
+            case WHITE_STAINED_GLASS_PANE:
+            case BROWN_STAINED_GLASS_PANE:
+            case GLOWSTONE:
+            case GRASS_BLOCK:
+            case GRAVEL:
+            case ICE:
+            case OAK_LEAVES:
+            case BIRCH_LEAVES:
+            case SPRUCE_LEAVES:
+            case JUNGLE_LEAVES:
+            case ACACIA_LEAVES:
+            case DARK_OAK_LEAVES:
+            case MELON:
+            case MUSHROOM_STEM:
+            case BROWN_MUSHROOM_BLOCK:
+            case RED_MUSHROOM_BLOCK:
+            case MYCELIUM:
+            case PODZOL:
+            case SEA_LANTERN:
+            case TURTLE_EGG:
+                drops.clear();
+                drops.add(new ItemStack(type));
+                break;
+            //pickaxe only (conditional too!)
+            case COAL_ORE:
+            case BUBBLE_CORAL_BLOCK:
+            case HORN_CORAL_BLOCK:
+            case FIRE_CORAL_BLOCK:
+            case TUBE_CORAL_BLOCK:
+            case BRAIN_CORAL_BLOCK:
+            case DIAMOND_ORE:
+            case EMERALD_ORE:
+            case ENDER_CHEST:
+            case LAPIS_ORE:
+            case NETHER_QUARTZ_ORE:
+            case REDSTONE_ORE:
+            case STONE:
+                if(axe.getType().name().toLowerCase().contains("pickaxe")){
+                    if(drops.isEmpty())return;
+                    drops.clear();
+                    drops.add(new ItemStack(type));
+                }
+                break;
+            //shovel only
+            case SNOW:
+            case SNOW_BLOCK:
+                if(axe.getType().name().toLowerCase().contains("shovel")){
+                    drops.clear();
+                    drops.add(new ItemStack(type));
+                }
+                break;
+        }
     }
     private static class RotationData{
         private final Axis axis;
@@ -1185,10 +1398,13 @@ public class TreeFeller extends JavaPlugin{
             message.send(player, vars);
             text = message.getDebugText();
         }
+        for(int i = 0; i<vars.length; i++){
+            text = text.replace("{"+i+"}", vars[i].toString());
+        }
         if(!debug)return;
         if(indent)debugIndent++;
         text = "[TreeFeller] "+getDebugIndent()+" "+text;
-        getLogger().log(Level.FINEST, text);
+        getLogger().log(Level.INFO, text);
         if(player!=null)player.sendMessage(text);
     }
     private void debug(Player player, boolean critical, boolean success, String text, Object... vars){
@@ -1197,13 +1413,16 @@ public class TreeFeller extends JavaPlugin{
             message.send(player, vars);
             text = message.getDebugText();
         }
+        for(int i = 0; i<vars.length; i++){
+            text = text.replace("{"+i+"}", vars[i].toString());
+        }
         if(!debug)return;
         if((critical||!success)&&debugIndent>0)debugIndent--;
         String icon;
         if(success)icon = (critical?ChatColor.DARK_GREEN:ChatColor.GREEN)+"O";
         else icon = (critical?ChatColor.DARK_RED:ChatColor.RED)+"X";
         text = "[TreeFeller] "+getDebugIndent(1)+icon+ChatColor.RESET+" "+text;
-        getLogger().log(Level.FINEST, text);
+        getLogger().log(Level.INFO, text);
         if(player!=null)player.sendMessage(text);
     }
     private String getDebugIndent(){
@@ -1264,6 +1483,6 @@ public class TreeFeller extends JavaPlugin{
     }
     public void dropExpOrb(World world, Location location, int xp){
         ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(location, EntityType.EXPERIENCE_ORB);
-        orb.setExperience(xp);
+        orb.setExperience(orb.getExperience()+xp);
     }
 }

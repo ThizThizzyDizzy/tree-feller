@@ -15,6 +15,10 @@ public class BlockBreak implements Listener{
     }
     @EventHandler
     public void onItemDrop(ItemSpawnEvent event){
+        if(TreeFeller.watching){
+            TreeFeller.watchedDrops.add(event.getEntity().getItemStack());
+            event.setCancelled(true);
+        }
         if(!plugin.saplings.isEmpty()){
             for(Iterator<Sapling> it = plugin.saplings.iterator(); it.hasNext();){
                 Sapling sapling = it.next();

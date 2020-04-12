@@ -31,14 +31,13 @@ public class ConfigGenerator{
             add("# Tree Feller by ThizThizzyDizzy");
             add("# Version "+version);
             add();
-            add("# Some options are disabled, such as min-durability and min-durability. To enable them, remove the # at the beginning of the line");
             for(Option o : Option.options){
                 if(!o.global)continue;
                 add();
                 for(Object s : o.getDescription()){
                     add("# "+s);
                 }
-                if(o.getDefaultConfigValue()==null)add("#"+o.getGlobalName()+":");
+                if(o.getDefaultConfigValue()==null)add(o.getGlobalName()+":");
                 else add(o.getGlobalName()+": "+o.getDefaultConfigValue());
             }
             add();
@@ -48,8 +47,8 @@ public class ConfigGenerator{
             add("# Any of the following variables may be used: (See above for descriptions)");
             for(Option o : Option.options){
                 if(!o.tool)continue;
-                if(o.global)add("# "+o.getGlobalName()+":");
-                else add("# "+o.getGlobalName()+":        "+o.getDesc());
+                if(o.global)add("# "+o.getGlobalName());
+                else add("# "+o.getGlobalName()+"         "+o.getDesc());
             }
             add("# AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree");
             add("# Examples of valid tools:");

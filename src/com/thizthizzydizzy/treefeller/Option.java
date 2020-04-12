@@ -458,9 +458,26 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(){
-            return "How much velocity should falling trees get?\n" +
+            return "How much horizontal velocity should falling trees get?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)\n" +
                 "All of the blocks in the tree will fall in the same direction with this velocity.";
+        }
+    };
+    public static Option<Double> VERTICAL_FALL_VELOCITY = new Option<Double>("Vertical Fall Velocity", true, true, true, .05d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public Double get(Tool tool, Tree tree){
+            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):0d;
+            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):0d;
+            return tl+tr+globalValue;
+        }
+        @Override
+        public String getDesc(){
+            return "How much upwards velocity should falling trees get?\n" +
+                "(Only used when log or leaf behavior is set to FALL or similar)";
         }
     };
     public static Option<Double> RANDOM_FALL_VELOCITY = new Option<Double>("Random Fall Velocity", true, true, true, 0d){
