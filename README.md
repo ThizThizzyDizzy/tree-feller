@@ -61,6 +61,11 @@ For example, if you want a single tree to require no leaves:
 
 If you are unable to pinpoint the problem, I’m happy to help on discord or GitHub. Make sure to provide the config, startup logs, and the debug information from /treefeller debug
 
+### 1.12?
+It's difficult enough to maintain 1.13-1.15 already.
+
+If you want a tree feller for 1.12 or lower, find a different plugin.
+
 ## Tips/Fun Facts
 ### You can use the tree feller for ores
 Add trees using ore for the trunk and with leaves disabled:
