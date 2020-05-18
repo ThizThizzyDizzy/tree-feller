@@ -44,12 +44,27 @@ Many custom trees are generated improperly, containing diagonally connected or p
 
 If this is the case, you may have to enable ignore-leaf-data, diagonal-leaves, and player-leaves.
 
+### My Tool/Tree settings aren't working!
+In version 1.11, the config was overhauled with more options.
+
+As a result of this overhaul, tool and tree-specific options no longer override global values.
+
+For example, if you want a single tree to require no leaves:
+1. Set `required-leaves` for every other tree to some value (Default 10)
+2. Set the global `required-leaves` to 0
+3. Set `required-leaves` for the target tree to 0 (For readability)
+
 ### How do I get [BLANK] to work?
 - Make sure you’re using the latest version
 - Run /treefeller debug and try to cut down a tree.
 - Check the startup logs in the server console
 
 If you are unable to pinpoint the problem, I’m happy to help on discord or GitHub. Make sure to provide the config, startup logs, and the debug information from /treefeller debug
+
+### 1.12?
+It's difficult enough to maintain 1.13-1.15 already.
+
+If you want a tree feller for 1.12 or lower, find a different plugin.
 
 ## Tips/Fun Facts
 ### You can use the tree feller for ores
@@ -65,6 +80,8 @@ Set allowed-trees for the axes to LOG
 Fore more specific configuration, allowed-trees should be set to a list of tree indexes, such as [0, 1, 2, 3, 4, 5] for the first 6 trees defined
 
 (you may need to set max-height higher as well)
+
+Note: You will need to adjust global and other trees' settings to allow for this- See "My Tool/Tree settings aren't working" under the FAQ
 
 ### You can define more than one tool or tree of the same type
 This is useful if you want OR behavior. In this example, a golden axe must have either unbreaking 1 or efficiency 2:
