@@ -5,7 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 public class TreeFellerCompat{
-    private static ArrayList<PluginCompatibility> compatibilities = new ArrayList<>();
+    private static final ArrayList<PluginCompatibility> compatibilities = new ArrayList<>();
     static{
         compatibilities.add(new JobsRebornCompat());
         compatibilities.add(new McMMOCompat());
@@ -13,6 +13,7 @@ public class TreeFellerCompat{
         compatibilities.add(new WorldGuardCompat());
         compatibilities.add(new GriefPreventionCompat());
     }
+    public static void init(){}//placeholder method for loading the class
     public static void breakBlock(Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
             compat.breakBlock(player, block);
@@ -63,6 +64,7 @@ public class TreeFellerCompat{
     private static ArrayList<PluginCompatibility> getCompatibilities(){
         ArrayList<PluginCompatibility> compats = new ArrayList<>();
         for(PluginCompatibility compat : compatibilities){
+            if(!compat.isEnabled())continue;
             if(Bukkit.getPluginManager().getPlugin(compat.getPluginName())!=null)compats.add(compat);
         }
         return compats;

@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.12
+# Version 1.12.1
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -269,6 +269,21 @@ world-blacklist: false
 
 # How long (in ticks) should players have to wait before felling another tree?
 cooldown:
+
+# Toggle compatibility with Jobs Reborn
+compatibility-jobs: true
+
+# Toggle compatibility with McMMO
+compatibility-mcmmo: true
+
+# Toggle compatibility with CoreProtect
+compatibility-coreprotect: true
+
+# Toggle compatibility with WorldGuard
+compatibility-worldguard: true
+
+# Toggle compatibility with GriefPrevention
+compatibility-griefprevention: true
 
 # What tools can be used to cut down trees?
 # Format:

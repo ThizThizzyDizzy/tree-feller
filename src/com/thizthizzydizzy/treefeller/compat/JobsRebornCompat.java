@@ -7,6 +7,10 @@ public class JobsRebornCompat extends InternalCompatibility{
         return "Jobs";
     }
     @Override
+    public String getFriendlyName(){
+        return "Jobs Reborn";
+    }
+    @Override
     public void breakBlock(Player player, Block block){
         JobsRebornCompat2.breakBlock(player, block);
     }

@@ -434,6 +434,7 @@ public class TreeFeller extends JavaPlugin{
     public void onEnable(){
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = getLogger();
+        TreeFellerCompat.init();
         //<editor-fold defaultstate="collapsed" desc="Register Events">
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new BlockBreak(this), this);
@@ -771,6 +772,7 @@ public class TreeFeller extends JavaPlugin{
                 }
                 Tool tool = new Tool(type);
                 for(Object key : map.keySet()){
+                    if(key.equals("type"))continue;//already got that
                     if(!(key instanceof String)){
                         logger.log(Level.WARNING, "Unknown tool property: {0}; Skipping...", key);
                         continue;

@@ -18,7 +18,7 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
 public abstract class Option<E>{
-    private static HashSet<Material> defaultOverridables = new HashSet<>();
+    private static final HashSet<Material> defaultOverridables = new HashSet<>();
     static{
         defaultOverridables.add(Material.GRASS);
         defaultOverridables.add(Material.AIR);
@@ -30,7 +30,7 @@ public abstract class Option<E>{
         defaultOverridables.add(Material.FERN);
         defaultOverridables.add(Material.LARGE_FERN);
     }
-    private static HashSet<Material> defaultGrasses = new HashSet<>();
+    private static final HashSet<Material> defaultGrasses = new HashSet<>();
     static{
         defaultGrasses.add(Material.GRASS_BLOCK);
         defaultGrasses.add(Material.DIRT);
