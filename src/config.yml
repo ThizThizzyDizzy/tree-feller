@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.12.1
+# Version 1.12.2
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -55,9 +55,9 @@ spawn-saplings: 0
 
 # What blocks can saplings be planted on?
 grass: 
+    - GRASS_BLOCK
     - DIRT
     - PODZOL
-    - GRASS_BLOCK
 
 # What felling behavior should logs have?
 # Valid options:
@@ -108,15 +108,15 @@ directional-fall-behavior: RANDOM
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
 overridables: 
-    - CAVE_AIR
-    - WATER
+    - TALL_SEAGRASS
     - TALL_GRASS
+    - AIR
     - FERN
     - LARGE_FERN
-    - SEAGRASS
+    - CAVE_AIR
+    - WATER
     - GRASS
-    - AIR
-    - TALL_SEAGRASS
+    - SEAGRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -247,6 +247,9 @@ min-phase:
 # 7 = waxing gibbous
 max-phase:
 
+# Tool's CustomModelData must match in order to fell trees (1.14+)
+custom-model-data:
+
 # Should the tree feller work in adventure mode?
 enable-adventure: false
 
@@ -336,6 +339,7 @@ compatibility-griefprevention: true
 # max-time
 # min-phase
 # max-phase
+# custom-model-data
 # allowed-trees         The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # enable-adventure
 # enable-survival
@@ -415,6 +419,7 @@ tools:
 # max-time:
 # min-phase:
 # max-phase:
+# custom-model-data:
 # enable-adventure:
 # enable-survival:
 # enable-creative:
@@ -583,6 +588,10 @@ debug-max-phase: "Phase is greater than maximum allowed: {0}"
 debug-max-phase-tool: "Phase is greater than maximum allowed for tool: {0}"
 debug-max-phase-tree: "Phase is greater than maximum allowed for tree: {0}"
 debug-max-phase-success: "Phase meets maximum requirement"
+debug-custom-model-data: "Custom model data does not match#: {0} != {1}"
+debug-custom-model-data-tool: "Custom model data does not match#: {0} != {1}"
+debug-custom-model-data-tree: "Custom model data does not match#: {0} != {1}"
+debug-custom-model-data-success: "Custom model data matches!"
 debug-allowed-trees-tool: "Tree is not allowed for tool: {0}"
 debug-allowed-trees-success: "Tree is allowed for tool"
 debug-enable-adventure: "TreeFeller is disabled in adventure mode"

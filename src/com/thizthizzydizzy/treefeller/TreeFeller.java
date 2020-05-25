@@ -98,7 +98,7 @@ public class TreeFeller extends JavaPlugin{
                 debug(player, "checking", false, trees.indexOf(tree), tools.indexOf(tool));
                 if(tool.material!=Material.AIR&&axe.getType()!=tool.material)continue;
                 for(Option o : Option.options){
-                    DebugResult result = o.check(tool, tree, block, player, axe, gamemode, sneaking, dropItems);
+                    DebugResult result = o.check(this, tool, tree, block, player, axe, gamemode, sneaking, dropItems);
                     if(result==null)continue;
                     debug(player, false, result.success, result.message, result.args);
                     if(!result.success)continue TOOL;
@@ -107,7 +107,7 @@ public class TreeFeller extends JavaPlugin{
                 int scanDistance = Option.SCAN_DISTANCE.get(tool, tree);
                 HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, true, false, false);//TODO what if the trunk is made of leaves?
                 for(Option o : Option.options){
-                    DebugResult result = o.checkTrunk(tool, tree, blocks, block);
+                    DebugResult result = o.checkTrunk(this, tool, tree, blocks, block);
                     if(result==null)continue;
                     debug(player, false, result.success, result.message, result.args);
                     if(!result.success)continue TOOL;
@@ -169,7 +169,7 @@ public class TreeFeller extends JavaPlugin{
                     continue TREE;
                 }
                 for(Option o : Option.options){
-                    DebugResult result = o.checkTree(tool, tree, blocks, leaves);
+                    DebugResult result = o.checkTree(this, tool, tree, blocks, leaves);
                     if(result==null)continue;
                     debug(player, false, result.success, result.message, result.args);
                     if(!result.success)continue TOOL;
@@ -431,6 +431,7 @@ public class TreeFeller extends JavaPlugin{
         }
         return list;
     }
+    @Override
     public void onEnable(){
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = getLogger();
@@ -449,6 +450,7 @@ public class TreeFeller extends JavaPlugin{
         logger.log(Level.INFO, "{0} has been enabled! (Version {1}) by ThizThizzyDizzy", new Object[]{pdfFile.getName(), pdfFile.getVersion()});
         reload();
     }
+    @Override
     public void onDisable(){
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = getLogger();
