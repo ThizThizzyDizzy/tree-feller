@@ -1200,9 +1200,6 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             ItemMeta meta = axe.getItemMeta();
-            if(plugin.serverVersion.contains("13")){
-                return new DebugResult(this, SUCCESS);
-            }
             int data = (meta==null||!meta.hasCustomModelData()?0:meta.getCustomModelData());
             if(globalValue!=null){
                 if(data!=globalValue)return new DebugResult(this, GLOBAL, data, globalValue);
@@ -1217,7 +1214,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(){
-            return "Tool's CustomModelData must match in order to fell trees (1.14+)";
+            return "Tool's CustomModelData must match in order to fell trees";
         }
         @Override
         public String[] getDebugText(){

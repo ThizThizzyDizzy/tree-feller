@@ -59,9 +59,6 @@ public class TreeFeller extends JavaPlugin{
         exp.put(Material.REDSTONE_ORE, new int[]{1, 5});
         exp.put(Material.SPAWNER, new int[]{15, 43});
     }
-    static boolean watching = false;
-    static ArrayList<ItemStack> watchedDrops = new ArrayList<>();
-    public String serverVersion = null;
     public void fellTree(BlockBreakEvent event){
         if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
     }
@@ -241,9 +238,9 @@ public class TreeFeller extends JavaPlugin{
                         for(Block b : blocks.get(i)){
                             if(ttl<=0)break;
                             for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
-                                droppedItems.addAll(getDrops(leaf, tool, tree, axe));
+                                droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
                             }
-                            droppedItems.addAll(getDrops(b, tool, tree, axe));
+                            droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
                             ttl--;
                         }
                         new BukkitRunnable() {
@@ -536,7 +533,6 @@ public class TreeFeller extends JavaPlugin{
     }
     public void reload(){
         Logger logger = getLogger();
-        serverVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
         trees.clear();
         tools.clear();
         effects.clear();
@@ -675,7 +671,7 @@ public class TreeFeller extends JavaPlugin{
             message.load(getConfig());
         }
         if(Option.STARTUP_LOGS.isTrue()){
-            logger.log(Level.INFO, "Server version: {0}", serverVersion);
+            logger.log(Level.INFO, "Server version: {0}", Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1));
             logger.log(Level.INFO, "Loaded global values:");
             for(Option option : Option.options){
                 Object value = option.getValue();
@@ -929,15 +925,18 @@ public class TreeFeller extends JavaPlugin{
         }
         if(drop){
             for(int i = 0; i<bonus+1; i++){
-                drops.addAll(getDrops(block, tool, tree, axe));
-                if(exp.containsKey(block.getType())){
-                    xp[0] += randbetween(exp.get(block.getType()));
-                }
+                int[] blockXP = new int[1];
+                drops.addAll(getDrops(block, tool, tree, axe, blockXP));
+                xp[0]+=blockXP[0];
             }
         }
         return drops;
     }
-    private Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe){
+    private Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
+        if(xp.length!=1)throw new IllegalArgumentException("blockXP must be an array of length 1!");
+        if(exp.containsKey(block.getType())){
+            xp[0] += randbetween(exp.get(block.getType()));
+        }
         ArrayList<ItemStack> drops = new ArrayList<>();
         boolean convert = Option.CONVERT_WOOD_TO_LOG.get(tool, tree);
         boolean fortune, silk;
@@ -948,17 +947,10 @@ public class TreeFeller extends JavaPlugin{
             fortune = Option.LEAF_FORTUNE.get(tool, tree);
             silk = Option.LEAF_SILK_TOUCH.get(tool, tree);
         }
-        BlockData data = block.getBlockData();
         Material type = block.getType();
-        watching = true;
-        watchedDrops.clear();
-        block.breakNaturally(axe);
-        if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, watchedDrops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS));
-        if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, watchedDrops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH));
-        watching = false;
-        drops.addAll(watchedDrops);
-        block.setType(type);
-        block.setBlockData(data);
+        drops.addAll(block.getDrops());
+        if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
+        if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
         if(convert){
             for(ItemStack s : drops){
                 if(s.getType().name().endsWith("_WOOD")){
@@ -969,7 +961,7 @@ public class TreeFeller extends JavaPlugin{
         return drops;
     }
     //Bukkit API lacks fortune/silk touch handling, so I have to do it the hard way...
-    private void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel){
+    private void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
         if(enchantmentLevel==0)return;
         switch(type){
             case COAL_ORE:
@@ -978,6 +970,7 @@ public class TreeFeller extends JavaPlugin{
             case LAPIS_ORE:
             case NETHER_QUARTZ_ORE:
             case REDSTONE_ORE://incorrect
+            case NETHER_GOLD_ORE://might be incorrect
                 ArrayList<Integer> mults = new ArrayList<>();
                 mults.add(1);
                 mults.add(1);
@@ -1026,21 +1019,19 @@ public class TreeFeller extends JavaPlugin{
                             break;
                     }
                 }
-                if(!serverVersion.startsWith("1_13")){//no sticks in 1.13!
-                    switch(fortune){
-                        case 1:
-                            if(r.nextDouble()<.0022)drops.add(new ItemStack(Material.STICK));
-                            break;
-                        case 2:
-                            if(r.nextDouble()<.005)drops.add(new ItemStack(Material.STICK));
-                            break;
-                        case 3:
-                            if(r.nextDouble()<.0133)drops.add(new ItemStack(Material.STICK));
-                            break;
-                        case 4:
-                            if(r.nextDouble()<.08)drops.add(new ItemStack(Material.STICK));//why, minecraft, why?
-                            break;
-                    }
+                switch(fortune){
+                    case 1:
+                        if(r.nextDouble()<.0022)drops.add(new ItemStack(Material.STICK));
+                        break;
+                    case 2:
+                        if(r.nextDouble()<.005)drops.add(new ItemStack(Material.STICK));
+                        break;
+                    case 3:
+                        if(r.nextDouble()<.0133)drops.add(new ItemStack(Material.STICK));
+                        break;
+                    case 4:
+                        if(r.nextDouble()<.08)drops.add(new ItemStack(Material.STICK));//why, minecraft, why?
+                        break;
                 }
                 if(type==Material.OAK_LEAVES){
                     switch(fortune){
@@ -1059,13 +1050,12 @@ public class TreeFeller extends JavaPlugin{
                 break;
         }
     }
-    private void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel){
+    private void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
         if(enchantmentLevel==0)return;
-        if(type.name().startsWith("BEE")||type.name().startsWith("CAMPFIRE")){//because I'm still supporting 1.13... We'll see how long that lasts
-            drops.clear();
-            drops.add(new ItemStack(type));
-        }
         switch(type){
+            case BEEHIVE:
+            case BEE_NEST:
+            case CAMPFIRE:
             case BLUE_ICE:
             case BOOKSHELF:
             case CLAY:
@@ -1135,8 +1125,10 @@ public class TreeFeller extends JavaPlugin{
             case PODZOL:
             case SEA_LANTERN:
             case TURTLE_EGG:
+            case SOUL_CAMPFIRE:
                 drops.clear();
                 drops.add(new ItemStack(type));
+                xp[0] = 0;
                 break;
             //pickaxe only (conditional too!)
             case COAL_ORE:
@@ -1151,8 +1143,11 @@ public class TreeFeller extends JavaPlugin{
             case LAPIS_ORE:
             case NETHER_QUARTZ_ORE:
             case REDSTONE_ORE:
+            case NETHER_GOLD_ORE:
+            case GILDED_BLACKSTONE:
             case STONE:
                 if(axe.getType().name().toLowerCase().contains("pickaxe")){
+                    xp[0] = 0;
                     if(drops.isEmpty())return;
                     drops.clear();
                     drops.add(new ItemStack(type));
@@ -1164,6 +1159,7 @@ public class TreeFeller extends JavaPlugin{
                 if(axe.getType().name().toLowerCase().contains("shovel")){
                     drops.clear();
                     drops.add(new ItemStack(type));
+                    xp[0] = 0;
                 }
                 break;
         }
@@ -1189,16 +1185,16 @@ public class TreeFeller extends JavaPlugin{
         private final Tree tree;
         private final ItemStack axe;
         private final boolean doBreak;
-        private final Player inv;
+        private final Player player;
         private final RotationData rot;
         private final boolean dropItems;
-        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player inv, RotationData rot, boolean dropItems){
+        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems){
             this.entity = entity;
             this.tool = tool;
             this.tree = tree;
             this.axe = axe;
             this.doBreak = doBreak;
-            this.inv = inv;
+            this.player = player;
             this.rot = rot;
             this.dropItems = dropItems;
         }
@@ -1226,12 +1222,12 @@ public class TreeFeller extends JavaPlugin{
                     for(ItemStack drop : drops)event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop);
                     dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
                 }
-                if(inv!=null){
+                if(player!=null){
                     event.setCancelled(true);
                     for(ItemStack drop : drops){
-                        for(ItemStack stack : inv.getInventory().addItem(drop).values())event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
+                        for(ItemStack stack : player.getInventory().addItem(drop).values())event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
                     }
-                    inv.setTotalExperience(inv.getTotalExperience()+xp[0]);
+                    player.setTotalExperience(player.getTotalExperience()+xp[0]);
                 }
                 fallingBlocks.remove(this);
                 if(event.isCancelled())return;
