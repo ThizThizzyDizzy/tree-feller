@@ -59,6 +59,9 @@ public class TreeFeller extends JavaPlugin{
         exp.put(Material.REDSTONE_ORE, new int[]{1, 5});
         exp.put(Material.SPAWNER, new int[]{15, 43});
     }
+    static boolean watching = false;
+    static ArrayList<ItemStack> watchedDrops = new ArrayList<>();
+    public String serverVersion = null;
     public void fellTree(BlockBreakEvent event){
         if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
     }
@@ -146,7 +149,7 @@ public class TreeFeller extends JavaPlugin{
                 HashMap<Integer, ArrayList<Block>> allLeaves = new HashMap<>();
                 FOR:for(int i : distances){
                     for(Block b : blocks.get(i)){
-                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
+                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree));
                         leaves+=toList(someLeaves).size();
                         for(int in : someLeaves.keySet()){
                             if(allLeaves.containsKey(in)){
@@ -208,17 +211,14 @@ public class TreeFeller extends JavaPlugin{
                         }
                         possibleSaplings.put(b, above);
                     }
-                    Integer maxSaplings = Option.MAX_SAPLINGS.get(tool, tree);
-                    if(maxSaplings!=null){
-                        while(possibleSaplings.size()>maxSaplings){
-                            ArrayList<Integer> ints = new ArrayList<>(possibleSaplings.values());
-                            Collections.sort(ints);
-                            int i = ints.get(0);
-                            for(Block b : possibleSaplings.keySet()){
-                                if(possibleSaplings.get(b)==i){
-                                    possibleSaplings.remove(b);
-                                    break;
-                                }
+                    while(possibleSaplings.size()>Option.MAX_SAPLINGS.get(tool, tree)){
+                        ArrayList<Integer> ints = new ArrayList<>(possibleSaplings.values());
+                        Collections.sort(ints);
+                        int i = ints.get(0);
+                        for(Block b : possibleSaplings.keySet()){
+                            if(possibleSaplings.get(b)==i){
+                                possibleSaplings.remove(b);
+                                break;
                             }
                         }
                     }
@@ -240,10 +240,10 @@ public class TreeFeller extends JavaPlugin{
                         delay+=Option.ANIM_DELAY.get(tool, tree);
                         for(Block b : blocks.get(i)){
                             if(ttl<=0)break;
-                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
-                                droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
+                            for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
+                                droppedItems.addAll(getDrops(leaf, tool, tree, axe));
                             }
-                            droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
+                            droppedItems.addAll(getDrops(b, tool, tree, axe));
                             ttl--;
                         }
                         new BukkitRunnable() {
@@ -252,7 +252,7 @@ public class TreeFeller extends JavaPlugin{
                                 int tTl = TTL;
                                 for(Block b : blocks.get(i)){
                                     if(tTl<=0)break;
-                                    for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                                    for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
                                         breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
                                     }
                                     breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
@@ -263,8 +263,7 @@ public class TreeFeller extends JavaPlugin{
                         }.runTaskLater(this, delay);
                         Ttl += blocks.get(i).size();
                     }
-                    Integer maxSaplings = Option.MAX_SAPLINGS.get(tool, tree);
-                    if(maxSaplings!=null&&maxSaplings>=1){
+                    if(Option.MAX_SAPLINGS.get(tool, tree)>=1){
                         new BukkitRunnable() {
                             @Override
                             public void run(){
@@ -279,7 +278,7 @@ public class TreeFeller extends JavaPlugin{
                     for(int i : distances){
                         for(Block b : blocks.get(i)){
                             if(total<=0)break;
-                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                            for(Block leaf : toList(getBlocks(tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree)))){
                                 breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
                             }
                             breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
@@ -356,12 +355,10 @@ public class TreeFeller extends JavaPlugin{
                                 if(newBlock.getBlockData() instanceof Leaves){
                                     Leaves newLeaf = (Leaves)newBlock.getBlockData();
                                     if(!playerLeaves&&newLeaf.isPersistent())continue;
-                                    if(!ignoreLeafData){
-                                        if(block.getBlockData() instanceof Leaves){
-                                            Leaves oldLeaf = (Leaves)block.getBlockData();
-                                            if(newLeaf.getDistance()<=oldLeaf.getDistance()){
-                                                continue;
-                                            }
+                                    if(block.getBlockData() instanceof Leaves&&!ignoreLeafData){
+                                        Leaves oldLeaf = (Leaves)block.getBlockData();
+                                        if(newLeaf.getDistance()<=oldLeaf.getDistance()){
+                                            continue;
                                         }
                                     }
                                 }
@@ -404,12 +401,10 @@ public class TreeFeller extends JavaPlugin{
                         if(newBlock.getState().getBlockData() instanceof Leaves){
                             Leaves newLeaf = (Leaves)newBlock.getBlockData();
                             if(!playerLeaves&&newLeaf.isPersistent())continue;
-                            if(!ignoreLeafData){
-                                if(block.getBlockData() instanceof Leaves){
-                                    Leaves oldLeaf = (Leaves)block.getBlockData();
-                                    if(newLeaf.getDistance()<=oldLeaf.getDistance()){
-                                        continue;
-                                    }
+                            if(block.getBlockData() instanceof Leaves&&!ignoreLeafData){
+                                Leaves oldLeaf = (Leaves)block.getBlockData();
+                                if(newLeaf.getDistance()<=oldLeaf.getDistance()){
+                                    continue;
                                 }
                             }
                         }
@@ -421,11 +416,6 @@ public class TreeFeller extends JavaPlugin{
             results.put(i+1, layer);
         }
         return results;
-    }
-    private HashMap<Integer, ArrayList<Block>> getBlocksWithLeafCheck(ArrayList<Material> trunk, ArrayList<Material> leaves, Block startingBlock, int maxDistance, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData, boolean forceDistanceCheck){
-        HashMap<Integer, ArrayList<Block>> blocks = getBlocks(leaves, startingBlock, maxDistance, diagonal, playerLeaves, ignoreLeafData);
-        if(forceDistanceCheck)leafCheck(blocks, trunk, leaves, diagonal, playerLeaves, ignoreLeafData);
-        return blocks;
     }
     private int getTotal(HashMap<Integer, ArrayList<Block>> blocks){
         int total = 0;
@@ -440,16 +430,6 @@ public class TreeFeller extends JavaPlugin{
             list.addAll(blocks.get(i));
         }
         return list;
-    }
-    private int distance(Block from, ArrayList<Material> to, ArrayList<Material> materialTypes, int max, boolean diagonal, boolean playerLeaves){
-        materialTypes.add(from.getType());
-        materialTypes.addAll(to);
-        for(int d = 0; d<max; d++){
-            for(Block b : toList(getBlocks(materialTypes, from, d, diagonal, playerLeaves, true))){
-                if(to.contains(b.getType()))return d;
-            }
-        }
-        return max;
     }
     @Override
     public void onEnable(){
@@ -556,6 +536,7 @@ public class TreeFeller extends JavaPlugin{
     }
     public void reload(){
         Logger logger = getLogger();
+        serverVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
         trees.clear();
         tools.clear();
         effects.clear();
@@ -694,7 +675,7 @@ public class TreeFeller extends JavaPlugin{
             message.load(getConfig());
         }
         if(Option.STARTUP_LOGS.isTrue()){
-            logger.log(Level.INFO, "Server version: {0}", Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1));
+            logger.log(Level.INFO, "Server version: {0}", serverVersion);
             logger.log(Level.INFO, "Loaded global values:");
             for(Option option : Option.options){
                 Object value = option.getValue();
@@ -948,18 +929,15 @@ public class TreeFeller extends JavaPlugin{
         }
         if(drop){
             for(int i = 0; i<bonus+1; i++){
-                int[] blockXP = new int[1];
-                drops.addAll(getDrops(block, tool, tree, axe, blockXP));
-                xp[0]+=blockXP[0];
+                drops.addAll(getDrops(block, tool, tree, axe));
+                if(exp.containsKey(block.getType())){
+                    xp[0] += randbetween(exp.get(block.getType()));
+                }
             }
         }
         return drops;
     }
-    private Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
-        if(xp.length!=1)throw new IllegalArgumentException("blockXP must be an array of length 1!");
-        if(exp.containsKey(block.getType())){
-            xp[0] += randbetween(exp.get(block.getType()));
-        }
+    private Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe){
         ArrayList<ItemStack> drops = new ArrayList<>();
         boolean convert = Option.CONVERT_WOOD_TO_LOG.get(tool, tree);
         boolean fortune, silk;
@@ -970,10 +948,17 @@ public class TreeFeller extends JavaPlugin{
             fortune = Option.LEAF_FORTUNE.get(tool, tree);
             silk = Option.LEAF_SILK_TOUCH.get(tool, tree);
         }
+        BlockData data = block.getBlockData();
         Material type = block.getType();
-        drops.addAll(block.getDrops());
-        if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
-        if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
+        watching = true;
+        watchedDrops.clear();
+        block.breakNaturally(axe);
+        if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, watchedDrops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS));
+        if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, watchedDrops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH));
+        watching = false;
+        drops.addAll(watchedDrops);
+        block.setType(type);
+        block.setBlockData(data);
         if(convert){
             for(ItemStack s : drops){
                 if(s.getType().name().endsWith("_WOOD")){
@@ -984,7 +969,7 @@ public class TreeFeller extends JavaPlugin{
         return drops;
     }
     //Bukkit API lacks fortune/silk touch handling, so I have to do it the hard way...
-    private void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
+    private void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel){
         if(enchantmentLevel==0)return;
         switch(type){
             case COAL_ORE:
@@ -993,7 +978,6 @@ public class TreeFeller extends JavaPlugin{
             case LAPIS_ORE:
             case NETHER_QUARTZ_ORE:
             case REDSTONE_ORE://incorrect
-            case NETHER_GOLD_ORE://might be incorrect
                 ArrayList<Integer> mults = new ArrayList<>();
                 mults.add(1);
                 mults.add(1);
@@ -1042,19 +1026,21 @@ public class TreeFeller extends JavaPlugin{
                             break;
                     }
                 }
-                switch(fortune){
-                    case 1:
-                        if(r.nextDouble()<.0022)drops.add(new ItemStack(Material.STICK));
-                        break;
-                    case 2:
-                        if(r.nextDouble()<.005)drops.add(new ItemStack(Material.STICK));
-                        break;
-                    case 3:
-                        if(r.nextDouble()<.0133)drops.add(new ItemStack(Material.STICK));
-                        break;
-                    case 4:
-                        if(r.nextDouble()<.08)drops.add(new ItemStack(Material.STICK));//why, minecraft, why?
-                        break;
+                if(!serverVersion.startsWith("1_13")){//no sticks in 1.13!
+                    switch(fortune){
+                        case 1:
+                            if(r.nextDouble()<.0022)drops.add(new ItemStack(Material.STICK));
+                            break;
+                        case 2:
+                            if(r.nextDouble()<.005)drops.add(new ItemStack(Material.STICK));
+                            break;
+                        case 3:
+                            if(r.nextDouble()<.0133)drops.add(new ItemStack(Material.STICK));
+                            break;
+                        case 4:
+                            if(r.nextDouble()<.08)drops.add(new ItemStack(Material.STICK));//why, minecraft, why?
+                            break;
+                    }
                 }
                 if(type==Material.OAK_LEAVES){
                     switch(fortune){
@@ -1073,12 +1059,13 @@ public class TreeFeller extends JavaPlugin{
                 break;
         }
     }
-    private void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
+    private void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel){
         if(enchantmentLevel==0)return;
+        if(type.name().startsWith("BEE")||type.name().startsWith("CAMPFIRE")){//because I'm still supporting 1.13... We'll see how long that lasts
+            drops.clear();
+            drops.add(new ItemStack(type));
+        }
         switch(type){
-            case BEEHIVE:
-            case BEE_NEST:
-            case CAMPFIRE:
             case BLUE_ICE:
             case BOOKSHELF:
             case CLAY:
@@ -1148,10 +1135,8 @@ public class TreeFeller extends JavaPlugin{
             case PODZOL:
             case SEA_LANTERN:
             case TURTLE_EGG:
-            case SOUL_CAMPFIRE:
                 drops.clear();
                 drops.add(new ItemStack(type));
-                xp[0] = 0;
                 break;
             //pickaxe only (conditional too!)
             case COAL_ORE:
@@ -1166,11 +1151,8 @@ public class TreeFeller extends JavaPlugin{
             case LAPIS_ORE:
             case NETHER_QUARTZ_ORE:
             case REDSTONE_ORE:
-            case NETHER_GOLD_ORE:
-            case GILDED_BLACKSTONE:
             case STONE:
                 if(axe.getType().name().toLowerCase().contains("pickaxe")){
-                    xp[0] = 0;
                     if(drops.isEmpty())return;
                     drops.clear();
                     drops.add(new ItemStack(type));
@@ -1182,23 +1164,8 @@ public class TreeFeller extends JavaPlugin{
                 if(axe.getType().name().toLowerCase().contains("shovel")){
                     drops.clear();
                     drops.add(new ItemStack(type));
-                    xp[0] = 0;
                 }
                 break;
-        }
-    }
-    private void leafCheck(HashMap<Integer, ArrayList<Block>> someLeaves, ArrayList<Material> trunk, ArrayList<Material> leaves, Boolean diagonal, Boolean playerLeaves, Boolean ignoreLeafData){
-        if(ignoreLeafData)return;
-        ArrayList<Integer> ints = new ArrayList<>();
-        ints.addAll(someLeaves.keySet());
-        Collections.sort(ints);
-        for(int d : ints){
-            for(Iterator<Block> it = someLeaves.get(d).iterator(); it.hasNext();){
-                Block leaf = it.next();
-                if(distance(leaf, trunk, leaves, d, diagonal, playerLeaves)<d){
-                    it.remove();
-                }
-            }
         }
     }
     private static class RotationData{
@@ -1222,16 +1189,16 @@ public class TreeFeller extends JavaPlugin{
         private final Tree tree;
         private final ItemStack axe;
         private final boolean doBreak;
-        private final Player player;
+        private final Player inv;
         private final RotationData rot;
         private final boolean dropItems;
-        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems){
+        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player inv, RotationData rot, boolean dropItems){
             this.entity = entity;
             this.tool = tool;
             this.tree = tree;
             this.axe = axe;
             this.doBreak = doBreak;
-            this.player = player;
+            this.inv = inv;
             this.rot = rot;
             this.dropItems = dropItems;
         }
@@ -1259,12 +1226,12 @@ public class TreeFeller extends JavaPlugin{
                     for(ItemStack drop : drops)event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop);
                     dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
                 }
-                if(player!=null){
+                if(inv!=null){
                     event.setCancelled(true);
                     for(ItemStack drop : drops){
-                        for(ItemStack stack : player.getInventory().addItem(drop).values())event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
+                        for(ItemStack stack : inv.getInventory().addItem(drop).values())event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
                     }
-                    player.setTotalExperience(player.getTotalExperience()+xp[0]);
+                    inv.setTotalExperience(inv.getTotalExperience()+xp[0]);
                 }
                 fallingBlocks.remove(this);
                 if(event.isCancelled())return;

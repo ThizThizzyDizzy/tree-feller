@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.13.2
+# Version 1.12.2
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -38,10 +38,6 @@ ignore-leaf-data: false
 # Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)
 require-cross-section: false
 
-# If set to true, all non-leaf-block leaves will be distance-checked to make sure they belong to the tree being felled (ex. mushrooms or nether 'tree' leaves)
-# WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR
-force-distance-check: false
-
 # Should the tree cut down with an animation?
 cutting-animation: false
 
@@ -59,8 +55,8 @@ spawn-saplings: 0
 
 # What blocks can saplings be planted on?
 grass: 
-    - DIRT
     - GRASS_BLOCK
+    - DIRT
     - PODZOL
 
 # What felling behavior should logs have?
@@ -112,15 +108,15 @@ directional-fall-behavior: RANDOM
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
 overridables: 
-    - CAVE_AIR
-    - TALL_GRASS
     - TALL_SEAGRASS
-    - GRASS
+    - TALL_GRASS
     - AIR
-    - WATER
-    - SEAGRASS
     - FERN
     - LARGE_FERN
+    - CAVE_AIR
+    - WATER
+    - GRASS
+    - SEAGRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -251,7 +247,7 @@ min-phase:
 # 7 = waxing gibbous
 max-phase:
 
-# Tool's CustomModelData must match in order to fell trees
+# Tool's CustomModelData must match in order to fell trees (1.14+)
 custom-model-data:
 
 # Should the tree feller work in adventure mode?
@@ -382,7 +378,6 @@ tools:
 # diagonal-leaves:
 # ignore-leaf-data:
 # require-cross-section:
-# force-distance-check:
 # cutting-animation:
 # anim-delay:
 # replant-saplings:
@@ -445,8 +440,6 @@ trees:
     - [[JUNGLE_LOG, JUNGLE_WOOD], JUNGLE_LEAVES, {sapling: JUNGLE_SAPLING, max-saplings: 4}]
     - [[DARK_OAK_LOG, DARK_OAK_WOOD], DARK_OAK_LEAVES, {sapling: DARK_OAK_SAPLING, max-saplings: 4}]
     - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, max-saplings: 1}]
-    - [[CRIMSON_STEM, CRIMSON_HYPHAE], [NETHER_WART_BLOCK, SHROOMLIGHT], {sapling: CRIMSON_FUNGUS, max-saplings: 1, grass: [CRIMSON_NYLIUM], diagonal-leaves: true, leaf-range: 8}]
-    - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-range: 8}]
 
 # Here, you can create custom effects for trees or tools
 # Fields:

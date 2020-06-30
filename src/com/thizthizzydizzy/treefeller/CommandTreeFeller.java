@@ -30,8 +30,7 @@ public class CommandTreeFeller implements TabExecutor{
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
                 for(TreeFellerCommand cmd : commands){
                     if(cmd.hasPermission(sender)){
-                        String s = cmd.getUsage();
-                        if(s!=null)sender.sendMessage(s);
+                        sender.sendMessage(cmd.getUsage());
                     }
                 }
                 return true;
@@ -86,7 +85,7 @@ public class CommandTreeFeller implements TabExecutor{
             }
             @Override
             protected String getUsage(){
-                return null;
+                return "/treefeller on|toggle on";
             }
         };
         TreeFellerCommand toggleOff = new TreeFellerCommand("off"){
@@ -98,7 +97,7 @@ public class CommandTreeFeller implements TabExecutor{
             }
             @Override
             protected String getUsage(){
-                return null;
+                return "/treefeller off|toggle off";
             }
         };
         commands.add(toggleOn);

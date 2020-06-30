@@ -233,13 +233,6 @@ public abstract class Option<E>{
             return generateDebugText("A full cross-section has not been cut$", "A full cross-section has been cut");
         }
     };
-    public static OptionBoolean FORCE_DISTANCE_CHECK = new OptionBoolean("Force Distance Check", true, false, true, false){
-        @Override
-        public String getDesc(){
-            return "If set to true, all non-leaf-block leaves will be distance-checked to make sure they belong to the tree being felled (ex. mushrooms or nether 'tree' leaves)\n"
-                    + "WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR";
-        }
-    };
     
     public static OptionBoolean CUTTING_ANIMATION = new OptionBoolean("Cutting Animation", true, true, true, false){
         @Override
@@ -1207,6 +1200,9 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             ItemMeta meta = axe.getItemMeta();
+            if(plugin.serverVersion.contains("13")){
+                return new DebugResult(this, SUCCESS);
+            }
             int data = (meta==null||!meta.hasCustomModelData()?0:meta.getCustomModelData());
             if(globalValue!=null){
                 if(data!=globalValue)return new DebugResult(this, GLOBAL, data, globalValue);
@@ -1221,7 +1217,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(){
-            return "Tool's CustomModelData must match in order to fell trees";
+            return "Tool's CustomModelData must match in order to fell trees (1.14+)";
         }
         @Override
         public String[] getDebugText(){
