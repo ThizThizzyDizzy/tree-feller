@@ -1,5 +1,6 @@
 # Thizzy'z Tree Feller
-A Bukkit plugin for Minecraft 1.13+
+A Bukkit plugin for Minecraft 1.16+
+(Versions 1.12.2 and below are available for 1.13-1.15)
 
 ## Full customization
 Configure custom trees with any combination of blocks for its leaves and logs!
@@ -62,7 +63,7 @@ For example, if you want a single tree to require no leaves:
 If you are unable to pinpoint the problem, I’m happy to help on discord or GitHub. Make sure to provide the config, startup logs, and the debug information from /treefeller debug
 
 ### 1.12?
-It's difficult enough to maintain 1.13-1.15 already.
+The 1.12-1.13 transition involved *The Flattening* and a lot of other changes, making the code fundamentally different.
 
 If you want a tree feller for 1.12 or lower, find a different plugin.
 
