@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.12.2
+# Version 1.12.3
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -55,8 +55,8 @@ spawn-saplings: 0
 
 # What blocks can saplings be planted on?
 grass: 
-    - GRASS_BLOCK
     - DIRT
+    - GRASS_BLOCK
     - PODZOL
 
 # What felling behavior should logs have?
@@ -108,15 +108,15 @@ directional-fall-behavior: RANDOM
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
 overridables: 
-    - TALL_SEAGRASS
+    - CAVE_AIR
     - TALL_GRASS
+    - TALL_SEAGRASS
+    - GRASS
     - AIR
+    - WATER
+    - SEAGRASS
     - FERN
     - LARGE_FERN
-    - CAVE_AIR
-    - WATER
-    - GRASS
-    - SEAGRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false

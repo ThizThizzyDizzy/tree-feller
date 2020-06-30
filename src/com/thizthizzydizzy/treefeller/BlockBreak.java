@@ -18,19 +18,21 @@ public class BlockBreak implements Listener{
         if(TreeFeller.watching){
             TreeFeller.watchedDrops.add(event.getEntity().getItemStack());
             event.setCancelled(true);
-        }
-        if(!plugin.saplings.isEmpty()){
-            for(Iterator<Sapling> it = plugin.saplings.iterator(); it.hasNext();){
-                Sapling sapling = it.next();
-                if(sapling.isDead()){
-                    it.remove();
-                }else{
-                    if(!sapling.autofill)return;
-                    ItemStack stack = event.getEntity().getItemStack();
-                    if(sapling.getMaterial()==stack.getType()&&stack.getAmount()>=1){
-                        if(sapling.place()){
-                            stack.setAmount(stack.getAmount()-1);
-                            it.remove();
+        }else{
+            if(event.isCancelled())return;
+            if(!plugin.saplings.isEmpty()){
+                for(Iterator<Sapling> it = plugin.saplings.iterator(); it.hasNext();){
+                    Sapling sapling = it.next();
+                    if(sapling.isDead()){
+                        it.remove();
+                    }else{
+                        if(!sapling.autofill)return;
+                        ItemStack stack = event.getEntity().getItemStack();
+                        if(sapling.getMaterial()==stack.getType()&&stack.getAmount()>=1){
+                            if(sapling.place()){
+                                stack.setAmount(stack.getAmount()-1);
+                                it.remove();
+                            }
                         }
                     }
                 }
