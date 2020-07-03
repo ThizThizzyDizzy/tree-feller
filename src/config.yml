@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.13.2
+# Version 1.13.3
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -367,6 +367,7 @@ tools:
     - IRON_AXE
     - GOLDEN_AXE
     - DIAMOND_AXE
+    - NETHERITE_AXE
 
 # What materials count as trees?
 # Format:

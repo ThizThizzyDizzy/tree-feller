@@ -66,6 +66,7 @@ public class ConfigGenerator{
             add("    - IRON_AXE");
             add("    - GOLDEN_AXE");
             add("    - DIAMOND_AXE");
+            add("    - NETHERITE_AXE");
             add();
             add("# What materials count as trees?");
             add("# Format:");
