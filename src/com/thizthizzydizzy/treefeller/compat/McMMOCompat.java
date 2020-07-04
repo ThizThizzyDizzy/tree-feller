@@ -4,7 +4,7 @@ import org.bukkit.entity.Player;
 public class McMMOCompat extends InternalCompatibility{
     @Override
     public String getPluginName(){
-        return "McMMO";
+        return "mcMMO";
     }
     @Override
     public void breakBlock(Player player, Block block){
