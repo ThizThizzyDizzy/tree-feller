@@ -24,6 +24,7 @@ The default configuration will reliably cut down all vanilla trees, while not di
 - And more!
 ## Compatibility with the following plugins:
 - McMMO
+- MMOCore
 - Zrip’s Jobs Reborn
 - CoreProtect
 - GriefPrevention
