@@ -17,6 +17,7 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
+import org.bukkit.NamespacedKey;
 public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
     static{
@@ -614,6 +615,9 @@ public abstract class Option<E>{
                 return effects;
             }
             if(o instanceof String){
+                if(o.equals("ALL")){
+                    return new ArrayList<>(TreeFeller.effects);
+                }
                 ArrayList<Effect> effects = new ArrayList<>();
                 for(Effect e : TreeFeller.effects){
                     if(e.name.equalsIgnoreCase((String)o))effects.add(e);
@@ -1553,12 +1557,12 @@ public abstract class Option<E>{
     public E loadFromConfig(FileConfiguration config){
         return load(config.get(getGlobalName()));
     }
-    private static Material loadMaterial(Object o){
+    public static Material loadMaterial(Object o){
         if(o instanceof Material)return (Material)o;
         if(o instanceof String)return Material.matchMaterial((String)o);
         return null;
     }
-    private ArrayList<E> loadList(Object o){
+    public ArrayList<E> loadList(Object o){
         if(o instanceof Iterable){
             ArrayList<E> list = new ArrayList<>();
             for(Object ob : (Iterable)o){
@@ -1569,11 +1573,11 @@ public abstract class Option<E>{
         }
         return null;
     }
-    private static String loadString(Object o){
+    public static String loadString(Object o){
         if(o==null)return null;
         return o.toString();
     }
-    private static Integer loadInt(Object o){
+    public static Integer loadInt(Object o){
         if(o instanceof Number){
             return ((Number)o).intValue();
         }
@@ -1586,7 +1590,7 @@ public abstract class Option<E>{
         }
         return null;
     }
-    private static Double loadDouble(Object o){
+    public static Double loadDouble(Object o){
         if(o instanceof Number){
             return ((Number)o).doubleValue();
         }
@@ -1737,7 +1741,12 @@ public abstract class Option<E>{
             case "aqua affinity":
                 return Enchantment.WATER_WORKER;
             default:
-                return null;
+                if(string.contains(":")){
+                    String[] strs = string.split("\\:");
+                    return Enchantment.getByKey(new NamespacedKey(strs[0], strs[1]));
+                }else{
+                    return Enchantment.getByName(string);
+                }
         }
     }
     public E get(Tool tool, Tree tree){

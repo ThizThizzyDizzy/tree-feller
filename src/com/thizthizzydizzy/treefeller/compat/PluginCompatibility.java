@@ -1,7 +1,12 @@
 package com.thizthizzydizzy.treefeller.compat;
+import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
+import com.thizthizzydizzy.treefeller.Tool;
+import com.thizthizzydizzy.treefeller.Tree;
+import java.util.List;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 public abstract class PluginCompatibility{
     private final OptionBoolean enabled;
     public PluginCompatibility(){
@@ -20,7 +25,7 @@ public abstract class PluginCompatibility{
     /**
      * Called when a block is broken by a player
      */
-    public void breakBlock(Player player, Block block){}
+    public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){}
     public void addBlock(Player player, Block block){}
     public boolean test(Player player, Block block){
         return true;

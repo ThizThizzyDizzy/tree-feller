@@ -1,12 +1,18 @@
 package com.thizthizzydizzy.treefeller.compat;
+import com.thizthizzydizzy.treefeller.Modifier;
+import com.thizthizzydizzy.treefeller.Tool;
+import com.thizthizzydizzy.treefeller.Tree;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 public class TreeFellerCompat{
     private static final ArrayList<PluginCompatibility> compatibilities = new ArrayList<>();
     static{
+        compatibilities.add(new MMOCoreCompat());
         compatibilities.add(new JobsRebornCompat());
         compatibilities.add(new McMMOCompat());
         compatibilities.add(new CoreProtectCompat());
@@ -14,9 +20,9 @@ public class TreeFellerCompat{
         compatibilities.add(new GriefPreventionCompat());
     }
     public static void init(){}//placeholder method for loading the class
-    public static void breakBlock(Player player, Block block){
+    public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.breakBlock(player, block);
+            compat.breakBlock(tree, tool, player, axe, block, modifiers);
         }
     }
     public static void addBlock(Player player, Block block){

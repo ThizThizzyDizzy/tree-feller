@@ -12,6 +12,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.HashSet;
+import java.util.List;
 import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -124,6 +125,7 @@ public class TreeFeller extends JavaPlugin{
                     durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
                     if(durabilityCost<1)durabilityCost++;
                 }
+                if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
                 if(gamemode==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
                 if(Option.PREVENT_BREAKAGE.get(tool, tree)){
                     if(durabilityCost==durability){
@@ -761,7 +763,7 @@ public class TreeFeller extends JavaPlugin{
                 ArrayList<Material> trunk = new ArrayList<>();
                 ArrayList<Material> leaves = new ArrayList<>();
                 Material t = Material.matchMaterial((String) o);
-                Material l = Material.matchMaterial(((String) o).replaceAll("STRIPPED_", "").replaceAll("LOG", "LEAVES").replaceAll("WOOD", "LEAVES"));
+                Material l = Material.matchMaterial(((String) o).replace("STRIPPED_", "").replace("LOG", "LEAVES").replace("WOOD", "LEAVES"));
                 if(t!=null)trunk.add(t);
                 if(l!=null)leaves.add(l);
                 if(trunk.isEmpty()||leaves.isEmpty()){
@@ -856,17 +858,18 @@ public class TreeFeller extends JavaPlugin{
         boolean rotate = Option.ROTATE_LOGS.get(tool, tree);
         DirectionalFallBehavior directionalFallBehavior = Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree);
         boolean lockCardinal = Option.LOCK_FALL_CARDINAL.get(tool, tree);
+        ArrayList<Modifier> modifiers = new ArrayList<>();
         if(behavior==FellBehavior.FALL||behavior==FellBehavior.FALL_HURT||behavior==FellBehavior.NATURAL){
             TreeFellerCompat.removeBlock(player, block);
         }else{
-            TreeFellerCompat.breakBlock(player, block);
+            TreeFellerCompat.breakBlock(tree, tool, player, axe, block, modifiers);
         }
         switch(behavior){
             case INVENTORY:
                 if(player!=null){
                     if(dropItems){
                         int[] xp = new int[]{0};
-                        for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp)){
+                        for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
                             for(ItemStack st : player.getInventory().addItem(s).values()){
                                 block.getWorld().dropItemNaturally(block.getLocation(), st);
                             }
@@ -879,7 +882,7 @@ public class TreeFeller extends JavaPlugin{
             case BREAK:
                 if(dropItems){
                     int[] xp = new int[]{0};
-                    for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp)){
+                    for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
                         block.getWorld().dropItemNaturally(block.getLocation(), s);
                     }
                     dropExp(block.getWorld(), block.getLocation(), xp[0]);
@@ -911,7 +914,7 @@ public class TreeFeller extends JavaPlugin{
                     rot = new RotationData((Orientable)falling.getBlockData(), origin);
                 }
                 block.setType(Material.AIR);
-                fallingBlocks.add(new FallingTreeBlock(falling, tool, tree, axe, doBreak, inv, rot, dropItems));
+                fallingBlocks.add(new FallingTreeBlock(falling, tool, tree, axe, doBreak, inv, rot, dropItems, modifiers));
                 break;
             case NATURAL:
                 v = directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity).normalize();
@@ -931,10 +934,26 @@ public class TreeFeller extends JavaPlugin{
     public int randbetween(int min, int max){
         return new Random().nextInt(max-min+1)+min;
     }
-    private Collection<? extends ItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
+    private Collection<? extends ItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp, List<Modifier> modifiers){
         if(xp.length!=1)throw new IllegalArgumentException("xp must be an array of size 1!");
         ArrayList<ItemStack> drops = new ArrayList<>();
         double dropChance = tree.trunk.contains(block.getType())?Option.LOG_DROP_CHANCE.get(tool, tree):Option.LEAF_DROP_CHANCE.get(tool, tree);
+        for(Modifier mod : modifiers){
+            switch(mod.type){
+                case LOG_MULT:
+                    if(tree.trunk.contains(block.getType()))dropChance*=mod.value;
+                    break;
+                case LEAF_MULT:
+                    if(!tree.trunk.contains(block.getType()))dropChance*=mod.value;
+                    break;
+                case DROPS_MULT:
+                    dropChance*=mod.value;
+                    break;
+                default:
+                    getLogger().log(Level.WARNING, "Unhandled modifier: {0}! Please report this on github! (https://github.com/ThizThizzyDizzy/tree-feller)!", mod.toString());
+                    break;
+            }
+        }
         boolean drop = true;
         int bonus = 0;
         if(dropChance<=1){
@@ -972,12 +991,19 @@ public class TreeFeller extends JavaPlugin{
         }
         Material type = block.getType();
         drops.addAll(block.getDrops());
+        for(Iterator<ItemStack> it = drops.iterator(); it.hasNext();){
+            ItemStack next = it.next();
+            if(next.getType().isAir())it.remove();//don't try to drop air
+        }
         if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
         if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
         if(convert){
             for(ItemStack s : drops){
                 if(s.getType().name().endsWith("_WOOD")){
                     s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
+                }
+                if(s.getType().name().endsWith("_HYPHAE")){
+                    s.setType(Material.matchMaterial(s.getType().name().replace("_HYPHAE", "_STEM")));
                 }
             }
         }
@@ -1225,7 +1251,8 @@ public class TreeFeller extends JavaPlugin{
         private final Player player;
         private final RotationData rot;
         private final boolean dropItems;
-        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems){
+        private final List<Modifier> modifiers;
+        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems, List<Modifier> modifiers){
             this.entity = entity;
             this.tool = tool;
             this.tree = tree;
@@ -1234,6 +1261,7 @@ public class TreeFeller extends JavaPlugin{
             this.player = player;
             this.rot = rot;
             this.dropItems = dropItems;
+            this.modifiers = modifiers;
         }
         public void land(EntityChangeBlockEvent event){
             if(event.getTo()==Material.AIR)return;
@@ -1253,7 +1281,7 @@ public class TreeFeller extends JavaPlugin{
                     fallingBlocks.remove(this);
                     return;
                 }
-                ArrayList<ItemStack> drops = getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp);
+                ArrayList<ItemStack> drops = getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp, modifiers);
                 if(doBreak){
                     event.setCancelled(true);
                     for(ItemStack drop : drops)event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop);
@@ -1309,7 +1337,7 @@ public class TreeFeller extends JavaPlugin{
             }
         }
     }
-    private ArrayList<ItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp){
+    private ArrayList<ItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp, List<Modifier> modifiers){
         ArrayList<ItemStack> drops = new ArrayList<>();
         if(!m.isBlock())return drops;
         Block block = findAir(location);
@@ -1318,7 +1346,7 @@ public class TreeFeller extends JavaPlugin{
             return drops;
         }
         block.setType(m);
-        drops.addAll(getDropsWithBonus(block, tool, tree, axe, xp));
+        drops.addAll(getDropsWithBonus(block, tool, tree, axe, xp, modifiers));
         block.setType(Material.AIR);
         return drops;
     }

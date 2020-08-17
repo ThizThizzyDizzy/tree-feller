@@ -1,7 +1,5 @@
 package com.thizthizzydizzy.treefeller;
-
 import java.util.Objects;
-
 public abstract class OptionBoolean extends Option<Boolean>{
     public OptionBoolean(String name, boolean global, boolean tool, boolean tree, Boolean defaultValue){
         super(name, global, tool, tree, defaultValue);

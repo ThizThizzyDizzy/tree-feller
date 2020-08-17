@@ -59,9 +59,9 @@ spawn-saplings: 0
 
 # What blocks can saplings be planted on?
 grass: 
+    - PODZOL
     - DIRT
     - GRASS_BLOCK
-    - PODZOL
 
 # What felling behavior should logs have?
 # Valid options:
@@ -112,15 +112,15 @@ directional-fall-behavior: RANDOM
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
 overridables: 
+    - GRASS
     - CAVE_AIR
     - TALL_GRASS
-    - TALL_SEAGRASS
-    - GRASS
+    - LARGE_FERN
+    - FERN
     - AIR
     - WATER
     - SEAGRASS
-    - FERN
-    - LARGE_FERN
+    - TALL_SEAGRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -277,8 +277,32 @@ world-blacklist: false
 # How long (in ticks) should players have to wait before felling another tree?
 cooldown:
 
+# EXP will be provided to these professions when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)
+# use "global" to add global experience
+# ex:
+# - global: 3
+# - woodcutting: 8
+mmocore-trunk-xp: 
+   - global: 1
+
+# EXP will be provided to these professions when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
+# use "global" to add global experience
+# ex:
+# - global: 3
+# - woodcutting: 8
+mmocore-leaves-xp: 
+   - global: 0
+
+# Toggle compatibility with MMOCore
+compatibility-mmocore: true
+
 # Toggle compatibility with Jobs Reborn
 compatibility-jobs: true
+
+# Should the mcMMO Double Drops feature apply when cutting down trees?
+mcmmo-double-drops: true
 
 # Toggle compatibility with mcMMO
 compatibility-mcmmo: true
@@ -353,6 +377,7 @@ compatibility-griefprevention: true
 # worlds
 # world-blacklist
 # cooldown
+# mcmmo-double-drops
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
 #    - {type: WOODEN_AXE, required-enchantments: {efficiency: 4, unbreaking: 1}, banned-enchantments: {unbreaking: 2}, min-durability: 4, max-durability-percent: 0.9}
@@ -434,6 +459,9 @@ tools:
 # worlds:
 # world-blacklist:
 # cooldown:
+# mmocore-trunk-xp:
+# mmocore-leaves-xp:
+# mcmmo-double-drops:
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
