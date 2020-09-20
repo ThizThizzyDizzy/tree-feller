@@ -56,4 +56,5 @@ public abstract class PluginCompatibility{
     public ItemBuilder getConfigurationDisplayItem(){
         return new ItemBuilder(Material.JIGSAW);
     }
+    public void reload(){}
 }

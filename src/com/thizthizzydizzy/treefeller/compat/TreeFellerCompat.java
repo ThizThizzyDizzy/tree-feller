@@ -15,6 +15,7 @@ public class TreeFellerCompat{
         compatibilities.add(new MMOCoreCompat());
         compatibilities.add(new JobsRebornCompat());
         compatibilities.add(new McMMOCompat());
+        compatibilities.add(new McMMOClassicCompat());
         compatibilities.add(new CoreProtectCompat());
         compatibilities.add(new WorldGuardCompat());
         compatibilities.add(new GriefPreventionCompat());
@@ -66,6 +67,11 @@ public class TreeFellerCompat{
         }
         if(override!=null)compatibilities.remove(override);
         compatibilities.add(compatibility);
+    }
+    public static void reload(){
+        for(PluginCompatibility compat : getCompatibilities()){
+            compat.reload();
+        }
     }
     private static ArrayList<PluginCompatibility> getCompatibilities(){
         ArrayList<PluginCompatibility> compats = new ArrayList<>();

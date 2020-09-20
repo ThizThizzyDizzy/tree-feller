@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller;
+import com.thizthizzydizzy.treefeller.compat.PluginCompatibility;
 import com.thizthizzydizzy.treefeller.compat.TestResult;
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import java.util.ArrayList;
@@ -826,6 +827,7 @@ public class TreeFeller extends JavaPlugin{
             }
         }
 //</editor-fold>
+        TreeFellerCompat.reload();
     }
     public Sapling getSapling(Block b){
         for(Iterator<Sapling> it = saplings.iterator(); it.hasNext();){

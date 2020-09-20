@@ -8,3 +8,5 @@ commands:
     treefeller:
         description: TreeFeller commands
         usage: /treefeller help | toggle [on|off] | on | off | reload | config | debug [on|off]
+softdepend:
+  - mcMMO
