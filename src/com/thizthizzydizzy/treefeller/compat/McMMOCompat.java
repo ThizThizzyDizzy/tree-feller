@@ -1,9 +1,11 @@
 package com.thizthizzydizzy.treefeller.compat;
+import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import java.util.List;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
@@ -13,6 +15,10 @@ public class McMMOCompat extends InternalCompatibility{
         @Override
         public String getDesc(){
             return "Should the mcMMO Double Drops feature apply when cutting down trees?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG).setCount(getValue()?2:1);
         }
     };
     @Override

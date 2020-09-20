@@ -7,4 +7,4 @@ name: TreeFeller
 commands:
     treefeller:
         description: TreeFeller commands
-        usage: /treefeller help | toggle [on|off] | on | off | reload | debug [on|off]
+        usage: /treefeller help | toggle [on|off] | on | off | reload | config | debug [on|off]

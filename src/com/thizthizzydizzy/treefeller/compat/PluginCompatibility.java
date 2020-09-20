@@ -1,9 +1,11 @@
 package com.thizthizzydizzy.treefeller.compat;
+import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import java.util.List;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -14,6 +16,14 @@ public abstract class PluginCompatibility{
             @Override
             public String getDesc(){
                 return "Toggle compatibility with "+PluginCompatibility.this.getFriendlyName();
+            }
+            @Override
+            public String getFriendlyName(){
+                return "Compatibility: "+PluginCompatibility.this.getFriendlyName();
+            }
+            @Override
+            public ItemBuilder getConfigurationDisplayItem(){
+                return PluginCompatibility.this.getConfigurationDisplayItem();
             }
         };
     }
@@ -41,5 +51,9 @@ public abstract class PluginCompatibility{
     }
     public boolean isEnabled(){
         return enabled.isTrue();
+    }
+    //not abstract as to not break external compatibilities
+    public ItemBuilder getConfigurationDisplayItem(){
+        return new ItemBuilder(Material.JIGSAW);
     }
 }

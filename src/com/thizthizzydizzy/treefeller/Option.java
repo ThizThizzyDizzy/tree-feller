@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller;
+import com.thizthizzydizzy.simplegui.ItemBuilder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,6 +19,7 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
 import org.bukkit.NamespacedKey;
+import org.bukkit.inventory.ItemFlag;
 public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
     static{
@@ -43,6 +45,15 @@ public abstract class Option<E>{
         public String getDesc(){
             return "If set to false, the tree feller will not list all its settings in the console on startup";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            ItemBuilder builder = new ItemBuilder(Material.OAK_LOG);
+            if(getValue()==true){
+                builder.enchant(Enchantment.BINDING_CURSE, 1);
+                builder.addFlag(ItemFlag.HIDE_ENCHANTS);
+            }
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     
     public static Option<Integer> SCAN_DISTANCE = new Option<Integer>("Scan Distance", true, true, false, 256){
@@ -54,6 +65,10 @@ public abstract class Option<E>{
         public String getDesc(){
             return "How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.RAIL).setCount(globalValue);
+        }
     };
     public static Option<Integer> LEAF_RANGE = new Option<Integer>("Leaf Range", true, true, true, 6){
         @Override
@@ -63,6 +78,10 @@ public abstract class Option<E>{
         @Override
         public String getDesc(){
             return "How far away from logs should leaf blocks be destroyed? (set to 0 to prevent leaves from being destroyed) (Values over 6 are useless for vanilla trees, as these leaves would naturally decay anyway)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES).setCount(globalValue);
         }
     };
     public static Option<Integer> REQUIRED_LOGS = new Option<Integer>("Required Logs", true, true, true, 4){
@@ -92,6 +111,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tree has too few logs$: {0}<{1}", "Tree has enough logs");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG).setCount(getValue());
+        }
     };
     public static Option<Integer> REQUIRED_LEAVES = new Option<Integer>("Required Leaves", true, true, true, 10){
         @Override
@@ -118,6 +141,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Tree has too few leaves$: {0}<{1}", "Tree has enough leaves");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES).setCount(getValue());
         }
     };
     public static Option<Integer> MAX_LOGS = new Option<Integer>("Max Logs", true, true, true, 250){
@@ -146,6 +173,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Tree has too many logs$: {0}>{1}", "Tree has few enough logs");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG).setCount(getValue());
         }
     };
     public static Option<Integer> MAX_HEIGHT = new Option<Integer>("Max Height", true, true, true, 5){
@@ -183,11 +214,19 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tree was cut {0} blocks too high$", "Tree was cut low enough");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.LADDER).setCount(getValue());
+        }
     };
     public static OptionBoolean ALLOW_PARTIAL = new OptionBoolean("Allow Partial", true, true, true, false){
         @Override
         public String getDesc(){
             return "Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.STICK);
         }
     };
     public static OptionBoolean PLAYER_LEAVES = new OptionBoolean("Player Leaves", true, true, true, false){
@@ -195,17 +234,29 @@ public abstract class Option<E>{
         public String getDesc(){
             return "Should leaves placed by players be cut down also? (Only works with _LEAVES materials)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES);
+        }
     };
     public static OptionBoolean DIAGONAL_LEAVES = new OptionBoolean("Diagonal Leaves", true, false, true, false){
         @Override
         public String getDesc(){
             return "If set to true, leaves will be detected diagonally; May require ignore-leaf-data to work properly";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES);
+        }
     };
     public static OptionBoolean IGNORE_LEAF_DATA = new OptionBoolean("Ignore Leaf Data", true, false, true, false){
         @Override
         public String getDesc(){
             return "If set to true, leaves' blockdata will be ignored. This should only be set if custom trees' leaves are not being destroyed when they should.";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES);
         }
     };
     public static OptionBoolean REQUIRE_CROSS_SECTION = new OptionBoolean("Require Cross Section", true, true, true, false){
@@ -233,6 +284,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("A full cross-section has not been cut$", "A full cross-section has been cut");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DARK_OAK_LOG);
+        }
     };
     public static OptionBoolean FORCE_DISTANCE_CHECK = new OptionBoolean("Force Distance Check", true, false, true, false){
         @Override
@@ -240,12 +295,20 @@ public abstract class Option<E>{
             return "If set to true, all non-leaf-block leaves will be distance-checked to make sure they belong to the tree being felled (ex. mushrooms or nether 'tree' leaves)\n"
                     + "WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DETECTOR_RAIL);
+        }
     };
     
     public static OptionBoolean CUTTING_ANIMATION = new OptionBoolean("Cutting Animation", true, true, true, false){
         @Override
         public String getDesc(){
             return "Should the tree cut down with an animation?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.GOLDEN_AXE);
         }
     };
     public static Option<Integer> ANIM_DELAY = new Option<Integer>("Anim Delay", true, true, true, 1){
@@ -257,11 +320,19 @@ public abstract class Option<E>{
         public String getDesc(){
             return "Animation delay, in ticks";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK).setCount(getValue());
+        }
     };
     public static OptionBoolean REPLANT_SAPLINGS = new OptionBoolean("Replant Saplings", true, true, true, false){
         @Override
         public String getDesc(){
             return "Should saplings be replanted?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_SAPLING);
         }
     };
     public static Option<Integer> SPAWN_SAPLINGS = new Option<Integer>("Spawn Saplings", true, true, true, 0){
@@ -285,6 +356,10 @@ public abstract class Option<E>{
                 "1 = Yes, but only if the leaves do not drop enough\n" +
                 "2 = Yes, always spawn new saplings";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_SAPLING);
+        }
     };
     public static Option<Material> SAPLING = new Option<Material>("Sapling", false, false, true, null){
         @Override
@@ -295,6 +370,10 @@ public abstract class Option<E>{
         public String getDesc(){
             return "If replant-saplings is enabled, this will replant the tree with this type of sapling";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_SAPLING);
+        }
     };
     public static Option<Integer> MAX_SAPLINGS = new Option<Integer>("Max Saplings", false, false, true, 1){
         @Override
@@ -304,6 +383,10 @@ public abstract class Option<E>{
         @Override
         public String getDesc(){
             return "If replant-saplings is enabled, this will limit the number of saplings that can be replanted";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_SAPLING);
         }
     };
     public static Option<HashSet<Material>> GRASS = new Option<HashSet<Material>>("Grass", true, false, true, defaultGrasses){
@@ -326,6 +409,10 @@ public abstract class Option<E>{
         @Override
         public String getDesc(){
             return "What blocks can saplings be planted on?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.GRASS_BLOCK);
         }
     };
     
@@ -357,6 +444,10 @@ public abstract class Option<E>{
                 "NATURAL             The logs will instantly fall in a more natural way (May not work with cutting-animation)\n" +
                 "Note that falling blocks occasionally drop as items if they land wrong";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     public static Option<FellBehavior> LEAF_BEHAVIOR = new Option<FellBehavior>("Leaf Behavior", true, true, true, FellBehavior.BREAK){
         @Override
@@ -385,6 +476,10 @@ public abstract class Option<E>{
                 "FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground\n" +
                 "NATURAL             The leaves will instantly fall in a more natural way (May not work with cutting-animation)\n" +
                 "Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES);
         }
     };
     public static Option<DirectionalFallBehavior> DIRECTIONAL_FALL_BEHAVIOR = new Option<DirectionalFallBehavior>("Directional Fall Behavior", true, true, true, DirectionalFallBehavior.RANDOM){
@@ -419,6 +514,10 @@ public abstract class Option<E>{
                 "SOUTH_WEST The tree fill fall to the southwest\n" +
                 "SOUTH_EAST The tree fill fall to the southeast";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     public static Option<HashSet<Material>> OVERRIDABLES = new Option<HashSet<Material>>("Overridables", true, true, true, defaultOverridables){
         @Override
@@ -446,11 +545,19 @@ public abstract class Option<E>{
             return "This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)\n" +
 "(Only used for NATURAL fell behavior)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.GRASS);
+        }
     };
     public static OptionBoolean LOCK_FALL_CARDINAL = new OptionBoolean("Lock Fall Cardinal", true, true, true, false){
         @Override
         public String getDesc(){
             return "If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.COMPASS);
         }
     };
     public static Option<Double> DIRECTIONAL_FALL_VELOCITY = new Option<Double>("Directional Fall Velocity", true, true, true, .35d){
@@ -470,6 +577,10 @@ public abstract class Option<E>{
                 "(Only used when log or leaf behavior is set to FALL or similar)\n" +
                 "All of the blocks in the tree will fall in the same direction with this velocity.";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     public static Option<Double> VERTICAL_FALL_VELOCITY = new Option<Double>("Vertical Fall Velocity", true, true, true, .05d){
         @Override
@@ -486,6 +597,10 @@ public abstract class Option<E>{
         public String getDesc(){
             return "How much upwards velocity should falling trees get?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
         }
     };
     public static Option<Double> RANDOM_FALL_VELOCITY = new Option<Double>("Random Fall Velocity", true, true, true, 0d){
@@ -504,12 +619,22 @@ public abstract class Option<E>{
             return "How much random sideways velocity should falling blocks get?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     
     public static OptionBoolean RESPECT_UNBREAKING = new OptionBoolean("Respect Unbreaking", true, true, true, true){
         @Override
         public String getDesc(){
             return "If a tool has unbreaking, should it take less damage from cutting trees?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            ItemBuilder builder = new ItemBuilder(Material.IRON_AXE);
+            if(getValue())builder.enchant(Enchantment.DURABILITY);
+            return builder;
         }
     };
     public static Option<Double> DAMAGE_MULT = new Option<Double>("Damage Mult", true, true, true, 1d){
@@ -521,11 +646,19 @@ public abstract class Option<E>{
         public String getDesc(){
             return "How much damage should tools take per log? (Multiplier)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.WOODEN_AXE);
+        }
     };
     public static OptionBoolean LEAF_FORTUNE = new OptionBoolean("Leaf Fortune", true, true, true, true){
         @Override
         public String getDesc(){
             return "Should Fortune on an axe be applied to leaves?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.LOOT_BONUS_BLOCKS);
         }
     };
     public static OptionBoolean LEAF_SILK_TOUCH = new OptionBoolean("Leaf Silk Touch", true, true, true, false){
@@ -533,17 +666,29 @@ public abstract class Option<E>{
         public String getDesc(){
             return "Should Silk Touch on an axe be applied to leaves?";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.SILK_TOUCH);
+        }
     };
     public static OptionBoolean LOG_FORTUNE = new OptionBoolean("Log Fortune", true, true, true, true){
         @Override
         public String getDesc(){
             return "Should Fortune on an axe be applied to logs?";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.LOOT_BONUS_BLOCKS);
+        }
     };
     public static OptionBoolean LOG_SILK_TOUCH = new OptionBoolean("Log Silk Touch", true, true, true, true){
         @Override
         public String getDesc(){
             return "Should Silk Touch on an axe be applied to leaves?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.SILK_TOUCH);
         }
     };
     public static OptionBoolean LEAVE_STUMP = new OptionBoolean("Leave Stump", true, true, true, false){
@@ -552,6 +697,10 @@ public abstract class Option<E>{
             return "When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)\n" +
                 "This may cause issues with custom trees that have multiple trunks or branches that extend very low";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     public static OptionBoolean ROTATE_LOGS = new OptionBoolean("Rotate Logs", true, true, true, true){
         @Override
@@ -559,11 +708,19 @@ public abstract class Option<E>{
             return "When trees fall, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
+        }
     };
     public static OptionBoolean CONVERT_WOOD_TO_LOG = new OptionBoolean("Convert Wood To Log", true, true, true, true){
         @Override
         public String getDesc(){
             return "Should _WOOD blocks in trees be converted to _LOG when they drop as items?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_WOOD);
         }
     };
     public static Option<Double> LEAF_DROP_CHANCE = new Option<Double>("Leaf Drop Chance", true, true, true, 1d){
@@ -581,6 +738,10 @@ public abstract class Option<E>{
         public String getDesc(){
             return "How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)";
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES);
+        }
     };
     public static Option<Double> LOG_DROP_CHANCE = new Option<Double>("Log Drop Chance", true, true, true, 1d){
         @Override
@@ -596,6 +757,10 @@ public abstract class Option<E>{
         @Override
         public String getDesc(){
             return "How often should logs drop items? Set this to 0.0 to stop logs from dropping items altogether (Only works with BREAK behavior)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
         }
     };
     public static Option<ArrayList<Effect>> EFFECTS = new Option<ArrayList<Effect>>("Effects", true, true, true, null, "\n    - ALL"){
@@ -645,6 +810,10 @@ public abstract class Option<E>{
                 "ex:\n" +
                 "  - ghost sound\n" +
                 "  - smoke";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.POTION);
         }
     };
     
@@ -713,6 +882,17 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Enchantment missing$: {0} at minimum level {1}", "All required enchantments met");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            ItemBuilder builder = new ItemBuilder(Material.ENCHANTED_BOOK);
+            HashMap<Enchantment, Integer> value = getValue();
+            if(value!=null){
+                for(Enchantment enchantment : value.keySet()){
+                    builder.enchant(enchantment, value.get(enchantment));
+                }
+            }
+            return builder;
+        }
     };
     public static Option<HashMap<Enchantment, Integer>> BANNED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Banned Enchantments", true, true, true, null){
         @Override
@@ -779,11 +959,22 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tool contains banned enchantment$: {0} above level {1}", "No banned enchantments found");
         }
-    };
-    public static Option<Integer> MIN_DURABILITY = new Option<Integer>("Min Durability", true, true, true, null){
         @Override
-        public Integer load(Object o){
-            return loadInt(o);
+        public ItemBuilder getConfigurationDisplayItem(){
+            ItemBuilder builder = new ItemBuilder(Material.ENCHANTED_BOOK);
+            HashMap<Enchantment, Integer> value = getValue();
+            if(value!=null){
+                for(Enchantment enchantment : value.keySet()){
+                    builder.enchant(enchantment, value.get(enchantment));
+                }
+            }
+            return builder;
+        }
+    };
+    public static Option<Short> MIN_DURABILITY = new Option<Short>("Min Durability", true, true, true, null){
+        @Override
+        public Short load(Object o){
+            return loadShort(o);
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
@@ -809,11 +1000,15 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
         }
-    };
-    public static Option<Integer> MAX_DURABILITY = new Option<Integer>("Max Durability", true, true, true, null){
         @Override
-        public Integer load(Object o){
-            return loadInt(o);
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        }
+    };
+    public static Option<Short> MAX_DURABILITY = new Option<Short>("Max Durability", true, true, true, null){
+        @Override
+        public Short load(Object o){
+            return loadShort(o);
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
@@ -839,16 +1034,20 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
         }
-    };
-    public static Option<Double> MIN_DURABILITY_PERCENT = new Option<Double>("Min Durability Percent", true, true, true, null){
         @Override
-        public Double load(Object o){
-            return loadDouble(o);
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        }
+    };
+    public static Option<Float> MIN_DURABILITY_PERCENT = new Option<Float>("Min Durability Percent", true, true, true, null){
+        @Override
+        public Float load(Object o){
+            return loadFloat(o);
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
-            double durabilityPercent = durability/(double)axe.getType().getMaxDurability();
+            float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
                     if(durabilityPercent<globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
@@ -870,16 +1069,20 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
         }
-    };
-    public static Option<Double> MAX_DURABILITY_PERCENT = new Option<Double>("Max Durability Percent", true, true, true, null){
         @Override
-        public Double load(Object o){
-            return loadDouble(o);
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        }
+    };
+    public static Option<Float> MAX_DURABILITY_PERCENT = new Option<Float>("Max Durability Percent", true, true, true, null){
+        @Override
+        public Float load(Object o){
+            return loadFloat(o);
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
-            double durabilityPercent = durability/(double)axe.getType().getMaxDurability();
+            float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
                     if(durabilityPercent>globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
@@ -901,11 +1104,19 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        }
     };
     public static OptionBoolean PREVENT_BREAKAGE = new OptionBoolean("Prevent Breakage", true, true, true, false){
         @Override
         public String getDesc(){
             return "If set to true, tools will not be able to fell a tree if doing so would break the tool.";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.WOODEN_AXE);
         }
     };
     public static Option<ArrayList<String>> REQUIRED_LORE = new Option<ArrayList<String>>("Required Lore", true, true, true, null){
@@ -974,6 +1185,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tool is missing required lore$: {0}", "Tool has all required lore");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.BOOK);
+        }
     };
     public static Option<String> REQUIRED_NAME = new Option<String>("Required Name", true, true, true, null){
         @Override
@@ -1005,6 +1220,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Tool name does not match required name$: {0}", "Tool name matches");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.PAPER).addLore(getValue());
         }
     };
     public static Option<HashSet<String>> REQUIRED_PERMISSIONS = new Option<HashSet<String>>("Required Permissions", true, true, true, new HashSet<>(), null){
@@ -1060,6 +1279,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Player is missing required permission$: {0}", "Player has all required permissions");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.PAPER);
+        }
     };
     public static Option<Integer> MIN_TIME = new Option<Integer>("Min Time", true, true, true, null){
         @Override
@@ -1090,6 +1313,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Time is less than minimum allowed$: {0}", "Time meets minimum requirement");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK);
+        }
     };
     public static Option<Integer> MAX_TIME = new Option<Integer>("Max Time", true, true, true, null){
         @Override
@@ -1119,6 +1346,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Time is greater than maximum allowed$: {0}", "Time meets maximum requirement");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK);
         }
     };
     public static Option<Integer> MIN_PHASE = new Option<Integer>("Min Phase", true, true, true, null){
@@ -1161,6 +1392,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Phase is less than minimum allowed$: {0}", "Phase meets minimum requirement");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK);
+        }
     };
     public static Option<Integer> MAX_PHASE = new Option<Integer>("Max Phase", true, true, true, null){
         @Override
@@ -1202,6 +1437,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Phase is greater than maximum allowed$: {0}", "Phase meets maximum requirement");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK);
+        }
     };
     public static Option<Integer> CUSTOM_MODEL_DATA = new Option<Integer>("Custom Model Data", true, true, true, null){
         @Override
@@ -1230,6 +1469,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Custom model data does not match#: {0} != {1}", "Custom model data matches!");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK);
         }
     };
     public static Option<ArrayList<Tree>> ALLOWED_TREES = new Option<ArrayList<Tree>>("Allowed Trees", false, true, false, null){
@@ -1287,6 +1530,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("Tree is not allowed$: {0}", "Tree is allowed for tool");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.SPRUCE_SAPLING);
+        }
     };
     public static OptionBoolean ENABLE_ADVENTURE = new OptionBoolean("Enable Adventure", true, true, true, false){
         @Override
@@ -1304,6 +1551,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("TreeFeller is disabled in adventure mode", "Tool is disabled in adventure mode", "Tree is disabled in adventure mode", "All components OK for adventure mode");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.MAP);
         }
     };
     public static OptionBoolean ENABLE_SURVIVAL = new OptionBoolean("Enable Survival", true, true, true, true){
@@ -1323,6 +1574,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("TreeFeller is disabled in survival mode", "Tool is disabled in survival mode", "Tree is disabled in survival mode", "All components OK for survival mode");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.IRON_SWORD);
+        }
     };
     public static OptionBoolean ENABLE_CREATIVE = new OptionBoolean("Enable Creative", true, true, true, false){
         @Override
@@ -1340,6 +1595,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("TreeFeller is disabled in creative mode", "Tool is disabled in creative mode", "Tree is disabled in creative mode", "All components OK for creative mode");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.GRASS_BLOCK);
         }
     };
     public static OptionBoolean WITH_SNEAK = new OptionBoolean("With Sneak", true, true, true, false){
@@ -1359,6 +1618,10 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("TreeFeller is disabled when sneaking", "Tool is disabled when sneaking", "Tree is disabled when sneaking", "Felling allowed when sneaking");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.LEATHER_BOOTS);
+        }
     };
     public static OptionBoolean WITHOUT_SNEAK = new OptionBoolean("Without Sneak", true, true, true, true){
         @Override
@@ -1376,6 +1639,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("TreeFeller is disabled when not sneaking", "Tool is disabled when not sneaking", "Tree is disabled when not sneaking", "Felling allowed when not sneaking");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.IRON_BOOTS);
         }
     };
     public static Option<HashSet<String>> WORLDS = new Option<HashSet<String>>("Worlds", true, true, true, null){
@@ -1448,11 +1715,19 @@ public abstract class Option<E>{
         public String[] getDebugText(){
             return generateDebugText("World {0} is invalid$", "World {0} is valid");
         }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.GRASS_BLOCK);
+        }
     };
     public static OptionBoolean WORLD_BLACKLIST = new OptionBoolean("World Blacklist", true, true, true, false){
         @Override
         public String getDesc(){
             return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.GRASS_BLOCK);
         }
     };
     public static Option<Integer> COOLDOWN = new Option<Integer>("Cooldown", true, true, true, null){
@@ -1494,6 +1769,10 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Cooldown remaining: {0}ms", "Tool cooldown remaining: {0}ms", "Tree cooldown remaining: {0}ms", "Cooldown ready");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.CLOCK);
         }
     };
     protected final String name;
@@ -1584,6 +1863,45 @@ public abstract class Option<E>{
         if(o instanceof String){
             try{
                 return Integer.parseInt((String)o);
+            }catch(NumberFormatException ex){
+                return null;
+            }
+        }
+        return null;
+    }
+    public static Short loadShort(Object o){
+        if(o instanceof Number){
+            return ((Number)o).shortValue();
+        }
+        if(o instanceof String){
+            try{
+                return Short.parseShort((String)o);
+            }catch(NumberFormatException ex){
+                return null;
+            }
+        }
+        return null;
+    }
+    public static Long loadLong(Object o){
+        if(o instanceof Number){
+            return ((Number)o).longValue();
+        }
+        if(o instanceof String){
+            try{
+                return Long.parseLong((String)o);
+            }catch(NumberFormatException ex){
+                return null;
+            }
+        }
+        return null;
+    }
+    public static Float loadFloat(Object o){
+        if(o instanceof Number){
+            return ((Number)o).floatValue();
+        }
+        if(o instanceof String){
+            try{
+                return Float.parseFloat((String)o);
             }catch(NumberFormatException ex){
                 return null;
             }
@@ -1796,4 +2114,5 @@ public abstract class Option<E>{
     private static String[] generateDebugText(String global, String tool, String tree, String success){
         return new String[]{global,tool,tree,success};
     }
+    public abstract ItemBuilder getConfigurationDisplayItem();
 }

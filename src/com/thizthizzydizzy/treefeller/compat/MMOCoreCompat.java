@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.compat;
+import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.Tool;
@@ -7,11 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class MMOCoreCompat extends InternalCompatibility{
-    
     public static Option<HashMap<String, Double>> MMOCORE_TRUNK_XP = new Option<HashMap<String, Double>>("MMOCore Trunk XP", true, false, true, new HashMap<>(), "\n   - global: 1"){
         @Override
         public String getDesc(){
@@ -44,6 +45,10 @@ public class MMOCoreCompat extends InternalCompatibility{
                 return professions;
             }
             return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LOG);
         }
     };
     public static Option<HashMap<String, Double>> MMOCORE_LEAVES_XP = new Option<HashMap<String, Double>>("MMOCore Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
@@ -78,6 +83,10 @@ public class MMOCoreCompat extends InternalCompatibility{
                 return professions;
             }
             return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.OAK_LEAVES);
         }
     };
     @Override

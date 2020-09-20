@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller;
+import com.thizthizzydizzy.treefeller.menu.MenuConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.command.Command;
@@ -25,6 +26,21 @@ public class CommandTreeFeller implements TabExecutor{
                 return "/treefeller reload";
             }
         });
+//        commands.add(new TreeFellerCommand("config"){
+//            @Override
+//            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+//                if(!(sender instanceof Player)){
+//                    sender.sendMessage("You're not a player!");
+//                    return false;
+//                }
+//                new MenuConfiguration(null, plugin, (Player)sender).openInventory();
+//                return true;
+//            }
+//            @Override
+//            protected String getUsage(){
+//                return "/treefeller config";
+//            }
+//        });
         commands.add(new TreeFellerCommand("help"){
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){

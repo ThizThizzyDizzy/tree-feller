@@ -59,9 +59,9 @@ spawn-saplings: 0
 
 # What blocks can saplings be planted on?
 grass: 
-    - PODZOL
-    - DIRT
     - GRASS_BLOCK
+    - DIRT
+    - PODZOL
 
 # What felling behavior should logs have?
 # Valid options:
@@ -113,14 +113,14 @@ directional-fall-behavior: RANDOM
 # (Only used for NATURAL fell behavior)
 overridables: 
     - GRASS
-    - CAVE_AIR
-    - TALL_GRASS
     - LARGE_FERN
+    - CAVE_AIR
+    - TALL_SEAGRASS
+    - SEAGRASS
     - FERN
     - AIR
     - WATER
-    - SEAGRASS
-    - TALL_SEAGRASS
+    - TALL_GRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
