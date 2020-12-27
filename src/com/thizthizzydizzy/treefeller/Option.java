@@ -658,7 +658,7 @@ public abstract class Option<E>{
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.LOOT_BONUS_BLOCKS);
+            return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.LOOT_BONUS_BLOCKS).addFlag(ItemFlag.HIDE_ENCHANTS);
         }
     };
     public static OptionBoolean LEAF_SILK_TOUCH = new OptionBoolean("Leaf Silk Touch", true, true, true, false){
@@ -668,7 +668,7 @@ public abstract class Option<E>{
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.SILK_TOUCH);
+            return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.SILK_TOUCH).addFlag(ItemFlag.HIDE_ENCHANTS);
         }
     };
     public static OptionBoolean LOG_FORTUNE = new OptionBoolean("Log Fortune", true, true, true, true){
@@ -813,7 +813,7 @@ public abstract class Option<E>{
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.POTION);
+            return new ItemBuilder(Material.POTION).addFlag(ItemFlag.HIDE_POTION_EFFECTS);
         }
     };
     

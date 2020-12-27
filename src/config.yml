@@ -59,8 +59,8 @@ spawn-saplings: 0
 
 # What blocks can saplings be planted on?
 grass: 
-    - GRASS_BLOCK
     - DIRT
+    - GRASS_BLOCK
     - PODZOL
 
 # What felling behavior should logs have?
@@ -112,15 +112,15 @@ directional-fall-behavior: RANDOM
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
 overridables: 
-    - GRASS
-    - LARGE_FERN
-    - CAVE_AIR
-    - TALL_SEAGRASS
-    - SEAGRASS
-    - FERN
-    - AIR
     - WATER
     - TALL_GRASS
+    - TALL_SEAGRASS
+    - CAVE_AIR
+    - GRASS
+    - FERN
+    - AIR
+    - SEAGRASS
+    - LARGE_FERN
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -305,6 +305,9 @@ compatibility-jobs: true
 mcmmo-double-drops: true
 
 # Toggle compatibility with mcMMO
+compatibility-mcmmo: true
+
+# Toggle compatibility with mcMMO Classic
 compatibility-mcmmo: true
 
 # Toggle compatibility with CoreProtect

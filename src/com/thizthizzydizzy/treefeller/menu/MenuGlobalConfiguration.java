@@ -2,6 +2,9 @@ package com.thizthizzydizzy.treefeller.menu;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.Option;
+import java.util.ArrayList;
+import java.util.Objects;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -38,7 +41,7 @@ public class MenuGlobalConfiguration extends Menu{
                 continue;
             }
             if(i<pageMin)continue;
-            add(new Button(index, o.getConfigurationDisplayItem().setDisplayName(o.getFriendlyName()), (click) -> {
+            add(new Button(index, o.getConfigurationDisplayItem().setDisplayName(o.getFriendlyName()).addLore(ChatColor.GRAY+shorten(Objects.toString(o.getValue()), 42)).addLore(shorten(o.getDescription(), 42)), (click) -> {
             }));
             index++;
         }
@@ -49,5 +52,25 @@ public class MenuGlobalConfiguration extends Menu{
             if(o.global)total++;
         }
         return total;
+    }
+    private ArrayList<String> shorten(ArrayList<String> description, int chars){
+        ArrayList<String> output = new ArrayList<>();
+        for(String s : description){
+            String[] split = s.split(" ");
+            String str = "";
+            for(int i = 0; i<split.length; i++){
+                str+=" "+split[i];
+                if(str.length()>chars){
+                    output.add(str.trim());
+                    str = "";
+                }
+            }
+            if(!str.trim().isEmpty())output.add(str.trim());
+        }
+        return output;
+    }
+    private String shorten(String s, int chars){
+        if(s.length()<=chars)return s;
+        return s.substring(0, chars-3)+"...";
     }
 }

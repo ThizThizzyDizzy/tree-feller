@@ -5,7 +5,6 @@ import com.thizthizzydizzy.treefeller.Tree;
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
@@ -18,6 +17,10 @@ public class McMMOClassicCompat extends InternalCompatibility{
     @Override
     public String getPluginName(){
         return "mcMMO";
+    }
+    @Override
+    public String getFriendlyName(){
+        return "mcMMO Classic";
     }
     @Override
     public void reload(){
