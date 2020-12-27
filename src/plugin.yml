@@ -10,3 +10,7 @@ commands:
         usage: /treefeller help | toggle [on|off] | on | off | reload | config | debug [on|off]
 softdepend:
   - mcMMO
+  - CoreProtect
+  - WorldGuard
+  - WorldEdit
+  - Towny
