@@ -99,8 +99,8 @@ public class TreeFeller extends JavaPlugin{
                 for(Option o : Option.options){
                     DebugResult result = o.check(this, tool, tree, block, player, axe, gamemode, sneaking, dropItems);
                     if(result==null)continue;
-                    debug(player, false, result.success, result.message, result.args);
-                    if(!result.success)continue TOOL;
+                    debug(player, false, result);
+                    if(!result.isSuccess())continue TOOL;
                 }
                 int durability = axe.getType().getMaxDurability()-axe.getDurability();
                 int scanDistance = Option.SCAN_DISTANCE.get(tool, tree);
@@ -108,8 +108,8 @@ public class TreeFeller extends JavaPlugin{
                 for(Option o : Option.options){
                     DebugResult result = o.checkTrunk(this, tool, tree, blocks, block);
                     if(result==null)continue;
-                    debug(player, false, result.success, result.message, result.args);
-                    if(!result.success)continue TOOL;
+                    debug(player, false, result);
+                    if(!result.isSuccess())continue TOOL;
                 }
                 int total = getTotal(blocks);
                 int minY = block.getY();
@@ -171,8 +171,8 @@ public class TreeFeller extends JavaPlugin{
                 for(Option o : Option.options){
                     DebugResult result = o.checkTree(this, tool, tree, blocks, leaves);
                     if(result==null)continue;
-                    debug(player, false, result.success, result.message, result.args);
-                    if(!result.success)continue TOOL;
+                    debug(player, false, result);
+                    if(!result.isSuccess())continue TOOL;
                 }
                 debug(player, true, true, "success");
                 if(Option.LEAVE_STUMP.get(tool, tree)){
@@ -1473,6 +1473,24 @@ public class TreeFeller extends JavaPlugin{
         text = "[TreeFeller] "+getDebugIndent()+" "+text;
         getLogger().log(Level.INFO, text);
         if(player!=null)player.sendMessage(text);
+    }
+    private void debug(Player player, boolean critical, DebugResult result){
+        Message message = Message.getMessage(result.message+result.type.suffix);
+        if(message!=null){
+            message.send(player, result.args);
+            if(!debug)return;
+            String text = message.getDebugText();
+            for(int i = 0; i<result.args.length; i++){
+                text = text.replace("{"+i+"}", result.args[i].toString());
+            }
+            if((critical||!result.isSuccess())&&debugIndent>0)debugIndent--;
+            String icon;
+            if(result.isSuccess())icon = (critical?ChatColor.DARK_GREEN:ChatColor.GREEN)+"O";
+            else icon = (critical?ChatColor.DARK_RED:ChatColor.RED)+"X";
+            text = "[TreeFeller] "+getDebugIndent(1)+icon+ChatColor.RESET+" "+text;
+            getLogger().log(Level.INFO, text);
+            if(player!=null)player.sendMessage(text);
+        }
     }
     private void debug(Player player, boolean critical, boolean success, String text, Object... vars){
         Message message = Message.getMessage(text);

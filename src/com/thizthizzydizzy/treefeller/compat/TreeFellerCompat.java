@@ -20,6 +20,7 @@ public class TreeFellerCompat{
         compatibilities.add(new WorldGuardCompat());
         compatibilities.add(new GriefPreventionCompat());
         compatibilities.add(new TownyCompat());
+        compatibilities.add(new OreRegeneratorCompat());
     }
     public static void init(){}//placeholder method for loading the class
     public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){

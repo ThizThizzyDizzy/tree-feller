@@ -1,5 +1,5 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.13.5
+version: 1.13.6
 api-version: 1.16
 author: ThizThizzyDizzy
 website: "https://www.spigotmc.org/resources/thizzyz-tree-feller.64346/"
@@ -14,3 +14,4 @@ softdepend:
   - WorldGuard
   - WorldEdit
   - Towny
+  - OreRegenerator

@@ -127,7 +127,7 @@ public class CommandTreeFeller implements TabExecutor{
                 }else{
                     plugin.disabledPlayers.add(((Player)sender).getUniqueId());
                 }
-                sender.sendMessage("Tree Feller "+(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())?"enabled":"disabled"));
+                sender.sendMessage("Tree Feller "+(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())?"disabled":"enabled"));
                 return true;
             }
             @Override

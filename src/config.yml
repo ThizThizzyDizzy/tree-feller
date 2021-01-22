@@ -322,6 +322,12 @@ compatibility-griefprevention: true
 # Toggle compatibility with Towny
 compatibility-towny: true
 
+# The delay before trees should regenerate
+oreregenerator-regen-delay: 1200
+
+# Toggle compatibility with OreRegenerator
+compatibility-oreregenerator: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -468,6 +474,7 @@ tools:
 # mmocore-trunk-xp:
 # mmocore-leaves-xp:
 # mcmmo-double-drops:
+# oreregenerator-regen-delay:
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
@@ -533,7 +540,6 @@ effects:
 # Format:  prefix-<option name>-suffix: "<text>"
 # Valid prefixes are:
 # debug        This is the message used when debug mode is on
-# actionbar    This will be sent to the player's actionbar
 # chat         This will be sent to the player in the chat
 # Valid suffixes are:
 # <no suffix>  This defines what message is sent when this option's global requirement is not met

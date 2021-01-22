@@ -1,17 +1,27 @@
 package com.thizthizzydizzy.treefeller;
 public class DebugResult{
-    public final boolean success;
+    public final Type type;
     public final String message;
     public final Object[] args;
-    private DebugResult(boolean success, String message, Object... args){
-        this.success = success;
+    public DebugResult(Option option, Type type, Object... args){
+        this(type, option.getGlobalName(), args);
+    }
+    public DebugResult(Type type, String message, Object... args){
+        this.type = type;
         this.message = message;
         this.args = args;
     }
-    public DebugResult(Option option, Type type, Object... args){
-        this(type==Type.SUCCESS, option.getDebugText()[type.ordinal()], args);
+    public boolean isSuccess(){
+        return type==Type.SUCCESS;
     }
     public static enum Type{
-        GLOBAL,TOOL,TREE,SUCCESS;
+        GLOBAL(""),
+        TOOL("-tool"),
+        TREE("-tree"),
+        SUCCESS("-success");
+        public final String suffix;
+        private Type(String suffix){
+            this.suffix = suffix;
+        }
     }
 }

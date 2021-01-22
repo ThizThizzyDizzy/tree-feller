@@ -142,7 +142,7 @@ public class ConfigGenerator{
             add("# Format:  prefix-<option name>-suffix: \"<text>\"");
             add("# Valid prefixes are:");
             add("# debug        This is the message used when debug mode is on");
-            add("# actionbar    This will be sent to the player's actionbar");
+//            add("# actionbar    This will be sent to the player's actionbar");//TODO fix actionbar
             add("# chat         This will be sent to the player in the chat");
             add("# Valid suffixes are:");
             add("# <no suffix>  This defines what message is sent when this option's global requirement is not met");
