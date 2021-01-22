@@ -29,8 +29,8 @@ The default configuration will reliably cut down all vanilla trees, while not di
 - CoreProtect
 - GriefPrevention
 - WorldGuard
-
-something missing?
+- Towny
+- Ore Regenerator
 
 ## FAQ
 ### Does it work with custom trees?
