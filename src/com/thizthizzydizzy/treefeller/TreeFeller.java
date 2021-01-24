@@ -21,6 +21,7 @@ import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -28,14 +29,18 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -898,6 +903,7 @@ public class TreeFeller extends JavaPlugin{
             case FALL_INVENTORY:
             case FALL_HURT_INVENTORY:
                 FallingBlock falling = block.getWorld().spawnFallingBlock(block.getLocation().add(.5,.5,.5), block.getBlockData());
+                falling.addScoreboardTag("tree_feller");
                 Vector v = falling.getVelocity();
                 if(directionalFallVelocity>0){
                     v.add(directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity));
@@ -1286,7 +1292,26 @@ public class TreeFeller extends JavaPlugin{
                 ArrayList<ItemStack> drops = getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp, modifiers);
                 if(doBreak){
                     event.setCancelled(true);
-                    for(ItemStack drop : drops)event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop);
+                    for(ItemStack drop : drops){
+                        //fake item
+                        ItemStack fakeDrop = new ItemStack(drop);
+                        ItemMeta meta = fakeDrop.getItemMeta();
+                        meta.getPersistentDataContainer().set(new NamespacedKey(TreeFeller.this, "fakeItemTag"), PersistentDataType.STRING, UUID.randomUUID().toString());
+                        fakeDrop.setItemMeta(meta);
+                        Item fake = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), fakeDrop);
+                        fake.setTicksLived(5960);//40 ticks to despawn
+                        fake.setPickupDelay(32767);//cannot be picked up
+                        //real item
+                        Item item = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation().add(randbetween(-8, 8), randbetween(1000, 10000), randbetween(-8, 8)), drop);//If I spawn items near others, some will get deleted
+                        Vector velocity = item.getVelocity();
+                        new BukkitRunnable() {
+                            @Override
+                            public void run(){
+                                item.teleport(event.getEntity().getLocation());
+                                item.setVelocity(velocity);
+                            }
+                        }.runTaskLater(TreeFeller.this, 40);
+                    }
                     dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
                 }
                 if(player!=null){
