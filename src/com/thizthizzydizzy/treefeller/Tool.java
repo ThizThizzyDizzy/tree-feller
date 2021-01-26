@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Material;

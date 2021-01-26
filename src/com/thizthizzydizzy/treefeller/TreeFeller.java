@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller;
-import com.thizthizzydizzy.treefeller.compat.PluginCompatibility;
 import com.thizthizzydizzy.treefeller.compat.TestResult;
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import java.util.ArrayList;
@@ -29,7 +28,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.FallingBlock;
