@@ -105,6 +105,7 @@ public class ConfigGenerator{
             add("#   particle  A particle effect, such as flame, block, etc. particles");
             add("#   sound     Any sound");
             add("#   explosion An explosion that Will destroy blocks and items- This will occur after the block is destroyed");
+            add("#   marker    A marker for use with datapacks (An armor stand or area effect cloud)");
             add("# Particle settings:");
             add("#   particle: <value> The particle to display");
             add("#   x: <value>        The X offset from the center of the block to display the particle (default 0)");
@@ -132,6 +133,9 @@ public class ConfigGenerator{
             add("# Explosion settings:");
             add("#   power: <value>     The explosion power, where creepers are 3, tnt 4, charged creepers 5");
             add("#   fire: (true|false) Weather or not to light fires with the explosion (Default false)");
+            add("# Marker settings:");
+            add("#   permanent: (true|false) If true, an armor stand will be created. If false, an area effect cloud will be created. (Area effect clouds last exactly 1 tick)");
+            add("#   tags: [<values>]   A list of tags to apply to the created entity. (Note that the \"tree_feller\" tag is always applied)");
             add("# Examples of valid effects:");
             add("#   - {name: smoke, chance: 1, location: logs, type: particle, particle: smoke, dx: 0.5, dy: 0.5, dz: 0.5, speed: .01, count: 10}");
             add("#   - {name: explosion, chance: .01, location: tool, type: explosion, power: 4}");
@@ -183,7 +187,6 @@ public class ConfigGenerator{
         return text;
     }
     private static void write(File file){
-        String text = "";
         try(BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))){
             for(String s : toWrite)writer.write(s+"\n");
         }catch(IOException ex){

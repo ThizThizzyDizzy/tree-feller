@@ -139,7 +139,7 @@ public class CommandTreeFeller implements TabExecutor{
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
         if(args.length<1){
-            sender.sendMessage("Usage: /treefeller help | toggle [on|off] | on | off | reload | debug [on|off]");
+            sender.sendMessage("Usage: /treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)");
             return true;
         }
         for(TreeFellerCommand cmd : commands){
@@ -147,7 +147,7 @@ public class CommandTreeFeller implements TabExecutor{
                 return cmd.onCommand(sender, command, label, trim(args, 1), args);
             }
         }
-        sender.sendMessage("Usage: /treefeller help | toggle [on|off] | on | off | reload | debug [on|off]");
+        sender.sendMessage("Usage: /treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)");
         return true;
     }
     @Override

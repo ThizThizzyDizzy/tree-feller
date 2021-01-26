@@ -672,8 +672,27 @@ public class TreeFeller extends JavaPlugin{
                             }
                             effect = new Effect(name, location, chance, power, fire);
                             break;
+                        case MARKER:
+                            boolean permanent = false;
+                            if(map.containsKey("permanent")){
+                                permanent = (boolean)map.get("permanent");
+                            }
+                            String[] tags = new String[0];
+                            if(map.containsKey("tags")){
+                                Object ob = map.get(tags);
+                                if(ob instanceof ArrayList){
+                                    ArrayList<String> list = (ArrayList<String>)map.get("tags");
+                                    tags = list.toArray(new String[list.size()]);
+                                }else if(ob instanceof String){
+                                    tags = new String[]{(String)ob};
+                                }else{
+                                    throw new IllegalArgumentException("Unknown marker tags format: "+ob+"! Please use an array or a String!");
+                                }
+                            }
+                            effect = new Effect(name, location, chance, permanent, tags);
+                            break;
                         default:
-                            throw new IllegalArgumentException("Unknown effect typpe: "+type+"!");
+                            throw new IllegalArgumentException("Unknown effect type: "+type+"! This is a bug!");
                     }
                     if(Option.STARTUP_LOGS.isTrue())effect.print(logger);
                     this.effects.add(effect);

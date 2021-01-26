@@ -1,5 +1,5 @@
 main: com.thizthizzydizzy.treefeller.TreeFeller
-version: 1.13.7
+version: 1.14
 api-version: 1.16
 author: ThizThizzyDizzy
 website: "https://www.spigotmc.org/resources/thizzyz-tree-feller.64346/"
@@ -7,7 +7,7 @@ name: TreeFeller
 commands:
     treefeller:
         description: TreeFeller commands
-        usage: /treefeller help | toggle [on|off] | on | off | reload | config | debug [on|off]
+        usage: /treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)
 softdepend:
   - mcMMO
   - CoreProtect

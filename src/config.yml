@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.13.7
+# Version 1.14
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -503,6 +503,7 @@ trees:
 #   particle  A particle effect, such as flame, block, etc. particles
 #   sound     Any sound
 #   explosion An explosion that Will destroy blocks and items- This will occur after the block is destroyed
+#   marker    A marker for use with datapacks (An armor stand or area effect cloud)
 # Particle settings:
 #   particle: <value> The particle to display
 #   x: <value>        The X offset from the center of the block to display the particle (default 0)
@@ -530,6 +531,9 @@ trees:
 # Explosion settings:
 #   power: <value>     The explosion power, where creepers are 3, tnt 4, charged creepers 5
 #   fire: (true|false) Weather or not to light fires with the explosion (Default false)
+# Marker settings:
+#   permanent: (true|false) If true, an armor stand will be created. If false, an area effect cloud will be created. (Area effect clouds last exactly 1 tick)
+#   tags: [<values>]   A list of tags to apply to the created entity. (Note that the "tree_feller" tag is always applied)
 # Examples of valid effects:
 #   - {name: smoke, chance: 1, location: logs, type: particle, particle: smoke, dx: 0.5, dy: 0.5, dz: 0.5, speed: .01, count: 10}
 #   - {name: explosion, chance: .01, location: tool, type: explosion, power: 4}

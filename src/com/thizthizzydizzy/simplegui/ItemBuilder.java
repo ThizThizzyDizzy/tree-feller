@@ -88,12 +88,10 @@ public class ItemBuilder{
         return this;
     }
     public ItemBuilder setCount(Integer count){
-        if(count==null)this.count = 1;
-        else this.count = count;
-        return this;
+        return setCount(count==null?1:(int)count);
     }
     public ItemBuilder setCount(int count){
-        this.count = count;
+        this.count = Math.max(1, count);
         return this;
     }
     public ItemBuilder setDurability(Short durability){

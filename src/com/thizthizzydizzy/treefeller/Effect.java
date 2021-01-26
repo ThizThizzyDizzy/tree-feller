@@ -1,9 +1,14 @@
 package com.thizthizzydizzy.treefeller;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.entity.AreaEffectCloud;
+import org.bukkit.entity.ArmorStand;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 public class Effect{
     public final String name;
     public final EffectLocation location;
@@ -24,6 +29,8 @@ public class Effect{
     private float pitch;
     private float power;
     private boolean fire;
+    private boolean permanent;
+    private String[] tags;
     private Effect(String name, EffectLocation location, EffectType type, double chance){
         this.name = name;
         this.location = location;
@@ -54,6 +61,11 @@ public class Effect{
         this.power = power;
         this.fire = fire;
     }
+    public Effect(String name, EffectLocation location, double chance, boolean permanent, String... tags){
+        this(name, location, EffectType.MARKER, chance);
+        this.permanent = permanent;
+        this.tags = tags;
+    }
     public void print(Logger logger){
         logger.log(Level.INFO, "Loaded effect: {0}", name);
         logger.log(Level.INFO, "- Location: {0}", location);
@@ -81,6 +93,12 @@ public class Effect{
                 logger.log(Level.INFO, "- Power: {0}", power);
                 logger.log(Level.INFO, "- Fire: {0}", fire);
                 break;
+            case MARKER:
+                logger.log(Level.INFO, "- Permanent: {0}", permanent);
+                logger.log(Level.INFO, "- Tags: {0}", Arrays.toString(tags));
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
         }
     }
     public void play(Block block){
@@ -94,12 +112,36 @@ public class Effect{
             case PARTICLE:
                 block.getWorld().spawnParticle(particle, block.getLocation().add(x+.5,y+.5,z+.5), count, dx, dy, dz, speed, extra);
                 break;
+            case MARKER:
+                Entity entity = block.getWorld().spawnEntity(block.getLocation().add(.5,.5,.5), permanent?EntityType.ARMOR_STAND:EntityType.AREA_EFFECT_CLOUD);
+                if(permanent){
+                    ArmorStand as = (ArmorStand)entity;
+                    as.setMarker(true);
+                    as.setInvulnerable(true);
+                    as.setGravity(false);
+                    as.setVisible(false);
+                    as.addScoreboardTag("tree_feller");
+                    for(String s : tags)as.addScoreboardTag(s);
+                }else{
+                    AreaEffectCloud cloud = (AreaEffectCloud)entity;
+                    cloud.setReapplicationDelay(0);
+                    cloud.setRadius(0);
+                    cloud.setDuration(0);
+                    cloud.setWaitTime(0);
+                    cloud.addScoreboardTag("tree_feller");
+                    for(String s : tags)cloud.addScoreboardTag(s);
+                }
+                break;
         }
     }
     public static enum EffectLocation{
         LOGS,LEAVES,TREE,TOOL;
     }
     public static enum EffectType{
-        PARTICLE,SOUND,EXPLOSION;
+        PARTICLE,SOUND,EXPLOSION,MARKER;
+    }
+    @Override
+    public String toString(){
+        return name;
     }
 }
