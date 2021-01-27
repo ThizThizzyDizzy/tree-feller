@@ -16,7 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 public abstract class Menu{
-    protected final Plugin plugin;
+    public final Plugin plugin;
     public final Player player;
     protected final String title;
     protected Inventory inventory;
@@ -77,12 +77,13 @@ public abstract class Menu{
             return AnvilGUI.Response.close();
         }).open(player);
     }
-    public Component add(Component component){
+    public <T extends Component> T add(T component){
         if(component==null)throw new IllegalArgumentException("Cannot add null to a menu!");
         components.add(component);
         return component;
     }
     protected void updateInventory(){
+        if(inventory==null)return;//be patient, the inventory doesn't even exist yet!
         inventory.clear();
         for(Component c : components){
             inventory.setItem(c.index, c.draw());

@@ -18,6 +18,19 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
+import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyDouble;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnchantmentMap;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnum;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyFloat;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyShort;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringSet;
+import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyEffectList;
+import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifySpawnSaplings;
+import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyTreeSet;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemFlag;
 public abstract class Option<E>{
@@ -69,6 +82,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.RAIL).setCount(globalValue);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Integer> LEAF_RANGE = new Option<Integer>("Leaf Range", true, true, true, 6){
         @Override
@@ -82,6 +101,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LEAVES).setCount(globalValue);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<Integer> REQUIRED_LOGS = new Option<Integer>("Required Logs", true, true, true, 4){
@@ -115,6 +140,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG).setCount(getValue());
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Integer> REQUIRED_LEAVES = new Option<Integer>("Required Leaves", true, true, true, 10){
         @Override
@@ -145,6 +176,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LEAVES).setCount(getValue());
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<Integer> MAX_LOGS = new Option<Integer>("Max Logs", true, true, true, 250){
@@ -177,6 +214,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG).setCount(getValue());
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<Integer> MAX_HEIGHT = new Option<Integer>("Max Height", true, true, true, 5){
@@ -217,6 +260,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.LADDER).setCount(getValue());
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static OptionBoolean ALLOW_PARTIAL = new OptionBoolean("Allow Partial", true, true, true, false){
@@ -324,6 +373,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK).setCount(getValue());
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static OptionBoolean REPLANT_SAPLINGS = new OptionBoolean("Replant Saplings", true, true, true, false){
         @Override
@@ -360,6 +415,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_SAPLING);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifySpawnSaplings(parent, parent.plugin, parent.player, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Material> SAPLING = new Option<Material>("Sapling", false, false, true, null){
         @Override
@@ -374,6 +435,10 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_SAPLING);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            throw new UnsupportedOperationException("Sapling has no global value!");
+        }
     };
     public static Option<Integer> MAX_SAPLINGS = new Option<Integer>("Max Saplings", false, false, true, 1){
         @Override
@@ -387,6 +452,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_SAPLING);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<HashSet<Material>> GRASS = new Option<HashSet<Material>>("Grass", true, false, true, defaultGrasses){
@@ -413,6 +484,14 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.GRASS_BLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, false, "block", globalValue, (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     
@@ -448,6 +527,17 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", false, globalValue, FellBehavior.values(), (value) -> {
+                globalValue = value;
+            }){
+                @Override
+                public Material getItem(FellBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
     };
     public static Option<FellBehavior> LEAF_BEHAVIOR = new Option<FellBehavior>("Leaf Behavior", true, true, true, FellBehavior.BREAK){
         @Override
@@ -480,6 +570,17 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LEAVES);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", false, globalValue, FellBehavior.values(), (value) -> {
+                globalValue = value;
+            }){
+                @Override
+                public Material getItem(FellBehavior value){
+                    return value.getItem();
+                }
+            });
         }
     };
     public static Option<DirectionalFallBehavior> DIRECTIONAL_FALL_BEHAVIOR = new Option<DirectionalFallBehavior>("Directional Fall Behavior", true, true, true, DirectionalFallBehavior.RANDOM){
@@ -518,6 +619,17 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEnum<DirectionalFallBehavior>(parent, parent.plugin, parent.player, name, "DirectionalFallBehavior", false, globalValue, DirectionalFallBehavior.values(), (value) -> {
+                globalValue = value;
+            }){
+                @Override
+                public Material getItem(DirectionalFallBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
     };
     public static Option<HashSet<Material>> OVERRIDABLES = new Option<HashSet<Material>>("Overridables", true, true, true, defaultOverridables){
         @Override
@@ -548,6 +660,14 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.GRASS);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, false, "block", globalValue, (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static OptionBoolean LOCK_FALL_CARDINAL = new OptionBoolean("Lock Fall Cardinal", true, true, true, false){
@@ -581,6 +701,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Double> VERTICAL_FALL_VELOCITY = new Option<Double>("Vertical Fall Velocity", true, true, true, .05d){
         @Override
@@ -602,6 +728,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Double> RANDOM_FALL_VELOCITY = new Option<Double>("Random Fall Velocity", true, true, true, 0d){
         @Override
@@ -622,6 +754,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     
@@ -649,6 +787,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.WOODEN_AXE);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static OptionBoolean LEAF_FORTUNE = new OptionBoolean("Leaf Fortune", true, true, true, true){
@@ -742,6 +886,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Double> LOG_DROP_CHANCE = new Option<Double>("Log Drop Chance", true, true, true, 1d){
         @Override
@@ -761,6 +911,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<ArrayList<Effect>> EFFECTS = new Option<ArrayList<Effect>>("Effects", true, true, true, null, "\n    - ALL"){
@@ -814,6 +970,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.POTION).addFlag(ItemFlag.HIDE_POTION_EFFECTS);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEffectList(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     
@@ -893,6 +1055,12 @@ public abstract class Option<E>{
             }
             return builder;
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEnchantmentMap(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<HashMap<Enchantment, Integer>> BANNED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Banned Enchantments", true, true, true, null){
         @Override
@@ -970,6 +1138,12 @@ public abstract class Option<E>{
             }
             return builder;
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEnchantmentMap(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Short> MIN_DURABILITY = new Option<Short>("Min Durability", true, true, true, null){
         @Override
@@ -1004,6 +1178,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Short> MAX_DURABILITY = new Option<Short>("Max Durability", true, true, true, null){
         @Override
@@ -1037,6 +1217,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<Float> MIN_DURABILITY_PERCENT = new Option<Float>("Min Durability Percent", true, true, true, null){
@@ -1073,6 +1259,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Float> MAX_DURABILITY_PERCENT = new Option<Float>("Max Durability Percent", true, true, true, null){
         @Override
@@ -1107,6 +1299,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static OptionBoolean PREVENT_BREAKAGE = new OptionBoolean("Prevent Breakage", true, true, true, false){
@@ -1189,7 +1387,13 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.BOOK);
         }
-    };
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyStringList(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+    };//TODO make this a HashSet
     public static Option<String> REQUIRED_NAME = new Option<String>("Required Name", true, true, true, null){
         @Override
         public String load(Object o){
@@ -1224,6 +1428,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.PAPER).addLore(getValue());
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.openAnvilGUI(globalValue==null?"":globalValue, "Edit Required Name", (p, str) -> {
+                globalValue = str==null||str.isEmpty()||str.equalsIgnoreCase("null")?null:str;
+            });
         }
     };
     public static Option<HashSet<String>> REQUIRED_PERMISSIONS = new Option<HashSet<String>>("Required Permissions", true, true, true, new HashSet<>(), null){
@@ -1283,6 +1493,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.PAPER);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Integer> MIN_TIME = new Option<Integer>("Min Time", true, true, true, null){
         @Override
@@ -1317,6 +1533,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Integer> MAX_TIME = new Option<Integer>("Max Time", true, true, true, null){
         @Override
@@ -1350,6 +1572,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<Integer> MIN_PHASE = new Option<Integer>("Min Phase", true, true, true, null){
@@ -1396,6 +1624,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Integer> MAX_PHASE = new Option<Integer>("Max Phase", true, true, true, null){
         @Override
@@ -1441,6 +1675,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<Integer> CUSTOM_MODEL_DATA = new Option<Integer>("Custom Model Data", true, true, true, null){
         @Override
@@ -1473,6 +1713,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     public static Option<ArrayList<Tree>> ALLOWED_TREES = new Option<ArrayList<Tree>>("Allowed Trees", false, true, false, null){
@@ -1534,7 +1780,13 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.SPRUCE_SAPLING);
         }
-    };
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(globalValue), (value) -> {
+                globalValue = new ArrayList<>(value);
+            }));
+        }
+    };//TODO make this a HashSet
     public static OptionBoolean ENABLE_ADVENTURE = new OptionBoolean("Enable Adventure", true, true, true, false){
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
@@ -1719,6 +1971,12 @@ public abstract class Option<E>{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.GRASS_BLOCK);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static OptionBoolean WORLD_BLACKLIST = new OptionBoolean("World Blacklist", true, true, true, false){
         @Override
@@ -1773,6 +2031,12 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     protected final String name;
@@ -2115,4 +2379,5 @@ public abstract class Option<E>{
         return new String[]{global,tool,tree,success};
     }
     public abstract ItemBuilder getConfigurationDisplayItem();
+    public abstract void openGlobalModifyMenu(MenuGlobalConfiguration parent);
 }

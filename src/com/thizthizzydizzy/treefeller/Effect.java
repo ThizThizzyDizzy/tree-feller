@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
@@ -138,7 +139,17 @@ public class Effect{
         LOGS,LEAVES,TREE,TOOL;
     }
     public static enum EffectType{
-        PARTICLE,SOUND,EXPLOSION,MARKER;
+        PARTICLE(Material.CAMPFIRE),
+        SOUND(Material.NOTE_BLOCK),
+        EXPLOSION(Material.TNT),
+        MARKER(Material.ARMOR_STAND);
+        private final Material item;
+        private EffectType(Material item){
+            this.item = item;
+        }
+        public Material getItem(){
+            return item;
+        }
     }
     @Override
     public String toString(){

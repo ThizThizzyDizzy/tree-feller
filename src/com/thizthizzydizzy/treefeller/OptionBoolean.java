@@ -1,4 +1,6 @@
 package com.thizthizzydizzy.treefeller;
+import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyBoolean;
 import java.util.Objects;
 public abstract class OptionBoolean extends Option<Boolean>{
     public OptionBoolean(String name, boolean global, boolean tool, boolean tree, Boolean defaultValue){
@@ -31,5 +33,11 @@ public abstract class OptionBoolean extends Option<Boolean>{
      */
     public boolean isTrue(){
         return Objects.equals(getValue(), true);
+    }
+    @Override
+    public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+        parent.open(new MenuModifyBoolean(parent, parent.plugin, parent.player, name, false, globalValue, (value) -> {
+            globalValue = value;
+        }));
     }
 }

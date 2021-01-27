@@ -4,6 +4,8 @@ import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,12 @@ public class MMOCoreCompat extends InternalCompatibility{
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LOG);
         }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
     };
     public static Option<HashMap<String, Double>> MMOCORE_LEAVES_XP = new Option<HashMap<String, Double>>("MMOCore Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
         @Override
@@ -87,6 +95,12 @@ public class MMOCoreCompat extends InternalCompatibility{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.OAK_LEAVES);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     @Override

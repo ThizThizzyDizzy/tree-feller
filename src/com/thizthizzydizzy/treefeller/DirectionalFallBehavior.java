@@ -1,10 +1,27 @@
 package com.thizthizzydizzy.treefeller;
 import java.util.Random;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 public enum DirectionalFallBehavior{
-    RANDOM,TOWARD,AWAY,LEFT,RIGHT,NORTH,SOUTH,EAST,WEST,NORTH_EAST,SOUTH_EAST,NORTH_WEST,SOUTH_WEST;
+    RANDOM(Material.BELL),
+    TOWARD(Material.DISPENSER),
+    AWAY(Material.DROPPER),
+    LEFT(Material.CROSSBOW),
+    RIGHT(Material.WOODEN_SWORD),
+    NORTH(Material.RED_CONCRETE),
+    SOUTH(Material.BLUE_CONCRETE),
+    EAST(Material.YELLOW_CONCRETE),
+    WEST(Material.GREEN_CONCRETE),
+    NORTH_EAST(Material.RED_TERRACOTTA),
+    SOUTH_EAST(Material.YELLOW_TERRACOTTA),
+    NORTH_WEST(Material.GREEN_TERRACOTTA),
+    SOUTH_WEST(Material.BLUE_TERRACOTTA);
+    private final Material item;
+    private DirectionalFallBehavior(Material item){
+        this.item = item;
+    }
     public static DirectionalFallBehavior match(String s){
         return valueOf(s.toUpperCase().trim().replace("-", "_"));
     }
@@ -74,5 +91,8 @@ public enum DirectionalFallBehavior{
         directionalVel = directionalVel.normalize();
         directionalVel = directionalVel.multiply(directionalFallVelocity);
         return directionalVel;
+    }
+    public Material getItem(){
+        return item;
     }
 }

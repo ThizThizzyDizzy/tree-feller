@@ -4,6 +4,8 @@ import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -22,6 +24,12 @@ public class OreRegeneratorCompat extends InternalCompatibility{
         @Override
         public ItemBuilder getConfigurationDisplayItem(){
             return new ItemBuilder(Material.CLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
         }
     };
     @Override
