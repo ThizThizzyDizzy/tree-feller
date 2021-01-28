@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.compat.TestResult;
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
+import com.thizthizzydizzy.treefeller.menu.MenuTreesConfiguration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -13,6 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -49,6 +51,7 @@ public class TreeFeller extends JavaPlugin{
     public static ArrayList<Tree> trees = new ArrayList<>();
     public static ArrayList<Effect> effects = new ArrayList<>();
     public static HashMap<UUID, Cooldown> cooldowns = new HashMap<>();
+    public static HashMap<Player, MenuTreesConfiguration> detectingTrees = new HashMap<>();
     public HashSet<UUID> disabledPlayers = new HashSet<>();
     public ArrayList<FallingTreeBlock> fallingBlocks = new ArrayList<>();
     public ArrayList<Sapling> saplings = new ArrayList<>();
@@ -342,7 +345,7 @@ public class TreeFeller extends JavaPlugin{
     public int getTreeSize(Block block, ItemStack axe){
         throw new UnsupportedOperationException("This feature is not done yet!");//TODO fix this
     }
-    private HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
+    private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
         //layer zero
         HashMap<Integer, ArrayList<Block>> results = new HashMap<>();
         ArrayList<Block> zero = new ArrayList<>();
@@ -444,7 +447,7 @@ public class TreeFeller extends JavaPlugin{
         if(forceDistanceCheck)leafCheck(blocks, trunk, leaves, diagonal, playerLeaves, ignoreLeafData);
         return blocks;
     }
-    private int getTotal(HashMap<Integer, ArrayList<Block>> blocks){
+    private static int getTotal(HashMap<Integer, ArrayList<Block>> blocks){
         int total = 0;
         for(int i : blocks.keySet()){
             total+=blocks.get(i).size();
@@ -475,7 +478,7 @@ public class TreeFeller extends JavaPlugin{
         TreeFellerCompat.init();
         //<editor-fold defaultstate="collapsed" desc="Register Events">
         PluginManager pm = getServer().getPluginManager();
-        pm.registerEvents(new BlockBreak(this), this);
+        pm.registerEvents(new TreeFellerEventListener(this), this);
 //</editor-fold>
         //<editor-fold defaultstate="collapsed" desc="Register Config">
         saveDefaultConfig();
@@ -1622,5 +1625,113 @@ public class TreeFeller extends JavaPlugin{
     public void dropExpOrb(World world, Location location, int xp){
         ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(location, EntityType.EXPERIENCE_ORB);
         orb.setExperience(orb.getExperience()+xp);
+    }
+    public static Tree detect(Block clickedBlock, Player player){
+        ArrayList<Material> allLogs = new ArrayList<>();
+        allLogs.add(Material.OAK_LOG);
+        allLogs.add(Material.BIRCH_LOG);
+        allLogs.add(Material.SPRUCE_LOG);
+        allLogs.add(Material.DARK_OAK_LOG);
+        allLogs.add(Material.ACACIA_LOG);
+        allLogs.add(Material.JUNGLE_LOG);
+        allLogs.add(Material.WARPED_STEM);
+        allLogs.add(Material.CRIMSON_STEM);
+        allLogs.add(Material.OAK_WOOD);
+        allLogs.add(Material.BIRCH_WOOD);
+        allLogs.add(Material.SPRUCE_WOOD);
+        allLogs.add(Material.DARK_OAK_WOOD);
+        allLogs.add(Material.ACACIA_WOOD);
+        allLogs.add(Material.JUNGLE_WOOD);
+        allLogs.add(Material.WARPED_HYPHAE);
+        allLogs.add(Material.CRIMSON_HYPHAE);
+        allLogs.add(Material.MUSHROOM_STEM);
+        HashMap<Integer, ArrayList<Block>> trunk = getBlocks(allLogs, clickedBlock, Option.SCAN_DISTANCE.getValue(), true, true, true);
+        HashSet<Material> logs = new HashSet<>();
+        for(int i : trunk.keySet()){
+            for(Block b : trunk.get(i))logs.add(b.getType());
+        }
+        if(logs.isEmpty()){
+            player.sendMessage(ChatColor.RED+"Failed to detect tree trunk");
+            return null;
+        }
+        ArrayList<Material> allLeaves = new ArrayList<>();
+        allLeaves.add(Material.OAK_LEAVES);
+        allLeaves.add(Material.BIRCH_LEAVES);
+        allLeaves.add(Material.SPRUCE_LEAVES);
+        allLeaves.add(Material.DARK_OAK_LEAVES);
+        allLeaves.add(Material.ACACIA_LEAVES);
+        allLeaves.add(Material.JUNGLE_LEAVES);
+        allLeaves.add(Material.WARPED_WART_BLOCK);
+        allLeaves.add(Material.NETHER_WART_BLOCK);
+        allLeaves.add(Material.SHROOMLIGHT);
+        allLeaves.add(Material.RED_MUSHROOM_BLOCK);
+        allLeaves.add(Material.BROWN_MUSHROOM_BLOCK);
+        ArrayList<Material> allBlocks = new ArrayList<>(logs);
+        allBlocks.addAll(allLeaves);
+        HashMap<Integer, ArrayList<Block>> properLeaves;
+        HashMap<Integer, ArrayList<Block>> badLeaves;
+        HashMap<Integer, ArrayList<Block>> terribleLeaves;
+        int proper = getTotal(properLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), false, false, false));
+        int bad = getTotal(badLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), false, true, true));
+        int terrible = getTotal(terribleLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), true, true, true));
+        int numLogs = getTotal(trunk);
+        int numLeaves;
+        HashSet<Material> leaves = new HashSet<>();
+        boolean diagonalLeaves = false;
+        boolean playerLeaves = false;
+        boolean ignoreLeafData = false;
+        if(terrible>bad||terrible>proper){
+            numLeaves = terrible-numLogs;
+            for(int i : terribleLeaves.keySet()){
+                for(Block b : terribleLeaves.get(i))leaves.add(b.getType());
+            }
+            diagonalLeaves = playerLeaves = ignoreLeafData = true;
+        }else if(bad>proper){
+            numLeaves = bad-numLogs;
+            for(int i : badLeaves.keySet()){
+                for(Block b : badLeaves.get(i))leaves.add(b.getType());
+            }
+            playerLeaves = ignoreLeafData = true;
+        }else{
+            numLeaves = proper-numLogs;
+            for(int i : properLeaves.keySet()){
+                for(Block b : properLeaves.get(i))leaves.add(b.getType());
+            }
+        }
+        leaves.removeAll(logs);
+        Tree tree = new Tree(new ArrayList<>(logs), new ArrayList<>(leaves));
+        if(numLogs<Option.REQUIRED_LOGS.getValue()){
+            Option.REQUIRED_LOGS.treeValues.put(tree, numLogs/4);
+        }
+        if(numLogs>Option.MAX_LOGS.getValue()){
+            Option.MAX_LOGS.treeValues.put(tree, numLogs*2);
+        }
+        if(numLeaves<Option.REQUIRED_LEAVES.getValue()){
+            Option.REQUIRED_LEAVES.treeValues.put(tree, numLeaves/4);
+        }
+        if(diagonalLeaves||Objects.equals(Option.DIAGONAL_LEAVES.getValue(),true))Option.DIAGONAL_LEAVES.treeValues.put(tree, diagonalLeaves);
+        if(playerLeaves||Objects.equals(Option.PLAYER_LEAVES.getValue(),true))Option.PLAYER_LEAVES.treeValues.put(tree, playerLeaves);
+        if(ignoreLeafData||Objects.equals(Option.IGNORE_LEAF_DATA.getValue(),true))Option.IGNORE_LEAF_DATA.treeValues.put(tree, ignoreLeafData);
+        //now to find the leaf range...
+        ArrayList<Integer> distances = new ArrayList<>(trunk.keySet());
+        Collections.sort(distances);
+        int theLeafRange = 0;
+        int lastCount = 0;
+        for(int leafRange = 1; leafRange<Option.SCAN_DISTANCE.getValue(); leafRange++){
+            HashSet<Block> allDaLeaves = new HashSet<>();
+            FOR:for(int i : distances){
+                for(Block b : trunk.get(i)){
+                    HashMap<Integer, ArrayList<Block>> someLeaves = getBlocks(tree.leaves, b, leafRange, diagonalLeaves, playerLeaves, ignoreLeafData);
+                    for(int in : someLeaves.keySet()){
+                        allDaLeaves.addAll(someLeaves.get(in));
+                    }
+                }
+            }
+            if(allDaLeaves.size()==lastCount)break;
+            theLeafRange = leafRange;
+            lastCount = allDaLeaves.size();
+        }
+        if(theLeafRange>Option.LEAF_RANGE.getValue())Option.LEAF_RANGE.treeValues.put(tree, theLeafRange);
+        return tree;
     }
 }

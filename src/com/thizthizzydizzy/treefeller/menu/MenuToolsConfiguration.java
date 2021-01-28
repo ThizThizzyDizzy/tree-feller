@@ -1,11 +1,11 @@
 package com.thizthizzydizzy.treefeller.menu;
+import com.gamingmesh.jobs.stuff.ChatColor;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.TreeFeller;
-import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterial;
 import com.thizthizzydizzy.treefeller.menu.select.MenuSelectMaterial;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -59,9 +59,12 @@ public class MenuToolsConfiguration extends Menu{
         int offset = 0;
         for(int i = 0; i<Math.min(pageMax,TreeFeller.tools.size()-offset); i++){
             Tool t = TreeFeller.tools.get(i+offset);
+            int idx = i+offset;
             if(i<pageMin)continue;
             ItemBuilder builder = makeItem(t.material);
             if(Option.REQUIRED_NAME.toolValues.containsKey(t))builder.setDisplayName(Option.REQUIRED_NAME.getValue(t));
+            builder.addLore("Shift-left click to move left");
+            builder.addLore(("Shift-right click to move right"));
             if(Option.REQUIRED_LORE.toolValues.containsKey(t)){
                 for(String lore : Option.REQUIRED_LORE.getValue(t)){
                     builder.addLore(lore);
@@ -69,6 +72,18 @@ public class MenuToolsConfiguration extends Menu{
             }
             add(new Button(index, builder, (click) -> {
                 if(click==ClickType.LEFT)open(new MenuToolConfiguration(this, plugin, player, t));
+                if(click==ClickType.SHIFT_LEFT){
+                    if(idx==0)return;
+                    TreeFeller.tools.remove(t);
+                    TreeFeller.tools.add(idx-1, t);
+                    refresh();
+                }
+                if(click==ClickType.SHIFT_RIGHT){
+                    if(idx==TreeFeller.tools.size()-1)return;
+                    TreeFeller.tools.remove(t);
+                    TreeFeller.tools.add(idx+1, t);
+                    refresh();
+                }
             }));
             index++;
         }
