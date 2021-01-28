@@ -11,27 +11,27 @@ import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 public class Effect{
-    public final String name;
-    public final EffectLocation location;
-    public final EffectType type;
-    public final double chance;
-    private Particle particle;
-    private double x;
-    private double y;
-    private double z;
-    private double dx;
-    private double dy;
-    private double dz;
-    private double speed;
-    private int count;
-    private Object extra;
-    private String sound;
-    private float volume;
-    private float pitch;
-    private float power;
-    private boolean fire;
-    private boolean permanent;
-    private String[] tags;
+    public String name;
+    public EffectLocation location;
+    public EffectType type;
+    public double chance;
+    public Particle particle;
+    public double x;
+    public double y;
+    public double z;
+    public double dx;
+    public double dy;
+    public double dz;
+    public double speed;
+    public int count;
+    public Object extra;
+    public String sound;
+    public float volume;
+    public float pitch;
+    public float power;
+    public boolean fire;
+    public boolean permanent;
+    public String[] tags;
     private Effect(String name, EffectLocation location, EffectType type, double chance){
         this.name = name;
         this.location = location;
@@ -66,6 +66,32 @@ public class Effect{
         this(name, location, EffectType.MARKER, chance);
         this.permanent = permanent;
         this.tags = tags;
+    }
+    public static Effect newEffect(EffectType type){
+        String nam = "new_effect";
+        String name = nam;
+        boolean matches;
+        int i = 0;
+        do{
+            matches = false;
+            for(Effect e : TreeFeller.effects){
+                if(e.name.equalsIgnoreCase(name))matches = true;
+            }
+            if(matches)name = nam+i;
+            i++;
+        }while(matches);
+        switch(type){
+            case EXPLOSION:
+                return new Effect(name, EffectLocation.TREE, 1, 0, false);
+            case MARKER:
+                return new Effect(name, EffectLocation.TREE, 1, false);
+            case PARTICLE:
+                return new Effect(name, EffectLocation.TREE, 1, Particle.ASH, 0, 0, 0, 0, 0, 0, 0, 1, null);
+            case SOUND:
+                return new Effect(name, EffectLocation.TREE, 1, "", 1, 1);
+            default:
+                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
+        }
     }
     public void print(Logger logger){
         logger.log(Level.INFO, "Loaded effect: {0}", name);
@@ -133,10 +159,22 @@ public class Effect{
                     for(String s : tags)cloud.addScoreboardTag(s);
                 }
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
         }
     }
     public static enum EffectLocation{
-        LOGS,LEAVES,TREE,TOOL;
+        LOGS(Material.OAK_WOOD),
+        LEAVES(Material.OAK_LEAVES),
+        TREE(Material.OAK_SAPLING),
+        TOOL(Material.IRON_AXE);
+        private final Material item;
+        private EffectLocation(Material item){
+            this.item = item;
+        }
+        public Material getItem(){
+            return item;
+        }
     }
     public static enum EffectType{
         PARTICLE(Material.CAMPFIRE),

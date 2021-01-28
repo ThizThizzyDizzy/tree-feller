@@ -16,7 +16,7 @@ public class MenuSelectMaterial extends Menu{
     private final Function<Material, Boolean> filter;
     private final BiConsumer<MenuSelectMaterial, Material> setFunc;
     public MenuSelectMaterial(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, String filterName, Material defaultValue, Function<Material, Boolean> filter, BiConsumer<MenuSelectMaterial, Material> setFunc){
-        super(parent, plugin, player, "Modify Material ("+name+")", 9);
+        super(parent, plugin, player, "Select Material ("+name+")", 9);
         this.value = defaultValue;
         this.allowNull = allowNull;
         this.filterName = filterName;
@@ -35,7 +35,7 @@ public class MenuSelectMaterial extends Menu{
                 refresh();
             }
         }));
-        add(new Button(size-1, makeItem(value==null?Material.BARRIER:Material.GREEN_CONCRETE).setDisplayName("Select"), (click) -> {
+        add(new Button(size-1, makeItem(value==null?Material.BARRIER:Material.GREEN_CONCRETE).setDisplayName(value==null?"Back":"Select"), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value!=null){
                 setFunc.accept(this, value);

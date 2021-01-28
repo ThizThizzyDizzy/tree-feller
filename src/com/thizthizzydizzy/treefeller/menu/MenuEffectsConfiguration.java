@@ -2,7 +2,9 @@ package com.thizthizzydizzy.treefeller.menu;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.Effect;
+import com.thizthizzydizzy.treefeller.Effect.EffectType;
 import com.thizthizzydizzy.treefeller.TreeFeller;
+import com.thizthizzydizzy.treefeller.menu.select.MenuSelectEnum;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -29,6 +31,20 @@ public class MenuEffectsConfiguration extends Menu{
         add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click==ClickType.LEFT)open(parent);
         }));
+        add(new Button(size-5, makeItem(Material.GREEN_CONCRETE).setDisplayName("New effect"), (click) -> {
+            if(click==ClickType.LEFT){
+                open(new MenuSelectEnum<EffectType>(this, plugin, player, "New Effect", "EffectType", false, null, EffectType.values(), (menu, value) -> {
+                    Effect effect = Effect.newEffect(value);
+                    TreeFeller.effects.add(effect);
+                    menu.open(new MenuEffectConfiguration(this, plugin, player, effect));
+                }){
+                    @Override
+                    public Material getItem(EffectType value){
+                        return value.getItem();
+                    }
+                });
+            }
+        }));
         if(page>0){
             add(new Button(size-9, makeItem(Material.PAPER).setDisplayName("Previous Page"), (click) -> {
                 if(click==ClickType.LEFT)open(new MenuEffectsConfiguration(parent, plugin, player, page-1));
@@ -42,10 +58,10 @@ public class MenuEffectsConfiguration extends Menu{
         int index = 0;
         int offset = 0;
         for(int i = 0; i<Math.min(pageMax,TreeFeller.effects.size()-offset); i++){
-            Effect e = TreeFeller.effects.get(i+offset);
+            Effect effect = TreeFeller.effects.get(i+offset);
             if(i<pageMin)continue;
-            add(new Button(index, makeItem(e.type.getItem()).setDisplayName(e.name), (click) -> {
-//                if(click==ClickType.LEFT)t.openEffectModifyMenu(this);
+            add(new Button(index, makeItem(effect.type.getItem()).setDisplayName(effect.name), (click) -> {
+                if(click==ClickType.LEFT)open(new MenuEffectConfiguration(this, plugin, player, effect));
             }));
             index++;
         }

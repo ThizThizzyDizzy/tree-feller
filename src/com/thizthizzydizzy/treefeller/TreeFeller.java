@@ -493,13 +493,13 @@ public class TreeFeller extends JavaPlugin{
         Logger logger = getLogger();
         logger.log(Level.INFO, "{0} has been disabled! (Version {1}) by ThizThizzyDizzy", new Object[]{pdfFile.getName(), pdfFile.getVersion()});
     }
-    private Particle getParticle(String string){
+    public static Particle getParticle(String string){
         Particle p = null;
         try{
             p = Particle.valueOf(string.toUpperCase().replace(" ", "-").replace("-", "_"));
         }catch(IllegalArgumentException ex){}
         if(p!=null)return p;
-        switch(string.toLowerCase().replaceAll("_", " ")){
+        switch(string.toLowerCase().replace("_", " ").replace("-", " ")){
             case "barrier":
                 return Particle.BARRIER;
             case "block":

@@ -45,7 +45,6 @@ public class MenuModifyEffectList extends Menu{
                 }
             }
             add(new Button(i+1, makeItem(effect.type.getItem()).setDisplayName(effect.name).setCount(count).addLore("Left click to add this effect").addLore("Right click to remove this effect").addLore("Currently added: "+count), (click) -> {
-                if(click!=ClickType.LEFT)return;
                 if(click==ClickType.LEFT){
                     if(value==null)value = new ArrayList<>();
                     value.add(effect);

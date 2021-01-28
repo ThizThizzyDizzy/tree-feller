@@ -9,7 +9,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
-public class MenuModifyEnum<T> extends Menu{
+public class MenuModifyEnum<T> extends Menu{//TODO make multi-page
     public MenuModifyEnum(Menu parent, Plugin plugin, Player player, String name, String enumName, boolean allowNull, T defaultValue, T[] values, Consumer<T> setFunc){
         super(parent, plugin, player, "Modify "+enumName+" ("+name+")", getSize(values.length, allowNull));
         Label label = add(new Label(0, makeItem(Material.PAPER).setDisplayName(Objects.toString(defaultValue))));

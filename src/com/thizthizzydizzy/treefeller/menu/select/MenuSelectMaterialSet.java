@@ -20,7 +20,7 @@ public class MenuSelectMaterialSet extends Menu{//TODO make this multi-page allo
     private final Function<Material, Boolean> filter;
     private final BiConsumer<MenuSelectMaterialSet, HashSet<Material>> setFunc;
     public MenuSelectMaterialSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, String filterName, HashSet<Material> defaultValue, Function<Material, Boolean> filter, BiConsumer<MenuSelectMaterialSet, HashSet<Material>> setFunc){
-        super(parent, plugin, player, "Modify Material Set ("+name+")", 54);
+        super(parent, plugin, player, "Select Material Set ("+name+")", 54);
         this.value = (HashSet<Material>)defaultValue.clone();
         this.allowNull = allowNull;
         this.filterName = filterName;
@@ -62,7 +62,7 @@ public class MenuSelectMaterialSet extends Menu{//TODO make this multi-page allo
                 add(new Label(52, b));
             }
         }
-        add(new Button(size-1, makeItem(value==null||value.isEmpty()?Material.BARRIER:Material.GREEN_CONCRETE).setDisplayName("Select"), (click) -> {
+        add(new Button(size-1, makeItem(value==null||value.isEmpty()?Material.BARRIER:Material.GREEN_CONCRETE).setDisplayName(value==null||value.isEmpty()?"Back":"Select"), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value!=null&&!value.isEmpty()){
                 setFunc.accept(this, value);
