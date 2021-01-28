@@ -5,6 +5,8 @@ import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.TreeFeller;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterial;
+import com.thizthizzydizzy.treefeller.menu.select.MenuSelectMaterial;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -30,6 +32,18 @@ public class MenuToolsConfiguration extends Menu{
         components.clear();
         add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click==ClickType.LEFT)open(parent);
+        }));
+        add(new Button(size-5, makeItem(Material.GREEN_CONCRETE).setDisplayName("New tool"), (click) -> {
+            if(click==ClickType.LEFT){
+                open(new MenuSelectMaterial(this, plugin, player, "New Tool", false, "item", null, (mat) -> {
+                    return mat.isItem();
+                }, (menu, value) -> {
+                    if(value==null)return;
+                    Tool tool = new Tool(value);
+                    TreeFeller.tools.add(tool);
+                    menu.open(new MenuToolConfiguration(this, plugin, player, tool));
+                }));
+            }
         }));
         if(page>0){
             add(new Button(size-9, makeItem(Material.PAPER).setDisplayName("Previous Page"), (click) -> {

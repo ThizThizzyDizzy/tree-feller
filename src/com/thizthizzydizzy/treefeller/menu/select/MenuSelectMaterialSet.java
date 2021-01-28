@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller.menu.modify;
+package com.thizthizzydizzy.treefeller.menu.select;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Label;
@@ -6,20 +6,20 @@ import com.thizthizzydizzy.simplegui.Menu;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
-public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allowing more to be visible
+public class MenuSelectMaterialSet extends Menu{//TODO make this multi-page allowing more to be visible
     private HashSet<Material> value;
     private final boolean allowNull;
     private final String filterName;
     private final Function<Material, Boolean> filter;
-    private final Consumer<HashSet<Material>> setFunc;
-    public MenuModifyMaterialSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, String filterName, HashSet<Material> defaultValue, Function<Material, Boolean> filter, Consumer<HashSet<Material>> setFunc){
+    private final BiConsumer<MenuSelectMaterialSet, HashSet<Material>> setFunc;
+    public MenuSelectMaterialSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, String filterName, HashSet<Material> defaultValue, Function<Material, Boolean> filter, BiConsumer<MenuSelectMaterialSet, HashSet<Material>> setFunc){
         super(parent, plugin, player, "Modify Material Set ("+name+")", 54);
         this.value = (HashSet<Material>)defaultValue.clone();
         this.allowNull = allowNull;
@@ -37,7 +37,6 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
                     if(value==null)value = new HashSet<>();
                     value.clear();
                 }
-                setFunc.accept(value);
                 refresh();
             }
         }));
@@ -50,7 +49,6 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
                 add(new Button(i+1, m.isItem()?makeItem(m):(makeItem(Material.PAPER).setDisplayName(m.toString())), (click) -> {
                     if(click==ClickType.RIGHT){
                         value.remove(lst.get(idx));
-                        setFunc.accept(value);
                         refresh();
                     }
                 }));
@@ -64,9 +62,13 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
                 add(new Label(52, b));
             }
         }
-        add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
+        add(new Button(size-1, makeItem(value==null||value.isEmpty()?Material.BARRIER:Material.GREEN_CONCRETE).setDisplayName("Select"), (click) -> {
             if(click!=ClickType.LEFT)return;
-            open(parent);
+            if(value!=null&&!value.isEmpty()){
+                setFunc.accept(this, value);
+            }else{
+                open(parent);
+            }
         }));
         updateInventory();
     }
@@ -78,7 +80,6 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
         if(filter.apply(stack.getType())){
             if(value==null)value = new HashSet<>();
             value.add(stack.getType());
-            setFunc.accept(value);
             refresh();
         }
     }

@@ -1,9 +1,12 @@
 package com.thizthizzydizzy.treefeller.menu;
 import com.thizthizzydizzy.simplegui.Button;
-import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
+import com.thizthizzydizzy.treefeller.menu.select.MenuSelectMaterialSet;
+import java.util.ArrayList;
+import java.util.HashSet;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -29,6 +32,23 @@ public class MenuTreesConfiguration extends Menu{
         components.clear();
         add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click==ClickType.LEFT)open(parent);
+        }));
+        add(new Button(size-5, makeItem(Material.GREEN_CONCRETE).setDisplayName("New tree"), (click) -> {
+            if(click==ClickType.LEFT){
+                open(new MenuSelectMaterialSet(this, plugin, player, "New Tree Trunk", false, "block", new HashSet<>(), (mat) -> {
+                    return mat.isItem();
+                }, (menu, trunk) -> {
+                    if(trunk.isEmpty())return;
+                    menu.open(new MenuSelectMaterialSet(this, plugin, player, "New Tree Leaves", false, "block", new HashSet<>(), (mat) -> {
+                        return mat.isItem();
+                    }, (menu2, leaves) -> {
+                        if(leaves.isEmpty())return;
+                        Tree tree = new Tree(new ArrayList<>(trunk), new ArrayList<>(leaves));
+                        TreeFeller.trees.add(tree);
+                        menu2.open(new MenuTreeConfiguration(this, plugin, player, tree));
+                    }));
+                }));
+            }
         }));
         if(page>0){
             add(new Button(size-9, makeItem(Material.PAPER).setDisplayName("Previous Page"), (click) -> {
