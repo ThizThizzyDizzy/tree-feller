@@ -19,11 +19,14 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
+import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
+import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyDouble;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnchantmentMap;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnum;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyFloat;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterial;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyShort;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
@@ -88,6 +91,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Integer> LEAF_RANGE = new Option<Integer>("Leaf Range", true, true, true, 6){
         @Override
@@ -106,6 +123,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -146,6 +177,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Integer> REQUIRED_LEAVES = new Option<Integer>("Required Leaves", true, true, true, 10){
         @Override
@@ -181,6 +226,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -219,6 +278,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -265,6 +338,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -379,6 +466,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static OptionBoolean REPLANT_SAPLINGS = new OptionBoolean("Replant Saplings", true, true, true, false){
         @Override
@@ -421,6 +522,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifySpawnSaplings(parent, parent.plugin, parent.player, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifySpawnSaplings(parent, parent.plugin, parent.player, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Material> SAPLING = new Option<Material>("Sapling", false, false, true, null){
         @Override
@@ -437,7 +552,29 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            throw new UnsupportedOperationException("Sapling has no global value!");
+            parent.open(new MenuModifyMaterial(parent, parent.plugin, parent.player, name, true, "block", globalValue, (mat) -> {
+                return mat.isBlock();
+            }, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterial(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (mat) -> {
+                return mat.isBlock();
+            }, (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterial(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (mat) -> {
+                return mat.isBlock();
+            }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
         }
     };
     public static Option<Integer> MAX_SAPLINGS = new Option<Integer>("Max Saplings", false, false, true, 1){
@@ -457,6 +594,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -491,6 +642,24 @@ public abstract class Option<E>{
                 return material.isBlock();
             }, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -538,6 +707,30 @@ public abstract class Option<E>{
                 }
             });
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, toolValues.get(tool), FellBehavior.values(), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }){
+                @Override
+                public Material getItem(FellBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, treeValues.get(tree), FellBehavior.values(), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }){
+                @Override
+                public Material getItem(FellBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
     };
     public static Option<FellBehavior> LEAF_BEHAVIOR = new Option<FellBehavior>("Leaf Behavior", true, true, true, FellBehavior.BREAK){
         @Override
@@ -575,6 +768,30 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", false, globalValue, FellBehavior.values(), (value) -> {
                 globalValue = value;
+            }){
+                @Override
+                public Material getItem(FellBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, toolValues.get(tool), FellBehavior.values(), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }){
+                @Override
+                public Material getItem(FellBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, treeValues.get(tree), FellBehavior.values(), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }){
                 @Override
                 public Material getItem(FellBehavior value){
@@ -630,6 +847,30 @@ public abstract class Option<E>{
                 }
             });
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEnum<DirectionalFallBehavior>(parent, parent.plugin, parent.player, name, "DirectionalFallBehavior", true, toolValues.get(tool), DirectionalFallBehavior.values(), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }){
+                @Override
+                public Material getItem(DirectionalFallBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEnum<DirectionalFallBehavior>(parent, parent.plugin, parent.player, name, "DirectionalFallBehavior", true, treeValues.get(tree), DirectionalFallBehavior.values(), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }){
+                @Override
+                public Material getItem(DirectionalFallBehavior value){
+                    return value.getItem();
+                }
+            });
+        }
     };
     public static Option<HashSet<Material>> OVERRIDABLES = new Option<HashSet<Material>>("Overridables", true, true, true, defaultOverridables){
         @Override
@@ -667,6 +908,24 @@ public abstract class Option<E>{
                 return material.isBlock();
             }, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -707,6 +966,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Double> VERTICAL_FALL_VELOCITY = new Option<Double>("Vertical Fall Velocity", true, true, true, .05d){
         @Override
@@ -734,6 +1007,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Double> RANDOM_FALL_VELOCITY = new Option<Double>("Random Fall Velocity", true, true, true, 0d){
         @Override
@@ -759,6 +1046,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -793,6 +1094,30 @@ public abstract class Option<E>{
             parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static OptionBoolean STACKED_TOOLS = new OptionBoolean("Stacked Tools", true, true, false, false){
+        @Override
+        public String getDesc(){
+            return "If set to true, stacked tools will be consumed one at a time.\nThis will treat the entire stack as one tool, so prevent-breakage will not keep individual tools from breaking, only the whole stack.\nWARNING: Stacked tools are not recommended!";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(){
+            return new ItemBuilder(Material.DIAMOND_AXE).setCount(64);
         }
     };
     public static OptionBoolean LEAF_FORTUNE = new OptionBoolean("Leaf Fortune", true, true, true, true){
@@ -892,6 +1217,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Double> LOG_DROP_CHANCE = new Option<Double>("Log Drop Chance", true, true, true, 1d){
         @Override
@@ -916,6 +1255,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -975,6 +1328,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyEffectList(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEffectList(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEffectList(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -1061,6 +1428,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEnchantmentMap(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEnchantmentMap(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<HashMap<Enchantment, Integer>> BANNED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Banned Enchantments", true, true, true, null){
         @Override
@@ -1144,6 +1525,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEnchantmentMap(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEnchantmentMap(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Short> MIN_DURABILITY = new Option<Short>("Min Durability", true, true, true, null){
         @Override
@@ -1184,6 +1579,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Short> MAX_DURABILITY = new Option<Short>("Max Durability", true, true, true, null){
         @Override
@@ -1222,6 +1631,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyShort(parent, parent.plugin, parent.player, name, (short)0, Short.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -1265,6 +1688,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Float> MAX_DURABILITY_PERCENT = new Option<Float>("Max Durability Percent", true, true, true, null){
         @Override
@@ -1304,6 +1741,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, 1f, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -1393,6 +1844,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyStringList(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyStringList(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };//TODO make this a HashSet
     public static Option<String> REQUIRED_NAME = new Option<String>("Required Name", true, true, true, null){
         @Override
@@ -1433,6 +1898,22 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.openAnvilGUI(globalValue==null?"":globalValue, "Edit Required Name", (p, str) -> {
                 globalValue = str==null||str.isEmpty()||str.equalsIgnoreCase("null")?null:str;
+            });
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.openAnvilGUI(toolValues.containsKey(tool)?toolValues.get(tool):"", "Edit Required Name", (p, str) -> {
+                String value = str==null||str.isEmpty()||str.equalsIgnoreCase("null")?null:str;
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            });
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.openAnvilGUI(treeValues.containsKey(tree)?treeValues.get(tree):"", "Edit Required Name", (p, str) -> {
+                String value = str==null||str.isEmpty()||str.equalsIgnoreCase("null")?null:str;
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             });
         }
     };
@@ -1499,6 +1980,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Integer> MIN_TIME = new Option<Integer>("Min Time", true, true, true, null){
         @Override
@@ -1539,6 +2034,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Integer> MAX_TIME = new Option<Integer>("Max Time", true, true, true, null){
         @Override
@@ -1577,6 +2086,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 24000, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -1630,6 +2153,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Integer> MAX_PHASE = new Option<Integer>("Max Phase", true, true, true, null){
         @Override
@@ -1681,6 +2218,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static Option<Integer> CUSTOM_MODEL_DATA = new Option<Integer>("Custom Model Data", true, true, true, null){
         @Override
@@ -1718,6 +2269,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -1784,6 +2349,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(globalValue), (value) -> {
                 globalValue = new ArrayList<>(value);
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(toolValues.get(tool)), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, new ArrayList<>(value));
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(treeValues.get(tree)), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, new ArrayList<>(value));
             }));
         }
     };//TODO make this a HashSet
@@ -1977,6 +2556,20 @@ public abstract class Option<E>{
                 globalValue = value;
             }));
         }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
     };
     public static OptionBoolean WORLD_BLACKLIST = new OptionBoolean("World Blacklist", true, true, true, false){
         @Override
@@ -2036,6 +2629,20 @@ public abstract class Option<E>{
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
                 globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
             }));
         }
     };
@@ -2380,4 +2987,6 @@ public abstract class Option<E>{
     }
     public abstract ItemBuilder getConfigurationDisplayItem();
     public abstract void openGlobalModifyMenu(MenuGlobalConfiguration parent);
+    public abstract void openToolModifyMenu(MenuToolConfiguration parent, Tool tool);
+    public abstract void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree);
 }

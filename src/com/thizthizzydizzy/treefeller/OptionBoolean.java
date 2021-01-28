@@ -1,5 +1,7 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
+import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
+import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyBoolean;
 import java.util.Objects;
 public abstract class OptionBoolean extends Option<Boolean>{
@@ -40,4 +42,19 @@ public abstract class OptionBoolean extends Option<Boolean>{
             globalValue = value;
         }));
     }
+    @Override
+    public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+        parent.open(new MenuModifyBoolean(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+            if(value==null)toolValues.remove(tool);
+            else toolValues.put(tool, value);
+        }));
+    }
+    @Override
+    public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+        parent.open(new MenuModifyBoolean(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+            if(value==null)treeValues.remove(tree);
+            else treeValues.put(tree, value);
+        }));
+    }
+    
 }

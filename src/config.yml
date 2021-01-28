@@ -144,6 +144,11 @@ respect-unbreaking: true
 # How much damage should tools take per log? (Multiplier)
 damage-mult: 1.0
 
+# If set to true, stacked tools will be consumed one at a time.
+# This will treat the entire stack as one tool, so prevent-breakage will not keep individual tools from breaking, only the whole stack.
+# WARNING: Stacked tools are not recommended!
+stacked-tools: false
+
 # Should Fortune on an axe be applied to leaves?
 leaf-fortune: true
 
@@ -355,6 +360,7 @@ compatibility-oreregenerator: true
 # random-fall-velocity
 # respect-unbreaking
 # damage-mult
+# stacked-tools
 # leaf-fortune
 # leaf-silk-touch
 # log-fortune

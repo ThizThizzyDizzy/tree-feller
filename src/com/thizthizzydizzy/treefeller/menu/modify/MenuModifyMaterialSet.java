@@ -30,7 +30,7 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
     }
     public void refresh(){
         components.clear();
-        add(new Button(0, new ItemBuilder(Material.PAPER).setDisplayName(value==null?"NULL":(value.size()+" "+filterName+"s")).addLore("Click a "+filterName+" in your inventory to add it to the list.").addLore("Right click any "+filterName+" in the list to remove it.").addLore(allowNull?"Shift-right click this item to set to NULL":("Shift-right click this item to clear all "+filterName+"s")), (click) -> {
+        add(new Button(0, makeItem(Material.PAPER).setDisplayName(value==null?"NULL":(value.size()+" "+filterName+"s")).addLore("Click a "+filterName+" in your inventory to add it to the list.").addLore("Right click any "+filterName+" in the list to remove it.").addLore(allowNull?"Shift-right click this item to set to NULL":("Shift-right click this item to clear all "+filterName+"s")), (click) -> {
             if(click==ClickType.SHIFT_RIGHT){
                 if(allowNull)value = null;
                 else{
@@ -46,7 +46,7 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
             Collections.sort(lst);
             for(int i = 0; i<Math.min(51,lst.size()); i++){
                 int idx = i;
-                add(new Button(i+1, new ItemBuilder(lst.get(i)), (click) -> {
+                add(new Button(i+1, makeItem(lst.get(i)), (click) -> {
                     if(click==ClickType.RIGHT){
                         value.remove(lst.get(idx));
                         setFunc.accept(value);
@@ -55,7 +55,7 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
                 }));
             }
             if(lst.size()>=52){
-                ItemBuilder b = new ItemBuilder(Material.PAPER);
+                ItemBuilder b = makeItem(Material.PAPER);
                 b.setDisplayName(lst.size()-51+" More...");
                 for(int i = 52; i<lst.size(); i++){
                     b.addLore(lst.get(i).toString());
@@ -63,6 +63,10 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
                 add(new Label(52, b));
             }
         }
+        add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
+            if(click!=ClickType.LEFT)return;
+            open(parent);
+        }));
         updateInventory();
     }
     @Override

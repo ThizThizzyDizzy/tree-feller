@@ -33,4 +33,13 @@ public class Tree{
             }
         }
     }
+    public Material getDisplayMaterial(){
+        if(trunk.isEmpty()){
+            if(leaves.isEmpty()){
+                return Material.BEDROCK;
+            }
+            return leaves.get(0);
+        }
+        return trunk.get(0);
+    }
 }

@@ -33,7 +33,7 @@ public class MenuModifyStringDoubleMap extends Menu{
     }
     public void refresh(){
         components.clear();
-        add(new Button(0, new ItemBuilder(Material.GREEN_CONCRETE).setDisplayName("Click to add a String"), (click) -> {
+        add(new Button(0, makeItem(Material.GREEN_CONCRETE).setDisplayName("Click to add a String"), (click) -> {
             if(click!=ClickType.LEFT)return;
             openAnvilGUI("", "Add String", (p, str) -> {
                 if(value==null)value = new HashMap<>();
@@ -47,7 +47,7 @@ public class MenuModifyStringDoubleMap extends Menu{
             Collections.sort(strs);
             for(int i = 0; i<Math.min(value.size(), allowNull?51:52); i++){
                 int idx = i;
-                add(new Button(i+1, new ItemBuilder(Material.PAPER).setDisplayName(strs.get(i)+" ("+value.get(strs.get(i))+")").addLore("Left click to modify").addLore("Right click to remove"), (click) -> {
+                add(new Button(i+1, makeItem(Material.PAPER).setDisplayName(strs.get(i)+" ("+value.get(strs.get(i))+")").addLore("Left click to modify").addLore("Right click to remove"), (click) -> {
                     if(click==ClickType.LEFT){
                         open(new MenuModifyDouble(this, plugin, player, "Modify "+strs.get(idx), min, max, allowNullDoubles, value.get(strs.get(idx)), (value) -> {
                             this.value.put(strs.get(idx), value);
@@ -62,14 +62,14 @@ public class MenuModifyStringDoubleMap extends Menu{
             }
         }
         if(allowNull){
-            add(new Button(value==null?1:(value.size()+1), new ItemBuilder(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
+            add(new Button(value==null?1:(value.size()+1), makeItem(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
                 if(click!=ClickType.LEFT)return;
                 value = null;
                 setFunc.accept(value);
                 refresh();
             }));
         }
-        add(new Button(size-1, new ItemBuilder(Material.BARRIER).setDisplayName("Back"), (click) -> {
+        add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click!=ClickType.LEFT)return;
             open(parent);
         }));

@@ -14,7 +14,7 @@ public class MenuModifyShort extends Menu{
     public MenuModifyShort(Menu parent, Plugin plugin, Player player, String name, short min, short max, boolean allowNull, Short defaultValue, Consumer<Short> setFunc){
         super(parent, plugin, player, "Modify Short ("+name+")", 9);
         value = defaultValue;
-        display = add(new Button(0, new ItemBuilder(Material.PAPER).setDisplayName(Objects.toString(defaultValue)).addLore("Click to set value"), (click) -> {
+        display = add(new Button(0, makeItem(Material.PAPER).setDisplayName(Objects.toString(defaultValue)).addLore("Click to set value"), (click) -> {
             if(click!=ClickType.LEFT)return;
             openAnvilGUI(value==null?"0":value.toString(), "Edit "+name, (plyr, string) -> {
                 string = string.trim();
@@ -25,14 +25,14 @@ public class MenuModifyShort extends Menu{
                 refresh();
             });
         }));
-        add(new Button(2, new ItemBuilder(Material.RED_CONCRETE).setDisplayName("-10"), (click) -> {
+        add(new Button(2, makeItem(Material.RED_CONCRETE).setDisplayName("-10"), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0;
             value = (short)Math.min(max,Math.max(min, value-10));
             setFunc.accept(value);
                 refresh();
         }));
-        add(new Button(3, new ItemBuilder(Material.RED_TERRACOTTA).setDisplayName("-1"), (click) -> {
+        add(new Button(3, makeItem(Material.RED_TERRACOTTA).setDisplayName("-1"), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0;
             value = (short)Math.min(max,Math.max(min, value-1));
@@ -40,41 +40,41 @@ public class MenuModifyShort extends Menu{
                 refresh();
         }));
         if(allowNull){
-            add(new Button(4, new ItemBuilder(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
+            add(new Button(4, makeItem(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
                 if(click!=ClickType.LEFT)return;
                 value = null;
                 setFunc.accept(value);
                 refresh();
             }));
         }else{
-            add(new Button(4, new ItemBuilder(Material.BLACK_CONCRETE).setDisplayName("Set to "+Math.min(max,Math.max(min, 0))), (click) -> {
+            add(new Button(4, makeItem(Material.BLACK_CONCRETE).setDisplayName("Set to "+Math.min(max,Math.max(min, 0))), (click) -> {
                 if(click!=ClickType.LEFT)return;
                 value = (short)Math.min(max,Math.max(min, 0));
                 setFunc.accept(value);
                 refresh();
             }));
         }
-        add(new Button(5, new ItemBuilder(Material.GREEN_TERRACOTTA).setDisplayName("+1"), (click) -> {
+        add(new Button(5, makeItem(Material.GREEN_TERRACOTTA).setDisplayName("+1"), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0;
             value = (short)Math.min(max,Math.max(min, value+1));
             setFunc.accept(value);
                 refresh();
         }));
-        add(new Button(6, new ItemBuilder(Material.GREEN_CONCRETE).setDisplayName("+10"), (click) -> {
+        add(new Button(6, makeItem(Material.GREEN_CONCRETE).setDisplayName("+10"), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0;
             value = (short)Math.min(max,Math.max(min, value+10));
             setFunc.accept(value);
                 refresh();
         }));
-        add(new Button(8, new ItemBuilder(Material.BARRIER).setDisplayName("Back"), (click) -> {
+        add(new Button(8, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click!=ClickType.LEFT)return;
             open(parent);
         }));
     }
     public void refresh(){
-        display.label = new ItemBuilder(Material.PAPER).setDisplayName(Objects.toString(value)).addLore("Click to set value").build();
+        display.label = makeItem(Material.PAPER).setDisplayName(Objects.toString(value)).addLore("Click to set value").build();
         updateInventory();
     }
 }

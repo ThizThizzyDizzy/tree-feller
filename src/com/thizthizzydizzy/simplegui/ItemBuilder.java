@@ -47,6 +47,20 @@ public class ItemBuilder{
     public ItemBuilder(Material type){
         this.type = type;
     }
+    public ItemBuilder(ItemBuilder builder){
+        type = builder.type;
+        displayName = builder.displayName;
+        localizedName = builder.localizedName;
+        lore.addAll(builder.lore);
+        enchantments.putAll(builder.enchantments);
+        color = builder.color;
+        customModelData = builder.customModelData;
+        count = builder.count;
+        durability = builder.durability;
+        flags.addAll(builder.flags);
+        unbreakable = builder.unbreakable;
+        for(AttributeAndModifier m : builder.attributes)attributes.add(new AttributeAndModifier(m));
+    }
     public ItemBuilder setDisplayName(String name){
         if(name!=null){
             if(!name.startsWith(ChatColor.RESET.toString())){
@@ -91,7 +105,7 @@ public class ItemBuilder{
         return setCount(count==null?1:(int)count);
     }
     public ItemBuilder setCount(int count){
-        this.count = Math.max(1, count);
+        this.count = Math.max(1, Math.min(64, count));
         return this;
     }
     public ItemBuilder setDurability(Short durability){
@@ -156,6 +170,9 @@ public class ItemBuilder{
         public AttributeAndModifier(Attribute attribute, AttributeModifier modifier){
             this.attribute = attribute;
             this.modifier = modifier;
+        }
+        private AttributeAndModifier(AttributeAndModifier m){
+            this(m.attribute, m.modifier);
         }
     }
 }

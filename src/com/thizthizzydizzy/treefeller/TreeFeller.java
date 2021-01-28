@@ -106,6 +106,9 @@ public class TreeFeller extends JavaPlugin{
                     if(!result.isSuccess())continue TOOL;
                 }
                 int durability = axe.getType().getMaxDurability()-axe.getDurability();
+                if(Option.STACKED_TOOLS.get(tool, tree)){
+                    durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
+                }
                 int scanDistance = Option.SCAN_DISTANCE.get(tool, tree);
                 HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, true, false, false);//TODO what if the trunk is made of leaves?
                 for(Option o : Option.options){
@@ -193,6 +196,14 @@ public class TreeFeller extends JavaPlugin{
                 int lowest = lower;
                 if(gamemode!=GameMode.CREATIVE){
                     if(axe.getType().getMaxDurability()>0){
+                        if(Option.STACKED_TOOLS.get(tool, tree)){
+                            int amt = axe.getAmount();
+                            while(durabilityCost>axe.getType().getMaxDurability()-axe.getDurability()){
+                                amt--;
+                                durabilityCost-=axe.getType().getMaxDurability();
+                            }
+                            axe.setAmount(amt);
+                        }
                         axe.setDurability((short)(axe.getDurability()+durabilityCost));
                         if(durability==durabilityCost)axe.setAmount(0);
                     }

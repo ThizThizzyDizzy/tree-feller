@@ -25,7 +25,7 @@ public class MenuModifyEffectList extends Menu{
     }
     private void refresh(){
         components.clear();
-        ItemBuilder builder = new ItemBuilder(Material.PAPER).setDisplayName(value==null?"null":value.size()+" effects:");
+        ItemBuilder builder = makeItem(Material.PAPER).setDisplayName(value==null?"null":value.size()+" effects:");
         if(value!=null){
             HashMap<Effect, Integer> quantities = new HashMap<>();
             for(Effect e : value){
@@ -44,7 +44,7 @@ public class MenuModifyEffectList extends Menu{
                     if(e==effect)count++;
                 }
             }
-            add(new Button(i+1, new ItemBuilder(effect.type.getItem()).setDisplayName(effect.name).setCount(count).addLore("Left click to add this effect").addLore("Right click to remove this effect").addLore("Currently added: "+count), (click) -> {
+            add(new Button(i+1, makeItem(effect.type.getItem()).setDisplayName(effect.name).setCount(count).addLore("Left click to add this effect").addLore("Right click to remove this effect").addLore("Currently added: "+count), (click) -> {
                 if(click!=ClickType.LEFT)return;
                 if(click==ClickType.LEFT){
                     if(value==null)value = new ArrayList<>();
@@ -60,14 +60,14 @@ public class MenuModifyEffectList extends Menu{
             }));
         }
         if(allowNull){
-            add(new Button(TreeFeller.effects.size()+1, new ItemBuilder(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
+            add(new Button(TreeFeller.effects.size()+1, makeItem(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
                 if(click!=ClickType.LEFT)return;
                 value = null;
                 setFunc.accept(value);
                 refresh();
             }));
         }
-        add(new Button(size-1, new ItemBuilder(Material.BARRIER).setDisplayName("Back"), (click) -> {
+        add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click!=ClickType.LEFT)return;
             open(parent);
         }));

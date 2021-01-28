@@ -105,7 +105,8 @@ public abstract class Menu{
     public void onClick(int slot, ClickType click){}
     public void onInventoryClick(int slot, ClickType click){}
     private void click(int slot, ClickType click){
-        for(Component c : components){
+        for(int i = 0; i<components.size(); i++){
+            Component c = components.get(i);
             if(c.index==slot)c.onClick(click);
         }
         onClick(slot, click);

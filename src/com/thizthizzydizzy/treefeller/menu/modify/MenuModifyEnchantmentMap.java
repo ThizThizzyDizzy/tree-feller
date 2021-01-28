@@ -24,7 +24,7 @@ public class MenuModifyEnchantmentMap extends Menu{
     }
     private void refresh(){
         components.clear();
-        ItemBuilder builder = new ItemBuilder(Material.PAPER).setDisplayName(value==null?"null":value.size()+" enchantments:");
+        ItemBuilder builder = makeItem(Material.PAPER).setDisplayName(value==null?"null":value.size()+" enchantments:");
         if(value!=null){
             for(Enchantment e : value.keySet()){
                 builder.addLore(e.toString()+" "+value.get(e));
@@ -34,7 +34,7 @@ public class MenuModifyEnchantmentMap extends Menu{
         for(int i = 0; i<Math.min(allowNull?51:52, Enchantment.values().length); i++){
             Enchantment enchantment = Enchantment.values()[i];
             Integer level = value==null?null:value.get(enchantment);
-            add(new Button(i+1, new ItemBuilder(Material.ENCHANTED_BOOK).enchant(enchantment,level==null?1:level).setDisplayName(enchantment.toString()).addLore("Left click to increase enchantment level").addLore("Right click to decrease enchantment level").addLore("Current level: "+(level==null?"null":level)), (click) -> {
+            add(new Button(i+1, makeItem(Material.ENCHANTED_BOOK).enchant(enchantment,level==null?1:level).setDisplayName(enchantment.toString()).addLore("Left click to increase enchantment level").addLore("Right click to decrease enchantment level").addLore("Current level: "+(level==null?"null":level)), (click) -> {
                 if(click==ClickType.LEFT){
                     if(value==null)value = new HashMap<>();
                     value.put(enchantment, value.containsKey(enchantment)?value.get(enchantment)+1:1);
@@ -50,14 +50,14 @@ public class MenuModifyEnchantmentMap extends Menu{
             }));
         }
         if(allowNull){
-            add(new Button(Enchantment.values().length+1, new ItemBuilder(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
+            add(new Button(Enchantment.values().length+1, makeItem(Material.BLACK_CONCRETE).setDisplayName("Set to NULL"), (click) -> {
                 if(click!=ClickType.LEFT)return;
                 value = null;
                 setFunc.accept(value);
                 refresh();
             }));
         }
-        add(new Button(size-1, new ItemBuilder(Material.BARRIER).setDisplayName("Back"), (click) -> {
+        add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back"), (click) -> {
             if(click!=ClickType.LEFT)return;
             open(parent);
         }));
