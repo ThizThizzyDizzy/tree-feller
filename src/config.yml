@@ -112,15 +112,15 @@ directional-fall-behavior: RANDOM
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
 # (Only used for NATURAL fell behavior)
 overridables: 
-    - WATER
-    - TALL_GRASS
-    - TALL_SEAGRASS
-    - CAVE_AIR
-    - GRASS
-    - FERN
     - AIR
     - SEAGRASS
+    - CAVE_AIR
+    - WATER
+    - TALL_GRASS
     - LARGE_FERN
+    - FERN
+    - TALL_SEAGRASS
+    - GRASS
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -550,6 +550,7 @@ effects:
 # Format:  prefix-<option name>-suffix: "<text>"
 # Valid prefixes are:
 # debug        This is the message used when debug mode is on
+# actionbar    This will be sent to the player's actionbar
 # chat         This will be sent to the player in the chat
 # Valid suffixes are:
 # <no suffix>  This defines what message is sent when this option's global requirement is not met
