@@ -2,14 +2,17 @@ package com.thizthizzydizzy.treefeller;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.SoundCategory;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.inventory.ItemStack;
 public class Effect{
     public String name;
     public EffectLocation location;
@@ -162,6 +165,59 @@ public class Effect{
             default:
                 throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
         }
+    }
+    public String writeToConfig(){
+        String s = "{name: "+name;
+        s+=", chance: "+chance;
+        s+=", location: "+location.name();
+        s+=", type: "+type.name();
+        switch(type){
+            case EXPLOSION:
+                s+=", power: "+power;
+                s+=", fire: "+fire;
+                break;
+            case MARKER:
+                s+=", permanent: "+permanent;
+                s+=", tags: "+Arrays.toString(tags);
+                break;
+            case PARTICLE:
+                s+=", particle: "+particle.name();
+                s+=", x: "+x;
+                s+=", y: "+y;
+                s+=", z: "+z;
+                s+=", dx: "+dx;
+                s+=", dy: "+dy;
+                s+=", dz: "+dz;
+                s+=", speed: "+speed;
+                s+=", count: "+count;
+                switch(particle){
+                    case REDSTONE:
+                        Particle.DustOptions options = (Particle.DustOptions)extra;
+                        Color color = options.getColor();
+                        s+=", r: "+color.getRed();
+                        s+=", g: "+color.getGreen();
+                        s+=", b: "+color.getBlue();
+                        s+=", size: "+options.getSize();
+                        break;
+                    case ITEM_CRACK:
+                        s+="item: "+((ItemStack)extra).getType().name();
+                        break;
+                    case BLOCK_CRACK:
+                    case BLOCK_DUST:
+                    case FALLING_DUST:
+                        s+=", block: "+((BlockData)extra).getMaterial().name();
+                        break;
+                }
+                break;
+            case SOUND:
+                s+=", sound: "+sound;
+                s+=", volume: "+volume;
+                s+=", pitch: "+pitch;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
+        }
+        return s+"}";
     }
     public static enum EffectLocation{
         LOGS(Material.OAK_WOOD),

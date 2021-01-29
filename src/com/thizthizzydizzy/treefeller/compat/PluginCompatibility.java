@@ -22,7 +22,7 @@ public abstract class PluginCompatibility{
                 return "Compatibility: "+PluginCompatibility.this.getFriendlyName();
             }
             @Override
-            public ItemBuilder getConfigurationDisplayItem(){
+            public ItemBuilder getConfigurationDisplayItem(Boolean value){
                 return PluginCompatibility.this.getConfigurationDisplayItem();
             }
         };

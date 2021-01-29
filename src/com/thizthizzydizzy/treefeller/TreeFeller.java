@@ -113,7 +113,8 @@ public class TreeFeller extends JavaPlugin{
                     durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
                 }
                 int scanDistance = Option.SCAN_DISTANCE.get(tool, tree);
-                HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, true, false, false);//TODO what if the trunk is made of leaves?
+                Integer maxBlocks = Option.MAX_LOGS.get(tool, tree);
+                HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, maxBlocks==null?Integer.MAX_VALUE:(maxBlocks*2), true, false, false);//TODO what if the trunk is made of leaves?
                 for(Option o : Option.options){
                     DebugResult result = o.checkTrunk(this, tool, tree, blocks, block);
                     if(result==null)continue;
@@ -345,14 +346,16 @@ public class TreeFeller extends JavaPlugin{
     public int getTreeSize(Block block, ItemStack axe){
         throw new UnsupportedOperationException("This feature is not done yet!");//TODO fix this
     }
-    private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
+    private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
         //layer zero
         HashMap<Integer, ArrayList<Block>> results = new HashMap<>();
+        int total = 0;
         ArrayList<Block> zero = new ArrayList<>();
         if(materialTypes.contains(startingBlock.getType())){
             zero.add(startingBlock);
         }
         results.put(0, zero);
+        total+=zero.size();
         //all the other layers
         for(int i = 0; i<maxDistance; i++){
             ArrayList<Block> layer = new ArrayList<>();
@@ -439,11 +442,13 @@ public class TreeFeller extends JavaPlugin{
             }
             if(layer.isEmpty())break;
             results.put(i+1, layer);
+            total+=layer.size();
+            if(total>maxBlocks)return results;
         }
         return results;
     }
     private HashMap<Integer, ArrayList<Block>> getBlocksWithLeafCheck(ArrayList<Material> trunk, ArrayList<Material> leaves, Block startingBlock, int maxDistance, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData, boolean forceDistanceCheck){
-        HashMap<Integer, ArrayList<Block>> blocks = getBlocks(leaves, startingBlock, maxDistance, diagonal, playerLeaves, ignoreLeafData);
+        HashMap<Integer, ArrayList<Block>> blocks = getBlocks(leaves, startingBlock, maxDistance, Integer.MAX_VALUE, diagonal, playerLeaves, ignoreLeafData);
         if(forceDistanceCheck)leafCheck(blocks, trunk, leaves, diagonal, playerLeaves, ignoreLeafData);
         return blocks;
     }
@@ -465,7 +470,7 @@ public class TreeFeller extends JavaPlugin{
         materialTypes.add(from.getType());
         materialTypes.addAll(to);
         for(int d = 0; d<max; d++){
-            for(Block b : toList(getBlocks(materialTypes, from, d, diagonal, playerLeaves, true))){
+            for(Block b : toList(getBlocks(materialTypes, from, d, Integer.MAX_VALUE, diagonal, playerLeaves, true))){
                 if(to.contains(b.getType()))return d;
             }
         }
@@ -1645,7 +1650,7 @@ public class TreeFeller extends JavaPlugin{
         allLogs.add(Material.WARPED_HYPHAE);
         allLogs.add(Material.CRIMSON_HYPHAE);
         allLogs.add(Material.MUSHROOM_STEM);
-        HashMap<Integer, ArrayList<Block>> trunk = getBlocks(allLogs, clickedBlock, Option.SCAN_DISTANCE.getValue(), true, true, true);
+        HashMap<Integer, ArrayList<Block>> trunk = getBlocks(allLogs, clickedBlock, Option.SCAN_DISTANCE.getValue(), Integer.MAX_VALUE, true, true, true);
         HashSet<Material> logs = new HashSet<>();
         for(int i : trunk.keySet()){
             for(Block b : trunk.get(i))logs.add(b.getType());
@@ -1671,9 +1676,9 @@ public class TreeFeller extends JavaPlugin{
         HashMap<Integer, ArrayList<Block>> properLeaves;
         HashMap<Integer, ArrayList<Block>> badLeaves;
         HashMap<Integer, ArrayList<Block>> terribleLeaves;
-        int proper = getTotal(properLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), false, false, false));
-        int bad = getTotal(badLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), false, true, true));
-        int terrible = getTotal(terribleLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), true, true, true));
+        int proper = getTotal(properLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), Integer.MAX_VALUE, false, false, false));
+        int bad = getTotal(badLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), Integer.MAX_VALUE, false, true, true));
+        int terrible = getTotal(terribleLeaves = getBlocks(allBlocks, clickedBlock, Option.SCAN_DISTANCE.getValue(), Integer.MAX_VALUE, true, true, true));
         int numLogs = getTotal(trunk);
         int numLeaves;
         HashSet<Material> leaves = new HashSet<>();
@@ -1721,7 +1726,7 @@ public class TreeFeller extends JavaPlugin{
             HashSet<Block> allDaLeaves = new HashSet<>();
             FOR:for(int i : distances){
                 for(Block b : trunk.get(i)){
-                    HashMap<Integer, ArrayList<Block>> someLeaves = getBlocks(tree.leaves, b, leafRange, diagonalLeaves, playerLeaves, ignoreLeafData);
+                    HashMap<Integer, ArrayList<Block>> someLeaves = getBlocks(tree.leaves, b, leafRange, Integer.MAX_VALUE, diagonalLeaves, playerLeaves, ignoreLeafData);
                     for(int in : someLeaves.keySet()){
                         allDaLeaves.addAll(someLeaves.get(in));
                     }

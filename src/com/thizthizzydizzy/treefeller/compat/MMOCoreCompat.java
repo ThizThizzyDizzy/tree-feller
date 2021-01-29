@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Random;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class MMOCoreCompat extends InternalCompatibility{
@@ -29,6 +30,22 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
         @Override
         public HashMap<String, Double> load(Object o){
+            if(o instanceof MemorySection){
+                HashMap<String, Double> professions = new HashMap<>();
+                MemorySection m = (MemorySection)o;
+                for(String key : m.getKeys(false)){
+                    String profession = key;
+                    if(profession==null)continue;
+                    Double xp = Option.loadDouble(m.get(key));
+                    if(xp==null)continue;
+                    if(professions.containsKey(profession)){
+                        professions.put(profession, professions.get(profession)+xp);
+                    }else{
+                        professions.put(profession, xp);
+                    }
+                }
+                return professions;
+            }
             if(o instanceof Map){
                 HashMap<String, Double> professions = new HashMap<>();
                 Map m = (Map)o;
@@ -48,10 +65,34 @@ public class MMOCoreCompat extends InternalCompatibility{
                 }
                 return professions;
             }
+            if(o instanceof List){
+                List l = (List)o;
+                HashMap<String, Double> professions = new HashMap<>();
+                for(Object lbj : l){
+                    if(lbj instanceof Map){
+                        Map m = (Map)lbj;
+                        for(Object obj : m.keySet()){
+                            String profession = null;
+                            if(obj instanceof String){
+                                profession = (String)obj;
+                            }
+                            if(profession==null)continue;
+                            Double xp = Option.loadDouble(m.get(obj));
+                            if(xp==null)continue;
+                            if(professions.containsKey(profession)){
+                                professions.put(profession, professions.get(profession)+xp);
+                            }else{
+                                professions.put(profession, xp);
+                            }
+                        }
+                    }
+                }
+                return professions;
+            }
             return null;
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -74,6 +115,17 @@ public class MMOCoreCompat extends InternalCompatibility{
                 else treeValues.put(tree, value);
             }));
         }
+        @Override
+        public String writeToConfig(HashMap<String, Double> value){
+            if(value==null)return "";
+            String s = "{";
+            String str = "";
+            for(String st : value.keySet()){
+                str+=", "+st+": "+value.get(st);
+            }
+            if(!str.isEmpty())s+=str.substring(2);
+            return s+"}";
+        }
     };
     public static Option<HashMap<String, Double>> MMOCORE_LEAVES_XP = new Option<HashMap<String, Double>>("MMOCore Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
         @Override
@@ -87,6 +139,22 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
         @Override
         public HashMap<String, Double> load(Object o){
+            if(o instanceof MemorySection){
+                HashMap<String, Double> professions = new HashMap<>();
+                MemorySection m = (MemorySection)o;
+                for(String key : m.getKeys(false)){
+                    String profession = key;
+                    if(profession==null)continue;
+                    Double xp = Option.loadDouble(m.get(key));
+                    if(xp==null)continue;
+                    if(professions.containsKey(profession)){
+                        professions.put(profession, professions.get(profession)+xp);
+                    }else{
+                        professions.put(profession, xp);
+                    }
+                }
+                return professions;
+            }
             if(o instanceof Map){
                 HashMap<String, Double> professions = new HashMap<>();
                 Map m = (Map)o;
@@ -106,10 +174,34 @@ public class MMOCoreCompat extends InternalCompatibility{
                 }
                 return professions;
             }
+            if(o instanceof List){
+                List l = (List)o;
+                HashMap<String, Double> professions = new HashMap<>();
+                for(Object lbj : l){
+                    if(lbj instanceof Map){
+                        Map m = (Map)lbj;
+                        for(Object obj : m.keySet()){
+                            String profession = null;
+                            if(obj instanceof String){
+                                profession = (String)obj;
+                            }
+                            if(profession==null)continue;
+                            Double xp = Option.loadDouble(m.get(obj));
+                            if(xp==null)continue;
+                            if(professions.containsKey(profession)){
+                                professions.put(profession, professions.get(profession)+xp);
+                            }else{
+                                professions.put(profession, xp);
+                            }
+                        }
+                    }
+                }
+                return professions;
+            }
             return null;
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
         @Override
@@ -131,6 +223,17 @@ public class MMOCoreCompat extends InternalCompatibility{
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
+        }
+        @Override
+        public String writeToConfig(HashMap<String, Double> value){
+            if(value==null)return "";
+            String s = "{";
+            String str = "";
+            for(String st : value.keySet()){
+                str+=", "+st+": "+value.get(st);
+            }
+            if(!str.isEmpty())s+=str.substring(2);
+            return s+"}";
         }
     };
     @Override

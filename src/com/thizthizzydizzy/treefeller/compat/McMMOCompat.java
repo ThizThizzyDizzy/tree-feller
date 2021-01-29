@@ -5,6 +5,7 @@ import com.thizthizzydizzy.treefeller.OptionBoolean;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import java.util.List;
+import java.util.Objects;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -17,8 +18,8 @@ public class McMMOCompat extends InternalCompatibility{
             return "Should the mcMMO Double Drops feature apply when cutting down trees?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LOG).setCount(getValue()?2:1);
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Material.OAK_LOG).setCount(Objects.equals(value, true)?2:1);
         }
     };
     @Override

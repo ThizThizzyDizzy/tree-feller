@@ -34,7 +34,9 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringSet;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyEffectList;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifySpawnSaplings;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyTreeSet;
+import java.util.List;
 import org.bukkit.NamespacedKey;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.inventory.ItemFlag;
 public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
@@ -62,9 +64,9 @@ public abstract class Option<E>{
             return "If set to false, the tree feller will not list all its settings in the console on startup";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             ItemBuilder builder = new ItemBuilder(Material.OAK_LOG);
-            if(getValue()==true){
+            if(Objects.equals(value, true)){
                 builder.enchant(Enchantment.BINDING_CURSE, 1);
                 builder.addFlag(ItemFlag.HIDE_ENCHANTS);
             }
@@ -82,8 +84,8 @@ public abstract class Option<E>{
             return "How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.RAIL).setCount(globalValue);
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.RAIL).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -116,8 +118,8 @@ public abstract class Option<E>{
             return "How far away from logs should leaf blocks be destroyed? (set to 0 to prevent leaves from being destroyed) (Values over 6 are useless for vanilla trees, as these leaves would naturally decay anyway)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LEAVES).setCount(globalValue);
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_LEAVES).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -168,8 +170,8 @@ public abstract class Option<E>{
             return generateDebugText("Tree has too few logs$: {0}<{1}", "Tree has enough logs");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LOG).setCount(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_LOG).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -219,8 +221,8 @@ public abstract class Option<E>{
             return generateDebugText("Tree has too few leaves$: {0}<{1}", "Tree has enough leaves");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LEAVES).setCount(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_LEAVES).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -271,8 +273,8 @@ public abstract class Option<E>{
             return generateDebugText("Tree has too many logs$: {0}>{1}", "Tree has few enough logs");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_LOG).setCount(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_LOG).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -293,6 +295,14 @@ public abstract class Option<E>{
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
+        }
+        @Override
+        public Integer get(Tool tool, Tree tree){
+            Integer val = null;
+            if(getValue()!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue());
+            if(getValue(tool)!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue(tool));
+            if(getValue(tree)!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue(tree));
+            return val;
         }
     };
     public static Option<Integer> MAX_HEIGHT = new Option<Integer>("Max Height", true, true, true, 5){
@@ -331,8 +341,8 @@ public abstract class Option<E>{
             return generateDebugText("Tree was cut {0} blocks too high$", "Tree was cut low enough");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.LADDER).setCount(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.LADDER).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -361,7 +371,7 @@ public abstract class Option<E>{
             return "Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.STICK);
         }
     };
@@ -371,7 +381,7 @@ public abstract class Option<E>{
             return "Should leaves placed by players be cut down also? (Only works with _LEAVES materials)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
     };
@@ -381,7 +391,7 @@ public abstract class Option<E>{
             return "If set to true, leaves will be detected diagonally; May require ignore-leaf-data to work properly";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
     };
@@ -391,7 +401,7 @@ public abstract class Option<E>{
             return "If set to true, leaves' blockdata will be ignored. This should only be set if custom trees' leaves are not being destroyed when they should.";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
     };
@@ -421,7 +431,7 @@ public abstract class Option<E>{
             return generateDebugText("A full cross-section has not been cut$", "A full cross-section has been cut");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.DARK_OAK_LOG);
         }
     };
@@ -432,7 +442,7 @@ public abstract class Option<E>{
                     + "WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.DETECTOR_RAIL);
         }
     };
@@ -443,7 +453,7 @@ public abstract class Option<E>{
             return "Should the tree cut down with an animation?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.GOLDEN_AXE);
         }
     };
@@ -457,8 +467,8 @@ public abstract class Option<E>{
             return "Animation delay, in ticks";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.CLOCK).setCount(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.CLOCK).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -487,7 +497,7 @@ public abstract class Option<E>{
             return "Should saplings be replanted?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_SAPLING);
         }
     };
@@ -513,7 +523,7 @@ public abstract class Option<E>{
                 "2 = Yes, always spawn new saplings";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.OAK_SAPLING);
         }
         @Override
@@ -547,8 +557,8 @@ public abstract class Option<E>{
             return "If replant-saplings is enabled, this will replant the tree with this type of sapling";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_SAPLING);
+        public ItemBuilder getConfigurationDisplayItem(Material value){
+            return new ItemBuilder(value==null?Material.OAK_SAPLING:value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -587,8 +597,8 @@ public abstract class Option<E>{
             return "If replant-saplings is enabled, this will limit the number of saplings that can be replanted";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.OAK_SAPLING);
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_SAPLING).setCount(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -633,7 +643,7 @@ public abstract class Option<E>{
             return "What blocks can saplings be planted on?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashSet<Material> value){
             return new ItemBuilder(Material.GRASS_BLOCK);
         }
         @Override
@@ -693,7 +703,7 @@ public abstract class Option<E>{
                 "Note that falling blocks occasionally drop as items if they land wrong";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(FellBehavior value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -761,7 +771,7 @@ public abstract class Option<E>{
                 "Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(FellBehavior value){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
         @Override
@@ -833,7 +843,7 @@ public abstract class Option<E>{
                 "SOUTH_EAST The tree fill fall to the southeast";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(DirectionalFallBehavior value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -899,7 +909,7 @@ public abstract class Option<E>{
 "(Only used for NATURAL fell behavior)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashSet<Material> value){
             return new ItemBuilder(Material.GRASS);
         }
         @Override
@@ -935,7 +945,7 @@ public abstract class Option<E>{
             return "If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.COMPASS);
         }
     };
@@ -957,7 +967,7 @@ public abstract class Option<E>{
                 "All of the blocks in the tree will fall in the same direction with this velocity.";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -998,7 +1008,7 @@ public abstract class Option<E>{
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -1039,7 +1049,7 @@ public abstract class Option<E>{
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -1070,9 +1080,9 @@ public abstract class Option<E>{
             return "If a tool has unbreaking, should it take less damage from cutting trees?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             ItemBuilder builder = new ItemBuilder(Material.IRON_AXE);
-            if(getValue())builder.enchant(Enchantment.DURABILITY);
+            if(Objects.equals(value, true))builder.enchant(Enchantment.DURABILITY);
             return builder;
         }
     };
@@ -1086,7 +1096,7 @@ public abstract class Option<E>{
             return "How much damage should tools take per log? (Multiplier)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.WOODEN_AXE);
         }
         @Override
@@ -1116,8 +1126,8 @@ public abstract class Option<E>{
             return "If set to true, stacked tools will be consumed one at a time.\nThis will treat the entire stack as one tool, so prevent-breakage will not keep individual tools from breaking, only the whole stack.\nWARNING: Stacked tools are not recommended!";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.DIAMOND_AXE).setCount(64);
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Material.DIAMOND_AXE).setCount(Objects.equals(value, true)?64:16);
         }
     };
     public static OptionBoolean LEAF_FORTUNE = new OptionBoolean("Leaf Fortune", true, true, true, true){
@@ -1126,7 +1136,7 @@ public abstract class Option<E>{
             return "Should Fortune on an axe be applied to leaves?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.LOOT_BONUS_BLOCKS).addFlag(ItemFlag.HIDE_ENCHANTS);
         }
     };
@@ -1136,7 +1146,7 @@ public abstract class Option<E>{
             return "Should Silk Touch on an axe be applied to leaves?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LEAVES).enchant(Enchantment.SILK_TOUCH).addFlag(ItemFlag.HIDE_ENCHANTS);
         }
     };
@@ -1146,7 +1156,7 @@ public abstract class Option<E>{
             return "Should Fortune on an axe be applied to logs?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.LOOT_BONUS_BLOCKS);
         }
     };
@@ -1156,7 +1166,7 @@ public abstract class Option<E>{
             return "Should Silk Touch on an axe be applied to leaves?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.SILK_TOUCH);
         }
     };
@@ -1167,7 +1177,7 @@ public abstract class Option<E>{
                 "This may cause issues with custom trees that have multiple trunks or branches that extend very low";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
@@ -1178,7 +1188,7 @@ public abstract class Option<E>{
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
@@ -1188,7 +1198,7 @@ public abstract class Option<E>{
             return "Should _WOOD blocks in trees be converted to _LOG when they drop as items?";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.OAK_WOOD);
         }
     };
@@ -1208,7 +1218,7 @@ public abstract class Option<E>{
             return "How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.OAK_LEAVES);
         }
         @Override
@@ -1248,7 +1258,7 @@ public abstract class Option<E>{
             return "How often should logs drop items? Set this to 0.0 to stop logs from dropping items altogether (Only works with BREAK behavior)";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.OAK_LOG);
         }
         @Override
@@ -1321,7 +1331,7 @@ public abstract class Option<E>{
                 "  - smoke";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(ArrayList<Effect> value){
             return new ItemBuilder(Material.POTION).addFlag(ItemFlag.HIDE_POTION_EFFECTS);
         }
         @Override
@@ -1349,6 +1359,22 @@ public abstract class Option<E>{
     public static Option<HashMap<Enchantment, Integer>> REQUIRED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Required Enchantments", true, true, true, null){
         @Override
         public HashMap<Enchantment, Integer> load(Object o){
+            if(o instanceof MemorySection){
+                HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+                MemorySection m = (MemorySection)o;
+                for(String key : m.getKeys(false)){
+                    Enchantment e = getEnchantment(key);
+                    if(e==null)continue;
+                    Integer level = loadInt(m.get(key));
+                    if(level==null)continue;
+                    if(enchantments.containsKey(e)){
+                        enchantments.put(e, Math.max(enchantments.get(e), level));
+                    }else{
+                        enchantments.put(e, level);
+                    }
+                }
+                return enchantments;
+            }
             if(o instanceof Map){
                 HashMap<Enchantment, Integer> enchantments = new HashMap<>();
                 Map m = (Map)o;
@@ -1367,6 +1393,33 @@ public abstract class Option<E>{
                         enchantments.put(e, Math.max(enchantments.get(e), level));
                     }else{
                         enchantments.put(e, level);
+                    }
+                }
+                return enchantments;
+            }
+            if(o instanceof List){
+                List l = (List)o;
+                HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+                for(Object lbj : l){
+                    if(lbj instanceof Map){
+                        Map m = (Map)lbj;
+                        for(Object obj : m.keySet()){
+                            Enchantment e = null;
+                            if(obj instanceof Enchantment){
+                                e = (Enchantment)obj;
+                            }
+                            if(obj instanceof String){
+                                e = getEnchantment((String)obj);
+                            }
+                            if(e==null)continue;
+                            Integer level = loadInt(m.get(obj));
+                            if(level==null)continue;
+                            if(enchantments.containsKey(e)){
+                                enchantments.put(e, Math.max(enchantments.get(e), level));
+                            }else{
+                                enchantments.put(e, level);
+                            }
+                        }
                     }
                 }
                 return enchantments;
@@ -1412,9 +1465,8 @@ public abstract class Option<E>{
             return generateDebugText("Enchantment missing$: {0} at minimum level {1}", "All required enchantments met");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashMap<Enchantment, Integer> value){
             ItemBuilder builder = new ItemBuilder(Material.ENCHANTED_BOOK);
-            HashMap<Enchantment, Integer> value = getValue();
             if(value!=null){
                 for(Enchantment enchantment : value.keySet()){
                     builder.enchant(enchantment, value.get(enchantment));
@@ -1442,10 +1494,37 @@ public abstract class Option<E>{
                 else treeValues.put(tree, value);
             }));
         }
+        @Override
+        public String writeToConfig(HashMap<Enchantment, Integer> value){
+            if(value==null)return "";
+            String s = "{";
+            String str = "";
+            for(Enchantment e : value.keySet()){
+                str+=", "+e.getKey().getKey()+": "+value.get(e);
+            }
+            if(!str.isEmpty())s+=str.substring(2);
+            return s+"}";
+        }
     };
     public static Option<HashMap<Enchantment, Integer>> BANNED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Banned Enchantments", true, true, true, null){
         @Override
         public HashMap<Enchantment, Integer> load(Object o){
+            if(o instanceof MemorySection){
+                HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+                MemorySection m = (MemorySection)o;
+                for(String key : m.getKeys(false)){
+                    Enchantment e = getEnchantment(key);
+                    if(e==null)continue;
+                    Integer level = loadInt(m.get(key));
+                    if(level==null)continue;
+                    if(enchantments.containsKey(e)){
+                        enchantments.put(e, Math.min(enchantments.get(e), level));
+                    }else{
+                        enchantments.put(e, level);
+                    }
+                }
+                return enchantments;
+            }
             if(o instanceof Map){
                 HashMap<Enchantment, Integer> enchantments = new HashMap<>();
                 Map m = (Map)o;
@@ -1464,6 +1543,33 @@ public abstract class Option<E>{
                         enchantments.put(e, Math.min(enchantments.get(e), level));
                     }else{
                         enchantments.put(e, level);
+                    }
+                }
+                return enchantments;
+            }
+            if(o instanceof List){
+                List l = (List)o;
+                HashMap<Enchantment, Integer> enchantments = new HashMap<>();
+                for(Object lbj : l){
+                    if(lbj instanceof Map){
+                        Map m = (Map)lbj;
+                        for(Object obj : m.keySet()){
+                            Enchantment e = null;
+                            if(obj instanceof Enchantment){
+                                e = (Enchantment)obj;
+                            }
+                            if(obj instanceof String){
+                                e = getEnchantment((String)obj);
+                            }
+                            if(e==null)continue;
+                            Integer level = loadInt(m.get(obj));
+                            if(level==null)continue;
+                            if(enchantments.containsKey(e)){
+                                enchantments.put(e, Math.min(enchantments.get(e), level));
+                            }else{
+                                enchantments.put(e, level);
+                            }
+                        }
                     }
                 }
                 return enchantments;
@@ -1509,9 +1615,8 @@ public abstract class Option<E>{
             return generateDebugText("Tool contains banned enchantment$: {0} above level {1}", "No banned enchantments found");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashMap<Enchantment, Integer> value){
             ItemBuilder builder = new ItemBuilder(Material.ENCHANTED_BOOK);
-            HashMap<Enchantment, Integer> value = getValue();
             if(value!=null){
                 for(Enchantment enchantment : value.keySet()){
                     builder.enchant(enchantment, value.get(enchantment));
@@ -1538,6 +1643,17 @@ public abstract class Option<E>{
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
+        }
+        @Override
+        public String writeToConfig(HashMap<Enchantment, Integer> value){
+            if(value==null)return "";
+            String s = "{";
+            String str = "";
+            for(Enchantment e : value.keySet()){
+                str+=", "+e.getKey().getKey()+": "+value.get(e);
+            }
+            if(!str.isEmpty())s+=str.substring(2);
+            return s+"}";
         }
     };
     public static Option<Short> MIN_DURABILITY = new Option<Short>("Min Durability", true, true, true, null){
@@ -1570,8 +1686,8 @@ public abstract class Option<E>{
             return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Short value){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -1624,8 +1740,8 @@ public abstract class Option<E>{
             return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Short value){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(value);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -1679,8 +1795,8 @@ public abstract class Option<E>{
             return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Float value){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability((value==null?1:value)*Material.DIAMOND_AXE.getMaxDurability());
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -1734,8 +1850,8 @@ public abstract class Option<E>{
             return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.DIAMOND_AXE).setDurability(getValue());
+        public ItemBuilder getConfigurationDisplayItem(Float value){
+            return new ItemBuilder(Material.DIAMOND_AXE).setDurability((value==null?1:value)*Material.DIAMOND_AXE.getMaxDurability());
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -1764,7 +1880,7 @@ public abstract class Option<E>{
             return "If set to true, tools will not be able to fell a tree if doing so would break the tool.";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.WOODEN_AXE);
         }
     };
@@ -1835,7 +1951,7 @@ public abstract class Option<E>{
             return generateDebugText("Tool is missing required lore$: {0}", "Tool has all required lore");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(ArrayList<String> value){
             return new ItemBuilder(Material.BOOK);
         }
         @Override
@@ -1891,8 +2007,8 @@ public abstract class Option<E>{
             return generateDebugText("Tool name does not match required name$: {0}", "Tool name matches");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
-            return new ItemBuilder(Material.PAPER).addLore(getValue());
+        public ItemBuilder getConfigurationDisplayItem(String value){
+            return new ItemBuilder(Material.PAPER);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
@@ -1971,7 +2087,7 @@ public abstract class Option<E>{
             return generateDebugText("Player is missing required permission$: {0}", "Player has all required permissions");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashSet<String> value){
             return new ItemBuilder(Material.PAPER);
         }
         @Override
@@ -2025,7 +2141,7 @@ public abstract class Option<E>{
             return generateDebugText("Time is less than minimum allowed$: {0}", "Time meets minimum requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override
@@ -2079,7 +2195,7 @@ public abstract class Option<E>{
             return generateDebugText("Time is greater than maximum allowed$: {0}", "Time meets maximum requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override
@@ -2144,7 +2260,7 @@ public abstract class Option<E>{
             return generateDebugText("Phase is less than minimum allowed$: {0}", "Phase meets minimum requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override
@@ -2209,7 +2325,7 @@ public abstract class Option<E>{
             return generateDebugText("Phase is greater than maximum allowed$: {0}", "Phase meets maximum requirement");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override
@@ -2262,7 +2378,7 @@ public abstract class Option<E>{
             return generateDebugText("Custom model data does not match#: {0} != {1}", "Custom model data matches!");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override
@@ -2342,7 +2458,7 @@ public abstract class Option<E>{
             return generateDebugText("Tree is not allowed$: {0}", "Tree is allowed for tool");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(ArrayList<Tree> value){
             return new ItemBuilder(Material.SPRUCE_SAPLING);
         }
         @Override
@@ -2365,6 +2481,14 @@ public abstract class Option<E>{
                 else treeValues.put(tree, new ArrayList<>(value));
             }));
         }
+        @Override
+        public String writeToConfig(ArrayList<Tree> value){
+            ArrayList<Integer> indicies = new ArrayList<>();
+            for(Tree t : value){
+                indicies.add(TreeFeller.trees.indexOf(t));
+            }
+            return indicies.toString();
+        }
     };//TODO make this a HashSet
     public static OptionBoolean ENABLE_ADVENTURE = new OptionBoolean("Enable Adventure", true, true, true, false){
         @Override
@@ -2384,7 +2508,7 @@ public abstract class Option<E>{
             return generateDebugText("TreeFeller is disabled in adventure mode", "Tool is disabled in adventure mode", "Tree is disabled in adventure mode", "All components OK for adventure mode");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.MAP);
         }
     };
@@ -2406,7 +2530,7 @@ public abstract class Option<E>{
             return generateDebugText("TreeFeller is disabled in survival mode", "Tool is disabled in survival mode", "Tree is disabled in survival mode", "All components OK for survival mode");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.IRON_SWORD);
         }
     };
@@ -2428,7 +2552,7 @@ public abstract class Option<E>{
             return generateDebugText("TreeFeller is disabled in creative mode", "Tool is disabled in creative mode", "Tree is disabled in creative mode", "All components OK for creative mode");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.GRASS_BLOCK);
         }
     };
@@ -2450,7 +2574,7 @@ public abstract class Option<E>{
             return generateDebugText("TreeFeller is disabled when sneaking", "Tool is disabled when sneaking", "Tree is disabled when sneaking", "Felling allowed when sneaking");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.LEATHER_BOOTS);
         }
     };
@@ -2472,7 +2596,7 @@ public abstract class Option<E>{
             return generateDebugText("TreeFeller is disabled when not sneaking", "Tool is disabled when not sneaking", "Tree is disabled when not sneaking", "Felling allowed when not sneaking");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.IRON_BOOTS);
         }
     };
@@ -2547,7 +2671,7 @@ public abstract class Option<E>{
             return generateDebugText("World {0} is invalid$", "World {0} is valid");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(HashSet<String> value){
             return new ItemBuilder(Material.GRASS_BLOCK);
         }
         @Override
@@ -2577,7 +2701,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.GRASS_BLOCK);
         }
     };
@@ -2622,7 +2746,7 @@ public abstract class Option<E>{
             return generateDebugText("Cooldown remaining: {0}ms", "Tool cooldown remaining: {0}ms", "Tree cooldown remaining: {0}ms", "Cooldown ready");
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override
@@ -2985,8 +3109,29 @@ public abstract class Option<E>{
     private static String[] generateDebugText(String global, String tool, String tree, String success){
         return new String[]{global,tool,tree,success};
     }
-    public abstract ItemBuilder getConfigurationDisplayItem();
+    public abstract ItemBuilder getConfigurationDisplayItem(E value);
+    public ItemBuilder getConfigurationDisplayItem(){
+        return getConfigurationDisplayItem(getValue());
+    }
+    public ItemBuilder getConfigurationDisplayItem(Tool tool){
+        return getConfigurationDisplayItem(getValue(tool));
+    }
+    public ItemBuilder getConfigurationDisplayItem(Tree tree){
+        return getConfigurationDisplayItem(getValue(tree));
+    }
     public abstract void openGlobalModifyMenu(MenuGlobalConfiguration parent);
     public abstract void openToolModifyMenu(MenuToolConfiguration parent, Tool tool);
     public abstract void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree);
+    public String writeToConfig(E value){
+        return value==null?"":value.toString();
+    }
+    public String writeToConfig(){
+        return writeToConfig(getValue());
+    }
+    public String writeToConfig(Tool tool){
+        return writeToConfig(getValue(tool));
+    }
+    public String writeToConfig(Tree tree){
+        return writeToConfig(getValue(tree));
+    }
 }

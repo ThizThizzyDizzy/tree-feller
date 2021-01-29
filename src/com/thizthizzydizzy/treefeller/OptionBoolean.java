@@ -56,5 +56,4 @@ public abstract class OptionBoolean extends Option<Boolean>{
             else treeValues.put(tree, value);
         }));
     }
-    
 }

@@ -24,7 +24,7 @@ public class OreRegeneratorCompat extends InternalCompatibility{
             return loadInt(o);
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(){
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
             return new ItemBuilder(Material.CLOCK);
         }
         @Override

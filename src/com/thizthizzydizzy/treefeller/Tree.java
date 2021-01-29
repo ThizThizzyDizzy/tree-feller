@@ -42,4 +42,13 @@ public class Tree{
         }
         return trunk.get(0);
     }
+    public String writeToConfig(){
+        String str = "["+trunk.toString()+", "+leaves.toString();
+        String options = "";
+        for(Option o : Option.options){
+            if(o.getValue(this)!=null)options+=", "+o.getGlobalName()+": "+o.writeToConfig(this);
+        }
+        if(!options.isEmpty())str+=", {"+options.substring(2)+"}";
+        return str+"]";
+    }
 }

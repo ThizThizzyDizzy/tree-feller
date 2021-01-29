@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.menu;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.Label;
 import com.thizthizzydizzy.simplegui.Menu;
+import com.thizthizzydizzy.treefeller.ConfigGenerator;
 import com.thizthizzydizzy.treefeller.Message;
 import com.thizthizzydizzy.treefeller.TreeFeller;
 import org.bukkit.ChatColor;
@@ -10,8 +11,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.inventory.ItemFlag;
 public class MenuConfiguration extends Menu{
+    private final TreeFeller treefeller;
     public MenuConfiguration(Menu parent, TreeFeller plugin, Player player){
         super(parent, plugin, player, "TreeFeller Configuration", 54);
+        treefeller = plugin;
         refresh();
     }
     @Override
@@ -44,8 +47,10 @@ public class MenuConfiguration extends Menu{
         add(new Button(23, makeItem(Material.PAPER).setDisplayName("Messages").setCount(Message.messages.size()), (click) -> {
             if(click==ClickType.LEFT)open(new MenuMessagesConfiguration(this, plugin, player));
         }));
-        add(new Button(size-14, makeItem(Material.GREEN_CONCRETE).setDisplayName("Save Configuration").addLore("This will overwrite the config.yml file!"), (click) -> {
-            save(theConfig).makeItHappen(hurryUp);
+        add(new Button(size-14, makeItem(Material.GREEN_CONCRETE).setDisplayName("Save Configuration").addLore("Shift-left click to save.").addLore("This will overwrite the config.yml file!"), (click) -> {
+            if(click==ClickType.SHIFT_LEFT){
+                ConfigGenerator.generateConfiguration(treefeller);
+            }
         }));
     }
 }
