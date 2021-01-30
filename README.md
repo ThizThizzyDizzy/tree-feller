@@ -100,7 +100,7 @@ An explosion will never occur, as an iron axe with unbreaking 2 also matches the
 ## Commands
 /treefeller reload<br>
 Permission: treefeller.reload<br>
-> Reloads the tree feller configuration<br>
+Reloads the tree feller configuration<br>
 
 /treefeller help<br>
 Permission: treefeller.help<br>
