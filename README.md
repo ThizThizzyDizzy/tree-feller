@@ -3,13 +3,10 @@ A Bukkit plugin for Minecraft 1.16+
 (Versions 1.12.2 and below are available for 1.13-1.15)
 
 ## Full customization
-Configure custom trees with any combination of blocks for its leaves and logs!
-
-Configure custom tools with custom name, durability, enchantments, and more!
-
-Almost any configuration option can be customized for each tree or tool
-
-Tools or trees can be configured to only work in specific worlds, times of day, gamemodes, and more!
+- Configure custom trees with any combination of blocks for its leaves and logs
+- Configure custom tools with custom name, durability, enchantments, and more
+- Almost any configuration option can be customized for each tree or tool
+- Tools or trees can be configured to only work in specific worlds, times of day, gamemodes, and more!
 
 ## Plug-and-play
 The default configuration will reliably cut down all vanilla trees, while not disturbing player-made structures.
@@ -103,27 +100,31 @@ An explosion will never occur, as an iron axe with unbreaking 2 also matches the
 ## Commands
 /treefeller reload<br>
 Permission: treefeller.reload<br>
-- Reloads the tree feller configuration
- 
+> Reloads the tree feller configuration<br>
+
 /treefeller help<br>
 Permission: treefeller.help<br>
-- Displays help for tree feller commands
- 
+Displays help for tree feller commands<br>
+
 /treefeller on<br>
 Permission: treefeller.on<br>
-- Toggles on the tree feller for the player who ran the command
- 
+Toggles on the tree feller for the player who ran the command<br>
+
 /treefeller off<br>
 Permission: treefeller.off<br>
-- Toggles off the tree feller for the player who ran the command
- 
+Toggles off the tree feller for the player who ran the command<br>
+
 /treefeller toggle<br>
 Permission: treefeller.toggle<br>
-- Toggles the tree feller for the player who ran the command
- 
+Toggles the tree feller for the player who ran the command<br>
+
 /treefeller debug [on|off]<br>
 Permission: treefeller.debug<br>
-- Toggles debug mode on or off globally
+Toggles debug mode on or off globally<br>
+
+/treefeller config<br>
+Permission: treefeller.config<br>
+Opens the ingame configuration<br>
 
 ## Configuration
 When you update the tree feller, make sure to add any missing configuration options, as they will not be automatically added
