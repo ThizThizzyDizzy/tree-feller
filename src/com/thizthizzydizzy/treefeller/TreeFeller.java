@@ -1329,14 +1329,14 @@ public class TreeFeller extends JavaPlugin{
                 if(doBreak){
                     event.setCancelled(true);
                     for(ItemStack drop : drops){
-                        //fake item
-                        ItemStack fakeDrop = new ItemStack(drop);
-                        ItemMeta meta = fakeDrop.getItemMeta();
-                        meta.getPersistentDataContainer().set(new NamespacedKey(TreeFeller.this, "fakeItemTag"), PersistentDataType.STRING, UUID.randomUUID().toString());
-                        fakeDrop.setItemMeta(meta);
-                        Item fake = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), fakeDrop);
-                        fake.setTicksLived(5960);//40 ticks to despawn
-                        fake.setPickupDelay(32767);//cannot be picked up
+                        //fake item (whoops, this deletes items already on the ground!)
+//                        ItemStack fakeDrop = new ItemStack(drop);
+//                        ItemMeta meta = fakeDrop.getItemMeta();
+//                        meta.getPersistentDataContainer().set(new NamespacedKey(TreeFeller.this, "fakeItemTag"), PersistentDataType.STRING, UUID.randomUUID().toString());
+//                        fakeDrop.setItemMeta(meta);
+//                        Item fake = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), fakeDrop);
+//                        fake.setTicksLived(5960);//40 ticks to despawn
+//                        fake.setPickupDelay(32767);//cannot be picked up
                         //real item
                         Item item = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation().add(randbetween(-8, 8), randbetween(1000, 10000), randbetween(-8, 8)), drop);//If I spawn items near others, some will get deleted
                         Vector velocity = item.getVelocity();
