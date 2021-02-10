@@ -266,7 +266,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(){
-            return "How many logs may be felled at with one stroke?";
+            return "What is the maximum number of logs that a tree may have and still be counted as a tree?";
         }
         @Override
         public String[] getDebugText(){

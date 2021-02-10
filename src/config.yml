@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.14.1
+# Version 1.14.2
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -17,7 +17,7 @@ required-logs: 4
 # How many leaves should be required for logs to be counted as a tree?
 required-leaves: 10
 
-# How many logs may be felled at with one stroke?
+# What is the maximum number of logs that a tree may have and still be counted as a tree?
 max-logs: 250
 
 # How far from the bottom can you cut down a tree? (Prevents you from cutting it down from the top) 1 = bottom block
