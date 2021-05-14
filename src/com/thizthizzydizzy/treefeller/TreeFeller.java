@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
 import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -22,7 +22,6 @@ import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -38,9 +37,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -74,23 +71,21 @@ public class TreeFeller extends JavaPlugin{
         return fellTree(block, player.getInventory().getItemInMainHand(), player);
     }
     public boolean fellTree(Block block, ItemStack axe, Player player){
-        return fellTree(block, player, axe, player.getGameMode(), player.isSneaking());
+        return fellTree(block, player, axe);
     }
-    public boolean fellTree(Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking){
-        return fellTree(block, player, axe, gamemode, sneaking, true)!=null;
+    public boolean fellTree(Block block, Player player, ItemStack axe){
+        return fellTree(block, player, axe, true)!=null;
     }
     /**
      * Fells a tree
      * @param block     the block that was broken
      * @param player    the player whose permissions are to be used. CAN BE NULL
      * @param axe       the tool used to break the block
-     * @param gamemode  the player's gamemode
-     * @param sneaking  weather or not the player was sneaking
      * @param dropItems weather or not to drop items
      * @return the items that would have been dropped. <b>This is not the actual dropped items, but possible dropped items</b> Returns null if the tree was not felled.
      */
-    public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-        if(gamemode==GameMode.SPECTATOR)return null;
+    public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){//TODO use detectTree here to avoid duplicating code?
+        if(player!=null&&player.getGameMode()==GameMode.SPECTATOR)return null;
         debugIndent = 0;
         Material material = block.getType();
         TREE:for(Tree tree : trees){
@@ -103,7 +98,7 @@ public class TreeFeller extends JavaPlugin{
                 debug(player, "checking", false, trees.indexOf(tree), tools.indexOf(tool));
                 if(tool.material!=Material.AIR&&axe.getType()!=tool.material)continue;
                 for(Option o : Option.options){
-                    DebugResult result = o.check(this, tool, tree, block, player, axe, gamemode, sneaking, dropItems);
+                    DebugResult result = o.check(this, tool, tree, block, player, axe);
                     if(result==null)continue;
                     debug(player, false, result);
                     if(!result.isSuccess())continue TOOL;
@@ -137,7 +132,7 @@ public class TreeFeller extends JavaPlugin{
                     if(durabilityCost<1)durabilityCost++;
                 }
                 if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
-                if(gamemode==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
+                if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
                 if(Option.PREVENT_BREAKAGE.get(tool, tree)){
                     if(durabilityCost==durability){
                         debug(player, false, false, "prevent-breakage");
@@ -198,7 +193,7 @@ public class TreeFeller extends JavaPlugin{
                     if(b.getY()<lower)lower = b.getY();
                 }
                 int lowest = lower;
-                if(gamemode!=GameMode.CREATIVE){
+                if(player!=null&&player.getGameMode()!=GameMode.CREATIVE){
                     if(axe.getType().getMaxDurability()>0){
                         if(Option.STACKED_TOOLS.get(tool, tree)){
                             int amt = axe.getAmount();
@@ -335,16 +330,128 @@ public class TreeFeller extends JavaPlugin{
         return null;
     }
     /**
-     * Gets the size (number of logs) of a tree (Only for use by other plugins)
-     * @param block the block that was broken
-     * @param axe the tool used to break it
-     * @return the size of the tree, in logs (0 if no tree can be felled)
-     * @deprecated This does not behave exactly like fellTree, although no replacement is currently available
-     * @throws UnsupportedOperationException when run, as it is highly broken
+     * Detect any type of tree from a source block
+     * @param block the block to search for the tree from
+     * @param player The player to use while detecting the tree; can be null
+     * @param axe The ItemStack to use while detecting the tree; can be null. (Used to find the Tool; tool durability for partial trees is not considered)
+     * @return a DetectedTree object, or null if no tree was found
      */
-    @Deprecated
-    public int getTreeSize(Block block, ItemStack axe){
-        throw new UnsupportedOperationException("This feature is not done yet!");//TODO fix this
+    public DetectedTree detectTree(Block block, Player player, ItemStack axe){
+        if(player!=null&&player.getGameMode()==GameMode.SPECTATOR)return null;
+        debugIndent = 0;
+        Material material = block.getType();
+        TREE:for(Tree tree : trees){
+            if(!tree.trunk.contains(material))continue;
+            TOOL:for(Tool tool : tools){
+                if(player!=null&&disabledPlayers.contains(player.getUniqueId())){
+                    debug(player, true, false, "toggle");
+                    return null;
+                }
+                debug(player, "checking", false, trees.indexOf(tree), tools.indexOf(tool));
+                if(axe!=null&&tool.material!=Material.AIR&&axe.getType()!=tool.material)continue;
+                for(Option o : Option.options){
+                    DebugResult result = o.check(this, tool, tree, block, player, axe);
+                    if(result==null)continue;
+                    debug(player, false, result);
+                    if(!result.isSuccess())continue TOOL;
+                }
+                int scanDistance = Option.SCAN_DISTANCE.get(tool, tree);
+                Integer maxBlocks = Option.MAX_LOGS.get(tool, tree);
+                HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, maxBlocks==null?Integer.MAX_VALUE:(maxBlocks*2), true, false, false);//TODO what if the trunk is made of leaves?
+                for(Option o : Option.options){
+                    DebugResult result = o.checkTrunk(this, tool, tree, blocks, block);
+                    if(result==null)continue;
+                    debug(player, false, result);
+                    if(!result.isSuccess())continue TOOL;
+                }
+                int minY = block.getY();
+                for(int i : blocks.keySet()){
+                    for(Block b : blocks.get(i)){
+                        minY = Math.min(minY, b.getY());
+                    }
+                }
+                ArrayList<Integer> distances = new ArrayList<>(blocks.keySet());
+                Collections.sort(distances);
+                int leaves = 0;
+                HashMap<Integer, ArrayList<Block>> allLeaves = new HashMap<>();
+                FOR:for(int i : distances){
+                    for(Block b : blocks.get(i)){
+                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
+                        leaves+=toList(someLeaves).size();
+                        for(int in : someLeaves.keySet()){
+                            if(allLeaves.containsKey(in)){
+                                allLeaves.get(in).addAll(someLeaves.get(in));
+                            }else{
+                                allLeaves.put(in, someLeaves.get(in));
+                            }
+                        }
+                    }
+                }
+                ArrayList<Block> everything = new ArrayList<>();
+                everything.addAll(toList(blocks));
+                everything.addAll(toList(allLeaves));
+                TestResult res = TreeFellerCompat.test(player, everything);
+                if(res!=null){
+                    debug(player, false, false, "protected", res.plugin, res.block.getX(), res.block.getY(), res.block.getZ());
+                    continue TREE;
+                }
+                for(Option o : Option.options){
+                    DebugResult result = o.checkTree(this, tool, tree, blocks, leaves);
+                    if(result==null)continue;
+                    debug(player, false, result);
+                    if(!result.isSuccess())continue TOOL;
+                }
+                debug(player, true, true, "success");
+                DetectedTree detected = new DetectedTree(blocks, allLeaves);
+                if(Option.LEAVE_STUMP.get(tool, tree)){
+                    for(int i : blocks.keySet()){
+                        for(Iterator<Block> it = blocks.get(i).iterator(); it.hasNext();){
+                            Block b = it.next();
+                            if(b.getY()<block.getY()){
+                                detected.stump.add(b);
+                            }
+                        }
+                    }
+                }
+                HashMap<Block, Integer> possibleSaplings = new HashMap<>();
+                if(Option.SAPLING.get(tool, tree)!=null&&Option.REPLANT_SAPLINGS.get(tool, tree)){
+                    ArrayList<Block> logs = toList(blocks);
+                    for(Block log : logs){
+                        if(Option.GRASS.get(tool, tree).contains(log.getRelative(0, -1, 0).getType())){
+                            possibleSaplings.put(log, -1);
+                        }
+                    }
+                    for(Block b : possibleSaplings.keySet()){
+                        int above = -1;
+                        Block b1 = b;
+                        while(tree.trunk.contains(b1.getType())){
+                            above++;
+                            b1 = b1.getRelative(0, 1, 0);
+                        }
+                        possibleSaplings.put(b, above);
+                    }
+                    Integer maxSaplings = Option.MAX_SAPLINGS.get(tool, tree);
+                    if(maxSaplings!=null){
+                        while(possibleSaplings.size()>maxSaplings){
+                            ArrayList<Integer> ints = new ArrayList<>(possibleSaplings.values());
+                            Collections.sort(ints);
+                            int i = ints.get(0);
+                            for(Block b : possibleSaplings.keySet()){
+                                if(possibleSaplings.get(b)==i){
+                                    possibleSaplings.remove(b);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    for(Block b : possibleSaplings.keySet()){
+                        detected.addSapling(b, Option.SAPLING.get(tool, tree), Option.SPAWN_SAPLINGS.get(tool, tree)!=2);
+                    }
+                }
+                return detected;
+            }
+        }
+        return null;
     }
     private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
         //layer zero

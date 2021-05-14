@@ -1,6 +1,5 @@
 package com.thizthizzydizzy.treefeller.menu.modify.special;
 import com.thizthizzydizzy.simplegui.Button;
-import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Label;
 import com.thizthizzydizzy.simplegui.Menu;
 import java.util.Objects;

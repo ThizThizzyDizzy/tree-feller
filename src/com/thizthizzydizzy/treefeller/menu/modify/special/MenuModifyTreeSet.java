@@ -1,9 +1,9 @@
 package com.thizthizzydizzy.treefeller.menu.modify.special;
 import com.thizthizzydizzy.simplegui.Button;
-import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Label;
 import com.thizthizzydizzy.simplegui.Menu;
+import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
 import java.util.HashSet;
 import java.util.function.Consumer;

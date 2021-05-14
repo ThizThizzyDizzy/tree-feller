@@ -1,23 +1,6 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Objects;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
-import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
-import static com.thizthizzydizzy.treefeller.DebugResult.Type.TOOL;
-import static com.thizthizzydizzy.treefeller.DebugResult.Type.TREE;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.*;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
@@ -34,10 +17,24 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringSet;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyEffectList;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifySpawnSaplings;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyTreeSet;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
     static{
@@ -700,6 +697,7 @@ public abstract class Option<E>{
                 "FALL_INVENTORY      The logs will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground\n" +
                 "FALL_HURT_INVENTORY The logs will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground\n" +
                 "NATURAL             The logs will instantly fall in a more natural way (May not work with cutting-animation)\n" +
+                "WARNING: FALL_HURT behaviors may destroy items the blocks land on\n" +
                 "Note that falling blocks occasionally drop as items if they land wrong";
         }
         @Override
@@ -768,6 +766,7 @@ public abstract class Option<E>{
                 "FALL_INVENTORY      The leaves will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground\n" +
                 "FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground\n" +
                 "NATURAL             The leaves will instantly fall in a more natural way (May not work with cutting-animation)\n" +
+                "WARNING: FALL_HURT behaviors may destroy items the blocks land on\n" +
                 "Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do";
         }
         @Override
@@ -1427,7 +1426,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)<globalValue.get(e)){
@@ -1577,7 +1576,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)>=globalValue.get(e)){
@@ -1662,7 +1661,7 @@ public abstract class Option<E>{
             return loadShort(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
@@ -1716,7 +1715,7 @@ public abstract class Option<E>{
             return loadShort(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
@@ -1770,7 +1769,7 @@ public abstract class Option<E>{
             return loadFloat(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
@@ -1825,7 +1824,7 @@ public abstract class Option<E>{
             return loadFloat(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
@@ -1903,7 +1902,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems) {
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe) {
             ArrayList<String> lore = new ArrayList<>();
             if(axe.hasItemMeta()){
                 ItemMeta meta = axe.getItemMeta();
@@ -1981,7 +1980,7 @@ public abstract class Option<E>{
             return loadString(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems) {
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe) {
             String name = null;
             if(axe.hasItemMeta()){
                 ItemMeta meta = axe.getItemMeta();
@@ -2052,7 +2051,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems) {
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe) {
             if(globalValue!=null){
                 for(String s : globalValue){
                     if(!player.hasPermission(s)){
@@ -2117,7 +2116,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
@@ -2171,7 +2170,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
                 if(globalValue!=null){
@@ -2225,7 +2224,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             long gameTime = block.getWorld().getFullTime();
             long day = gameTime/24000;
             long phase = day%8;
@@ -2290,7 +2289,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             long gameTime = block.getWorld().getFullTime();
             long day = gameTime/24000;
             long phase = day%8;
@@ -2355,7 +2354,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             ItemMeta meta = axe.getItemMeta();
             int data = (meta==null||!meta.hasCustomModelData()?0:meta.getCustomModelData());
             if(globalValue!=null){
@@ -2441,7 +2440,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(toolValues.containsKey(tool)){
                 if(!toolValues.get(tool).contains(tree)){
                     return new DebugResult(this, TOOL, tree.toString());
@@ -2492,8 +2491,8 @@ public abstract class Option<E>{
     };//TODO make this a HashSet
     public static OptionBoolean ENABLE_ADVENTURE = new OptionBoolean("Enable Adventure", true, true, true, false){
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-            if(player.getGameMode()!=GameMode.ADVENTURE)return null;
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            if(player==null||player.getGameMode()!=GameMode.ADVENTURE)return null;
             if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
@@ -2514,8 +2513,8 @@ public abstract class Option<E>{
     };
     public static OptionBoolean ENABLE_SURVIVAL = new OptionBoolean("Enable Survival", true, true, true, true){
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-            if(player.getGameMode()!=GameMode.SURVIVAL)return null;
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            if(player==null||player.getGameMode()!=GameMode.SURVIVAL)return null;
             if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
@@ -2536,8 +2535,8 @@ public abstract class Option<E>{
     };
     public static OptionBoolean ENABLE_CREATIVE = new OptionBoolean("Enable Creative", true, true, true, false){
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-            if(player.getGameMode()!=GameMode.CREATIVE)return null;
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            if(player==null||player.getGameMode()!=GameMode.CREATIVE)return null;
             if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
@@ -2558,8 +2557,8 @@ public abstract class Option<E>{
     };
     public static OptionBoolean WITH_SNEAK = new OptionBoolean("With Sneak", true, true, true, false){
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-            if(!player.isSneaking())return null;
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            if(player==null||!player.isSneaking())return null;
             if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
@@ -2580,8 +2579,8 @@ public abstract class Option<E>{
     };
     public static OptionBoolean WITHOUT_SNEAK = new OptionBoolean("Without Sneak", true, true, true, true){
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
-            if(player.isSneaking())return null;
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            if(player==null||player.isSneaking())return null;
             if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
@@ -2602,7 +2601,7 @@ public abstract class Option<E>{
     };
     public static Option<HashSet<String>> WORLDS = new Option<HashSet<String>>("Worlds", true, true, true, null){
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(toolValues.containsKey(tool)){
                 HashSet<String> worlds = toolValues.get(tool);
                 boolean blacklist = Objects.equals(WORLD_BLACKLIST.getValue(tool), true);
@@ -2711,7 +2710,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(player==null)return null;
             Cooldown cooldown = TreeFeller.cooldowns.get(player.getUniqueId());
             if(cooldown!=null){
@@ -2937,9 +2936,9 @@ public abstract class Option<E>{
     public E getValue(Tool tool){
         return toolValues.get(tool);
     }
-    public DebugResult check(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+    public DebugResult check(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
         if(globalValue==null&&!treeValues.containsKey(tree)&&!toolValues.containsKey(tool))return null;
-        return doCheck(plugin, tool, tree, block, player, axe, gamemode, sneaking, dropItems);
+        return doCheck(plugin, tool, tree, block, player, axe);
     }
     public DebugResult checkTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
         if(globalValue==null&&!treeValues.containsKey(tree)&&!toolValues.containsKey(tool))return null;
@@ -2949,7 +2948,7 @@ public abstract class Option<E>{
         if(globalValue==null&&!treeValues.containsKey(tree)&&!toolValues.containsKey(tool))return null;
         return doCheckTree(plugin, tool, tree, blocks, leaves);
     }
-    protected DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe, GameMode gamemode, boolean sneaking, boolean dropItems){
+    protected DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
         return null;
     }
     protected DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){

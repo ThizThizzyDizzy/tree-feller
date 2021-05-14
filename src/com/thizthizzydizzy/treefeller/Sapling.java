@@ -8,6 +8,9 @@ public class Sapling{
     private final Material material;
     private final long time;
     private boolean placed = false;
+    public Sapling(Block block, Material material, boolean autofill){
+        this(block, material, autofill, -1);
+    }
     public Sapling(Block block, Material material, boolean autofill, long time){
         this.block = block;
         this.material = material;

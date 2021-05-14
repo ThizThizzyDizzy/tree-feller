@@ -1,11 +1,7 @@
 package com.thizthizzydizzy.treefeller.menu.modify;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
-import com.thizthizzydizzy.simplegui.Label;
 import com.thizthizzydizzy.simplegui.Menu;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import org.bukkit.Material;

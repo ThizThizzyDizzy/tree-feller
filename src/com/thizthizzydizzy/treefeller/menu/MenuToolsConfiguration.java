@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller.menu;
-import com.gamingmesh.jobs.stuff.ChatColor;
 import com.thizthizzydizzy.simplegui.Button;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Menu;

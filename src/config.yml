@@ -74,6 +74,7 @@ grass:
 # FALL_INVENTORY      The logs will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
 # FALL_HURT_INVENTORY The logs will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
 # NATURAL             The logs will instantly fall in a more natural way (May not work with cutting-animation)
+# WARNING: FALL_HURT behaviors may destroy items the blocks land on
 # Note that falling blocks occasionally drop as items if they land wrong
 log-behavior: BREAK
 
@@ -88,6 +89,7 @@ log-behavior: BREAK
 # FALL_INVENTORY      The leaves will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
 # FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
 # NATURAL             The leaves will instantly fall in a more natural way (May not work with cutting-animation)
+# WARNING: FALL_HURT behaviors may destroy items the blocks land on
 # Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do
 leaf-behavior: BREAK
 
