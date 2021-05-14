@@ -23,14 +23,11 @@ public class MenuConfiguration extends Menu{
     }
     private void refresh(){
         components.clear();
-        for(int i = 0; i<size-18; i++){
-            add(new Label(i, makeItem(Material.RED_STAINED_GLASS_PANE).setDisplayName(ChatColor.DARK_RED+"WARNING").addLore("All changes made are applied immediately!").addLore("To revert changes, run /trefeller reload").addLore("To save changes, click the save button below")));
-        }
-        for(int i = size-18; i<size-9; i++){
-            add(new Label(i, makeItem(Material.RED_STAINED_GLASS_PANE).setDisplayName(ChatColor.DARK_RED+"WARNING").addLore("All changes made are applied immediately!").addLore("To revert changes, run /trefeller reload").addLore("To save changes, click the save button")));
-        }
-        for(int i = size-9; i<size; i++){
-            add(new Label(i, makeItem(Material.RED_STAINED_GLASS_PANE).setDisplayName(ChatColor.DARK_RED+"WARNING").addLore("All changes made are applied immediately!").addLore("To revert changes, run /trefeller reload").addLore("To save changes, click the save button above")));
+        for(int i = 0; i<size; i++){
+            String additional = "";
+            if(i<size-18)additional = " below";
+            if(i>=size-9)additional = " above";
+            add(new Label(i, makeItem(Material.RED_STAINED_GLASS_PANE).setDisplayName(ChatColor.DARK_RED+"WARNING").addLore("All changes made are applied immediately!").addLore("To revert changes, run /trefeller reload").addLore("To save changes, click the save button"+additional)));
         }
         add(new Button(11, makeItem(Material.GRASS_BLOCK).setDisplayName("Global"), (click) -> {
             if(click==ClickType.LEFT)open(new MenuGlobalConfiguration(this, plugin, player));
@@ -52,5 +49,6 @@ public class MenuConfiguration extends Menu{
                 ConfigGenerator.generateConfiguration(treefeller);
             }
         }));
+        add(new Label(size-11, makeItem(Material.ORANGE_CONCRETE).setDisplayName("Thank you to my patrons:").addLore("Thalzamar").addLore("Mstk")));
     }
 }
