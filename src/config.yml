@@ -54,8 +54,7 @@ banned-leaves:
 
 # What is the maximum number of trunk blocks that may be in a horizontal line?
 # (This is to help detect structures with long horizontal pillars of logs)
-# Warning: this does some fairly heavy calculations, and may cause lag with massive trees
-max-horizontal-trunk-pillar-length:
+max-horizontal-trunk-pillar-length: 6
 
 # What is the maximum number of trunks a tree may have?
 # Note that the trunks are counted at the level at which the tree is cut; not at the base of the tree

@@ -570,10 +570,10 @@ public abstract class Option<E>{
             return generateDebugText("Tree contains banned leaf$: {0}", "Tree does not contain any banned leaves");
         }
     };
-    public static Option<Integer> MAX_HORIZONTAL_TRUNK_PILLAR_LENGTH = new Option<Integer>("Max Horizontal Trunk Pillar Length", true, true, true, null){
+    public static Option<Integer> MAX_HORIZONTAL_TRUNK_PILLAR_LENGTH = new Option<Integer>("Max Horizontal Trunk Pillar Length", true, true, true, 6){
         @Override
         public String getDesc(){
-            return "What is the maximum number of trunk blocks that may be in a horizontal line?\n(This is to help detect structures with long horizontal pillars of logs)\nWarning: this does some fairly heavy calculations, and may cause lag with massive trees";
+            return "What is the maximum number of trunk blocks that may be in a horizontal line?\n(This is to help detect structures with long horizontal pillars of logs)";
         }
         @Override
         public Integer load(Object o){
