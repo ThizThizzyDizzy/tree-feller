@@ -21,7 +21,7 @@ public class MenuModifyMaterialSet extends Menu{//TODO make this multi-page allo
     private final Consumer<HashSet<Material>> setFunc;
     public MenuModifyMaterialSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, String filterName, HashSet<Material> defaultValue, Function<Material, Boolean> filter, Consumer<HashSet<Material>> setFunc){
         super(parent, plugin, player, "Modify Material Set ("+name+")", 54);
-        this.value = (HashSet<Material>)defaultValue.clone();
+        this.value = defaultValue==null?null:(HashSet<Material>)defaultValue.clone();
         this.allowNull = allowNull;
         this.filterName = filterName;
         refresh();

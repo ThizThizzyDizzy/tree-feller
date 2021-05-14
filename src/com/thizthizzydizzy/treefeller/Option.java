@@ -24,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -55,6 +56,7 @@ public abstract class Option<E>{
         defaultGrasses.add(Material.PODZOL);
     }
     public static ArrayList<Option> options = new ArrayList<>();
+    //console/debugging stuff
     public static OptionBoolean STARTUP_LOGS = new OptionBoolean("Startup Logs", true, false, false, true){
         @Override
         public String getDesc(){
@@ -70,7 +72,7 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
-    
+    //tree detection
     public static Option<Integer> SCAN_DISTANCE = new Option<Integer>("Scan Distance", true, true, false, 256){
         @Override
         public Integer load(Object o){
@@ -443,7 +445,387 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.DETECTOR_RAIL);
         }
     };
-    
+    //unnatural tree detection settings
+    public static Option<HashSet<Material>> BANNED_LOGS = new Option<HashSet<Material>>("Banned Logs", true, true, true, new HashSet<>()){
+        @Override
+        public String getDesc(){
+            return "Which trunk blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)\n(For this to work, these must also be included in the tree trunk materials)\nEx. planks/glass";
+        }
+        @Override
+        public HashSet<Material> load(Object o){
+            return loadMaterialSet(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashSet<Material> value){
+            return new ItemBuilder(Material.OAK_PLANKS);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", globalValue, (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block blok : blox){
+                    Material mat = blok.getType();
+                    if(globalValue!=null&&globalValue.contains(mat)){
+                        return new DebugResult(this, GLOBAL, mat);
+                    }
+                    if(toolValues.get(tool)!=null&&toolValues.get(tool).contains(mat)){
+                        return new DebugResult(this, TOOL, mat);
+                    }
+                    if(treeValues.get(tree)!=null&&treeValues.get(tree).contains(mat)){
+                        return new DebugResult(this, TREE, mat);
+                    }
+                }
+            }
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree contains banned log$: {0}", "Tree does not contain any banned logs");
+        }
+    };
+    public static Option<HashSet<Material>> BANNED_LEAVES = new Option<HashSet<Material>>("Banned Leaves", true, true, true, new HashSet<>()){
+        @Override
+        public String getDesc(){
+            return "Which blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)\n(For this to work, these must also be included in the tree leaf materials)\nEx. planks or glass";
+        }
+        @Override
+        public HashSet<Material> load(Object o){
+            return loadMaterialSet(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashSet<Material> value){
+            return new ItemBuilder(Material.OAK_PLANKS);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", globalValue, (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTree(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block blok : blox){
+                    Material mat = blok.getType();
+                    if(globalValue!=null&&globalValue.contains(mat)){
+                        return new DebugResult(this, GLOBAL, mat);
+                    }
+                    if(toolValues.get(tool)!=null&&toolValues.get(tool).contains(mat)){
+                        return new DebugResult(this, TOOL, mat);
+                    }
+                    if(treeValues.get(tree)!=null&&treeValues.get(tree).contains(mat)){
+                        return new DebugResult(this, TREE, mat);
+                    }
+                }
+            }
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree contains banned leaf$: {0}", "Tree does not contain any banned leaves");
+        }
+    };
+    public static Option<Integer> MAX_HORIZONTAL_TRUNK_PILLAR_LENGTH = new Option<Integer>("Max Horizontal Trunk Pillar Length", true, true, true, null){
+        @Override
+        public String getDesc(){
+            return "What is the maximum number of trunk blocks that may be in a horizontal line?\n(This is to help detect structures with long horizontal pillars of logs)\nWarning: this does some fairly heavy calculations, and may cause lag with massive trees";
+        }
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.SCAFFOLDING);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+            int actual = 0;
+            ArrayList<Block> trunk = new ArrayList<>();
+            for(ArrayList<Block> blox : blocks.values())trunk.addAll(blox);
+            ArrayList<Block> xAxis = new ArrayList<>(trunk);
+            while(!xAxis.isEmpty()){
+                Block b = xAxis.get(0);
+                boolean stillPartOfTheTree;
+                do{
+                    stillPartOfTheTree = false;
+                    Block previous = b.getRelative(-1, 0, 0);
+                    //dunno if Block is immutable, so I'll check it a more complicated way
+                    for(Block checking : xAxis){
+                        if(checking.getX()==previous.getX()&&checking.getY()==previous.getY()&&checking.getZ()==previous.getZ()){
+                            b = checking;
+                            stillPartOfTheTree = true;
+                            break;
+                        }
+                    }
+                }while(stillPartOfTheTree);
+                //b should now be the first block in this row
+                ArrayList<Block> line = new ArrayList<>();
+                do{
+                    line.add(b);
+                    stillPartOfTheTree = false;
+                    Block next = b.getRelative(1, 0, 0);
+                    //dunno if Block is immutable, so I'll check it a more complicated way
+                    for(Block checking : xAxis){
+                        if(checking.getX()==next.getX()&&checking.getY()==next.getY()&&checking.getZ()==next.getZ()){
+                            b = checking;
+                            stillPartOfTheTree = true;
+                            break;
+                        }
+                    }
+                }while(stillPartOfTheTree);
+                actual = Math.max(actual, line.size());
+                xAxis.removeAll(line);//don't need to recheck the same line many times. Maybe this will actually make it faster even with all the nonsense above
+            }
+            //DUPLICATED CODE ALERT
+            ArrayList<Block> zAxis = new ArrayList<>(trunk);
+            while(!zAxis.isEmpty()){
+                Block b = zAxis.get(0);
+                boolean stillPartOfTheTree;
+                do{
+                    stillPartOfTheTree = false;
+                    Block previous = b.getRelative(0, 0, -1);
+                    //dunno if Block is immutable, so I'll check it a more complicated way
+                    for(Block checking : zAxis){
+                        if(checking.getX()==previous.getX()&&checking.getY()==previous.getY()&&checking.getZ()==previous.getZ()){
+                            b = checking;
+                            stillPartOfTheTree = true;
+                            break;
+                        }
+                    }
+                }while(stillPartOfTheTree);
+                //b should now be the first block in this row
+                ArrayList<Block> line = new ArrayList<>();
+                do{
+                    line.add(b);
+                    stillPartOfTheTree = false;
+                    Block next = b.getRelative(0, 0, 1);
+                    //dunno if Block is immutable, so I'll check it a more complicated way
+                    for(Block checking : zAxis){
+                        if(checking.getX()==next.getX()&&checking.getY()==next.getY()&&checking.getZ()==next.getZ()){
+                            b = checking;
+                            stillPartOfTheTree = true;
+                            break;
+                        }
+                    }
+                }while(stillPartOfTheTree);
+                actual = Math.max(actual, line.size());
+                zAxis.removeAll(line);//don't need to recheck the same line many times. Maybe this will actually make it faster even with all the nonsense above
+            }
+            if(globalValue!=null&&actual>globalValue)return new DebugResult(this, GLOBAL, actual, globalValue);
+            if(treeValues.containsKey(tree)&&actual>treeValues.get(tree))return new DebugResult(this, TREE, actual, treeValues.get(tree));
+            if(toolValues.containsKey(tool)&&actual>toolValues.get(tool))return new DebugResult(this, TOOL, actual, toolValues.get(tool));
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Found a horizontal trunk pillar that was too long$! {0}>{1}", "No excessive horizontal trunk pillars found");
+        }
+    };
+    public static Option<Integer> MAX_TRUNKS = new Option<Integer>("Max Trunks", true, true, true, 1){
+        @Override
+        public String getDesc(){
+            return "What is the maximum number of trunks a tree may have?\nNote that the trunks are counted at the level at which the tree is cut; not at the base of the tree\nSimilarly to leave-stump, this may include low-hanging leaves";
+        }
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.TRIDENT);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+            int value = 0;
+            ArrayList<Block> trunkSlice = new ArrayList<>();
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block b : blox){
+                    if(b.getY()==block.getY())trunkSlice.add(b);
+                }
+            }
+            while(!trunkSlice.isEmpty()){
+                ArrayList<Block> trunk = getTrunkBit(trunkSlice, trunkSlice.get(0), true);
+                trunkSlice.removeAll(trunk);
+                value++;
+            }
+            if(globalValue!=null&&value>globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
+            if(treeValues.containsKey(tree)&&value>treeValues.get(tree))return new DebugResult(this, TREE, value, treeValues.get(tree));
+            if(toolValues.containsKey(tool)&&value>toolValues.get(tool))return new DebugResult(this, TOOL, value, toolValues.get(tool));
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree has too many trunks$! {0}>{1}", "Trunk count is valid");
+        }
+        private ArrayList<Block> getTrunkBit(ArrayList<Block> theWholeTrunkSlice, Block startingBlock, boolean diagonal){
+            //layer zero
+            HashMap<Integer, ArrayList<Block>> results = new HashMap<>();
+            ArrayList<Block> zero = new ArrayList<>();
+            zero.add(startingBlock);
+            results.put(0, zero);
+            //all the other layers
+            int i = -1;
+            while(true){
+                i++;
+                ArrayList<Block> layer = new ArrayList<>();
+                ArrayList<Block> lastLayer = new ArrayList<>(results.get(i));
+                if(i==0&&lastLayer.isEmpty()){
+                    lastLayer.add(startingBlock);
+                }
+                for(Block block : lastLayer){
+                    if(diagonal){
+                        for(int x = -1; x<=1; x++){
+                            for(int z = -1; z<=1; z++){
+                                if(x==0&&z==0)continue;//same block
+                                Block newBlock = block.getRelative(x,0,z);
+                                boolean yep = false;
+                                for(Block checking : theWholeTrunkSlice){
+                                    if(checking.getX()==newBlock.getX()&&checking.getY()==newBlock.getY()&&checking.getZ()==newBlock.getZ()){
+                                        yep = true;
+                                        newBlock = checking;//just to be sure
+                                        break;
+                                    }
+                                }
+                                if(!yep)continue;
+                                if(lastLayer.contains(newBlock))continue;//if the new block is on the same layer, ignore
+                                if(i>0&&results.get(i-1).contains(newBlock))continue;//if the new block is on the previous layer, ignore
+                                if(layer.contains(newBlock))continue;//if the new block is on the next layer, but already processed, ignore
+                                layer.add(newBlock);
+                            }
+                        }
+                    }else{
+                        for(int j = 0; j<4; j++){
+                            int x=0,z=0;
+                            switch(j){
+                                case 0:
+                                    x = -1;
+                                    break;
+                                case 1:
+                                    x = 1;
+                                    break;
+                                case 2:
+                                    z = -1;
+                                    break;
+                                case 3:
+                                    z = 1;
+                                    break;
+                                default:
+                                    throw new IllegalArgumentException("How did this happen?");
+                            }
+                            Block newBlock = block.getRelative(x,0,z);
+                            boolean yep = false;
+                            for(Block checking : theWholeTrunkSlice){
+                                if(checking.getX()==newBlock.getX()&&checking.getY()==newBlock.getY()&&checking.getZ()==newBlock.getZ()){
+                                    yep = true;
+                                    newBlock = checking;//just to be sure
+                                    break;
+                                }
+                            }
+                            if(!yep)continue;
+                            if(lastLayer.contains(newBlock))continue;//if the new block is on the same layer, ignore
+                            if(i>0&&results.get(i-1).contains(newBlock))continue;//if the new block is on the previous layer, ignore
+                            if(layer.contains(newBlock))continue;//if the new block is on the next layer, but already processed, ignore
+                            layer.add(newBlock);
+                        }
+                    }
+                }
+                if(layer.isEmpty())break;
+                results.put(i+1, layer);
+            }
+            ArrayList<Block> properResults = new ArrayList<>();
+            for(ArrayList<Block> blox : results.values()){
+                properResults.addAll(blox);
+            }
+            return properResults;
+        }
+    };
+    //tree cutting details
     public static OptionBoolean CUTTING_ANIMATION = new OptionBoolean("Cutting Animation", true, true, true, false){
         @Override
         public String getDesc(){
@@ -621,19 +1003,7 @@ public abstract class Option<E>{
     public static Option<HashSet<Material>> GRASS = new Option<HashSet<Material>>("Grass", true, false, true, defaultGrasses){
         @Override
         public HashSet<Material>load(Object o){
-            if(o instanceof Iterable){
-                HashSet<Material> materials = new HashSet<>();
-                for(Object ob : (Iterable)o){
-                    HashSet<Material> newMaterials = load(ob);
-                    if(newMaterials!=null)materials.addAll(newMaterials);
-                }
-                return materials;
-            }
-            HashSet<Material> materials = new HashSet<>();
-            Material m = loadMaterial(o);
-            if(m==null)return null;
-            materials.add(m);
-            return materials;
+            return loadMaterialSet(o);
         }
         @Override
         public String getDesc(){
@@ -670,7 +1040,7 @@ public abstract class Option<E>{
             }));
         }
     };
-    
+    //tree falling details
     public static Option<FellBehavior> LOG_BEHAVIOR = new Option<FellBehavior>("Log Behavior", true, true, true, FellBehavior.BREAK){
         @Override
         public FellBehavior load(Object o){
@@ -884,23 +1254,7 @@ public abstract class Option<E>{
     public static Option<HashSet<Material>> OVERRIDABLES = new Option<HashSet<Material>>("Overridables", true, true, true, defaultOverridables){
         @Override
         public HashSet<Material> load(Object o){
-            if(o instanceof Collection){
-                HashSet<Material> overridables = new HashSet<>();
-                Collection c = (Collection)o;
-                for(Object ob : c){
-                    Material m = loadMaterial(ob);
-                    if(m!=null)overridables.add(m);
-                }
-                return overridables;
-            }else{
-                HashSet<Material> overridables = new HashSet<>();
-                Material m = loadMaterial(o);
-                if(m!=null){
-                    overridables.add(m);
-                    return overridables;
-                }
-            }
-            return null;
+            return loadMaterialSet(o);
         }
         @Override
         public String getDesc(){
@@ -1072,7 +1426,7 @@ public abstract class Option<E>{
             }));
         }
     };
-    
+    //effects and settings
     public static OptionBoolean RESPECT_UNBREAKING = new OptionBoolean("Respect Unbreaking", true, true, true, true){
         @Override
         public String getDesc(){
@@ -1354,7 +1708,7 @@ public abstract class Option<E>{
             }));
         }
     };
-    
+    //requirements
     public static Option<HashMap<Enchantment, Integer>> REQUIRED_ENCHANTMENTS = new Option<HashMap<Enchantment, Integer>>("Required Enchantments", true, true, true, null){
         @Override
         public HashMap<Enchantment, Integer> load(Object o){
@@ -2374,7 +2728,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Custom model data does not match#: {0} != {1}", "Custom model data matches!");
+            return generateDebugText("Custom model data does not match$: {0} != {1}", "Custom model data matches!");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Integer value){
@@ -2830,6 +3184,21 @@ public abstract class Option<E>{
     public E loadFromConfig(FileConfiguration config){
         return load(config.get(getGlobalName()));
     }
+    public static HashSet<Material> loadMaterialSet(Object o){
+        if(o instanceof Iterable){
+            HashSet<Material> materials = new HashSet<>();
+            for(Object ob : (Iterable)o){
+                HashSet<Material> newMaterials = loadMaterialSet(ob);
+                if(newMaterials!=null)materials.addAll(newMaterials);
+            }
+            return materials;
+        }
+        HashSet<Material> materials = new HashSet<>();
+        Material m = loadMaterial(o);
+        if(m==null)return null;
+        materials.add(m);
+        return materials;
+    }
     public static Material loadMaterial(Object o){
         if(o instanceof Material)return (Material)o;
         if(o instanceof String)return Material.matchMaterial((String)o);
@@ -2936,15 +3305,15 @@ public abstract class Option<E>{
     public E getValue(Tool tool){
         return toolValues.get(tool);
     }
-    public DebugResult check(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+    public final DebugResult check(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
         if(globalValue==null&&!treeValues.containsKey(tree)&&!toolValues.containsKey(tool))return null;
         return doCheck(plugin, tool, tree, block, player, axe);
     }
-    public DebugResult checkTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+    public final DebugResult checkTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
         if(globalValue==null&&!treeValues.containsKey(tree)&&!toolValues.containsKey(tool))return null;
         return doCheckTrunk(plugin, tool, tree, blocks, block);
     }
-    public DebugResult checkTree(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
+    public final DebugResult checkTree(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
         if(globalValue==null&&!treeValues.containsKey(tree)&&!toolValues.containsKey(tool))return null;
         return doCheckTree(plugin, tool, tree, blocks, leaves);
     }

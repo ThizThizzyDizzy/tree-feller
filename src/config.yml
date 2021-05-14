@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.14.2
+# Version 1.15
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -41,6 +41,26 @@ require-cross-section: false
 # If set to true, all non-leaf-block leaves will be distance-checked to make sure they belong to the tree being felled (ex. mushrooms or nether 'tree' leaves)
 # WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR
 force-distance-check: false
+
+# Which trunk blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)
+# (For this to work, these must also be included in the tree trunk materials)
+# Ex. planks/glass
+banned-logs: 
+
+# Which blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)
+# (For this to work, these must also be included in the tree leaf materials)
+# Ex. planks or glass
+banned-leaves: 
+
+# What is the maximum number of trunk blocks that may be in a horizontal line?
+# (This is to help detect structures with long horizontal pillars of logs)
+# Warning: this does some fairly heavy calculations, and may cause lag with massive trees
+max-horizontal-trunk-pillar-length:
+
+# What is the maximum number of trunks a tree may have?
+# Note that the trunks are counted at the level at which the tree is cut; not at the base of the tree
+# Similarly to leave-stump, this may include low-hanging leaves
+max-trunks: 1
 
 # Should the tree cut down with an animation?
 cutting-animation: false
@@ -348,6 +368,10 @@ compatibility-oreregenerator: true
 # allow-partial
 # player-leaves
 # require-cross-section
+# banned-logs
+# banned-leaves
+# max-horizontal-trunk-pillar-length
+# max-trunks
 # cutting-animation
 # anim-delay
 # replant-saplings
@@ -429,6 +453,10 @@ tools:
 # ignore-leaf-data:
 # require-cross-section:
 # force-distance-check:
+# banned-logs:
+# banned-leaves:
+# max-horizontal-trunk-pillar-length:
+# max-trunks:
 # cutting-animation:
 # anim-delay:
 # replant-saplings:
@@ -597,6 +625,22 @@ debug-require-cross-section: "A full cross-section has not been cut"
 debug-require-cross-section-tool: "A full cross-section has not been cut for tool"
 debug-require-cross-section-tree: "A full cross-section has not been cut for tree"
 debug-require-cross-section-success: "A full cross-section has been cut"
+debug-banned-logs: "Tree contains banned log: {0}"
+debug-banned-logs-tool: "Tree contains banned log for tool: {0}"
+debug-banned-logs-tree: "Tree contains banned log for tree: {0}"
+debug-banned-logs-success: "Tree does not contain any banned logs"
+debug-banned-leaves: "Tree contains banned leaf: {0}"
+debug-banned-leaves-tool: "Tree contains banned leaf for tool: {0}"
+debug-banned-leaves-tree: "Tree contains banned leaf for tree: {0}"
+debug-banned-leaves-success: "Tree does not contain any banned leaves"
+debug-max-horizontal-trunk-pillar-length: "Found a horizontal trunk pillar that was too long! {0}>{1}"
+debug-max-horizontal-trunk-pillar-length-tool: "Found a horizontal trunk pillar that was too long for tool! {0}>{1}"
+debug-max-horizontal-trunk-pillar-length-tree: "Found a horizontal trunk pillar that was too long for tree! {0}>{1}"
+debug-max-horizontal-trunk-pillar-length-success: "No excessive horizontal trunk pillars found"
+debug-max-trunks: "Tree has too many trunks! {0}>{1}"
+debug-max-trunks-tool: "Tree has too many trunks for tool! {0}>{1}"
+debug-max-trunks-tree: "Tree has too many trunks for tree! {0}>{1}"
+debug-max-trunks-success: "Trunk count is valid"
 debug-required-enchantments: "Enchantment missing: {0} at minimum level {1}"
 debug-required-enchantments-tool: "Enchantment missing for tool: {0} at minimum level {1}"
 debug-required-enchantments-tree: "Enchantment missing for tree: {0} at minimum level {1}"
@@ -649,9 +693,9 @@ debug-max-phase: "Phase is greater than maximum allowed: {0}"
 debug-max-phase-tool: "Phase is greater than maximum allowed for tool: {0}"
 debug-max-phase-tree: "Phase is greater than maximum allowed for tree: {0}"
 debug-max-phase-success: "Phase meets maximum requirement"
-debug-custom-model-data: "Custom model data does not match#: {0} != {1}"
-debug-custom-model-data-tool: "Custom model data does not match#: {0} != {1}"
-debug-custom-model-data-tree: "Custom model data does not match#: {0} != {1}"
+debug-custom-model-data: "Custom model data does not match: {0} != {1}"
+debug-custom-model-data-tool: "Custom model data does not match for tool: {0} != {1}"
+debug-custom-model-data-tree: "Custom model data does not match for tree: {0} != {1}"
 debug-custom-model-data-success: "Custom model data matches!"
 debug-allowed-trees-tool: "Tree is not allowed for tool: {0}"
 debug-allowed-trees-success: "Tree is allowed for tool"
