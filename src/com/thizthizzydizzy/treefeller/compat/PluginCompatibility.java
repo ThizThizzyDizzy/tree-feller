@@ -7,6 +7,7 @@ import com.thizthizzydizzy.treefeller.Tree;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public abstract class PluginCompatibility{
@@ -37,6 +38,7 @@ public abstract class PluginCompatibility{
      */
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){}
     public void addBlock(Player player, Block block){}
+    public void dropItem(Player player, Item item){}
     public boolean test(Player player, Block block){
         return true;
     }

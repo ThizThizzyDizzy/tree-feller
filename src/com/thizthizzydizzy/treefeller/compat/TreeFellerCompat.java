@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class TreeFellerCompat{
@@ -21,6 +22,7 @@ public class TreeFellerCompat{
         compatibilities.add(new GriefPreventionCompat());
         compatibilities.add(new TownyCompat());
         compatibilities.add(new OreRegeneratorCompat());
+        compatibilities.add(new Drop2InventoryCompat());
     }
     public static void init(){}//placeholder method for loading the class
     public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
@@ -36,6 +38,11 @@ public class TreeFellerCompat{
     public static void removeBlock(Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
             compat.removeBlock(player, block);
+        }
+    }
+    public static void dropItem(Player player, Item item){
+        for(PluginCompatibility compat : getCompatibilities()){
+            compat.dropItem(player, item);
         }
     }
     static String test(Player player, Block block){

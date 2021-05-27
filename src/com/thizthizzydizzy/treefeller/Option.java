@@ -107,7 +107,41 @@ public abstract class Option<E>{
             }));
         }
     };
-    public static Option<Integer> LEAF_RANGE = new Option<Integer>("Leaf Range", true, true, true, 6){
+    public static Option<Integer> LEAF_DETECT_RANGE = new Option<Integer>("Leaf Detect Range", true, true, true, 6){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(){
+            return "How far away from logs should leaf blocks be detected?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_LEAVES).setCount(value);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> LEAF_BREAK_RANGE = new Option<Integer>("Leaf Break Range", true, true, true, 6){
         @Override
         public Integer load(Object o){
             return loadInt(o);

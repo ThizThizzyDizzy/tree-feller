@@ -154,7 +154,7 @@ public class TreeFeller extends JavaPlugin{
                 HashMap<Integer, ArrayList<Block>> allLeaves = new HashMap<>();
                 FOR:for(int i : distances){
                     for(Block b : blocks.get(i)){
-                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
+                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_DETECT_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
                         leaves+=toList(someLeaves).size();
                         for(int in : someLeaves.keySet()){
                             if(allLeaves.containsKey(in)){
@@ -256,7 +256,7 @@ public class TreeFeller extends JavaPlugin{
                         delay+=Option.ANIM_DELAY.get(tool, tree);
                         for(Block b : blocks.get(i)){
                             if(ttl<=0)break;
-                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                                 droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
                             }
                             droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
@@ -268,7 +268,7 @@ public class TreeFeller extends JavaPlugin{
                                 int tTl = TTL;
                                 for(Block b : blocks.get(i)){
                                     if(tTl<=0)break;
-                                    for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                                    for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                                         breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
                                     }
                                     breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
@@ -295,7 +295,7 @@ public class TreeFeller extends JavaPlugin{
                     for(int i : distances){
                         for(Block b : blocks.get(i)){
                             if(total<=0)break;
-                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                                 breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
                             }
                             breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
@@ -376,7 +376,7 @@ public class TreeFeller extends JavaPlugin{
                 HashMap<Integer, ArrayList<Block>> allLeaves = new HashMap<>();
                 FOR:for(int i : distances){
                     for(Block b : blocks.get(i)){
-                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
+                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_DETECT_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
                         leaves+=toList(someLeaves).size();
                         for(int in : someLeaves.keySet()){
                             if(allLeaves.containsKey(in)){
@@ -1021,7 +1021,7 @@ public class TreeFeller extends JavaPlugin{
                         int[] xp = new int[]{0};
                         for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
                             for(ItemStack st : player.getInventory().addItem(s).values()){
-                                block.getWorld().dropItemNaturally(block.getLocation(), st);
+                                TreeFellerCompat.dropItem(player, block.getWorld().dropItemNaturally(block.getLocation(), st));
                             }
                         }
                         player.setTotalExperience(player.getTotalExperience()+xp[0]);
@@ -1033,7 +1033,7 @@ public class TreeFeller extends JavaPlugin{
                 if(dropItems){
                     int[] xp = new int[]{0};
                     for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
-                        block.getWorld().dropItemNaturally(block.getLocation(), s);
+                        TreeFellerCompat.dropItem(player, block.getWorld().dropItemNaturally(block.getLocation(), s));
                     }
                     dropExp(block.getWorld(), block.getLocation(), xp[0]);
                 }
@@ -1436,31 +1436,14 @@ public class TreeFeller extends JavaPlugin{
                 if(doBreak){
                     event.setCancelled(true);
                     for(ItemStack drop : drops){
-                        //fake item (whoops, this deletes items already on the ground!)
-//                        ItemStack fakeDrop = new ItemStack(drop);
-//                        ItemMeta meta = fakeDrop.getItemMeta();
-//                        meta.getPersistentDataContainer().set(new NamespacedKey(TreeFeller.this, "fakeItemTag"), PersistentDataType.STRING, UUID.randomUUID().toString());
-//                        fakeDrop.setItemMeta(meta);
-//                        Item fake = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), fakeDrop);
-//                        fake.setTicksLived(5960);//40 ticks to despawn
-//                        fake.setPickupDelay(32767);//cannot be picked up
-                        //real item
-                        Item item = event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation().add(randbetween(-8, 8), randbetween(1000, 10000), randbetween(-8, 8)), drop);//If I spawn items near others, some will get deleted
-                        Vector velocity = item.getVelocity();
-                        new BukkitRunnable() {
-                            @Override
-                            public void run(){
-                                item.teleport(event.getEntity().getLocation());
-                                item.setVelocity(velocity);
-                            }
-                        }.runTaskLater(TreeFeller.this, 40);
+                        TreeFellerCompat.dropItem(player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop));
                     }
                     dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
                 }
                 if(player!=null){
                     event.setCancelled(true);
                     for(ItemStack drop : drops){
-                        for(ItemStack stack : player.getInventory().addItem(drop).values())event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack);
+                        for(ItemStack stack : player.getInventory().addItem(drop).values())TreeFellerCompat.dropItem(player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
                     }
                     player.setTotalExperience(player.getTotalExperience()+xp[0]);
                 }
@@ -1843,7 +1826,7 @@ public class TreeFeller extends JavaPlugin{
             theLeafRange = leafRange;
             lastCount = allDaLeaves.size();
         }
-        if(theLeafRange>Option.LEAF_RANGE.getValue())Option.LEAF_RANGE.treeValues.put(tree, theLeafRange);
+        if(theLeafRange>Option.LEAF_DETECT_RANGE.getValue())Option.LEAF_DETECT_RANGE.treeValues.put(tree, theLeafRange);
         return tree;
     }
 }

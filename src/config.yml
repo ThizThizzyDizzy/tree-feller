@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.15
+# Version 1.16
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -8,8 +8,11 @@ startup-logs: true
 # How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)
 scan-distance: 256
 
+# How far away from logs should leaf blocks be detected?
+leaf-detect-range: 6
+
 # How far away from logs should leaf blocks be destroyed? (set to 0 to prevent leaves from being destroyed) (Values over 6 are useless for vanilla trees, as these leaves would naturally decay anyway)
-leaf-range: 6
+leaf-break-range: 6
 
 # How many logs should be required for logs to be counted as a tree?
 required-logs: 4
@@ -354,12 +357,16 @@ oreregenerator-regen-delay: 1200
 # Toggle compatibility with OreRegenerator
 compatibility-oreregenerator: true
 
+# Toggle compatibility with Drop2Inventory
+compatibility-drop2inventory: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
 # Any of the following variables may be used: (See above for descriptions)
 # scan-distance
-# leaf-range
+# leaf-detect-range
+# leaf-break-range
 # required-logs
 # required-leaves
 # max-logs
@@ -441,7 +448,8 @@ tools:
 # Format:
 #    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]
 # Any of the following variables may be used: (See above for descriptions)
-# leaf-range:
+# leaf-detect-range:
+# leaf-break-range:
 # required-logs:
 # required-leaves:
 # max-logs:
