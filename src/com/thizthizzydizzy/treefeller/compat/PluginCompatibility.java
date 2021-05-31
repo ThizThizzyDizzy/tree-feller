@@ -13,9 +13,9 @@ import org.bukkit.inventory.ItemStack;
 public abstract class PluginCompatibility{
     private final OptionBoolean enabled;
     public PluginCompatibility(){
-        enabled = new OptionBoolean("Compatibility "+getPluginName(), true, false, false, true, true){
+        enabled = new OptionBoolean("Compatibility "+getPluginName(), true, false, false, defaultEnabled(), defaultEnabled()){
             @Override
-            public String getDesc(){
+            public String getDesc(boolean ingame){
                 return "Toggle compatibility with "+PluginCompatibility.this.getFriendlyName();
             }
             @Override
@@ -40,6 +40,9 @@ public abstract class PluginCompatibility{
     public void addBlock(Player player, Block block){}
     public void dropItem(Player player, Item item){}
     public boolean test(Player player, Block block){
+        return true;
+    }
+    public boolean defaultEnabled(){
         return true;
     }
     public Block test(Player player, Iterable<Block> blocks){

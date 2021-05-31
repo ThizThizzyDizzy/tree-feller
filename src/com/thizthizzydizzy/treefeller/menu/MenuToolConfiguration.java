@@ -67,7 +67,7 @@ public class MenuToolConfiguration extends Menu{
                 continue;
             }
             if(i<pageMin)continue;
-            add(new Button(index, o.getConfigurationDisplayItem(tool).setDisplayName(o.getFriendlyName()).addLore(ChatColor.GRAY+shorten(Objects.toString(o.getValue(tool)), 42)).addLore(shorten(o.getDescription(), 42)), (click) -> {
+            add(new Button(index, o.getConfigurationDisplayItem(tool).setDisplayName(o.getFriendlyName()).addLore(ChatColor.GRAY+shorten(Objects.toString(o.getValue(tool)), 42)).addLore(shorten(o.getDescription(true), 42)), (click) -> {
                 if(click==ClickType.LEFT)o.openToolModifyMenu(this, tool);
             }));
             index++;

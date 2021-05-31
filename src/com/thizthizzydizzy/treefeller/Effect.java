@@ -1,7 +1,10 @@
 package com.thizthizzydizzy.treefeller;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.Particle;
@@ -83,140 +86,24 @@ public class Effect{
             if(matches)name = nam+i;
             i++;
         }while(matches);
-        switch(type){
-            case EXPLOSION:
-                return new Effect(name, EffectLocation.TREE, 1, 0, false);
-            case MARKER:
-                return new Effect(name, EffectLocation.TREE, 1, false);
-            case PARTICLE:
-                return new Effect(name, EffectLocation.TREE, 1, Particle.ASH, 0, 0, 0, 0, 0, 0, 0, 1, null);
-            case SOUND:
-                return new Effect(name, EffectLocation.TREE, 1, "", 1, 1);
-            default:
-                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
-        }
+        return type.createNewEffect(name);
     }
     public void print(Logger logger){
         logger.log(Level.INFO, "Loaded effect: {0}", name);
         logger.log(Level.INFO, "- Location: {0}", location);
         logger.log(Level.INFO, "- Type: {0}", type);
         logger.log(Level.INFO, "- Chance: {0}", chance);
-        switch(type){
-            case PARTICLE:
-                logger.log(Level.INFO, "- Particle: {0}", particle);
-                logger.log(Level.INFO, "- x: {0}", x);
-                logger.log(Level.INFO, "- y: {0}", y);
-                logger.log(Level.INFO, "- z: {0}", z);
-                logger.log(Level.INFO, "- dx: {0}", dx);
-                logger.log(Level.INFO, "- dy: {0}", dy);
-                logger.log(Level.INFO, "- dz: {0}", dz);
-                logger.log(Level.INFO, "- Speed: {0}", speed);
-                logger.log(Level.INFO, "- Count: {0}", count);
-                logger.log(Level.INFO, "- Extra: {0}", extra);
-                break;
-            case SOUND:
-                logger.log(Level.INFO, "- Sound: {0}", sound);
-                logger.log(Level.INFO, "- Volume: {0}", volume);
-                logger.log(Level.INFO, "- Pitch: {0}", pitch);
-                break;
-            case EXPLOSION:
-                logger.log(Level.INFO, "- Power: {0}", power);
-                logger.log(Level.INFO, "- Fire: {0}", fire);
-                break;
-            case MARKER:
-                logger.log(Level.INFO, "- Permanent: {0}", permanent);
-                logger.log(Level.INFO, "- Tags: {0}", Arrays.toString(tags));
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
-        }
+        type.print(this, logger);
     }
     public void play(Block block){
-        switch(type){
-            case EXPLOSION:
-                block.getWorld().createExplosion(block.getLocation().add(0.5, 0.5, 0.5), power, fire);
-                break;
-            case SOUND:
-                block.getWorld().playSound(block.getLocation().add(0.5,0.5,0.5), sound, SoundCategory.BLOCKS, volume, pitch);
-                break;
-            case PARTICLE:
-                block.getWorld().spawnParticle(particle, block.getLocation().add(x+.5,y+.5,z+.5), count, dx, dy, dz, speed, extra);
-                break;
-            case MARKER:
-                Entity entity = block.getWorld().spawnEntity(block.getLocation().add(.5,.5,.5), permanent?EntityType.ARMOR_STAND:EntityType.AREA_EFFECT_CLOUD);
-                if(permanent){
-                    ArmorStand as = (ArmorStand)entity;
-                    as.setMarker(true);
-                    as.setInvulnerable(true);
-                    as.setGravity(false);
-                    as.setVisible(false);
-                    as.addScoreboardTag("tree_feller");
-                    for(String s : tags)as.addScoreboardTag(s);
-                }else{
-                    AreaEffectCloud cloud = (AreaEffectCloud)entity;
-                    cloud.setReapplicationDelay(0);
-                    cloud.setRadius(0);
-                    cloud.setDuration(0);
-                    cloud.setWaitTime(0);
-                    cloud.addScoreboardTag("tree_feller");
-                    for(String s : tags)cloud.addScoreboardTag(s);
-                }
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
-        }
+        type.play(this, block);
     }
     public String writeToConfig(){
         String s = "{name: "+name;
         s+=", chance: "+chance;
         s+=", location: "+location.name();
         s+=", type: "+type.name();
-        switch(type){
-            case EXPLOSION:
-                s+=", power: "+power;
-                s+=", fire: "+fire;
-                break;
-            case MARKER:
-                s+=", permanent: "+permanent;
-                s+=", tags: "+Arrays.toString(tags);
-                break;
-            case PARTICLE:
-                s+=", particle: "+particle.name();
-                s+=", x: "+x;
-                s+=", y: "+y;
-                s+=", z: "+z;
-                s+=", dx: "+dx;
-                s+=", dy: "+dy;
-                s+=", dz: "+dz;
-                s+=", speed: "+speed;
-                s+=", count: "+count;
-                switch(particle){
-                    case REDSTONE:
-                        Particle.DustOptions options = (Particle.DustOptions)extra;
-                        Color color = options.getColor();
-                        s+=", r: "+color.getRed();
-                        s+=", g: "+color.getGreen();
-                        s+=", b: "+color.getBlue();
-                        s+=", size: "+options.getSize();
-                        break;
-                    case ITEM_CRACK:
-                        s+="item: "+((ItemStack)extra).getType().name();
-                        break;
-                    case BLOCK_CRACK:
-                    case BLOCK_DUST:
-                    case FALLING_DUST:
-                        s+=", block: "+((BlockData)extra).getMaterial().name();
-                        break;
-                }
-                break;
-            case SOUND:
-                s+=", sound: "+sound;
-                s+=", volume: "+volume;
-                s+=", pitch: "+pitch;
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown EffectType: "+type+"! This is a bug!");
-        }
+        s+= type.writeToConfig(this);
         return s+"}";
     }
     public static enum EffectLocation{
@@ -233,10 +120,237 @@ public class Effect{
         }
     }
     public static enum EffectType{
-        PARTICLE(Material.CAMPFIRE),
-        SOUND(Material.NOTE_BLOCK),
-        EXPLOSION(Material.TNT),
-        MARKER(Material.ARMOR_STAND);
+        PARTICLE(Material.CAMPFIRE){
+            @Override
+            Effect createNewEffect(String name){
+                return new Effect(name, EffectLocation.TREE, 1, Particle.ASH, 0, 0, 0, 0, 0, 0, 0, 1, null);
+            }
+            @Override
+            void print(Effect effect, Logger logger){
+                logger.log(Level.INFO, "- Particle: {0}", effect.particle);
+                logger.log(Level.INFO, "- x: {0}", effect.x);
+                logger.log(Level.INFO, "- y: {0}", effect.y);
+                logger.log(Level.INFO, "- z: {0}", effect.z);
+                logger.log(Level.INFO, "- dx: {0}", effect.dx);
+                logger.log(Level.INFO, "- dy: {0}", effect.dy);
+                logger.log(Level.INFO, "- dz: {0}", effect.dz);
+                logger.log(Level.INFO, "- Speed: {0}", effect.speed);
+                logger.log(Level.INFO, "- Count: {0}", effect.count);
+                logger.log(Level.INFO, "- Extra: {0}", effect.extra);
+            }
+            @Override
+            void play(Effect effect, Block block){
+                block.getWorld().spawnParticle(effect.particle, block.getLocation().add(effect.x+.5,effect.y+.5,effect.z+.5), effect.count, effect.dx, effect.dy, effect.dz, effect.speed, effect.extra);
+            }
+            @Override
+            String writeToConfig(Effect effect){
+                String s = "";
+                s+=", particle: "+effect.particle.name();
+                s+=", x: "+effect.x;
+                s+=", y: "+effect.y;
+                s+=", z: "+effect.z;
+                s+=", dx: "+effect.dx;
+                s+=", dy: "+effect.dy;
+                s+=", dz: "+effect.dz;
+                s+=", speed: "+effect.speed;
+                s+=", count: "+effect.count;
+                switch(effect.particle){
+                    case REDSTONE:
+                        Particle.DustOptions options = (Particle.DustOptions)effect.extra;
+                        Color color = options.getColor();
+                        s+=", r: "+color.getRed();
+                        s+=", g: "+color.getGreen();
+                        s+=", b: "+color.getBlue();
+                        s+=", size: "+options.getSize();
+                        break;
+                    case ITEM_CRACK:
+                        s+="item: "+((ItemStack)effect.extra).getType().name();
+                        break;
+                    case BLOCK_CRACK:
+                    case BLOCK_DUST:
+                    case FALLING_DUST:
+                        s+=", block: "+((BlockData)effect.extra).getMaterial().name();
+                        break;
+                }
+                return s;
+            }
+            @Override
+            Effect loadEffect(String name, EffectLocation location, double chance, LinkedHashMap map){
+                Particle particle = TreeFeller.getParticle((String) map.get("particle"));
+                double x = 0;
+                if(map.containsKey("x")){
+                    x = ((Number)map.get("x")).doubleValue();
+                }
+                double y = 0;
+                if(map.containsKey("y")){
+                    y = ((Number)map.get("y")).doubleValue();
+                }
+                double z = 0;
+                if(map.containsKey("z")){
+                    z = ((Number)map.get("z")).doubleValue();
+                }
+                double dx = 0;
+                if(map.containsKey("dx")){
+                    dx = ((Number)map.get("dx")).doubleValue();
+                }
+                double dy = 0;
+                if(map.containsKey("dy")){
+                    dy = ((Number)map.get("dy")).doubleValue();
+                }
+                double dz = 0;
+                if(map.containsKey("dz")){
+                    dz = ((Number)map.get("dz")).doubleValue();
+                }
+                double speed = 0;
+                if(map.containsKey("speed")){
+                    speed = ((Number)map.get("speed")).doubleValue();
+                }
+                int count = 1;
+                if(map.containsKey("count")){
+                    count = ((Number)map.get("count")).intValue();
+                }
+                Object extra = null;
+                switch(particle){
+                    case REDSTONE:
+                        extra = new Particle.DustOptions(Color.fromRGB(((Number)map.get("r")).intValue(), ((Number)map.get("g")).intValue(), ((Number)map.get("b")).intValue()), ((Number)map.get("size")).floatValue());
+                        break;
+                    case ITEM_CRACK:
+                        extra = new ItemStack(Material.matchMaterial((String)map.get("item")));
+                        break;
+                    case BLOCK_CRACK:
+                    case BLOCK_DUST:
+                    case FALLING_DUST:
+                        extra = Bukkit.createBlockData(Material.matchMaterial((String)map.get("block")));
+                        break;
+                }
+                return new Effect(name, location, chance, particle, x, y, z, dx, dy, dz, speed, count, extra);
+            }
+        },
+        SOUND(Material.NOTE_BLOCK){
+            @Override
+            Effect createNewEffect(String name){
+                return new Effect(name, EffectLocation.TREE, 1, "", 1, 1);
+            }
+            @Override
+            void print(Effect effect, Logger logger){
+                logger.log(Level.INFO, "- Sound: {0}", effect.sound);
+                logger.log(Level.INFO, "- Volume: {0}", effect.volume);
+                logger.log(Level.INFO, "- Pitch: {0}", effect.pitch);
+            }
+            @Override
+            void play(Effect effect, Block block){
+                block.getWorld().playSound(block.getLocation().add(0.5,0.5,0.5), effect.sound, SoundCategory.BLOCKS, effect.volume, effect.pitch);
+            }
+            @Override
+            String writeToConfig(Effect effect){
+                String s = "";
+                s+=", sound: "+effect.sound;
+                s+=", volume: "+effect.volume;
+                s+=", pitch: "+effect.pitch;
+                return s;
+            }
+            @Override
+            Effect loadEffect(String name, EffectLocation location, double chance, LinkedHashMap map){
+                String sound = (String)map.get("sound");
+                float volume = 1;
+                if(map.containsKey("volume")){
+                    volume = ((Number)map.get("volume")).floatValue();
+                }
+                float pitch = 1;
+                if(map.containsKey("pitch")){
+                    pitch = ((Number)map.get("pitch")).floatValue();
+                }
+                return new Effect(name, location, chance, sound, volume, pitch);
+            }
+        },
+        EXPLOSION(Material.TNT){
+            @Override
+            Effect createNewEffect(String name){
+                return new Effect(name, EffectLocation.TREE, 1, 0, false);
+            }
+            @Override
+            void print(Effect effect, Logger logger){
+                logger.log(Level.INFO, "- Power: {0}", effect.power);
+                logger.log(Level.INFO, "- Fire: {0}", effect.fire);
+            }
+            @Override
+            void play(Effect effect, Block block){
+                block.getWorld().createExplosion(block.getLocation().add(0.5, 0.5, 0.5), effect.power, effect.fire);
+            }
+            @Override
+            String writeToConfig(Effect effect){
+                String s = "";
+                s+=", power: "+effect.power;
+                s+=", fire: "+effect.fire;
+                return s;
+            }
+            @Override
+            Effect loadEffect(String name, EffectLocation location, double chance, LinkedHashMap map){
+                float power = ((Number)map.get("power")).floatValue();
+                boolean fire = false;
+                if(map.containsKey("fire")){
+                    fire = (boolean)map.get("fire");
+                }
+                return new Effect(name, location, chance, power, fire);
+            }
+        },
+        MARKER(Material.ARMOR_STAND){
+            @Override
+            Effect createNewEffect(String name){
+                return new Effect(name, EffectLocation.TREE, 1, false);
+            }
+            @Override
+            void print(Effect effect, Logger logger){
+                logger.log(Level.INFO, "- Permanent: {0}", effect.permanent);
+                logger.log(Level.INFO, "- Tags: {0}", Arrays.toString(effect.tags));
+            }
+            @Override
+            void play(Effect effect, Block block){
+                Entity entity = block.getWorld().spawnEntity(block.getLocation().add(.5,.5,.5), effect.permanent?EntityType.ARMOR_STAND:EntityType.AREA_EFFECT_CLOUD);
+                if(effect.permanent){
+                    ArmorStand as = (ArmorStand)entity;
+                    as.setMarker(true);
+                    as.setInvulnerable(true);
+                    as.setGravity(false);
+                    as.setVisible(false);
+                }else{
+                    AreaEffectCloud cloud = (AreaEffectCloud)entity;
+                    cloud.setReapplicationDelay(0);
+                    cloud.setRadius(0);
+                    cloud.setDuration(0);
+                    cloud.setWaitTime(0);
+                }
+                entity.addScoreboardTag("tree_feller");
+                for(String s : effect.tags)entity.addScoreboardTag(s);
+            }
+            @Override
+            String writeToConfig(Effect effect){
+                String s = "";
+                s+=", permanent: "+effect.permanent;
+                s+=", tags: "+Arrays.toString(effect.tags);
+                return s;
+            }
+            @Override
+            Effect loadEffect(String name, EffectLocation location, double chance, LinkedHashMap map){
+                boolean permanent = false;
+                if(map.containsKey("permanent")){
+                    permanent = (boolean)map.get("permanent");
+                }
+                String[] tags = new String[0];
+                if(map.containsKey("tags")){
+                    Object ob = map.get(tags);
+                    if(ob instanceof ArrayList){
+                        ArrayList<String> list = (ArrayList<String>)map.get("tags");
+                        tags = list.toArray(new String[list.size()]);
+                    }else if(ob instanceof String){
+                        tags = new String[]{(String)ob};
+                    }else{
+                        throw new IllegalArgumentException("Unknown marker tags format: "+ob+"! Please use an array or a String!");
+                    }
+                }
+                return new Effect(name, location, chance, permanent, tags);
+            }
+        };
         private final Material item;
         private EffectType(Material item){
             this.item = item;
@@ -244,6 +358,11 @@ public class Effect{
         public Material getItem(){
             return item;
         }
+        abstract Effect createNewEffect(String name);
+        abstract void print(Effect effect, Logger logger);
+        abstract void play(Effect effect, Block block);
+        abstract String writeToConfig(Effect effect);
+        abstract Effect loadEffect(String name, EffectLocation location, double chance, LinkedHashMap map);
     }
     @Override
     public String toString(){

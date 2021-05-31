@@ -1,18 +1,24 @@
 package com.thizthizzydizzy.treefeller;
-import com.thizthizzydizzy.treefeller.TreeFeller.FallingTreeBlock;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 public class TreeFellerEventListener implements Listener{
     private final TreeFeller plugin;
     public TreeFellerEventListener(TreeFeller plugin){
         this.plugin = plugin;
+    }
+    @EventHandler
+    public void onEntityDamage(EntityDamageByEntityEvent event){
+        Entity damager = event.getDamager();
+        if(event.getEntity().getType()==EntityType.DROPPED_ITEM&&damager.getType()==EntityType.FALLING_BLOCK&&damager.getScoreboardTags().contains("tree_feller"))event.setCancelled(true);
     }
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event){
@@ -29,7 +35,7 @@ public class TreeFellerEventListener implements Listener{
                     break;
                 }
             }
-            if(falling!=null)falling.land(event);
+            if(falling!=null)falling.land(plugin, event);
         }
     }
     @EventHandler

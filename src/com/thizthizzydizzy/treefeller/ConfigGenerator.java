@@ -24,7 +24,7 @@ public class ConfigGenerator{
         for(Option o : Option.options){
             if(!o.global)continue;
             add();
-            for(Object s : o.getDescription()){
+            for(Object s : o.getDescription(false)){
                 add("# "+s);
             }
             add(o.getGlobalName()+": "+o.writeToConfig());
@@ -37,7 +37,7 @@ public class ConfigGenerator{
         for(Option o : Option.options){
             if(!o.tool)continue;
             if(o.global)add("# "+o.getGlobalName());
-            else add("# "+o.getGlobalName()+"         "+o.getDesc());
+            else add("# "+o.getGlobalName()+"         "+o.getDesc(false));
         }
         add("# AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree");
         add("# Examples of valid tools:");
@@ -59,7 +59,7 @@ public class ConfigGenerator{
         for(Option o : Option.options){
             if(!o.tree)continue;
             if(o.global)add("# "+o.getGlobalName()+":");
-            else add("# "+o.getGlobalName()+":        "+o.getDesc());
+            else add("# "+o.getGlobalName()+":        "+o.getDesc(false));
         }
         add("# Examples of valid trees:");
         add("#    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]");
@@ -176,7 +176,7 @@ public class ConfigGenerator{
             for(Option o : Option.options){
                 if(!o.global)continue;
                 add();
-                for(Object s : o.getDescription()){
+                for(Object s : o.getDescription(false)){
                     add("# "+s);
                 }
                 if(o.getDefaultConfigValue()==null)add(o.getGlobalName()+":");
@@ -190,7 +190,7 @@ public class ConfigGenerator{
             for(Option o : Option.options){
                 if(!o.tool)continue;
                 if(o.global)add("# "+o.getGlobalName());
-                else add("# "+o.getGlobalName()+"         "+o.getDesc());
+                else add("# "+o.getGlobalName()+"         "+o.getDesc(false));
             }
             add("# AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree");
             add("# Examples of valid tools:");
@@ -215,7 +215,7 @@ public class ConfigGenerator{
             for(Option o : Option.options){
                 if(!o.tree)continue;
                 if(o.global)add("# "+o.getGlobalName()+":");
-                else add("# "+o.getGlobalName()+":        "+o.getDesc());
+                else add("# "+o.getGlobalName()+":        "+o.getDesc(false));
             }
             add("# Examples of valid trees:");
             add("#    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]");

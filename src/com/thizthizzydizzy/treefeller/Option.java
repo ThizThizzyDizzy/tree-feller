@@ -15,16 +15,15 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyShort;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringSet;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyEffectList;
+import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyFellBehavior;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifySpawnSaplings;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyTreeSet;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -59,7 +58,7 @@ public abstract class Option<E>{
     //console/debugging stuff
     public static OptionBoolean STARTUP_LOGS = new OptionBoolean("Startup Logs", true, false, false, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to false, the tree feller will not list all its settings in the console on startup";
         }
         @Override
@@ -79,7 +78,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)";
         }
         @Override
@@ -113,7 +112,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How far away from logs should leaf blocks be detected?";
         }
         @Override
@@ -147,7 +146,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How far away from logs should leaf blocks be destroyed? (set to 0 to prevent leaves from being destroyed) (Values over 6 are useless for vanilla trees, as these leaves would naturally decay anyway)";
         }
         @Override
@@ -195,7 +194,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS, total);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How many logs should be required for logs to be counted as a tree?";
         }
         @Override
@@ -246,7 +245,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS, leaves);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How many leaves should be required for logs to be counted as a tree?";
         }
         @Override
@@ -298,7 +297,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS, total);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What is the maximum number of logs that a tree may have and still be counted as a tree?";
         }
         @Override
@@ -366,7 +365,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How far from the bottom can you cut down a tree? (Prevents you from cutting it down from the top) 1 = bottom block";
         }
         @Override
@@ -400,7 +399,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean ALLOW_PARTIAL = new OptionBoolean("Allow Partial", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!";
         }
         @Override
@@ -410,7 +409,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean PLAYER_LEAVES = new OptionBoolean("Player Leaves", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should leaves placed by players be cut down also? (Only works with _LEAVES materials)";
         }
         @Override
@@ -420,7 +419,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean DIAGONAL_LEAVES = new OptionBoolean("Diagonal Leaves", true, false, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to true, leaves will be detected diagonally; May require ignore-leaf-data to work properly";
         }
         @Override
@@ -430,7 +429,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean IGNORE_LEAF_DATA = new OptionBoolean("Ignore Leaf Data", true, false, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to true, leaves' blockdata will be ignored. This should only be set if custom trees' leaves are not being destroyed when they should.";
         }
         @Override
@@ -456,7 +455,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should trees larger than 1x1 require an entire horizontal cross-section to be mined before the tree fells? (Works for up to 2x2 trees)";
         }
         @Override
@@ -470,7 +469,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean FORCE_DISTANCE_CHECK = new OptionBoolean("Force Distance Check", true, false, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to true, all non-leaf-block leaves will be distance-checked to make sure they belong to the tree being felled (ex. mushrooms or nether 'tree' leaves)\n"
                     + "WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR";
         }
@@ -482,7 +481,7 @@ public abstract class Option<E>{
     //unnatural tree detection settings
     public static Option<HashSet<Material>> BANNED_LOGS = new Option<HashSet<Material>>("Banned Logs", true, true, true, new HashSet<>()){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Which trunk blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)\n(For this to work, these must also be included in the tree trunk materials)\nEx. planks/glass";
         }
         @Override
@@ -544,7 +543,7 @@ public abstract class Option<E>{
     };
     public static Option<HashSet<Material>> BANNED_LEAVES = new Option<HashSet<Material>>("Banned Leaves", true, true, true, new HashSet<>()){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Which blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)\n(For this to work, these must also be included in the tree leaf materials)\nEx. planks or glass";
         }
         @Override
@@ -606,7 +605,7 @@ public abstract class Option<E>{
     };
     public static Option<Integer> MAX_HORIZONTAL_TRUNK_PILLAR_LENGTH = new Option<Integer>("Max Horizontal Trunk Pillar Length", true, true, true, 6){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What is the maximum number of trunk blocks that may be in a horizontal line?\n(This is to help detect structures with long horizontal pillars of logs)";
         }
         @Override
@@ -723,7 +722,7 @@ public abstract class Option<E>{
     };
     public static Option<Integer> MAX_TRUNKS = new Option<Integer>("Max Trunks", true, true, true, 1){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What is the maximum number of trunks a tree may have?\nNote that the trunks are counted at the level at which the tree is cut; not at the base of the tree\nSimilarly to leave-stump, this may include low-hanging leaves";
         }
         @Override
@@ -862,7 +861,7 @@ public abstract class Option<E>{
     //tree cutting details
     public static OptionBoolean CUTTING_ANIMATION = new OptionBoolean("Cutting Animation", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the tree cut down with an animation?";
         }
         @Override
@@ -876,7 +875,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Animation delay, in ticks";
         }
         @Override
@@ -906,7 +905,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean REPLANT_SAPLINGS = new OptionBoolean("Replant Saplings", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should saplings be replanted?";
         }
         @Override
@@ -929,7 +928,7 @@ public abstract class Option<E>{
             return globalValue;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should saplings be spawned?\n" +
                 "0 = No, only replant if the leaves drop saplings\n" +
                 "1 = Yes, but only if the leaves do not drop enough\n" +
@@ -966,7 +965,7 @@ public abstract class Option<E>{
             return loadMaterial(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If replant-saplings is enabled, this will replant the tree with this type of sapling";
         }
         @Override
@@ -1006,7 +1005,7 @@ public abstract class Option<E>{
             return loadInt(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If replant-saplings is enabled, this will limit the number of saplings that can be replanted";
         }
         @Override
@@ -1040,7 +1039,7 @@ public abstract class Option<E>{
             return loadMaterialSet(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What blocks can saplings be planted on?";
         }
         @Override
@@ -1089,20 +1088,16 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public String getDesc(){
-            return "What felling behavior should logs have?\n" +
-                "Valid options:\n" +
-                "BREAK (default)     The logs will break and fall as items\n" +
-                "FALL                The logs will fall as falling blocks\n" +
-                "FALL_HURT           The logs will fall as falling blocks and hurt any entity they land on\n" +
-                "FALL_BREAK          The logs will fall as falling blocks and break when they reach the ground\n" +
-                "FALL_HURT_BREAK     The logs will fall as falling brocks, hurt entities they land on, and break when they reach the ground\n" +
-                "INVENTORY           The logs will appear in the player's inventory as items\n" +
-                "FALL_INVENTORY      The logs will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground\n" +
-                "FALL_HURT_INVENTORY The logs will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground\n" +
-                "NATURAL             The logs will instantly fall in a more natural way (May not work with cutting-animation)\n" +
-                "WARNING: FALL_HURT behaviors may destroy items the blocks land on\n" +
-                "Note that falling blocks occasionally drop as items if they land wrong";
+        public String getDesc(boolean ingame){
+            String s = "What felling behavior should logs have?\n";
+            if(!ingame){
+                s+="Valid options:\n";
+                for(FellBehavior behavior : FellBehavior.values()){
+                    s+=behavior.name()+" - "+behavior.getDescription();
+                }
+            }
+            s+="Note that falling blocks occasionally drop as items if they land wrong";
+            return s;
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(FellBehavior value){
@@ -1110,38 +1105,23 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", false, globalValue, FellBehavior.values(), (value) -> {
+            parent.open(new MenuModifyFellBehavior(parent, parent.plugin, parent.player, name, false, globalValue, FellBehavior.values(), (value) -> {
                 globalValue = value;
-            }){
-                @Override
-                public Material getItem(FellBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, toolValues.get(tool), FellBehavior.values(), (value) -> {
+            parent.open(new MenuModifyFellBehavior(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), FellBehavior.values(), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
-            }){
-                @Override
-                public Material getItem(FellBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, treeValues.get(tree), FellBehavior.values(), (value) -> {
+            parent.open(new MenuModifyFellBehavior(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), FellBehavior.values(), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
-            }){
-                @Override
-                public Material getItem(FellBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
     };
     public static Option<FellBehavior> LEAF_BEHAVIOR = new Option<FellBehavior>("Leaf Behavior", true, true, true, FellBehavior.BREAK){
@@ -1158,20 +1138,16 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public String getDesc(){
-            return "What felling behavior should leaves have?\n" +
-                "Valid options:\n" +
-                "BREAK (default)     The leaves will break and fall as items\n" +
-                "FALL                The leaves will fall as falling blocks\n" +
-                "FALL_HURT           The leaves will fall as falling blocks and hurt any entity they land on\n" +
-                "FALL_BREAK          The leaves will fall as falling blocks and break when they reach the ground (Leaf blocks will be dropped)\n" +
-                "FALL_HURT_BREAK     The leaves will fall as falling brocks, hurt entities they land on, and break when they reach the ground. (Leaf blocks will be dropped)\n" +
-                "INVENTORY           The leaves will appear in the player's inventory as items\n" +
-                "FALL_INVENTORY      The leaves will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground\n" +
-                "FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground\n" +
-                "NATURAL             The leaves will instantly fall in a more natural way (May not work with cutting-animation)\n" +
-                "WARNING: FALL_HURT behaviors may destroy items the blocks land on\n" +
-                "Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do";
+        public String getDesc(boolean ingame){
+            String s = "What felling behavior should leaves have?\n";
+            if(!ingame){
+                s+="Valid options:\n";
+                for(FellBehavior behavior : FellBehavior.values()){
+                    s+=behavior.name()+" - "+behavior.getDescription();
+                }
+            }
+            s+="Note that falling blocks occasionally drop as items if they land wrong";
+            return s;
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(FellBehavior value){
@@ -1179,38 +1155,23 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", false, globalValue, FellBehavior.values(), (value) -> {
+            parent.open(new MenuModifyFellBehavior(parent, parent.plugin, parent.player, name, false, globalValue, FellBehavior.values(), (value) -> {
                 globalValue = value;
-            }){
-                @Override
-                public Material getItem(FellBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, toolValues.get(tool), FellBehavior.values(), (value) -> {
+            parent.open(new MenuModifyFellBehavior(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), FellBehavior.values(), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
-            }){
-                @Override
-                public Material getItem(FellBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyEnum<FellBehavior>(parent, parent.plugin, parent.player, name, "FellBehavior", true, treeValues.get(tree), FellBehavior.values(), (value) -> {
+            parent.open(new MenuModifyFellBehavior(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), FellBehavior.values(), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
-            }){
-                @Override
-                public Material getItem(FellBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
     };
     public static Option<DirectionalFallBehavior> DIRECTIONAL_FALL_BEHAVIOR = new Option<DirectionalFallBehavior>("Directional Fall Behavior", true, true, true, DirectionalFallBehavior.RANDOM){
@@ -1227,7 +1188,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Which direction should the tree fall in?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)\n" +
                 "Valid options:\n" +
@@ -1291,7 +1252,7 @@ public abstract class Option<E>{
             return loadMaterialSet(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)\n" +
 "(Only used for NATURAL fell behavior)";
         }
@@ -1328,7 +1289,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean LOCK_FALL_CARDINAL = new OptionBoolean("Lock Fall Cardinal", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)";
         }
         @Override
@@ -1348,7 +1309,7 @@ public abstract class Option<E>{
             return tl+tr+globalValue;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How much horizontal velocity should falling trees get?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)\n" +
                 "All of the blocks in the tree will fall in the same direction with this velocity.";
@@ -1390,7 +1351,7 @@ public abstract class Option<E>{
             return tl+tr+globalValue;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How much upwards velocity should falling trees get?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
@@ -1431,7 +1392,7 @@ public abstract class Option<E>{
             return tl+tr+globalValue;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How much random sideways velocity should falling blocks get?\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
@@ -1463,7 +1424,7 @@ public abstract class Option<E>{
     //effects and settings
     public static OptionBoolean RESPECT_UNBREAKING = new OptionBoolean("Respect Unbreaking", true, true, true, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If a tool has unbreaking, should it take less damage from cutting trees?";
         }
         @Override
@@ -1479,7 +1440,7 @@ public abstract class Option<E>{
             return loadDouble(o);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How much damage should tools take per log? (Multiplier)";
         }
         @Override
@@ -1509,7 +1470,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean STACKED_TOOLS = new OptionBoolean("Stacked Tools", true, true, false, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to true, stacked tools will be consumed one at a time.\nThis will treat the entire stack as one tool, so prevent-breakage will not keep individual tools from breaking, only the whole stack.\nWARNING: Stacked tools are not recommended!";
         }
         @Override
@@ -1519,7 +1480,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean LEAF_FORTUNE = new OptionBoolean("Leaf Fortune", true, true, true, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should Fortune on an axe be applied to leaves?";
         }
         @Override
@@ -1529,7 +1490,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean LEAF_SILK_TOUCH = new OptionBoolean("Leaf Silk Touch", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should Silk Touch on an axe be applied to leaves?";
         }
         @Override
@@ -1539,7 +1500,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean LOG_FORTUNE = new OptionBoolean("Log Fortune", true, true, true, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should Fortune on an axe be applied to logs?";
         }
         @Override
@@ -1549,7 +1510,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean LOG_SILK_TOUCH = new OptionBoolean("Log Silk Touch", true, true, true, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should Silk Touch on an axe be applied to leaves?";
         }
         @Override
@@ -1559,7 +1520,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean LEAVE_STUMP = new OptionBoolean("Leave Stump", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)\n" +
                 "This may cause issues with custom trees that have multiple trunks or branches that extend very low";
         }
@@ -1570,7 +1531,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean ROTATE_LOGS = new OptionBoolean("Rotate Logs", true, true, true, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "When trees fall, should the logs rotate as they fall? (This makes it look more realistic, with logs landing horizontally)\n" +
                 "(Only used when log or leaf behavior is set to FALL or similar)";
         }
@@ -1581,7 +1542,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean CONVERT_WOOD_TO_LOG = new OptionBoolean("Convert Wood To Log", true, true, true, true){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should _WOOD blocks in trees be converted to _LOG when they drop as items?";
         }
         @Override
@@ -1601,7 +1562,7 @@ public abstract class Option<E>{
             return tl*tr*globalValue;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)";
         }
         @Override
@@ -1641,7 +1602,7 @@ public abstract class Option<E>{
             return tl*tr*globalValue;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How often should logs drop items? Set this to 0.0 to stop logs from dropping items altogether (Only works with BREAK behavior)";
         }
         @Override
@@ -1710,7 +1671,7 @@ public abstract class Option<E>{
             return "global-effects";
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Global effects are applied every time a tree is felled, regardless of tree type or tool\n" +
                 "use ALL for all effects\n" +
                 "ex:\n" +
@@ -1841,7 +1802,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools must have these enchantments at this level or higher to fell trees\n"
                 + "ex:\n"
                 + "- unbreaking: 2\n"
@@ -1991,7 +1952,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools must not have these enchantments or have them lower than this level to fell trees\n"
                 + "ex:\n"
                 + "- silk_touch: 1\n"
@@ -2065,7 +2026,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools with less than this much durability will be unable to fell trees";
         }
         @Override
@@ -2119,7 +2080,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools with more than this much durability will be unable to fell trees";
         }
         @Override
@@ -2174,7 +2135,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools with less than this percentage of durability will be unable to fell trees";
         }
         @Override
@@ -2229,7 +2190,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools with more than this percentage of durability will be unable to fell trees";
         }
         @Override
@@ -2263,7 +2224,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean PREVENT_BREAKAGE = new OptionBoolean("Prevent Breakage", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "If set to true, tools will not be able to fell a tree if doing so would break the tool.";
         }
         @Override
@@ -2328,7 +2289,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tools must have all literal strings in this list in order to fell trees\n"
                 + "ex:\n"
                 + "- Can fell trees";
@@ -2386,7 +2347,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "A tool's name must match exactly in order to fell trees (colors can be designated with &)";
         }
         @Override
@@ -2464,7 +2425,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Trees can only be cut down by players who have all permissons listed here\n"
                 + "ex:\n"
                 + "- treefeller.example";
@@ -2520,7 +2481,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What should the minimum time be for felling trees? (0-24000)";
         }
         @Override
@@ -2574,7 +2535,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What should the maximum time be for felling trees? (0-24000)";
         }
         @Override
@@ -2630,7 +2591,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What should the maximum phase be for felling trees? (0-7)\n" +
                 "Phases:\n" +
                 "0 = full moon\n" +
@@ -2695,7 +2656,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "What should the minimum phase be for felling trees? (0-7)\n" +
                 "Phases:\n" +
                 "0 = full moon\n" +
@@ -2757,7 +2718,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Tool's CustomModelData must match in order to fell trees";
         }
         @Override
@@ -2837,7 +2798,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
         }
         @Override
@@ -2887,7 +2848,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the tree feller work in adventure mode?";
         }
         @Override
@@ -2909,7 +2870,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the tree feller work in survival mode?";
         }
         @Override
@@ -2931,7 +2892,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the tree feller work in creative mode?";
         }
         @Override
@@ -2953,7 +2914,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the tree feller work when sneaking?";
         }
         @Override
@@ -2975,7 +2936,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the tree feller work when not sneaking?";
         }
         @Override
@@ -3050,7 +3011,7 @@ public abstract class Option<E>{
             return null;
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "In what worlds should the tree feller work? (Inverted if world-blacklist is set to true)";
         }
         @Override
@@ -3084,7 +3045,7 @@ public abstract class Option<E>{
     };
     public static OptionBoolean WORLD_BLACKLIST = new OptionBoolean("World Blacklist", true, true, true, false){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return null;
         }
         @Override
@@ -3125,7 +3086,7 @@ public abstract class Option<E>{
             return new DebugResult(this, SUCCESS);
         }
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "How long (in ticks) should players have to wait before felling another tree?";
         }
         @Override
@@ -3184,9 +3145,9 @@ public abstract class Option<E>{
     public String getFriendlyName(){
         return name;
     }
-    public ArrayList<String> getDescription(){
+    public ArrayList<String> getDescription(boolean ingame){
         ArrayList<String> description = new ArrayList<>();
-        String s = getDesc();
+        String s = getDesc(ingame);
         if(s==null)return description;
         if(s.contains("\n")){
             for(String str : s.split("\n")){
@@ -3195,7 +3156,7 @@ public abstract class Option<E>{
         }else description.add(s);
         return description;
     }
-    public abstract String getDesc();
+    public abstract String getDesc(boolean ingame);
     /**
      * @return the name in-this-format
      */

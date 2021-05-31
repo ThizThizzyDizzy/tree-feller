@@ -20,13 +20,13 @@ import org.bukkit.inventory.ItemStack;
 public class MMOCoreCompat extends InternalCompatibility{
     public static Option<HashMap<String, Double>> MMOCORE_TRUNK_XP = new Option<HashMap<String, Double>>("MMOCore Trunk XP", true, false, true, new HashMap<>(), "\n   - global: 1"){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "EXP will be provided to these professions when a tree is felled\n"
                     + "EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)\n"
-                    + "use \"global\" to add global experience\n"
+                    + "use \"global\" to add global experience"+(ingame?"":("\n"
                     + "ex:\n"
                     + "- global: 3\n"
-                    + "- woodcutting: 8";
+                    + "- woodcutting: 8"));
         }
         @Override
         public HashMap<String, Double> load(Object o){
@@ -129,13 +129,13 @@ public class MMOCoreCompat extends InternalCompatibility{
     };
     public static Option<HashMap<String, Double>> MMOCORE_LEAVES_XP = new Option<HashMap<String, Double>>("MMOCore Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "EXP will be provided to these professions when a tree is felled\n"
                     + "EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)\n"
-                    + "use \"global\" to add global experience\n"
+                    + "use \"global\" to add global experience"+(ingame?"":("\n"
                     + "ex:\n"
                     + "- global: 3\n"
-                    + "- woodcutting: 8";
+                    + "- woodcutting: 8"));
         }
         @Override
         public HashMap<String, Double> load(Object o){

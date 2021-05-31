@@ -243,7 +243,7 @@ public class MenuEffectConfiguration extends Menu{
                 }));
                 break;
             default:
-                throw new IllegalArgumentException("Unknown EffectType: "+effect.type+"! This is a bug!");
+                throw new IllegalArgumentException("Could not build GUI for EffectType: "+effect.type+"! This is a bug!");
         }
         add(new Button(size-1, makeItem(Material.BARRIER).setDisplayName("Back").addLore("Shift-right click to delete effect"), (click) -> {
             if(click==ClickType.LEFT)open(parent);

@@ -16,7 +16,7 @@ import org.bukkit.inventory.ItemStack;
 public class OreRegeneratorCompat extends InternalCompatibility{
     public static Option<Integer> OREREGENERATOR_REGEN_DELAY = new Option<Integer>("OreRegenerator Regen Delay", true, false, true, 1200, 1200){
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "The delay before trees should regenerate";
         }
         @Override
@@ -55,5 +55,9 @@ public class OreRegeneratorCompat extends InternalCompatibility{
     @Override
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
         dev.mrshawn.oreregenerator.api.utils.RegenUtils.doRegen(block.getLocation(), block.getType(), block.getBlockData(), OREREGENERATOR_REGEN_DELAY.get(tool, tree));
+    }
+    @Override
+    public boolean defaultEnabled(){
+        return false;
     }
 }

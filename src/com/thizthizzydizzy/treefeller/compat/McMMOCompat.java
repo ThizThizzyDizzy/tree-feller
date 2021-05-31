@@ -14,7 +14,7 @@ import org.bukkit.inventory.ItemStack;
 public class McMMOCompat extends InternalCompatibility{
     public static OptionBoolean MCMMO_DOUBLE_DROPS = new OptionBoolean("MCMMO Double Drops", true, true, true, true, true) {
         @Override
-        public String getDesc(){
+        public String getDesc(boolean ingame){
             return "Should the mcMMO Double Drops feature apply when cutting down trees?";
         }
         @Override

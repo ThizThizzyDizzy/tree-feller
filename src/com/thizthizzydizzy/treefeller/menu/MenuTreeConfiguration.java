@@ -77,7 +77,7 @@ public class MenuTreeConfiguration extends Menu{
                 continue;
             }
             if(i<pageMin)continue;
-            add(new Button(index, o.getConfigurationDisplayItem(tree).setDisplayName(o.getFriendlyName()).addLore(ChatColor.GRAY+shorten(Objects.toString(o.getValue(tree)), 42)).addLore(shorten(o.getDescription(), 42)), (click) -> {
+            add(new Button(index, o.getConfigurationDisplayItem(tree).setDisplayName(o.getFriendlyName()).addLore(ChatColor.GRAY+shorten(Objects.toString(o.getValue(tree)), 42)).addLore(shorten(o.getDescription(true), 42)), (click) -> {
                 if(click==ClickType.LEFT)o.openTreeModifyMenu(this, tree);
             }));
             index++;

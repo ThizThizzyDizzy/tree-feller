@@ -15,34 +15,26 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Axis;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Color;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
-import org.bukkit.entity.FallingBlock;
-import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.util.Vector;
 public class TreeFeller extends JavaPlugin{
     public static ArrayList<Tool> tools = new ArrayList<>();
     public static ArrayList<Tree> trees = new ArrayList<>();
@@ -53,7 +45,7 @@ public class TreeFeller extends JavaPlugin{
     public ArrayList<FallingTreeBlock> fallingBlocks = new ArrayList<>();
     public ArrayList<Sapling> saplings = new ArrayList<>();
     boolean debug = false;
-    private ArrayList<NaturalFall> naturalFalls = new ArrayList<>();
+    ArrayList<NaturalFall> naturalFalls = new ArrayList<>();
     private static final HashMap<Material, int[]> exp = new HashMap<>();
     static{//Perhaps this should be in the config rather than hard-coded...
         exp.put(Material.COAL_ORE, new int[]{0, 2});
@@ -726,100 +718,7 @@ public class TreeFeller extends JavaPlugin{
                     if(map.containsKey("chance")){
                         chance = ((Number)map.get("chance")).doubleValue();
                     }
-                    Effect effect;
-                    switch(type){
-                        case PARTICLE:
-                            Particle particle = getParticle((String) map.get("particle"));
-                            double x = 0;
-                            if(map.containsKey("x")){
-                                x = ((Number)map.get("x")).doubleValue();
-                            }
-                            double y = 0;
-                            if(map.containsKey("y")){
-                                y = ((Number)map.get("y")).doubleValue();
-                            }
-                            double z = 0;
-                            if(map.containsKey("z")){
-                                z = ((Number)map.get("z")).doubleValue();
-                            }
-                            double dx = 0;
-                            if(map.containsKey("dx")){
-                                dx = ((Number)map.get("dx")).doubleValue();
-                            }
-                            double dy = 0;
-                            if(map.containsKey("dy")){
-                                dy = ((Number)map.get("dy")).doubleValue();
-                            }
-                            double dz = 0;
-                            if(map.containsKey("dz")){
-                                dz = ((Number)map.get("dz")).doubleValue();
-                            }
-                            double speed = 0;
-                            if(map.containsKey("speed")){
-                                speed = ((Number)map.get("speed")).doubleValue();
-                            }
-                            int count = 1;
-                            if(map.containsKey("count")){
-                                count = ((Number)map.get("count")).intValue();
-                            }
-                            Object extra = null;
-                            switch(particle){
-                                case REDSTONE:
-                                    extra = new Particle.DustOptions(Color.fromRGB(((Number)map.get("r")).intValue(), ((Number)map.get("g")).intValue(), ((Number)map.get("b")).intValue()), ((Number)map.get("size")).floatValue());
-                                    break;
-                                case ITEM_CRACK:
-                                    extra = new ItemStack(Material.matchMaterial((String)map.get("item")));
-                                    break;
-                                case BLOCK_CRACK:
-                                case BLOCK_DUST:
-                                case FALLING_DUST:
-                                    extra = Bukkit.createBlockData(Material.matchMaterial((String)map.get("block")));
-                                    break;
-                            }
-                            effect = new Effect(name, location, chance, particle, x, y, z, dx, dy, dz, speed, count, extra);
-                            break;
-                        case SOUND:
-                            String sound = (String)map.get("sound");
-                            float volume = 1;
-                            if(map.containsKey("volume")){
-                                volume = ((Number)map.get("volume")).floatValue();
-                            }
-                            float pitch = 1;
-                            if(map.containsKey("pitch")){
-                                pitch = ((Number)map.get("pitch")).floatValue();
-                            }
-                            effect = new Effect(name, location, chance, sound, volume, pitch);
-                            break;
-                        case EXPLOSION:
-                            float power = ((Number)map.get("power")).floatValue();
-                            boolean fire = false;
-                            if(map.containsKey("fire")){
-                                fire = (boolean)map.get("fire");
-                            }
-                            effect = new Effect(name, location, chance, power, fire);
-                            break;
-                        case MARKER:
-                            boolean permanent = false;
-                            if(map.containsKey("permanent")){
-                                permanent = (boolean)map.get("permanent");
-                            }
-                            String[] tags = new String[0];
-                            if(map.containsKey("tags")){
-                                Object ob = map.get(tags);
-                                if(ob instanceof ArrayList){
-                                    ArrayList<String> list = (ArrayList<String>)map.get("tags");
-                                    tags = list.toArray(new String[list.size()]);
-                                }else if(ob instanceof String){
-                                    tags = new String[]{(String)ob};
-                                }else{
-                                    throw new IllegalArgumentException("Unknown marker tags format: "+ob+"! Please use an array or a String!");
-                                }
-                            }
-                            effect = new Effect(name, location, chance, permanent, tags);
-                            break;
-                        default:
-                            throw new IllegalArgumentException("Unknown effect type: "+type+"! This is a bug!");
-                    }
+                    Effect effect = type.loadEffect(name, location, chance, map);
                     if(Option.STARTUP_LOGS.isTrue())effect.print(logger);
                     this.effects.add(effect);
                 }else if(o instanceof String){
@@ -1014,96 +913,24 @@ public class TreeFeller extends JavaPlugin{
         }else{
             TreeFellerCompat.breakBlock(tree, tool, player, axe, block, modifiers);
         }
-        switch(behavior){
-            case INVENTORY:
-                if(player!=null){
-                    if(dropItems){
-                        int[] xp = new int[]{0};
-                        for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
-                            for(ItemStack st : player.getInventory().addItem(s).values()){
-                                TreeFellerCompat.dropItem(player, block.getWorld().dropItemNaturally(block.getLocation(), st));
-                            }
-                        }
-                        player.setTotalExperience(player.getTotalExperience()+xp[0]);
-                    }
-                    block.setType(Material.AIR);
-                    break;
-                }
-            case BREAK:
-                if(dropItems){
-                    int[] xp = new int[]{0};
-                    for(ItemStack s : getDropsWithBonus(block, tool, tree, axe, xp, modifiers)){
-                        TreeFellerCompat.dropItem(player, block.getWorld().dropItemNaturally(block.getLocation(), s));
-                    }
-                    dropExp(block.getWorld(), block.getLocation(), xp[0]);
-                }
-                block.setType(Material.AIR);
-                break;
-            case FALL_HURT:
-            case FALL:
-            case FALL_BREAK:
-            case FALL_HURT_BREAK:
-            case FALL_INVENTORY:
-            case FALL_HURT_INVENTORY:
-                FallingBlock falling = block.getWorld().spawnFallingBlock(block.getLocation().add(.5,.5,.5), block.getBlockData());
-                falling.addScoreboardTag("tree_feller");
-                Vector v = falling.getVelocity();
-                if(directionalFallVelocity>0){
-                    v.add(directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity));
-                }
-                v.add(new Vector((Math.random()*2-1)*randomFallVelocity, verticalFallVelocity, (Math.random()*2-1)*randomFallVelocity));
-                falling.setVelocity(v);
-                falling.setHurtEntities(behavior.name().contains("HURT"));
-                boolean doBreak = behavior.name().contains("BREAK");
-                Player inv = null;
-                if(behavior.name().contains("INVENTORY")){
-                    if(player==null)doBreak = true;
-                    else inv = player;
-                }
-                RotationData rot = null;
-                if(falling.getBlockData() instanceof Orientable&&rotate){
-                    rot = new RotationData((Orientable)falling.getBlockData(), origin);
-                }
-                block.setType(Material.AIR);
-                fallingBlocks.add(new FallingTreeBlock(falling, tool, tree, axe, doBreak, inv, rot, dropItems, modifiers));
-                break;
-            case NATURAL:
-                v = directionalFallBehavior.getDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity).normalize();
-                naturalFalls.add(new NaturalFall(player, v, origin, block, block.getY()-lowest, rotate, overridables));
-                block.setType(Material.AIR);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid block behavior: "+behavior);
-        }
+        behavior.breakBlock(this, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, verticalFallVelocity);
+        Random rand = new Random();
         for(Effect e : effects){
-            if(new Random().nextDouble()<e.chance)e.play(block);
+            if(rand.nextDouble()<e.chance)e.play(block);
         }
     }
-    public int randbetween(int[] minmax){
+    int randbetween(int[] minmax){
         return randbetween(minmax[0], minmax[1]);
     }
-    public int randbetween(int min, int max){
+    int randbetween(int min, int max){
         return new Random().nextInt(max-min+1)+min;
     }
-    private Collection<? extends ItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp, List<Modifier> modifiers){
+    Collection<? extends ItemStack> getDropsWithBonus(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp, List<Modifier> modifiers){
         if(xp.length!=1)throw new IllegalArgumentException("xp must be an array of size 1!");
         ArrayList<ItemStack> drops = new ArrayList<>();
         double dropChance = tree.trunk.contains(block.getType())?Option.LOG_DROP_CHANCE.get(tool, tree):Option.LEAF_DROP_CHANCE.get(tool, tree);
         for(Modifier mod : modifiers){
-            switch(mod.type){
-                case LOG_MULT:
-                    if(tree.trunk.contains(block.getType()))dropChance*=mod.value;
-                    break;
-                case LEAF_MULT:
-                    if(!tree.trunk.contains(block.getType()))dropChance*=mod.value;
-                    break;
-                case DROPS_MULT:
-                    dropChance*=mod.value;
-                    break;
-                default:
-                    getLogger().log(Level.WARNING, "Unhandled modifier: {0}! Please report this on github! (https://github.com/ThizThizzyDizzy/tree-feller)!", mod.toString());
-                    break;
-            }
+            dropChance = mod.apply(dropChance, tree, block);
         }
         boolean drop = true;
         int bonus = 0;
@@ -1125,7 +952,7 @@ public class TreeFeller extends JavaPlugin{
         }
         return drops;
     }
-    private Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
+    Collection<? extends ItemStack> getDrops(Block block, Tool tool, Tree tree, ItemStack axe, int[] xp){
         if(xp.length!=1)throw new IllegalArgumentException("blockXP must be an array of length 1!");
         if(exp.containsKey(block.getType())){
             xp[0] += randbetween(exp.get(block.getType()));
@@ -1161,7 +988,7 @@ public class TreeFeller extends JavaPlugin{
         return drops;
     }
     //Bukkit API lacks fortune/silk touch handling, so I have to do it the hard way...
-    private void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
+    static void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
         if(enchantmentLevel==0)return;
         switch(type){
             case COAL_ORE:
@@ -1250,7 +1077,7 @@ public class TreeFeller extends JavaPlugin{
                 break;
         }
     }
-    private void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
+    static void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
         if(enchantmentLevel==0)return;
         switch(type){
             case BEEHIVE:
@@ -1378,119 +1205,7 @@ public class TreeFeller extends JavaPlugin{
             }
         }
     }
-    private static class RotationData{
-        private final Axis axis;
-        private final int x;
-        private final int y;
-        private final int z;
-        public RotationData(Orientable data, Block origin){
-            this(data.getAxis(), origin.getX(), origin.getY(), origin.getZ());
-        }
-        public RotationData(Axis axis, int x, int y, int z){
-            this.axis = axis;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-    }
-    public class FallingTreeBlock{
-        public FallingBlock entity;
-        private final Tool tool;
-        private final Tree tree;
-        private final ItemStack axe;
-        private final boolean doBreak;
-        private final Player player;
-        private final RotationData rot;
-        private final boolean dropItems;
-        private final List<Modifier> modifiers;
-        public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems, List<Modifier> modifiers){
-            this.entity = entity;
-            this.tool = tool;
-            this.tree = tree;
-            this.axe = axe;
-            this.doBreak = doBreak;
-            this.player = player;
-            this.rot = rot;
-            this.dropItems = dropItems;
-            this.modifiers = modifiers;
-        }
-        public void land(EntityChangeBlockEvent event){
-            if(event.getTo()==Material.AIR)return;
-            if(event.getBlock().getRelative(0, -1, 0).isPassable()){
-                event.setCancelled(true);
-                FallingBlock falling = event.getBlock().getWorld().spawnFallingBlock(event.getBlock().getLocation().add(.5,.5,.5), event.getBlockData());
-                entity = falling;
-                falling.setVelocity(new Vector(0, event.getEntity().getVelocity().getY(), 0));
-                falling.setHurtEntities(((FallingBlock)event.getEntity()).canHurtEntities());
-                for(String s : event.getEntity().getScoreboardTags()){
-                    falling.addScoreboardTag(s);
-                }
-            }else{
-                int[] xp = new int[]{0};
-                if(!dropItems){
-                    event.setCancelled(true);
-                    fallingBlocks.remove(this);
-                    return;
-                }
-                ArrayList<ItemStack> drops = getDrops(event.getTo(), tool, tree, axe, event.getBlock(), xp, modifiers);
-                if(doBreak){
-                    event.setCancelled(true);
-                    for(ItemStack drop : drops){
-                        TreeFellerCompat.dropItem(player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop));
-                    }
-                    dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
-                }
-                if(player!=null){
-                    event.setCancelled(true);
-                    for(ItemStack drop : drops){
-                        for(ItemStack stack : player.getInventory().addItem(drop).values())TreeFellerCompat.dropItem(player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
-                    }
-                    player.setTotalExperience(player.getTotalExperience()+xp[0]);
-                }
-                fallingBlocks.remove(this);
-                if(event.isCancelled())return;
-                if(rot!=null){
-                    Axis axis = rot.axis;
-                    double xDiff = Math.abs(rot.x-event.getEntity().getLocation().getX());
-                    double yDiff = Math.abs(rot.y-event.getEntity().getLocation().getY());
-                    double zDiff = Math.abs(rot.z-event.getEntity().getLocation().getZ());
-                    Axis newAxis = Axis.Y;
-                    if(Math.max(Math.max(xDiff, yDiff), zDiff)==xDiff)newAxis = Axis.X;
-                    if(Math.max(Math.max(xDiff, yDiff), zDiff)==zDiff)newAxis = Axis.Z;
-                    if(newAxis==Axis.X){
-                        switch(axis){
-                            case X:
-                                axis = Axis.Y;
-                                break;
-                            case Y:
-                                axis = Axis.X;
-                                break;
-                            case Z:
-                                break;
-                        }
-                    }
-                    if(newAxis==Axis.Z){
-                        switch(axis){
-                            case X:
-                                break;
-                            case Y:
-                                axis = Axis.Z;
-                                break;
-                            case Z:
-                                axis = Axis.X;
-                                break;
-                        }
-                    }
-                    Orientable data = (Orientable)event.getBlockData();
-                    data.setAxis(axis);
-                    event.setCancelled(true);
-                    event.getBlock().setType(event.getTo());
-                    event.getBlock().setBlockData(data);
-                }
-            }
-        }
-    }
-    private ArrayList<ItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp, List<Modifier> modifiers){
+    ArrayList<ItemStack> getDrops(Material m, Tool tool, Tree tree, ItemStack axe, Block location, int[] xp, List<Modifier> modifiers){
         ArrayList<ItemStack> drops = new ArrayList<>();
         if(!m.isBlock())return drops;
         Block block = findAir(location);
@@ -1516,96 +1231,9 @@ public class TreeFeller extends JavaPlugin{
         getLogger().log(Level.SEVERE, "Could not find any nearby air blocks to simulate drops!");
         return null;
     }
-    private class NaturalFall{
-        private static final double interval = 0.1;
-        private final Player player;
-        private final Vector v;
-        private final Block origin;
-        private final Block block;
-        private final int height;
-        private final Material material;
-        private Axis axis = null;
-        private final ArrayList<Material> overridables;
-        private boolean fell = false;
-        public NaturalFall(Player player, Vector v, Block origin, Block block, int height, boolean rotate, ArrayList<Material> overridables){
-            this.player = player;
-            this.v = v.multiply(interval);
-            this.origin = origin;
-            this.block = block;
-            this.height = height;
-            this.material = block.getType();
-            if(rotate&&block.getBlockData() instanceof Orientable){
-                axis = ((Orientable)block.getBlockData()).getAxis();
-            }
-            this.overridables = overridables;
-        }
-        public void fall(){
-            if(fell)return;
-            fell = true;
-            double dist = 0;
-            Block target = block;
-            Location l = block.getLocation().add(.5,.5,.5);
-            while(dist<height){
-                dist+=interval;
-                l = l.add(v);
-                Block b = l.getBlock();
-                triggerNaturalFall(b);
-                if(overridables.contains(b.getType()))target = b;
-                else break;
-            }
-            Block b;
-            while(overridables.contains((b = target.getRelative(0, -1, 0)).getType())){
-                triggerNaturalFall(b);
-                target = b;
-            }
-            target.setType(material);
-            if(axis!=null){
-                double xDiff = Math.abs(origin.getX()-target.getX());
-                double yDiff = Math.abs(origin.getY()-target.getY());
-                double zDiff = Math.abs(origin.getZ()-target.getZ());
-                Axis newAxis = Axis.Y;
-                if(Math.max(Math.max(xDiff, yDiff), zDiff)==xDiff)newAxis = Axis.X;
-                if(Math.max(Math.max(xDiff, yDiff), zDiff)==zDiff)newAxis = Axis.Z;
-                if(newAxis==Axis.X){
-                    switch(axis){
-                        case X:
-                            axis = Axis.Y;
-                            break;
-                        case Y:
-                            axis = Axis.X;
-                            break;
-                        case Z:
-                            break;
-                    }
-                }
-                if(newAxis==Axis.Z){
-                    switch(axis){
-                        case X:
-                            break;
-                        case Y:
-                            axis = Axis.Z;
-                            break;
-                        case Z:
-                            axis = Axis.X;
-                            break;
-                    }
-                }
-                BlockData data = target.getBlockData();
-                ((Orientable)data).setAxis(axis);
-                target.setBlockData(data);
-            }
-            TreeFellerCompat.addBlock(player, target);
-        }
-        private void triggerNaturalFall(Block b){
-            for(NaturalFall fall : naturalFalls){
-                if(fall==this)continue;
-                if(fall.block.equals(b))fall.fall();
-            }
-        }
-    }
     private void processNaturalFalls(){
         for(NaturalFall fall : naturalFalls){
-            fall.fall();
+            fall.fall(this);
         }
         naturalFalls.clear();
     }
@@ -1671,7 +1299,7 @@ public class TreeFeller extends JavaPlugin{
         }
         return indent;
     }
-    private void dropExp(World world, Location location, int xp){
+    void dropExp(World world, Location location, int xp){
         while(xp>2477){
             dropExpOrb(world, location, 2477);
             xp-=2477;
