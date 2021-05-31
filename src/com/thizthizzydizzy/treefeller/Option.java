@@ -14,6 +14,7 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyShort;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringSet;
+import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyDirectionalFallBehavior;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyEffectList;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyFellBehavior;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifySpawnSaplings;
@@ -1092,8 +1093,9 @@ public abstract class Option<E>{
             String s = "What felling behavior should logs have?\n";
             if(!ingame){
                 s+="Valid options:\n";
+                int width = findMaxWidth(FellBehavior.values());
                 for(FellBehavior behavior : FellBehavior.values()){
-                    s+=behavior.name()+" - "+behavior.getDescription();
+                    s+=normalize(behavior.name(), width)+" "+behavior.getDescription()+"\n";
                 }
             }
             s+="Note that falling blocks occasionally drop as items if they land wrong";
@@ -1142,8 +1144,9 @@ public abstract class Option<E>{
             String s = "What felling behavior should leaves have?\n";
             if(!ingame){
                 s+="Valid options:\n";
+                int len = findMaxWidth(FellBehavior.values());
                 for(FellBehavior behavior : FellBehavior.values()){
-                    s+=behavior.name()+" - "+behavior.getDescription();
+                    s+=normalize(behavior.name(), len)+" "+behavior.getDescription()+"\n";
                 }
             }
             s+="Note that falling blocks occasionally drop as items if they land wrong";
@@ -1189,22 +1192,16 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "Which direction should the tree fall in?\n" +
-                "(Only used when log or leaf behavior is set to FALL or similar)\n" +
-                "Valid options:\n" +
-                "RANDOM     The tree will fall in a random direction\n" +
-                "TOWARD     The tree will fall towards the player\n" +
-                "AWAY       The tree will fall away from the player\n" +
-                "LEFT       The tree will fall to the player's left\n" +
-                "RIGHT      The tree will fall to the player's right\n" +
-                "NORTH      The tree will fall to the north\n" +
-                "SOUTH      The tree will fall to the south\n" +
-                "EAST       The tree will fall to the east\n" +
-                "WEST       The tree will fall to the west\n" +
-                "NORTH_WEST The tree fill fall to the northwest\n" +
-                "NORTH_EAST The tree fill fall to the northeast\n" +
-                "SOUTH_WEST The tree fill fall to the southwest\n" +
-                "SOUTH_EAST The tree fill fall to the southeast";
+            String s = "Which direction should the tree fall in?\n" +
+                "(Only used when log or leaf behavior is set to FALL or similar)\n";
+            if(!ingame){
+                s+="Valid options:\n";
+                int i = findMaxWidth(DirectionalFallBehavior.values());
+                for(DirectionalFallBehavior behavior : DirectionalFallBehavior.values()){
+                    s+=normalize(behavior.name(), i)+" "+behavior.getDescription()+"\n";
+                }
+            }
+            return s;
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(DirectionalFallBehavior value){
@@ -1212,38 +1209,23 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyEnum<DirectionalFallBehavior>(parent, parent.plugin, parent.player, name, "DirectionalFallBehavior", false, globalValue, DirectionalFallBehavior.values(), (value) -> {
+            parent.open(new MenuModifyDirectionalFallBehavior(parent, parent.plugin, parent.player, name, false, globalValue, DirectionalFallBehavior.values(), (value) -> {
                 globalValue = value;
-            }){
-                @Override
-                public Material getItem(DirectionalFallBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyEnum<DirectionalFallBehavior>(parent, parent.plugin, parent.player, name, "DirectionalFallBehavior", true, toolValues.get(tool), DirectionalFallBehavior.values(), (value) -> {
+            parent.open(new MenuModifyDirectionalFallBehavior(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), DirectionalFallBehavior.values(), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
-            }){
-                @Override
-                public Material getItem(DirectionalFallBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyEnum<DirectionalFallBehavior>(parent, parent.plugin, parent.player, name, "DirectionalFallBehavior", true, treeValues.get(tree), DirectionalFallBehavior.values(), (value) -> {
+            parent.open(new MenuModifyDirectionalFallBehavior(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), DirectionalFallBehavior.values(), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
-            }){
-                @Override
-                public Material getItem(DirectionalFallBehavior value){
-                    return value.getItem();
-                }
-            });
+            }));
         }
     };
     public static Option<HashSet<Material>> OVERRIDABLES = new Option<HashSet<Material>>("Overridables", true, true, true, defaultOverridables){
@@ -1673,10 +1655,10 @@ public abstract class Option<E>{
         @Override
         public String getDesc(boolean ingame){
             return "Global effects are applied every time a tree is felled, regardless of tree type or tool\n" +
-                "use ALL for all effects\n" +
+                "use ALL for all effects"+(ingame?"":("\n" +
                 "ex:\n" +
                 "  - ghost sound\n" +
-                "  - smoke";
+                "  - smoke"));
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(ArrayList<Effect> value){
@@ -1803,10 +1785,10 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "Tools must have these enchantments at this level or higher to fell trees\n"
+            return "Tools must have these enchantments at this level or higher to fell trees"+(ingame?"":("\n"
                 + "ex:\n"
                 + "- unbreaking: 2\n"
-                + "- efficiency: 5";
+                + "- efficiency: 5"));
         }
         @Override
         public String[] getDebugText(){
@@ -1953,10 +1935,10 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "Tools must not have these enchantments or have them lower than this level to fell trees\n"
+            return "Tools must not have these enchantments or have them lower than this level to fell trees"+(ingame?"":("\n"
                 + "ex:\n"
                 + "- silk_touch: 1\n"
-                + "- unbreaking: 3";
+                + "- unbreaking: 3"));
         }
         @Override
         public String[] getDebugText(){
@@ -2290,9 +2272,9 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "Tools must have all literal strings in this list in order to fell trees\n"
+            return "Tools must have all literal strings in this list in order to fell trees"+(ingame?"":("\n"
                 + "ex:\n"
-                + "- Can fell trees";
+                + "- Can fell trees"));
         }
         @Override
         public String[] getDebugText(){
@@ -2426,9 +2408,9 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "Trees can only be cut down by players who have all permissons listed here\n"
+            return "Trees can only be cut down by players who have all permissons listed here"+(ingame?"":("\n"
                 + "ex:\n"
-                + "- treefeller.example";
+                + "- treefeller.example"));
         }
         @Override
         public String[] getDebugText(){
@@ -2799,7 +2781,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
+            return "If set, the tool can only fell specific trees. The given value is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
         }
         @Override
         public String[] getDebugText(){
@@ -3496,5 +3478,14 @@ public abstract class Option<E>{
     }
     public String writeToConfig(Tree tree){
         return writeToConfig(getValue(tree));
+    }
+    private static int findMaxWidth(Object[] objs){
+        int len = 0;
+        for(Object o : objs)len = Math.max(len, Objects.toString(o).length());
+        return len;
+    }
+    private static String normalize(String name, int width){
+        while(name.length()<width)name+=" ";
+        return name;
     }
 }

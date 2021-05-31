@@ -87,32 +87,30 @@ grass:
 
 # What felling behavior should logs have?
 # Valid options:
-# BREAK (default)     The logs will break and fall as items
-# FALL                The logs will fall as falling blocks
-# FALL_HURT           The logs will fall as falling blocks and hurt any entity they land on
-# FALL_BREAK          The logs will fall as falling blocks and break when they reach the ground
-# FALL_HURT_BREAK     The logs will fall as falling brocks, hurt entities they land on, and break when they reach the ground
-# INVENTORY           The logs will appear in the player's inventory as items
-# FALL_INVENTORY      The logs will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
-# FALL_HURT_INVENTORY The logs will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
-# NATURAL             The logs will instantly fall in a more natural way (May not work with cutting-animation)
-# WARNING: FALL_HURT behaviors may destroy items the blocks land on
+# BREAK               blocks will break and fall as items
+# FALL                blocks will fall as falling blocks
+# FALL_HURT           blocks will fall as falling blocks and hurt any entity they land on
+# FALL_BREAK          blocks will fall as falling blocks and break when they reach the ground
+# FALL_HURT_BREAK     blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground
+# INVENTORY           blocks will appear in the player's inventory as items, or fall as items if the player inventory is full
+# FALL_INVENTORY      blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
+# FALL_HURT_INVENTORY blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
+# NATURAL             blocks will instantly fall in a more natural way (May not work with cutting-animation)
 # Note that falling blocks occasionally drop as items if they land wrong
 log-behavior: BREAK
 
 # What felling behavior should leaves have?
 # Valid options:
-# BREAK (default)     The leaves will break and fall as items
-# FALL                The leaves will fall as falling blocks
-# FALL_HURT           The leaves will fall as falling blocks and hurt any entity they land on
-# FALL_BREAK          The leaves will fall as falling blocks and break when they reach the ground (Leaf blocks will be dropped)
-# FALL_HURT_BREAK     The leaves will fall as falling brocks, hurt entities they land on, and break when they reach the ground. (Leaf blocks will be dropped)
-# INVENTORY           The leaves will appear in the player's inventory as items
-# FALL_INVENTORY      The leaves will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
-# FALL_HURT_INVENTORY The leaves will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
-# NATURAL             The leaves will instantly fall in a more natural way (May not work with cutting-animation)
-# WARNING: FALL_HURT behaviors may destroy items the blocks land on
-# Note that falling blocks occasionally drop as items if they land wrong, and falling leaves will drop leaf blocks if they do
+# BREAK               blocks will break and fall as items
+# FALL                blocks will fall as falling blocks
+# FALL_HURT           blocks will fall as falling blocks and hurt any entity they land on
+# FALL_BREAK          blocks will fall as falling blocks and break when they reach the ground
+# FALL_HURT_BREAK     blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground
+# INVENTORY           blocks will appear in the player's inventory as items, or fall as items if the player inventory is full
+# FALL_INVENTORY      blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
+# FALL_HURT_INVENTORY blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
+# NATURAL             blocks will instantly fall in a more natural way (May not work with cutting-animation)
+# Note that falling blocks occasionally drop as items if they land wrong
 leaf-behavior: BREAK
 
 # Which direction should the tree fall in?
@@ -127,10 +125,10 @@ leaf-behavior: BREAK
 # SOUTH      The tree will fall to the south
 # EAST       The tree will fall to the east
 # WEST       The tree will fall to the west
-# NORTH_WEST The tree fill fall to the northwest
-# NORTH_EAST The tree fill fall to the northeast
-# SOUTH_WEST The tree fill fall to the southwest
-# SOUTH_EAST The tree fill fall to the southeast
+# NORTH_EAST The tree will fall to the northeast
+# SOUTH_EAST The tree will fall to the southeast
+# NORTH_WEST The tree will fall to the northwest
+# SOUTH_WEST The tree will fall to the southwest
 directional-fall-behavior: RANDOM
 
 # This is the list of blocks that may be overridden when a tree falls onto them (e.g air, grass, water)
@@ -355,7 +353,7 @@ compatibility-towny: true
 oreregenerator-regen-delay: 1200
 
 # Toggle compatibility with OreRegenerator
-compatibility-oreregenerator: true
+compatibility-oreregenerator: false
 
 # Toggle compatibility with Drop2Inventory
 compatibility-drop2inventory: true
@@ -418,7 +416,7 @@ compatibility-drop2inventory: true
 # min-phase
 # max-phase
 # custom-model-data
-# allowed-trees         The tool can only fell specific trees. <values> is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
+# allowed-trees                      If set, the tool can only fell specific trees. The given value is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # enable-adventure
 # enable-survival
 # enable-creative
@@ -448,76 +446,76 @@ tools:
 # Format:
 #    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]
 # Any of the following variables may be used: (See above for descriptions)
-# leaf-detect-range:
-# leaf-break-range:
-# required-logs:
-# required-leaves:
-# max-logs:
-# max-height:
-# allow-partial:
-# player-leaves:
-# diagonal-leaves:
-# ignore-leaf-data:
-# require-cross-section:
-# force-distance-check:
-# banned-logs:
-# banned-leaves:
-# max-horizontal-trunk-pillar-length:
-# max-trunks:
-# cutting-animation:
-# anim-delay:
-# replant-saplings:
-# spawn-saplings:
-# sapling:        If replant-saplings is enabled, this will replant the tree with this type of sapling
-# max-saplings:        If replant-saplings is enabled, this will limit the number of saplings that can be replanted
-# grass:
-# log-behavior:
-# leaf-behavior:
-# directional-fall-behavior:
-# overridables:
-# lock-fall-cardinal:
-# directional-fall-velocity:
-# vertical-fall-velocity:
-# random-fall-velocity:
-# respect-unbreaking:
-# damage-mult:
-# leaf-fortune:
-# leaf-silk-touch:
-# log-fortune:
-# log-silk-touch:
-# leave-stump:
-# rotate-logs:
-# convert-wood-to-log:
-# leaf-drop-chance:
-# log-drop-chance:
-# global-effects:
-# required-enchantments:
-# banned-enchantments:
-# min-durability:
-# max-durability:
-# min-durability-percent:
-# max-durability-percent:
-# prevent-breakage:
-# required-lore:
-# required-name:
-# required-permissions:
-# min-time:
-# max-time:
-# min-phase:
-# max-phase:
-# custom-model-data:
-# enable-adventure:
-# enable-survival:
-# enable-creative:
-# with-sneak:
-# without-sneak:
-# worlds:
-# world-blacklist:
-# cooldown:
-# mmocore-trunk-xp:
-# mmocore-leaves-xp:
-# mcmmo-double-drops:
-# oreregenerator-regen-delay:
+# leaf-detect-range
+# leaf-break-range
+# required-logs
+# required-leaves
+# max-logs
+# max-height
+# allow-partial
+# player-leaves
+# diagonal-leaves
+# ignore-leaf-data
+# require-cross-section
+# force-distance-check
+# banned-logs
+# banned-leaves
+# max-horizontal-trunk-pillar-length
+# max-trunks
+# cutting-animation
+# anim-delay
+# replant-saplings
+# spawn-saplings
+# sapling                            If replant-saplings is enabled, this will replant the tree with this type of sapling
+# max-saplings                       If replant-saplings is enabled, this will limit the number of saplings that can be replanted
+# grass
+# log-behavior
+# leaf-behavior
+# directional-fall-behavior
+# overridables
+# lock-fall-cardinal
+# directional-fall-velocity
+# vertical-fall-velocity
+# random-fall-velocity
+# respect-unbreaking
+# damage-mult
+# leaf-fortune
+# leaf-silk-touch
+# log-fortune
+# log-silk-touch
+# leave-stump
+# rotate-logs
+# convert-wood-to-log
+# leaf-drop-chance
+# log-drop-chance
+# global-effects
+# required-enchantments
+# banned-enchantments
+# min-durability
+# max-durability
+# min-durability-percent
+# max-durability-percent
+# prevent-breakage
+# required-lore
+# required-name
+# required-permissions
+# min-time
+# max-time
+# min-phase
+# max-phase
+# custom-model-data
+# enable-adventure
+# enable-survival
+# enable-creative
+# with-sneak
+# without-sneak
+# worlds
+# world-blacklist
+# cooldown
+# mmocore-trunk-xp
+# mmocore-leaves-xp
+# mcmmo-double-drops
+# oreregenerator-regen-delay
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]

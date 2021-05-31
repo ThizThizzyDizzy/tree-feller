@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  *  This class is not used at runtime.
@@ -34,10 +35,15 @@ public class ConfigGenerator{
         add("# Format:");
         add("#    - {type: AXE_MATERIAL, <variables>}");
         add("# Any of the following variables may be used: (See above for descriptions)");
+        int len = 0;
+        for(Option o : Option.options){
+            if(!o.tool)continue;
+            len = Math.max(len, ("# "+o.getGlobalName()).length());
+        }
         for(Option o : Option.options){
             if(!o.tool)continue;
             if(o.global)add("# "+o.getGlobalName());
-            else add("# "+o.getGlobalName()+"         "+o.getDesc(false));
+            else add(normalize("# "+o.getGlobalName(), len)+" "+o.getDesc(false));
         }
         add("# AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree");
         add("# Examples of valid tools:");
@@ -56,10 +62,15 @@ public class ConfigGenerator{
         add("# Format:");
         add("#    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]");
         add("# Any of the following variables may be used: (See above for descriptions)");
+        len = 0;
         for(Option o : Option.options){
             if(!o.tree)continue;
-            if(o.global)add("# "+o.getGlobalName()+":");
-            else add("# "+o.getGlobalName()+":        "+o.getDesc(false));
+            len = Math.max(len, ("# "+o.getGlobalName()).length());
+        }
+        for(Option o : Option.options){
+            if(!o.tree)continue;
+            if(o.global)add("# "+o.getGlobalName());
+            else add(normalize("# "+o.getGlobalName(), len)+" "+o.getDesc(false));
         }
         add("# Examples of valid trees:");
         add("#    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]");
@@ -187,10 +198,15 @@ public class ConfigGenerator{
             add("# Format:");
             add("#    - {type: AXE_MATERIAL, <variables>}");
             add("# Any of the following variables may be used: (See above for descriptions)");
+            int len = 0;
+            for(Option o : Option.options){
+                if(!o.tool)continue;
+                len = Math.max(len, ("# "+o.getGlobalName()).length());
+            }
             for(Option o : Option.options){
                 if(!o.tool)continue;
                 if(o.global)add("# "+o.getGlobalName());
-                else add("# "+o.getGlobalName()+"         "+o.getDesc(false));
+                else add(normalize("# "+o.getGlobalName(), len)+" "+o.getDesc(false));
             }
             add("# AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree");
             add("# Examples of valid tools:");
@@ -212,10 +228,15 @@ public class ConfigGenerator{
             add("# Format:");
             add("#    - [[TRUNK_MATERIALS], [LEAF_MATERIALS], {<options>}]");
             add("# Any of the following variables may be used: (See above for descriptions)");
+            len = 0;
             for(Option o : Option.options){
                 if(!o.tree)continue;
-                if(o.global)add("# "+o.getGlobalName()+":");
-                else add("# "+o.getGlobalName()+":        "+o.getDesc(false));
+                len = Math.max(len, ("# "+o.getGlobalName()).length());
+            }
+            for(Option o : Option.options){
+                if(!o.tree)continue;
+                if(o.global)add("# "+o.getGlobalName());
+                else add(normalize("# "+o.getGlobalName(), len)+" "+o.getDesc(false));
             }
             add("# Examples of valid trees:");
             add("#    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]");
@@ -309,9 +330,7 @@ public class ConfigGenerator{
             write(new File("src\\config.yml"));
             return;
         }
-        String message = "To install the Tree Feller, put this file in the plugins folder on your server";
-        System.out.println(message);
-        //JOptionPane.showMessageDialog(null, message, "Installation instructions", JOptionPane.INFORMATION_MESSAGE);
+        System.out.println("To install the Tree Feller, put this file in the plugins folder on your server");
     }
     private static String read(File file){
         String text = "";
@@ -341,5 +360,14 @@ public class ConfigGenerator{
     }
     private static void add(){
         add("");
+    }
+    private static int findMaxWidth(Object[] objs){
+        int len = 0;
+        for(Object o : objs)len = Math.max(len, Objects.toString(o).length());
+        return len;
+    }
+    private static String normalize(String name, int width){
+        while(name.length()<width)name+=" ";
+        return name;
     }
 }

@@ -5,88 +5,90 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 public enum DirectionalFallBehavior{
-    RANDOM(Material.BELL){
+    RANDOM(Material.BELL, "The tree will fall in a random direction"){
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             double angle = new Random(seed).nextDouble()*Math.PI*2;
             return new Vector(Math.cos(angle),0,Math.sin(angle));
         }
     },
-    TOWARD(Material.DISPENSER) {
+    TOWARD(Material.DISPENSER, "The tree will fall towards the player") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return player==null?null:new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ());
         }
     },
-    AWAY(Material.DROPPER) {
+    AWAY(Material.DROPPER, "The tree will fall away from the player") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return player==null?null:new Vector(player.getLocation().getX()-block.getLocation().getX(),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getZ()-block.getLocation().getZ()).multiply(-1);
         }
     },
-    LEFT(Material.CROSSBOW) {
+    LEFT(Material.CROSSBOW, "The tree will fall to the player's left") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return player==null?null:new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX());
         }
     },
-    RIGHT(Material.WOODEN_SWORD) {
+    RIGHT(Material.WOODEN_SWORD, "The tree will fall to the player's right") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return player==null?null:new Vector(-(player.getLocation().getZ()-block.getLocation().getZ()),player.getLocation().getY()-block.getLocation().getY(),player.getLocation().getX()-block.getLocation().getX()).multiply(-1);
         }
     },
-    NORTH(Material.RED_CONCRETE) {
+    NORTH(Material.RED_CONCRETE, "The tree will fall to the north") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(0, 0, -1);
         }
     },
-    SOUTH(Material.BLUE_CONCRETE) {
+    SOUTH(Material.BLUE_CONCRETE, "The tree will fall to the south") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(0, 0, 1);
         }
     },
-    EAST(Material.YELLOW_CONCRETE) {
+    EAST(Material.YELLOW_CONCRETE, "The tree will fall to the east") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(1, 0, 0);
         }
     },
-    WEST(Material.GREEN_CONCRETE) {
+    WEST(Material.GREEN_CONCRETE, "The tree will fall to the west") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(-1, 0, 0);
         }
     },
-    NORTH_EAST(Material.RED_TERRACOTTA) {
+    NORTH_EAST(Material.RED_TERRACOTTA, "The tree will fall to the northeast") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(1, 0, -1);
         }
     },
-    SOUTH_EAST(Material.YELLOW_TERRACOTTA) {
+    SOUTH_EAST(Material.YELLOW_TERRACOTTA, "The tree will fall to the southeast") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(1, 0, 1);
         }
     },
-    NORTH_WEST(Material.GREEN_TERRACOTTA) {
+    NORTH_WEST(Material.GREEN_TERRACOTTA, "The tree will fall to the northwest") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(-1, 0, -1);
         }
     },
-    SOUTH_WEST(Material.BLUE_TERRACOTTA) {
+    SOUTH_WEST(Material.BLUE_TERRACOTTA, "The tree will fall to the southwest") {
         @Override
         Vector getDefaultDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
             return new Vector(-1, 0, 1);
         }
     };
     private final Material item;
-    private DirectionalFallBehavior(Material item){
+    private final String description;
+    private DirectionalFallBehavior(Material item, String description){
         this.item = item;
+        this.description = description;
     }
     public static DirectionalFallBehavior match(String s){
         return valueOf(s.toUpperCase().trim().replace("-", "_"));
@@ -110,5 +112,8 @@ public enum DirectionalFallBehavior{
     }
     public Material getItem(){
         return item;
+    }
+    public String getDescription(){
+        return description;
     }
 }
