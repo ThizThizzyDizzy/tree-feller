@@ -3,6 +3,7 @@ import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
@@ -60,6 +61,11 @@ public class TreeFellerCompat{
         }
         return null;
     }
+    public static void fellTree(Block block, Player player, ItemStack axe, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks){
+        for(PluginCompatibility compat : getCompatibilities()){
+            compat.fellTree(block, player, axe, tool, tree, blocks);
+        }
+    }
     public static void addPluginCompatibility(PluginCompatibility compatibility){
         PluginCompatibility override = null;
         for(PluginCompatibility compat : compatibilities){
@@ -74,7 +80,10 @@ public class TreeFellerCompat{
                 }
             }
         }
-        if(override!=null)compatibilities.remove(override);
+        if(override!=null){
+            compatibilities.remove(override);
+            compatibility.enabled = override.enabled;
+        }
         compatibilities.add(compatibility);
     }
     public static void reload(){

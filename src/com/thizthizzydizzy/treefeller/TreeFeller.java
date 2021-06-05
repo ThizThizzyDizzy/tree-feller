@@ -172,6 +172,7 @@ public class TreeFeller extends JavaPlugin{
                     if(!result.isSuccess())continue TOOL;
                 }
                 debug(player, true, true, "success");
+                TreeFellerCompat.fellTree(block, player, axe, tool, tree, blocks);
                 if(Option.LEAVE_STUMP.get(tool, tree)){
                     for(int i : blocks.keySet()){
                         for(Iterator<Block> it = blocks.get(i).iterator(); it.hasNext();){

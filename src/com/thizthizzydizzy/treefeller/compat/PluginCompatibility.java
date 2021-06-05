@@ -4,6 +4,8 @@ import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -11,7 +13,10 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public abstract class PluginCompatibility{
-    private final OptionBoolean enabled;
+    /**
+     * This is the option that enables or disables this compatibility.
+     */
+    public OptionBoolean enabled;
     public PluginCompatibility(){
         enabled = new OptionBoolean("Compatibility "+getPluginName(), true, false, false, defaultEnabled(), defaultEnabled()){
             @Override
@@ -31,17 +36,51 @@ public abstract class PluginCompatibility{
     public abstract String getPluginName();
     /**
      * Called when a block is removed, but not broken, such as when a tree falls over
+     * @param player the player that caused the block to be removed
+     * @param block the block that was removed
      */
     public void removeBlock(Player player, Block block){}
     /**
-     * Called when a block is broken by a player
+     * Called when a block is broken by a player as part of felling a tree
+     * @param tree the tree that was cut down
+     * @param tool the tool that was used
+     * @param player the player that felled the tree
+     * @param axe the item that was used to fell the tree
+     * @param block the block that was broken
+     * @param modifiers a list of modifiers for multiplying item/exp drops
      */
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){}
+    /**
+     * Called when a block is added, such as when trees land from the NATURAL fell behavior
+     * @param player the player who caused this to happen
+     * @param block the block that was added
+     */
     public void addBlock(Player player, Block block){}
+    /**
+     * Called whenever TreeFeller drops an item
+     * @param player the player who dropped the item, if any
+     * @param item the item that was dropped
+     */
     public void dropItem(Player player, Item item){}
+    /**
+     * Tests if the player can break a certain block
+     * @param player the player
+     * @param block the block to test
+     * @return true if the player can break the given block
+     */
     public boolean test(Player player, Block block){
         return true;
     }
+    /**
+     * Called when a tree is successfully felled, but before the felling happens
+     * @param block the block that was broken
+     * @param player the player that felled the tree
+     * @param axe the item that was used to fell the tree
+     * @param tool the tool that was used
+     * @param tree the tree that was felled
+     * @param blocks the blocks of the tree, stored by distance from the first block
+     */
+    public void fellTree(Block block, Player player, ItemStack axe, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks){}
     public boolean defaultEnabled(){
         return true;
     }
@@ -54,6 +93,11 @@ public abstract class PluginCompatibility{
     public String getFriendlyName(){
         return getPluginName();
     }
+    /**
+     * If the compatibility is enabled or not.
+     * You may wish to override this method and return <code>true</code> for custom compatibilities
+     * @return true if this compatibility should be run
+     */
     public boolean isEnabled(){
         return enabled.isTrue();
     }
