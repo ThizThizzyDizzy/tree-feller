@@ -79,6 +79,9 @@ replant-saplings: false
 # 2 = Yes, always spawn new saplings
 spawn-saplings: 0
 
+# The amount of delay a sapling may take to respawn (if spawn saplings is set to 1, saplings will be spawned only after this amount of time, but will still be immediately planted upon dropping from leaves)
+sapling-timeout: 50
+
 # What blocks can saplings be planted on?
 grass: 
     - DIRT
@@ -155,6 +158,10 @@ directional-fall-velocity: 0.35
 # How much upwards velocity should falling trees get?
 # (Only used when log or leaf behavior is set to FALL or similar)
 vertical-fall-velocity: 0.05
+
+# How much explosive sideways velocity should falling blocks get? Velocity is applied away from the block that was used to cut down the tree (no velocity will be applied to blocks in the exact center)
+# (Only used when log or leaf behavior is set to FALL or similar)
+explosive-fall-velocity: 0.0
 
 # How much random sideways velocity should falling blocks get?
 # (Only used when log or leaf behavior is set to FALL or similar)
@@ -380,6 +387,7 @@ compatibility-drop2inventory: true
 # anim-delay
 # replant-saplings
 # spawn-saplings
+# sapling-timeout
 # log-behavior
 # leaf-behavior
 # directional-fall-behavior
@@ -387,6 +395,7 @@ compatibility-drop2inventory: true
 # lock-fall-cardinal
 # directional-fall-velocity
 # vertical-fall-velocity
+# explosive-fall-velocity
 # random-fall-velocity
 # respect-unbreaking
 # damage-mult
@@ -467,6 +476,7 @@ tools:
 # replant-saplings
 # spawn-saplings
 # sapling                            If replant-saplings is enabled, this will replant the tree with this type of sapling
+# sapling-timeout
 # max-saplings                       If replant-saplings is enabled, this will limit the number of saplings that can be replanted
 # grass
 # log-behavior
@@ -476,6 +486,7 @@ tools:
 # lock-fall-cardinal
 # directional-fall-velocity
 # vertical-fall-velocity
+# explosive-fall-velocity
 # random-fall-velocity
 # respect-unbreaking
 # damage-mult
@@ -524,7 +535,7 @@ tools:
 trees:
     - [[OAK_LOG, OAK_WOOD], OAK_LEAVES, {sapling: OAK_SAPLING, max-saplings: 1}]
     - [[BIRCH_LOG, BIRCH_WOOD], BIRCH_LEAVES, {sapling: BIRCH_SAPLING, max-saplings: 1}]
-    - [[SPRUCE_LOG, SPRUCE_WOOD], SPRUCE_LEAVES, {sapling: SPRUCE_SAPLING, max-saplings: 1}]
+    - [[SPRUCE_LOG, SPRUCE_WOOD], SPRUCE_LEAVES, {sapling: SPRUCE_SAPLING, max-saplings: 4}]
     - [[JUNGLE_LOG, JUNGLE_WOOD], JUNGLE_LEAVES, {sapling: JUNGLE_SAPLING, max-saplings: 4}]
     - [[DARK_OAK_LOG, DARK_OAK_WOOD], DARK_OAK_LEAVES, {sapling: DARK_OAK_SAPLING, max-saplings: 4}]
     - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, max-saplings: 1}]

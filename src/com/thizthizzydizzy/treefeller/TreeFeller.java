@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -27,6 +28,7 @@ import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -35,6 +37,7 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 public class TreeFeller extends JavaPlugin{
     public static ArrayList<Tool> tools = new ArrayList<>();
     public static ArrayList<Tree> trees = new ArrayList<>();
@@ -76,251 +79,176 @@ public class TreeFeller extends JavaPlugin{
      * @param dropItems weather or not to drop items
      * @return the items that would have been dropped. <b>This is not the actual dropped items, but possible dropped items</b> Returns null if the tree was not felled.
      */
-    public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){//TODO use detectTree here to avoid duplicating code?
-        if(player!=null&&player.getGameMode()==GameMode.SPECTATOR)return null;
-        debugIndent = 0;
-        Material material = block.getType();
-        TREE:for(Tree tree : trees){
-            if(!tree.trunk.contains(material))continue;
-            TOOL:for(Tool tool : tools){
-                if(player!=null&&disabledPlayers.contains(player.getUniqueId())){
-                    debug(player, true, false, "toggle");
+    public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){
+        DetectedTree detectedTree = detectTree(block, player, axe, (testTree) -> {
+            Tool tool = testTree.tool;
+            Tree tree = testTree.tree;
+            int durability = axe.getType().getMaxDurability()-axe.getDurability();
+            if(Option.STACKED_TOOLS.get(testTree.tool, testTree.tree)){
+                durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
+            }
+            int total = getTotal(testTree.trunk);
+            int durabilityCost = total;
+            if(Option.DAMAGE_MULT.globalValue!=null)durabilityCost*=Option.DAMAGE_MULT.globalValue;
+            if(Option.DAMAGE_MULT.treeValues.containsKey(tree))durabilityCost*=Option.DAMAGE_MULT.treeValues.get(tree);
+            if(Option.DAMAGE_MULT.toolValues.containsKey(tool))durabilityCost*=Option.DAMAGE_MULT.toolValues.get(tool);
+            if(Option.RESPECT_UNBREAKING.get(tool, tree)){
+                durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
+                if(durabilityCost<1)durabilityCost++;
+            }
+            if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
+            if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
+            if(Option.PREVENT_BREAKAGE.get(tool, tree)){
+                if(durabilityCost==durability){
+                    debug(player, false, false, "prevent-breakage");
                     return null;
                 }
-                debug(player, "checking", false, trees.indexOf(tree), tools.indexOf(tool));
-                if(tool.material!=Material.AIR&&axe.getType()!=tool.material)continue;
-                for(Option o : Option.options){
-                    DebugResult result = o.check(this, tool, tree, block, player, axe);
-                    if(result==null)continue;
-                    debug(player, false, result);
-                    if(!result.isSuccess())continue TOOL;
+                debug(player, false, true, "prevent-breakage-success");
+            }
+            if(durabilityCost>durability){
+                if(!Option.ALLOW_PARTIAL.get(tool, tree)){
+                    debug(player, false, false, "durability-low", durability, durabilityCost);
+                    return null;
                 }
-                int durability = axe.getType().getMaxDurability()-axe.getDurability();
-                if(Option.STACKED_TOOLS.get(tool, tree)){
-                    durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
+                debug(player, "partial", false);
+                durabilityCost = total = durability;
+            }
+            return true;
+        });
+        if(detectedTree==null)return null;
+        Tool tool = detectedTree.tool;
+        Tree tree = detectedTree.tree;
+        int durability = axe.getType().getMaxDurability()-axe.getDurability();
+        if(Option.STACKED_TOOLS.get(detectedTree.tool, detectedTree.tree)){
+            durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
+        }
+        int total = getTotal(detectedTree.trunk);
+        int durabilityCost = total;
+        if(Option.DAMAGE_MULT.globalValue!=null)durabilityCost*=Option.DAMAGE_MULT.globalValue;
+        if(Option.DAMAGE_MULT.treeValues.containsKey(tree))durabilityCost*=Option.DAMAGE_MULT.treeValues.get(tree);
+        if(Option.DAMAGE_MULT.toolValues.containsKey(tool))durabilityCost*=Option.DAMAGE_MULT.toolValues.get(tool);
+        if(Option.RESPECT_UNBREAKING.get(tool, tree)){
+            durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
+            if(durabilityCost<1)durabilityCost++;
+        }
+        if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
+        if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
+        debug(player, true, true, "success");
+        TreeFellerCompat.fellTree(block, player, axe, tool, tree, detectedTree.trunk);
+        if(Option.LEAVE_STUMP.get(tool, tree)){
+            for(int i : detectedTree.trunk.keySet()){
+                for(Iterator<Block> it = detectedTree.trunk.get(i).iterator(); it.hasNext();){
+                    Block b = it.next();
+                    if(b.getY()<block.getY())it.remove();
                 }
-                int scanDistance = Option.SCAN_DISTANCE.get(tool, tree);
-                Integer maxBlocks = Option.MAX_LOGS.get(tool, tree);
-                HashMap<Integer, ArrayList<Block>> blocks = getBlocks(tree.trunk, block, scanDistance, maxBlocks==null?Integer.MAX_VALUE:(maxBlocks*2), true, false, false);//TODO what if the trunk is made of leaves?
-                for(Option o : Option.options){
-                    DebugResult result = o.checkTrunk(this, tool, tree, blocks, block);
-                    if(result==null)continue;
-                    debug(player, false, result);
-                    if(!result.isSuccess())continue TOOL;
-                }
-                int total = getTotal(blocks);
-                int minY = block.getY();
-                for(int i : blocks.keySet()){
-                    for(Block b : blocks.get(i)){
-                        minY = Math.min(minY, b.getY());
-                    }
-                }
-                int durabilityCost = total;
-                if(Option.DAMAGE_MULT.globalValue!=null)durabilityCost*=Option.DAMAGE_MULT.globalValue;
-                if(Option.DAMAGE_MULT.treeValues.containsKey(tree))durabilityCost*=Option.DAMAGE_MULT.treeValues.get(tree);
-                if(Option.DAMAGE_MULT.toolValues.containsKey(tool))durabilityCost*=Option.DAMAGE_MULT.toolValues.get(tool);
-                if(Option.RESPECT_UNBREAKING.get(tool, tree)){
-                    durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
-                    if(durabilityCost<1)durabilityCost++;
-                }
-                if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
-                if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
-                if(Option.PREVENT_BREAKAGE.get(tool, tree)){
-                    if(durabilityCost==durability){
-                        debug(player, false, false, "prevent-breakage");
-                        continue;
-                    }
-                    debug(player, false, true, "prevent-breakage-success");
-                }
-                if(durabilityCost>durability){
-                    if(!Option.ALLOW_PARTIAL.get(tool, tree)){
-                        debug(player, false, false, "durability-low", durability, durabilityCost);
-                        continue;
-                    }
-                    debug(player, "partial", false);
-                    durabilityCost = total = durability;
-                }
-                ArrayList<Integer> distances = new ArrayList<>(blocks.keySet());
-                Collections.sort(distances);
-                int leaves = 0;
-                HashMap<Integer, ArrayList<Block>> allLeaves = new HashMap<>();
-                FOR:for(int i : distances){
-                    for(Block b : blocks.get(i)){
-                        HashMap<Integer, ArrayList<Block>> someLeaves = getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_DETECT_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree));
-                        leaves+=toList(someLeaves).size();
-                        for(int in : someLeaves.keySet()){
-                            if(allLeaves.containsKey(in)){
-                                allLeaves.get(in).addAll(someLeaves.get(in));
-                            }else{
-                                allLeaves.put(in, someLeaves.get(in));
-                            }
-                        }
-                    }
-                }
-                ArrayList<Block> everything = new ArrayList<>();
-                everything.addAll(toList(blocks));
-                everything.addAll(toList(allLeaves));
-                TestResult res = TreeFellerCompat.test(player, everything);
-                if(res!=null){
-                    debug(player, false, false, "protected", res.plugin, res.block.getX(), res.block.getY(), res.block.getZ());
-                    continue TREE;
-                }
-                for(Option o : Option.options){
-                    DebugResult result = o.checkTree(this, tool, tree, blocks, leaves);
-                    if(result==null)continue;
-                    debug(player, false, result);
-                    if(!result.isSuccess())continue TOOL;
-                }
-                debug(player, true, true, "success");
-                TreeFellerCompat.fellTree(block, player, axe, tool, tree, blocks);
-                if(Option.LEAVE_STUMP.get(tool, tree)){
-                    for(int i : blocks.keySet()){
-                        for(Iterator<Block> it = blocks.get(i).iterator(); it.hasNext();){
-                            Block b = it.next();
-                            if(b.getY()<block.getY())it.remove();
-                        }
-                    }
-                }
-                int lower = block.getY();
-                for(Block b : toList(blocks)){
-                    if(b.getY()<lower)lower = b.getY();
-                }
-                int lowest = lower;
-                if(player!=null&&player.getGameMode()!=GameMode.CREATIVE){
-                    if(axe.getType().getMaxDurability()>0){
-                        if(Option.STACKED_TOOLS.get(tool, tree)){
-                            int amt = axe.getAmount();
-                            while(durabilityCost>axe.getType().getMaxDurability()-axe.getDurability()){
-                                amt--;
-                                durabilityCost-=axe.getType().getMaxDurability();
-                            }
-                            axe.setAmount(amt);
-                        }
-                        axe.setDurability((short)(axe.getDurability()+durabilityCost));
-                        if(durability==durabilityCost)axe.setAmount(0);
-                    }
-                }
-                HashMap<Block, Integer> possibleSaplings = new HashMap<>();
-                if(Option.SAPLING.get(tool, tree)!=null&&Option.REPLANT_SAPLINGS.get(tool, tree)){
-                    ArrayList<Block> logs = toList(blocks);
-                    for(Block log : logs){
-                        if(Option.GRASS.get(tool, tree).contains(log.getRelative(0, -1, 0).getType())){
-                            possibleSaplings.put(log, -1);
-                        }
-                    }
-                    for(Block b : possibleSaplings.keySet()){
-                        int above = -1;
-                        Block b1 = b;
-                        while(tree.trunk.contains(b1.getType())){
-                            above++;
-                            b1 = b1.getRelative(0, 1, 0);
-                        }
-                        possibleSaplings.put(b, above);
-                    }
-                    Integer maxSaplings = Option.MAX_SAPLINGS.get(tool, tree);
-                    if(maxSaplings!=null){
-                        while(possibleSaplings.size()>maxSaplings){
-                            ArrayList<Integer> ints = new ArrayList<>(possibleSaplings.values());
-                            Collections.sort(ints);
-                            int i = ints.get(0);
-                            for(Block b : possibleSaplings.keySet()){
-                                if(possibleSaplings.get(b)==i){
-                                    possibleSaplings.remove(b);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    for(Block b : possibleSaplings.keySet()){
-                        addSapling(b, Option.SAPLING.get(tool, tree), Option.SPAWN_SAPLINGS.get(tool, tree)!=2);
-                    }
-                }
-                //now the blocks
-                ArrayList<ItemStack> droppedItems = new ArrayList<>();
-                final int t = total;
-                long seed = new Random().nextLong();
-                if(Option.CUTTING_ANIMATION.get(tool, tree)){
-                    int delay = 0;
-                    int ttl = t;
-                    int tTL = t;
-                    int Ttl = 0;
-                    for(int i : distances){
-                        int TTL = tTL - Ttl;
-                        delay+=Option.ANIM_DELAY.get(tool, tree);
-                        for(Block b : blocks.get(i)){
-                            if(ttl<=0)break;
-                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
-                                droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
-                            }
-                            droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
-                            ttl--;
-                        }
-                        new BukkitRunnable() {
-                            @Override
-                            public void run(){
-                                int tTl = TTL;
-                                for(Block b : blocks.get(i)){
-                                    if(tTl<=0)break;
-                                    for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
-                                        breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
-                                    }
-                                    breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
-                                    tTl--;
-                                }
-                                processNaturalFalls();
-                            }
-                        }.runTaskLater(this, delay);
-                        Ttl += blocks.get(i).size();
-                    }
-                    Integer maxSaplings = Option.MAX_SAPLINGS.get(tool, tree);
-                    if(maxSaplings!=null&&maxSaplings>=1){
-                        new BukkitRunnable() {
-                            @Override
-                            public void run(){
-                                for(Block b : possibleSaplings.keySet()){
-                                    Sapling s = getSapling(b);
-                                    if(s!=null)s.place();
-                                }
-                            }
-                        }.runTaskLater(this, delay+1);
-                    }
-                }else{
-                    for(int i : distances){
-                        for(Block b : blocks.get(i)){
-                            if(total<=0)break;
-                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
-                                breakBlock(dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
-                            }
-                            breakBlock(dropItems, tree, tool, axe, b, block, lowest, player, seed);
-                            total--;
-                        }
-                    }
-                    if(Option.SPAWN_SAPLINGS.get(tool, tree)>=1){
-                        for(Block b : possibleSaplings.keySet()){
-                            Sapling s = getSapling(b);
-                            if(s!=null)s.place();
-                        }
-                    }
-                    processNaturalFalls();
-                }
-                if(player!=null){
-                    long time = System.currentTimeMillis();
-                    Cooldown cooldown = cooldowns.get(player.getUniqueId());
-                    if(cooldown==null)cooldown = new Cooldown();
-                    cooldown.globalCooldown = time;
-                    cooldown.treeCooldowns.put(tree, time);
-                    cooldown.toolCooldowns.put(tool, time);
-                    cooldowns.put(player.getUniqueId(), cooldown);
-                }
-                for(Effect e : Option.EFFECTS.get(tool, tree)){
-                    if(e.location==Effect.EffectLocation.TOOL){
-                        if(new Random().nextDouble()<e.chance)e.play(block);
-                    }
-                }
-                return droppedItems;
             }
         }
-        return null;
+        int lower = block.getY();
+        for(Block b : toList(detectedTree.trunk)){
+            if(b.getY()<lower)lower = b.getY();
+        }
+        int lowest = lower;
+        if(player!=null&&player.getGameMode()!=GameMode.CREATIVE){
+            if(axe.getType().getMaxDurability()>0){
+                if(Option.STACKED_TOOLS.get(tool, tree)){
+                    int amt = axe.getAmount();
+                    while(durabilityCost>axe.getType().getMaxDurability()-axe.getDurability()){
+                        amt--;
+                        durabilityCost-=axe.getType().getMaxDurability();
+                    }
+                    axe.setAmount(amt);
+                }
+                axe.setDurability((short)(axe.getDurability()+durabilityCost));
+                if(durability==durabilityCost)axe.setAmount(0);
+            }
+        }
+        //now the blocks
+        ArrayList<ItemStack> droppedItems = new ArrayList<>();
+        final int t = total;
+        long seed = new Random().nextLong();
+        ArrayList<Integer> distances = new ArrayList<>(detectedTree.trunk.keySet());
+        Collections.sort(distances);
+        saplings.addAll(detectedTree.saplings);
+        if(Option.CUTTING_ANIMATION.get(tool, tree)){
+            int delay = 0;
+            int ttl = t;
+            int tTL = t;
+            int Ttl = 0;
+            for(int i : distances){
+                int TTL = tTL - Ttl;
+                delay+=Option.ANIM_DELAY.get(tool, tree);
+                for(Block b : detectedTree.trunk.get(i)){
+                    if(ttl<=0)break;
+                    for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                        droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
+                    }
+                    droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
+                    ttl--;
+                }
+                new BukkitRunnable() {
+                    @Override
+                    public void run(){
+                        int tTl = TTL;
+                        for(Block b : detectedTree.trunk.get(i)){
+                            if(tTl<=0)break;
+                            for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                                breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
+                            }
+                            breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed);
+                            tTl--;
+                        }
+                        processNaturalFalls();
+                    }
+                }.runTaskLater(this, delay);
+                Ttl += detectedTree.trunk.get(i).size();
+            }
+            Integer maxSaplings = Option.MAX_SAPLINGS.get(tool, tree);
+            if(maxSaplings!=null&&maxSaplings>=1){
+                if(Option.SPAWN_SAPLINGS.get(tool, tree)==2){
+                    new BukkitRunnable() {
+                        @Override
+                        public void run(){
+                            for(Sapling s : detectedTree.saplings){
+                                s.place(null);
+                            }
+                        }
+                    }.runTaskLater(this, delay+1);
+                }
+            }
+        }else{
+            for(int i : distances){
+                for(Block b : detectedTree.trunk.get(i)){
+                    if(total<=0)break;
+                    for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
+                        breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
+                    }
+                    breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed);
+                    total--;
+                }
+            }
+            if(Option.SPAWN_SAPLINGS.get(tool, tree)==2){
+                for(Sapling s : detectedTree.saplings){
+                    s.place(null);
+                }
+            }
+            processNaturalFalls();
+        }
+        if(player!=null){
+            long time = System.currentTimeMillis();
+            Cooldown cooldown = cooldowns.get(player.getUniqueId());
+            if(cooldown==null)cooldown = new Cooldown();
+            cooldown.globalCooldown = time;
+            cooldown.treeCooldowns.put(tree, time);
+            cooldown.toolCooldowns.put(tool, time);
+            cooldowns.put(player.getUniqueId(), cooldown);
+        }
+        for(Effect e : Option.EFFECTS.get(tool, tree)){
+            if(e.location==Effect.EffectLocation.TOOL){
+                if(new Random().nextDouble()<e.chance)e.play(block);
+            }
+        }
+        createSaplingHandler();
+        return droppedItems;
     }
     /**
      * Detect any type of tree from a source block
@@ -330,6 +258,19 @@ public class TreeFeller extends JavaPlugin{
      * @return a DetectedTree object, or null if no tree was found
      */
     public DetectedTree detectTree(Block block, Player player, ItemStack axe){
+        return detectTree(block, player, axe, (t) -> {
+            return true;
+        });
+    }
+    /**
+     * Detect any type of tree from a source block
+     * @param block the block to search for the tree from
+     * @param player The player to use while detecting the tree; can be null
+     * @param axe The ItemStack to use while detecting the tree; can be null. (Used to find the Tool; tool durability for partial trees is not considered)
+     * @param checkFunc A function to perform any additional checks to ensure a tree is valid. returns true if the tree is valid, null if the tool is invalid, or false if the tree is invalid.
+     * @return a DetectedTree object, or null if no tree was found
+     */
+    public DetectedTree detectTree(Block block, Player player, ItemStack axe, Function<DetectedTree, Boolean> checkFunc){
         if(player!=null&&player.getGameMode()==GameMode.SPECTATOR)return null;
         debugIndent = 0;
         Material material = block.getType();
@@ -394,8 +335,11 @@ public class TreeFeller extends JavaPlugin{
                     debug(player, false, result);
                     if(!result.isSuccess())continue TOOL;
                 }
+                DetectedTree detected = new DetectedTree(tool, tree, blocks, allLeaves);
+                Boolean result = checkFunc.apply(detected);
+                if(result==null)continue;
+                if(Objects.equals(result, false))continue TREE;
                 debug(player, true, true, "success");
-                DetectedTree detected = new DetectedTree(blocks, allLeaves);
                 if(Option.LEAVE_STUMP.get(tool, tree)){
                     for(int i : blocks.keySet()){
                         for(Iterator<Block> it = blocks.get(i).iterator(); it.hasNext();){
@@ -438,7 +382,7 @@ public class TreeFeller extends JavaPlugin{
                         }
                     }
                     for(Block b : possibleSaplings.keySet()){
-                        detected.addSapling(b, Option.SAPLING.get(tool, tree), Option.SPAWN_SAPLINGS.get(tool, tree)!=2);
+                        detected.addSapling(b, Option.SAPLING.get(tool, tree));
                     }
                 }
                 return detected;
@@ -676,15 +620,14 @@ public class TreeFeller extends JavaPlugin{
                 return null;
         }
     }
-    public void addSapling(Block b, Material sapling, boolean autofill){
-        saplings.add(new Sapling(b, sapling, autofill, System.currentTimeMillis()));
-    }
     public void reload(){
         Logger logger = getLogger();
         trees.clear();
         tools.clear();
         effects.clear();
         saplings.clear();
+        if(saplingHandler!=null)saplingHandler.cancel();
+        saplingHandler = null;
         fallingBlocks.clear();
         cooldowns.clear();
         //<editor-fold defaultstate="collapsed" desc="Effects">
@@ -877,18 +820,7 @@ public class TreeFeller extends JavaPlugin{
 //</editor-fold>
         TreeFellerCompat.reload();
     }
-    public Sapling getSapling(Block b){
-        for(Iterator<Sapling> it = saplings.iterator(); it.hasNext();){
-            Sapling sapling = it.next();
-            if(sapling.isDead()){
-                it.remove();
-                continue;
-            }
-            if(sapling.block.equals(b))return sapling;
-        }
-        return null;
-    }
-    private void breakBlock(boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed){
+    private void breakBlock(DetectedTree detectedTree, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed){
         ArrayList<Material> overridables = new ArrayList<>(Option.OVERRIDABLES.get(tool, tree));
         ArrayList<Effect> effects = new ArrayList<>();
         boolean isLeaf = !tree.trunk.contains(block.getType());
@@ -904,6 +836,7 @@ public class TreeFeller extends JavaPlugin{
 //        double dropChance = dropItems?(isLeaf?Option.LEAF_DROP_CHANCE.get(tool, tree):Option.LOG_DROP_CHANCE.get(tool, tree)):0;
         double directionalFallVelocity = Option.DIRECTIONAL_FALL_VELOCITY.get(tool, tree);
         double verticalFallVelocity = Option.VERTICAL_FALL_VELOCITY.get(tool, tree);
+        double explosiveFallVelocity = Option.EXPLOSIVE_FALL_VELOCITY.get(tool, tree);
         double randomFallVelocity = Option.RANDOM_FALL_VELOCITY.get(tool, tree);
         boolean rotate = Option.ROTATE_LOGS.get(tool, tree);
         DirectionalFallBehavior directionalFallBehavior = Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree);
@@ -914,7 +847,7 @@ public class TreeFeller extends JavaPlugin{
         }else{
             TreeFellerCompat.breakBlock(tree, tool, player, axe, block, modifiers);
         }
-        behavior.breakBlock(this, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, verticalFallVelocity);
+        behavior.breakBlock(detectedTree, this, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         Random rand = new Random();
         for(Effect e : effects){
             if(rand.nextDouble()<e.chance)e.play(block);
@@ -1457,5 +1390,44 @@ public class TreeFeller extends JavaPlugin{
         }
         if(theLeafRange>Option.LEAF_DETECT_RANGE.getValue())Option.LEAF_DETECT_RANGE.treeValues.put(tree, theLeafRange);
         return tree;
+    }
+    BukkitTask saplingHandler;
+    private void createSaplingHandler(){
+        if(saplingHandler!=null)return;
+        saplingHandler = new BukkitRunnable() {
+            @Override
+            public void run(){
+                for(Iterator<Sapling> it = saplings.iterator(); it.hasNext();){
+                    Sapling sapling = it.next();
+                    sapling.tick();
+                    if(sapling.isDead())it.remove();
+                }
+                if(saplings.isEmpty()){
+                    saplingHandler = null;
+                    cancel();
+                }
+            }
+        }.runTaskTimer(this, 0, 1);
+    }
+    /**
+     * Handle dropped item. Item has already dropped; this handles it for sapling replant & compatibilities
+     * @param detectedTree the tree that was cut down
+     * @param player the player who dropped the item
+     * @param item the item that was dropped
+     */
+    public void dropItem(DetectedTree detectedTree, Player player, Item item){
+        ItemStack stack = item.getItemStack();
+        for(Sapling sapling : saplings){
+            if(sapling.detectedTree==detectedTree){
+                if(sapling.tryPlace(stack)){
+                    if(stack.getAmount()==0){
+                        item.remove();
+                        return;
+                    }
+                }
+            }
+        }
+        item.setItemStack(stack);
+        TreeFellerCompat.dropItem(player, item);
     }
 }

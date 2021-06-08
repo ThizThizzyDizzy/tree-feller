@@ -6,10 +6,8 @@ import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyDouble;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnchantmentMap;
-import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnum;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyFloat;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
-import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterial;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyShort;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
@@ -960,31 +958,31 @@ public abstract class Option<E>{
             }));
         }
     };
-    public static Option<Material> SAPLING = new Option<Material>("Sapling", false, false, true, null){
+    public static Option<HashSet<Material>> SAPLING = new Option<HashSet<Material>>("Sapling", false, false, true, null){
         @Override
-        public Material load(Object o){
-            return loadMaterial(o);
+        public HashSet<Material> load(Object o){
+            return loadMaterialSet(o);
         }
         @Override
         public String getDesc(boolean ingame){
             return "If replant-saplings is enabled, this will replant the tree with this type of sapling";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(Material value){
-            return new ItemBuilder(value==null?Material.OAK_SAPLING:value);
+        public ItemBuilder getConfigurationDisplayItem(HashSet<Material> value){
+            return new ItemBuilder(Material.OAK_SAPLING);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyMaterial(parent, parent.plugin, parent.player, name, true, "block", globalValue, (mat) -> {
-                return mat.isBlock();
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, false, "block", globalValue, (material) -> {
+                return material.isBlock();
             }, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyMaterial(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (mat) -> {
-                return mat.isBlock();
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (material) -> {
+                return material.isBlock();
             }, (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
@@ -992,9 +990,52 @@ public abstract class Option<E>{
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyMaterial(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (mat) -> {
-                return mat.isBlock();
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (material) -> {
+                return material.isBlock();
             }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> SAPLING_TIMEOUT = new Option<Integer>("Sapling Timeout", true, true, true, 50){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public Integer get(Tool tool, Tree tree){
+            if(toolValues.containsKey(tool)||treeValues.containsKey(tree)){
+                Integer tl = toolValues.containsKey(tool)?toolValues.get(tool):0;
+                Integer tr = treeValues.containsKey(tree)?treeValues.get(tree):0;
+                return Math.max(tl, tr);
+            }
+            return globalValue;
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "The amount of delay a sapling may take to respawn (if spawn saplings is set to 1, saplings will be spawned only after this amount of time, but will still be immediately planted upon dropping from leaves)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.CLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1340,6 +1381,47 @@ public abstract class Option<E>{
         @Override
         public ItemBuilder getConfigurationDisplayItem(Double value){
             return new ItemBuilder(Material.OAK_LOG);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> EXPLOSIVE_FALL_VELOCITY = new Option<Double>("Explosive Fall Velocity", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public Double get(Tool tool, Tree tree){
+            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):0d;
+            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):0d;
+            return tl+tr+globalValue;
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much explosive sideways velocity should falling blocks get? Velocity is applied away from the block that was used to cut down the tree (no velocity will be applied to blocks in the exact center)\n" +
+                "(Only used when log or leaf behavior is set to FALL or similar)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.TNT);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){

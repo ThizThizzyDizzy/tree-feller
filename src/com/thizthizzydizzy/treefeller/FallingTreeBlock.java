@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller;
-import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Axis;
@@ -11,6 +10,7 @@ import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.Vector;
 public class FallingTreeBlock{
+    private final DetectedTree detectedTree;
     public FallingBlock entity;
     private final Tool tool;
     private final Tree tree;
@@ -20,7 +20,8 @@ public class FallingTreeBlock{
     private final RotationData rot;
     private final boolean dropItems;
     private final List<Modifier> modifiers;
-    public FallingTreeBlock(FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems, List<Modifier> modifiers){
+    public FallingTreeBlock(DetectedTree detectedTree, FallingBlock entity, Tool tool, Tree tree, ItemStack axe, boolean doBreak, Player player, RotationData rot, boolean dropItems, List<Modifier> modifiers){
+        this.detectedTree = detectedTree;
         this.entity = entity;
         this.tool = tool;
         this.tree = tree;
@@ -53,14 +54,14 @@ public class FallingTreeBlock{
             if(doBreak){
                 event.setCancelled(true);
                 for(ItemStack drop : drops){
-                    TreeFellerCompat.dropItem(player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop));
+                    plugin.dropItem(detectedTree, player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), drop));
                 }
                 plugin.dropExp(event.getBlock().getWorld(), event.getEntity().getLocation(), xp[0]);
             }
             if(player!=null){
                 event.setCancelled(true);
                 for(ItemStack drop : drops){
-                    for(ItemStack stack : player.getInventory().addItem(drop).values())TreeFellerCompat.dropItem(player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
+                    for(ItemStack stack : player.getInventory().addItem(drop).values())plugin.dropItem(detectedTree, player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
                 }
                 player.setTotalExperience(player.getTotalExperience()+xp[0]);
             }

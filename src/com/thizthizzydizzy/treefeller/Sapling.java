@@ -1,37 +1,50 @@
 package com.thizthizzydizzy.treefeller;
+import java.util.ArrayList;
+import java.util.HashSet;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.inventory.ItemStack;
 public class Sapling{
-    private static final float timeout = 2.5f;//seconds
-    public final boolean autofill;
+    public final boolean spawn;
+    public final DetectedTree detectedTree;
     public final Block block;
-    private final Material material;
-    private final long time;
+    private final HashSet<Material> materials;
+    private final int timeout;
+    private int timer;
     private boolean placed = false;
-    public Sapling(Block block, Material material, boolean autofill){
-        this(block, material, autofill, -1);
-    }
-    public Sapling(Block block, Material material, boolean autofill, long time){
+    public Sapling(DetectedTree detectedTree, Block block, HashSet<Material> materials, boolean spawn, int timeout){
+        this.detectedTree = detectedTree;
         this.block = block;
-        this.material = material;
-        this.autofill = autofill;
-        this.time = time;
+        this.materials = materials;
+        this.spawn = spawn;
+        this.timeout = timeout;
     }
     public boolean isDead(){
-        if(block.getType()==material)placed = true;
-        return placed||System.currentTimeMillis()>time+timeout*1000;
+        if(materials.contains(block.getType()))placed = true;
+        return placed||timer>timeout;
+    }
+    public void tick(){
+        timer++;
+        if(spawn&&timer==timeout)place(null);
     }
     public boolean canPlace(){
         if(isDead())return false;
         return block.getType()==Material.AIR;
     }
-    public boolean place(){
+    public boolean place(Material material){
         if(!canPlace())return false;
         placed = true;
+        if(material==null)material = new ArrayList<>(materials).get(0);
         block.setType(material);
         return true;
     }
-    public Material getMaterial(){
-        return material;
+    public boolean tryPlace(ItemStack stack){
+        if(materials.contains(stack.getType())){
+            if(place(stack.getType())){
+                stack.setAmount(stack.getAmount()-1);
+                return true;
+            }
+        }
+        return false;
     }
 }
