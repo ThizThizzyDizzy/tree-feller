@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller;
-//import javax.swing.JOptionPane;
 
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import java.io.BufferedReader;

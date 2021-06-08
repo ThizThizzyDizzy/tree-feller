@@ -87,6 +87,7 @@ grass:
     - DIRT
     - GRASS_BLOCK
     - PODZOL
+    - ROOTED_DIRT
 
 # What felling behavior should logs have?
 # Valid options:
