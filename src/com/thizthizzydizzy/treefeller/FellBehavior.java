@@ -170,10 +170,15 @@ public enum FellBehavior{
     private static void processNaturalFallBehavior(DetectedTree detectedTree, boolean hurt, boolean doBreak, boolean inventory, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, boolean rotate, ArrayList<Material> overridables, double verticalFallVelocity){
         FallingBlock falling = block.getWorld().spawnFallingBlock(block.getLocation().add(.5,.5,.5), block.getBlockData());
         falling.addScoreboardTag("tree_feller");
-        Vector v = directionalFallBehavior.getDirectionalVel(seed, player, origin, lockCardinal, 1).setY(0).normalize();
-        int height = block.getY()-lowest;
-        double velocity = findNaturalVelocity(verticalFallVelocity, height+.3, height, .015625);//at least quarter-of-a-pixel accuracy
-        falling.setVelocity(v.multiply(velocity).setY(verticalFallVelocity));
+//        Vector v = directionalFallBehavior.getDirectionalVel(seed, player, origin, lockCardinal, 1).setY(0).normalize();
+//        int height = block.getY()-lowest;
+//        double vel = calculateInitialVelocity(block.getLocation().toVector(), block.getLocation().add(height, -height, 0).toVector(), verticalFallVelocity).length();
+//        falling.setVelocity(v.multiply(vel).setY(verticalFallVelocity));
+        try{
+            Vector v = calculateVelocityForBlock(block, lowest, directionalFallBehavior.getDirectionalVel(seed, player, origin, lockCardinal, 1).setY(0).normalize(), verticalFallVelocity).setY(verticalFallVelocity);
+            if(!Double.isFinite(v.getX())||!Double.isFinite(v.getY())||!Double.isFinite(v.getZ()))v = new Vector(0, verticalFallVelocity, 0);
+            falling.setVelocity(v);
+        }catch(IllegalArgumentException ex){}
         falling.setHurtEntities(hurt);
         Player inv = null;
         if(inventory){
@@ -190,39 +195,74 @@ public enum FellBehavior{
     public String getDescription(){
         return description;
     }
-    private static double findNaturalVelocity(double verticalVelocity, double targetDistance, int altitude, double tolerance){
-        double vel = 0;
-        double result = 0;
-        int iteration = 0;
-        while(Math.abs(result-targetDistance)>tolerance){
-            if(iteration==0){
-                vel++;
-                result = testNaturalVelocity(verticalVelocity, vel, altitude);
-                if(result>targetDistance)iteration++;
-                if(vel>100)return 0;//a hundered blocks a tick is way too far already; this is a lost cause
-            }else{
-                double step = Math.pow(0.5, iteration);
-                System.out.println("Iteration "+iteration+", vert "+verticalVelocity+", alt "+altitude+", value "+vel+", result "+result+", target "+targetDistance+", step "+step+", difference "+Math.abs(result-targetDistance));
-                //at iteration 1, the target value is between vel-1 and vel
-                if(result>targetDistance)vel-=step;
-                else vel+=step;
-                result = testNaturalVelocity(verticalVelocity, vel, altitude);
-                iteration++;
-            }
-        }
-        return vel;
+    private static final double GRAVITY = .04d;
+    private static final double DRAG = .02d;
+    private static final Vector UP = new Vector(0, 1, 0);
+    
+    /**
+     * @param b The block in question
+     * @param bottomLog Bottommost log of the tree
+     * @param fallDirection Normalised direction the block should fall. Y component must be zero.
+     * @param yVelocity The initial y velocity this block should be given.
+     * @return The velocity that should be applied to the falling block
+     */
+    private static Vector calculateVelocityForBlock(Block b, int bottomLogY, Vector fallDirection, double yVelocity) {
+        Vector start = b.getLocation().toVector();
+        Vector bottomLogPos = start.clone().setY(bottomLogY);
+        Vector end = getEndPosition(start, bottomLogPos, fallDirection, yVelocity);
+        System.out.println("start "+start.toString()+", end "+end.toString());
+        return calculateInitialVelocity(start, end.add(start), yVelocity);
     }
-    private static double testNaturalVelocity(double verticalVelocity, double velocity, int altitude){
-        double xVel = velocity, yVel = verticalVelocity, x = 0, y = altitude;
-        int iteration = 0;
-        while(y>0){
-            iteration++;
-            xVel*=.98;
-            yVel-=.04;
-            yVel*=.98;
-            x+=xVel;
-            y+=yVel;
+
+    /**
+     * Gets the position a felled block should land at given its starting position, the bottommost log of the tree, the direction it should fall and its initial upwards velocity
+     * @param start Where the block is positioned before being felled
+     * @param bottomLog Where the bottommost log of the tree is
+     * @param fallDirection Normalised horizontal falling direction. Y component must be zero.
+     * @param yVelocity The initial y velocity (upwards) this block should have
+     */
+    private static Vector getEndPosition(Vector start, Vector bottomLog, Vector fallDirection, double yVelocity) {
+        return start.clone().subtract(bottomLog).rotateAroundAxis(fallDirection.crossProduct(UP), -90);
+    }
+
+    /**
+     * @param height How far down are we falling
+     * @param yVelocity The initial y velocity upwards
+     * @return Ticks it takes to fall
+     */
+    private static int getFallTime(double height, double yVelocity) {
+        double currHeight = height;
+        double vel = -yVelocity;
+        int ticks = 0;
+        while(currHeight > 0) {
+            vel += GRAVITY;
+            vel *= (1 - DRAG);
+            currHeight -= vel;
+            ticks++;
         }
-        return x;
+        return ticks;
+    }
+
+    /**
+     * Calculates the required velocity for a felled block to land in a specific position
+     * @param start Where the block starts at
+     * @param end Where the block should land
+     * @param yVelocity How fast upwards should the block be propelled
+     * @return The velocity that should be applied to the falling block
+     */
+    private static Vector calculateInitialVelocity(Vector start, Vector end, double yVelocity) {
+        System.out.println(start.getBlockY()+" "+end.getBlockY());
+        int t = getFallTime(start.getY()-end.getY(), yVelocity);
+        return new Vector(getAxisVelocity(end.getX() - start.getX(), t), 0, getAxisVelocity(end.getZ() - start.getZ(), t));
+    }
+
+    /**
+     * Calculates the velocity required to travel a certain distance in a given time, accounting for drag
+     * @param s The displacement (distance) that should be travelled along this axis
+     * @param t The time that we have to travel that far
+     * @return The velocity that should be applied to travel s blocks in t ticks along one axis
+     */
+    private static double getAxisVelocity(double s, int t) {
+        return (s * 0.02d) / (1 - Math.pow(0.98, t));
     }
 }

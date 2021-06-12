@@ -1,6 +1,17 @@
 package net.wesjd.anvilgui.version;
 
-import net.minecraft.server.v1_17_R1.*;
+import net.minecraft.core.BlockPosition;
+import net.minecraft.network.chat.ChatComponentText;
+import net.minecraft.network.chat.ChatMessage;
+import net.minecraft.network.protocol.game.PacketPlayOutCloseWindow;
+import net.minecraft.network.protocol.game.PacketPlayOutOpenWindow;
+import net.minecraft.server.level.EntityPlayer;
+import net.minecraft.world.IInventory;
+import net.minecraft.world.entity.player.EntityHuman;
+import net.minecraft.world.inventory.Container;
+import net.minecraft.world.inventory.ContainerAccess;
+import net.minecraft.world.inventory.ContainerAnvil;
+import net.minecraft.world.inventory.Containers;
 import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_17_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_17_R1.event.CraftEventFactory;
@@ -33,7 +44,7 @@ public class Wrapper1_17_R1 implements VersionWrapper {
      */
     @Override
     public void sendPacketOpenWindow(Player player, int containerId, String guiTitle) {
-        toNMS(player).playerConnection.sendPacket(new PacketPlayOutOpenWindow(containerId, Containers.ANVIL, new ChatMessage(guiTitle)));
+        toNMS(player).b.sendPacket(new PacketPlayOutOpenWindow(containerId, Containers.h, new ChatComponentText(guiTitle)));
     }
 
     /**
@@ -41,7 +52,7 @@ public class Wrapper1_17_R1 implements VersionWrapper {
      */
     @Override
     public void sendPacketCloseWindow(Player player, int containerId) {
-        toNMS(player).playerConnection.sendPacket(new PacketPlayOutCloseWindow(containerId));
+        toNMS(player).b.sendPacket(new PacketPlayOutCloseWindow(containerId));
     }
 
     /**
@@ -49,7 +60,7 @@ public class Wrapper1_17_R1 implements VersionWrapper {
      */
     @Override
     public void setActiveContainerDefault(Player player) {
-        toNMS(player).activeContainer = toNMS(player).defaultContainer;
+        (toNMS(player)).bV = (Container)(toNMS(player)).bU;
     }
 
     /**
@@ -57,7 +68,7 @@ public class Wrapper1_17_R1 implements VersionWrapper {
      */
     @Override
     public void setActiveContainer(Player player, Object container) {
-        toNMS(player).activeContainer = (Container) container;
+        (toNMS(player)).bV = (Container)container;
     }
 
     /**
@@ -73,7 +84,7 @@ public class Wrapper1_17_R1 implements VersionWrapper {
      */
     @Override
     public void addActiveContainerSlotListener(Object container, Player player) {
-        ((Container) container).addSlotListener(toNMS(player));
+        toNMS(player).initMenu((Container) container);
     }
 
     /**
@@ -106,32 +117,27 @@ public class Wrapper1_17_R1 implements VersionWrapper {
      * Modifications to ContainerAnvil that makes it so you don't have to have xp to use this anvil
      */
     private class AnvilContainer extends ContainerAnvil {
-
         public AnvilContainer(Player player, String guiTitle) {
-            super(getRealNextContainerId(player), ((CraftPlayer) player).getHandle().inventory,
-                    ContainerAccess.at(((CraftWorld) player.getWorld()).getHandle(), new BlockPosition(0, 0, 0)));
+            super(Wrapper1_17_R1.this.getRealNextContainerId(player), ((CraftPlayer)player).getHandle().getInventory(),
+                    ContainerAccess.at(((CraftWorld)player.getWorld()).getHandle(), new BlockPosition(0, 0, 0)));
             this.checkReachable = false;
             setTitle(new ChatMessage(guiTitle));
         }
 
         @Override
-        public void e() {
-            super.e();
-            this.levelCost.set(0);
+        public void i() {
+            super.i();
+            this.w.set(0);
         }
 
         @Override
-        public void b(EntityHuman entityhuman) {
-        }
+        public void b(EntityHuman player) {}
 
         @Override
-        protected void a(EntityHuman entityhuman, World world, IInventory iinventory) {
-        }
+        protected void a(EntityHuman player, IInventory container) {}
 
         public int getContainerId() {
-            return windowId;
+            return this.j;
         }
-
     }
-
 }
