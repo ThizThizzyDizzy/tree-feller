@@ -52,7 +52,8 @@ public abstract class Option<E>{
         defaultGrasses.add(Material.GRASS_BLOCK);
         defaultGrasses.add(Material.DIRT);
         defaultGrasses.add(Material.PODZOL);
-        defaultGrasses.add(Material.ROOTED_DIRT);
+        Material rootedDirt = Material.matchMaterial("ROOTED_DIRT");
+        if(rootedDirt!=null)defaultGrasses.add(rootedDirt);
     }
     public static ArrayList<Option> options = new ArrayList<>();
     //console/debugging stuff
