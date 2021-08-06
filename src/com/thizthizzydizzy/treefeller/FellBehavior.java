@@ -210,7 +210,6 @@ public enum FellBehavior{
         Vector start = b.getLocation().toVector();
         Vector bottomLogPos = start.clone().setY(bottomLogY);
         Vector end = getEndPosition(start, bottomLogPos, fallDirection, yVelocity);
-        System.out.println("start "+start.toString()+", end "+end.toString());
         return calculateInitialVelocity(start, end.add(start), yVelocity);
     }
 
@@ -251,7 +250,6 @@ public enum FellBehavior{
      * @return The velocity that should be applied to the falling block
      */
     private static Vector calculateInitialVelocity(Vector start, Vector end, double yVelocity) {
-        System.out.println(start.getBlockY()+" "+end.getBlockY());
         int t = getFallTime(start.getY()-end.getY(), yVelocity);
         return new Vector(getAxisVelocity(end.getX() - start.getX(), t), 0, getAxisVelocity(end.getZ() - start.getZ(), t));
     }

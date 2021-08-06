@@ -27,7 +27,6 @@ public class McMMOClassicCompat extends InternalCompatibility{
         super.reload();
         try{
             File file = new File("plugins/mcMMO/experience.yml");
-            System.out.println(file.getAbsolutePath());
             ConfigurationSection woodExp = YamlConfiguration.loadConfiguration(file).getConfigurationSection("Experience").getConfigurationSection("Woodcutting");
             for(String key : woodExp.getKeys(false)){
                 exp.put(Material.matchMaterial(key), ((Number)woodExp.get(key)).intValue());
