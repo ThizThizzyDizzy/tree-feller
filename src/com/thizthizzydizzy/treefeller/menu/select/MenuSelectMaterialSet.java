@@ -30,7 +30,7 @@ public class MenuSelectMaterialSet extends Menu{//TODO make this multi-page allo
     }
     public void refresh(){
         components.clear();
-        add(new Button(0, makeItem(Material.PAPER).setDisplayName(value==null?"NULL":(value.size()+" "+filterName+"s")).addLore("Click a "+filterName+" in your inventory to add it to the list.").addLore("Right click any "+filterName+" in the list to remove it.").addLore(allowNull?"Shift-right click this item to set to NULL":("Shift-right click this item to clear all "+filterName+"s")), (click) -> {
+        add(new Button(0, makeItem(Material.PAPER).setDisplayName(value==null?"NULL":(value.size()+" "+filterName+(value.size()==1?"":"s"))).addLore("Click a "+filterName+" in your inventory to add it to the list.").addLore("Right click any "+filterName+" in the list to remove it.").addLore(allowNull?"Shift-right click this item to set to NULL":("Shift-right click this item to clear all "+filterName+"s")), (click) -> {
             if(click==ClickType.SHIFT_RIGHT){
                 if(allowNull)value = null;
                 else{
