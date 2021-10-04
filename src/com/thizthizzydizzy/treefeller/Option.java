@@ -72,6 +72,16 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
+    public static OptionBoolean DEFAULT_ENABLED = new OptionBoolean("Default Enabled", true, false, false, true, true){
+        @Override
+        public String getDesc(boolean ingame){
+            return "If set to false, the tree feller will be toggled off for each player ttttby default (as with /treefeller toggle)"+(ingame?"\nOnly takes effect on reload/restart":"");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Objects.equals(value, true)?Material.GREEN_CONCRETE:Material.RED_CONCRETE);
+        }
+    };
     //tree detection
     public static Option<Integer> SCAN_DISTANCE = new Option<Integer>("Scan Distance", true, true, false, 256){
         @Override
@@ -1571,7 +1581,7 @@ public abstract class Option<E>{
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
-            return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.LOOT_BONUS_BLOCKS);
+            return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.LOOT_BONUS_BLOCKS).addFlag(ItemFlag.HIDE_ENCHANTS);
         }
     };
     public static OptionBoolean LOG_SILK_TOUCH = new OptionBoolean("Log Silk Touch", true, true, true, true){
@@ -1581,7 +1591,7 @@ public abstract class Option<E>{
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
-            return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.SILK_TOUCH);
+            return new ItemBuilder(Material.OAK_LOG).enchant(Enchantment.SILK_TOUCH).addFlag(ItemFlag.HIDE_ENCHANTS);
         }
     };
     public static OptionBoolean LEAVE_STUMP = new OptionBoolean("Leave Stump", true, true, true, false){

@@ -44,7 +44,7 @@ public class TreeFeller extends JavaPlugin{
     public static ArrayList<Effect> effects = new ArrayList<>();
     public static HashMap<UUID, Cooldown> cooldowns = new HashMap<>();
     public static HashMap<Player, MenuTreesConfiguration> detectingTrees = new HashMap<>();
-    public HashSet<UUID> disabledPlayers = new HashSet<>();
+    public HashSet<UUID> toggledPlayers = new HashSet<>();
     public ArrayList<FallingTreeBlock> fallingBlocks = new ArrayList<>();
     public ArrayList<Sapling> saplings = new ArrayList<>();
     boolean debug = false;
@@ -277,7 +277,7 @@ public class TreeFeller extends JavaPlugin{
         TREE:for(Tree tree : trees){
             if(!tree.trunk.contains(material))continue;
             TOOL:for(Tool tool : tools){
-                if(player!=null&&disabledPlayers.contains(player.getUniqueId())){
+                if(player!=null&&!isToggledOn(player)){
                     debug(player, true, false, "toggle");
                     return null;
                 }
@@ -1429,5 +1429,23 @@ public class TreeFeller extends JavaPlugin{
         }
         item.setItemStack(stack);
         TreeFellerCompat.dropItem(player, item);
+    }
+    public boolean isToggledOn(Player player){
+        boolean inverted = Option.DEFAULT_ENABLED.isTrue();
+        boolean toggled = toggledPlayers.contains(player.getUniqueId());
+        return inverted?!toggled:toggled;
+    }
+    public void toggle(Player player){
+        boolean on = isToggledOn(player);
+        toggle(player, !on);
+    }
+    public void toggle(Player player, boolean state){
+        boolean inverted = Option.DEFAULT_ENABLED.isTrue();
+        boolean shouldBeToggled = inverted?!state:state;
+        UUID uuid = player.getUniqueId();
+        if(toggledPlayers.contains(uuid)){
+            if(!shouldBeToggled)toggledPlayers.remove(uuid);
+        }else if(shouldBeToggled)toggledPlayers.add(uuid);
+        player.sendMessage("Tree Feller "+(state?"enabled":"disabled"));
     }
 }

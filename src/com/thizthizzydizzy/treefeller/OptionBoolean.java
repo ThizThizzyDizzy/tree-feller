@@ -29,6 +29,11 @@ public abstract class OptionBoolean extends Option<Boolean>{
         if(toolValues.containsKey(tool)||treeValues.containsKey(tree))return Objects.equals(toolValues.get(tool), true)||Objects.equals(treeValues.get(tree), true);
         return Objects.equals(globalValue, true)||Objects.equals(toolValues.get(tool), true)||Objects.equals(treeValues.get(tree), true);
     }
+    @Override
+    public void setValue(Boolean value){
+        if(value==null)value = defaultValue;
+        super.setValue(value); //To change body of generated methods, choose Tools | Templates.
+    }
     /**
      * Checks if the global value is true.
      * @return <code>true</code> if the global value is <code>true</code>, or <code>false</code> otherwise

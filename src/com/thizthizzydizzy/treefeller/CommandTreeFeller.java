@@ -29,28 +29,21 @@ public class CommandTreeFeller implements TabExecutor{
         TreeFellerCommand toggleOn = new TreeFellerCommand("on", "toggle"){
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.disabledPlayers.remove(((Player)sender).getUniqueId());
-                sender.sendMessage("Tree Feller enabled");
+                plugin.toggle((Player)sender, true);
                 return true;
             }
         };
         TreeFellerCommand toggleOff = new TreeFellerCommand("off", "toggle"){
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.disabledPlayers.add(((Player)sender).getUniqueId());
-                sender.sendMessage("Tree Feller disabled");
+                plugin.toggle((Player)sender, false);
                 return true;
             }
         };
         commands.add(new TreeFellerCommand("toggle", toggleOn, toggleOff) {
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                if(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())){
-                    plugin.disabledPlayers.remove(((Player)sender).getUniqueId());
-                }else{
-                    plugin.disabledPlayers.add(((Player)sender).getUniqueId());
-                }
-                sender.sendMessage("Tree Feller "+(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())?"disabled":"enabled"));
+                plugin.toggle((Player)sender);
                 return true;
             }
         });
