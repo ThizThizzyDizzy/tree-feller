@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.menu.MenuConfiguration;
 import java.util.ArrayList;
 import java.util.List;
+import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -13,6 +14,48 @@ public class CommandTreeFeller implements TabExecutor{
     }
     private final ArrayList<TreeFellerCommand> commands = new ArrayList<>();
     {
+        commands.add(new TreeFellerCommand("help"){
+            @Override
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                for(TreeFellerCommand cmd : commands){
+                    if(cmd.hasPermission(sender)){
+                        String s = cmd.getFullUsage();
+                        if(s!=null)sender.sendMessage("/treefeller "+s);
+                    }
+                }
+                return true;
+            }
+        });
+        TreeFellerCommand toggleOn = new TreeFellerCommand("on", "toggle"){
+            @Override
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                plugin.disabledPlayers.remove(((Player)sender).getUniqueId());
+                sender.sendMessage("Tree Feller enabled");
+                return true;
+            }
+        };
+        TreeFellerCommand toggleOff = new TreeFellerCommand("off", "toggle"){
+            @Override
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                plugin.disabledPlayers.add(((Player)sender).getUniqueId());
+                sender.sendMessage("Tree Feller disabled");
+                return true;
+            }
+        };
+        commands.add(new TreeFellerCommand("toggle", toggleOn, toggleOff) {
+            @Override
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                if(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())){
+                    plugin.disabledPlayers.remove(((Player)sender).getUniqueId());
+                }else{
+                    plugin.disabledPlayers.add(((Player)sender).getUniqueId());
+                }
+                sender.sendMessage("Tree Feller "+(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())?"disabled":"enabled"));
+                return true;
+            }
+        });
+        commands.add(toggleOn);
+        commands.add(toggleOff);
         commands.add(new TreeFellerCommand("reload"){
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
@@ -21,9 +64,29 @@ public class CommandTreeFeller implements TabExecutor{
                 sender.sendMessage("Tree Feller reloaded!");
                 return true;
             }
+        });
+        TreeFellerCommand debugOn = new TreeFellerCommand("on", "debug"){
             @Override
-            protected String getUsage(){
-                return "/treefeller reload";
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                plugin.debug = true;
+                sender.sendMessage("Debug mode enabled");
+                return true;
+            }
+        };
+        TreeFellerCommand debugOff = new TreeFellerCommand("off", "debug"){
+            @Override
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                plugin.debug = false;
+                sender.sendMessage("Debug mode disabled");
+                return true;
+            }
+        };
+        commands.add(new TreeFellerCommand("debug", debugOn, debugOff) {
+            @Override
+            protected boolean run(CommandSender sender, Command command, String label, String[] args){
+                plugin.debug = !plugin.debug;
+                sender.sendMessage("Debug mode "+(plugin.debug?"enabled":"disabled"));
+                return true;
             }
         });
         commands.add(new TreeFellerCommand("config"){
@@ -36,110 +99,12 @@ public class CommandTreeFeller implements TabExecutor{
                 new MenuConfiguration(null, plugin, (Player)sender).openInventory();
                 return true;
             }
-            @Override
-            protected String getUsage(){
-                return "/treefeller config";
-            }
-        });
-        commands.add(new TreeFellerCommand("help"){
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                for(TreeFellerCommand cmd : commands){
-                    if(cmd.hasPermission(sender)){
-                        String s = cmd.getUsage();
-                        if(s!=null)sender.sendMessage(s);
-                    }
-                }
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return "/treefeller help";
-            }
-        });
-        TreeFellerCommand debugOn = new TreeFellerCommand("on"){
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.debug = true;
-                sender.sendMessage("Debug mode enabled");
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return "/treefeller debug on";
-            }
-        };
-        TreeFellerCommand debugOff = new TreeFellerCommand("off"){
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.debug = false;
-                sender.sendMessage("Debug mode disabled");
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return "/treefeller debug off";
-            }
-        };
-        commands.add(new TreeFellerCommand("debug", debugOn, debugOff) {
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.debug = !plugin.debug;
-                sender.sendMessage("Debug mode "+(plugin.debug?"enabled":"disabled"));
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return "/treefeller debug [on|off]";
-            }
-        });
-        TreeFellerCommand toggleOn = new TreeFellerCommand("on"){
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.disabledPlayers.remove(((Player)sender).getUniqueId());
-                sender.sendMessage("Tree Feller enabled");
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return null;
-            }
-        };
-        TreeFellerCommand toggleOff = new TreeFellerCommand("off"){
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                plugin.disabledPlayers.add(((Player)sender).getUniqueId());
-                sender.sendMessage("Tree Feller disabled");
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return null;
-            }
-        };
-        commands.add(toggleOn);
-        commands.add(toggleOff);
-        commands.add(new TreeFellerCommand("toggle", toggleOn, toggleOff) {
-            @Override
-            protected boolean run(CommandSender sender, Command command, String label, String[] args){
-                if(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())){
-                    plugin.disabledPlayers.remove(((Player)sender).getUniqueId());
-                }else{
-                    plugin.disabledPlayers.add(((Player)sender).getUniqueId());
-                }
-                sender.sendMessage("Tree Feller "+(plugin.disabledPlayers.contains(((Player)sender).getUniqueId())?"disabled":"enabled"));
-                return true;
-            }
-            @Override
-            protected String getUsage(){
-                return "/treefeller on|off|toggle [on|off]";
-            }
         });
     }
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args){
         if(args.length<1){
-            sender.sendMessage("Usage: /treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)");
+            sendUsageResponse(sender);
             return true;
         }
         for(TreeFellerCommand cmd : commands){
@@ -147,7 +112,7 @@ public class CommandTreeFeller implements TabExecutor{
                 return cmd.onCommand(sender, command, label, trim(args, 1), args);
             }
         }
-        sender.sendMessage("Usage: /treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)");
+        sendUsageResponse(sender);
         return true;
     }
     @Override
@@ -173,4 +138,24 @@ public class CommandTreeFeller implements TabExecutor{
         }
         return newData;
     }
+    private String getFullUsage(CommandSender sender){
+        String usage = "/treefeller ";
+        boolean foundValidCommand = false;
+        String subUsage = "";
+        for(TreeFellerCommand cmd : commands){
+            if(cmd.hasPermission(sender)){
+                subUsage+="|"+cmd.getFullUsage();
+                foundValidCommand = true;
+            }
+        }
+        if(!foundValidCommand)return null;
+        usage+=subUsage.substring(1);
+        return usage;
+    }
+    private void sendUsageResponse(CommandSender sender){
+        String usage = getFullUsage(sender);
+        if(usage==null)sender.sendMessage(ChatColor.RED+"Unknown Command");
+        else sender.sendMessage("Usage: "+usage);
+    }
 }
+//treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)
