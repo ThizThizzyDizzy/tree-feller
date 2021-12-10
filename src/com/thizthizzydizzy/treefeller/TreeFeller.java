@@ -533,8 +533,11 @@ public class TreeFeller extends JavaPlugin{
         saveDefaultConfig();
         getConfig().options().copyDefaults(true);
 //</editor-fold>
+        pm.addPermission(new Permission("treefeller.help"));
+        pm.addPermission(new Permission("treefeller.toggle"));
         pm.addPermission(new Permission("treefeller.reload"));
         pm.addPermission(new Permission("treefeller.debug"));
+        pm.addPermission(new Permission("treefeller.config"));
         getCommand("treefeller").setExecutor(new CommandTreeFeller(this));
         logger.log(Level.INFO, "{0} has been enabled! (Version {1}) by ThizThizzyDizzy", new Object[]{pdfFile.getName(), pdfFile.getVersion()});
         reload();
@@ -552,8 +555,6 @@ public class TreeFeller extends JavaPlugin{
         }catch(IllegalArgumentException ex){}
         if(p!=null)return p;
         switch(string.toLowerCase().replace("_", " ").replace("-", " ")){
-            case "barrier":
-                return Particle.BARRIER;
             case "block":
 //                return Particle.BLOCK_CRACK;
                 return Particle.BLOCK_DUST;
