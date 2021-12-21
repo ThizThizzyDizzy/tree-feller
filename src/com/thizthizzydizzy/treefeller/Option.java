@@ -3030,41 +3030,49 @@ public abstract class Option<E>{
             if(toolValues.containsKey(tool)){
                 HashSet<String> worlds = toolValues.get(tool);
                 boolean blacklist = Objects.equals(WORLD_BLACKLIST.getValue(tool), true);
+                boolean foundWorld = false;
                 for(String world : worlds){
                     if(world.equalsIgnoreCase(block.getWorld().getName())||world.equalsIgnoreCase(block.getWorld().getUID().toString())){
                         if(blacklist){
                             return new DebugResult(this, TOOL, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
                         }else{
+                            foundWorld = true;
                             break;
                         }
                     }
                 }
+                if(!blacklist&&!foundWorld)return new DebugResult(this, TOOL, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
             }
             if(treeValues.containsKey(tree)){
                 HashSet<String> worlds = treeValues.get(tree);
                 boolean blacklist = Objects.equals(WORLD_BLACKLIST.getValue(tree), true);
+                boolean foundWorld = false;
                 for(String world : worlds){
                     if(world.equalsIgnoreCase(block.getWorld().getName())||world.equalsIgnoreCase(block.getWorld().getUID().toString())){
                         if(blacklist){
                             return new DebugResult(this, TREE, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
                         }else{
+                            foundWorld = true;
                             break;
                         }
                     }
                 }
-                
+                if(!blacklist&&!foundWorld)return new DebugResult(this, TREE, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
             }
             if(globalValue!=null){
                 boolean blacklist = Objects.equals(WORLD_BLACKLIST.globalValue, true);
+                boolean foundWorld = false;
                 for(String world : globalValue){
                     if(world.equalsIgnoreCase(block.getWorld().getName())||world.equalsIgnoreCase(block.getWorld().getUID().toString())){
                         if(blacklist){
                             return new DebugResult(this, GLOBAL, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
                         }else{
+                            foundWorld = true;
                             break;
                         }
                     }
                 }
+                if(!blacklist&&!foundWorld)return new DebugResult(this, GLOBAL, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
             }
             return new DebugResult(this, SUCCESS, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
         }
