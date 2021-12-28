@@ -24,6 +24,7 @@ public class TreeFellerCompat{
         compatibilities.add(new TownyCompat());
         compatibilities.add(new OreRegeneratorCompat());
         compatibilities.add(new Drop2InventoryCompat());
+        compatibilities.add(new EcoSkillsCompat());
     }
     public static void init(){}//placeholder method for loading the class
     public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){

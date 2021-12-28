@@ -18,6 +18,7 @@ import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyFellBehavior
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifySpawnSaplings;
 import com.thizthizzydizzy.treefeller.menu.modify.special.MenuModifyTreeSet;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -3523,12 +3524,17 @@ public abstract class Option<E>{
     }
     public String getDefaultConfigValue(){
         if(defaultConfigValue==null)return null;
-        if(defaultConfigValue instanceof HashSet){
-            String s = "";
-            for(Object o : (HashSet)defaultConfigValue){
-                s+="\n    - "+o;
+        if(defaultConfigValue instanceof HashSet hs){
+            String str = "";
+            ArrayList<String> lst = new ArrayList<>();
+            for(Object o : hs){
+                lst.add(Objects.toString(o));
             }
-            return s;
+            Collections.sort(lst);
+            for(String s : lst){
+                str += "\n    - "+s;
+            }
+            return str;
         }
         return defaultConfigValue.toString();
     }

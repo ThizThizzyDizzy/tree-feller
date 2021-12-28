@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.16.5
+# Version 1.17
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -154,14 +154,14 @@ directional-fall-behavior: RANDOM
 # (Only used for NATURAL fell behavior)
 overridables: 
     - AIR
-    - SEAGRASS
     - CAVE_AIR
-    - WATER
-    - TALL_GRASS
-    - LARGE_FERN
     - FERN
-    - TALL_SEAGRASS
     - GRASS
+    - LARGE_FERN
+    - SEAGRASS
+    - TALL_GRASS
+    - TALL_SEAGRASS
+    - WATER
 
 # If set to true, trees can only fall in one of the cardinal directions (N/S/E/W)
 lock-fall-cardinal: false
@@ -381,6 +381,24 @@ compatibility-oreregenerator: false
 # Toggle compatibility with Drop2Inventory
 compatibility-drop2inventory: true
 
+# How much Woodcutting experience should be given per block of trunk felled?
+ecoskills-trunk-woodcutting-xp: 1.0
+
+# How much Mining experience should be given per block of trunk felled?
+ecoskills-trunk-mining-xp: 0.0
+
+# How much Woodcutting experience should be given per block of leaves felled?
+ecoskills-leaf-woodcutting-xp: 0.0
+
+# How much Mining experience should be given per block of leaves felled?
+ecoskills-leaf-mining-xp: 0.0
+
+# Should EcoSkills modifiers be applied to experience earned through TreeFeller?
+ecoskills-apply-modifiers: true
+
+# Toggle compatibility with EcoSkills
+compatibility-ecoskills: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -451,6 +469,11 @@ compatibility-drop2inventory: true
 # world-blacklist
 # cooldown
 # mcmmo-double-drops
+# ecoskills-trunk-woodcutting-xp
+# ecoskills-trunk-mining-xp
+# ecoskills-leaf-woodcutting-xp
+# ecoskills-leaf-mining-xp
+# ecoskills-apply-modifiers
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
 #    - {type: WOODEN_AXE, required-enchantments: {efficiency: 4, unbreaking: 1}, banned-enchantments: {unbreaking: 2}, min-durability: 4, max-durability-percent: 0.9}
@@ -543,6 +566,11 @@ tools:
 # mmocore-leaves-xp
 # mcmmo-double-drops
 # oreregenerator-regen-delay
+# ecoskills-trunk-woodcutting-xp
+# ecoskills-trunk-mining-xp
+# ecoskills-leaf-woodcutting-xp
+# ecoskills-leaf-mining-xp
+# ecoskills-apply-modifiers
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
