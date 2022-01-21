@@ -76,6 +76,9 @@ anim-delay: 1
 # Should saplings be replanted?
 replant-saplings: false
 
+# Should saplings be taken from the player's inventory to replant trees?
+use-inventory-saplings: false
+
 # Should saplings be spawned?
 # 0 = No, only replant if the leaves drop saplings
 # 1 = Yes, but only if the leaves do not drop enough
@@ -433,6 +436,7 @@ compatibility-ecoskills: true
 # cutting-animation
 # anim-delay
 # replant-saplings
+# use-inventory-saplings
 # spawn-saplings
 # sapling-timeout
 # log-behavior
@@ -527,6 +531,7 @@ tools:
 # cutting-animation
 # anim-delay
 # replant-saplings
+# use-inventory-saplings
 # spawn-saplings
 # sapling                            If replant-saplings is enabled, this will replant the tree with this type of sapling
 # sapling-timeout

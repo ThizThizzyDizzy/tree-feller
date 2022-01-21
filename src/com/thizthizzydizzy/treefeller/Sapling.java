@@ -3,17 +3,20 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class Sapling{
     public final boolean spawn;
     public final DetectedTree detectedTree;
+    private final Player player;
     public final Block block;
     private final HashSet<Material> materials;
     private final int timeout;
     private int timer;
     private boolean placed = false;
-    public Sapling(DetectedTree detectedTree, Block block, HashSet<Material> materials, boolean spawn, int timeout){
+    public Sapling(DetectedTree detectedTree, Player player, Block block, HashSet<Material> materials, boolean spawn, int timeout){
         this.detectedTree = detectedTree;
+        this.player = player;
         this.block = block;
         this.materials = materials;
         this.spawn = spawn;
@@ -25,7 +28,24 @@ public class Sapling{
     }
     public void tick(){
         timer++;
-        if(spawn&&timer==timeout)place(null);
+        if(timer==timeout){
+            if(player!=null){
+                var inv = player.getInventory();
+                ItemStack[] contents = inv.getContents();
+                for(int i = 0; i<contents.length; i++){
+                    ItemStack content = contents[i];
+                    if(materials.contains(content.getType())){
+                        if(place(content.getType())){
+                            content.setAmount(content.getAmount()-1);
+                            contents[i] = content;
+                            inv.setContents(contents);
+                        }
+                        break;
+                    }
+                }
+            }
+            if(spawn)place(null);
+        }
     }
     public boolean canPlace(){
         if(isDead())return false;
