@@ -8,6 +8,7 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyDouble;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnchantmentMap;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyFloat;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialMaterialMap;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyShort;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
@@ -37,6 +38,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
+    private static final HashSet<Material> defaultGrasses = new HashSet<>();
+    private static final HashMap<Material, Material> defaultDropConversions = new HashMap<>();
     static{
         defaultOverridables.add(Material.GRASS);
         defaultOverridables.add(Material.AIR);
@@ -47,14 +50,19 @@ public abstract class Option<E>{
         defaultOverridables.add(Material.TALL_SEAGRASS);
         defaultOverridables.add(Material.FERN);
         defaultOverridables.add(Material.LARGE_FERN);
-    }
-    private static final HashSet<Material> defaultGrasses = new HashSet<>();
-    static{
         defaultGrasses.add(Material.GRASS_BLOCK);
         defaultGrasses.add(Material.DIRT);
         defaultGrasses.add(Material.PODZOL);
         Material rootedDirt = Material.matchMaterial("ROOTED_DIRT");
         if(rootedDirt!=null)defaultGrasses.add(rootedDirt);
+        defaultDropConversions.put(Material.OAK_WOOD, Material.OAK_LOG);
+        defaultDropConversions.put(Material.BIRCH_WOOD, Material.BIRCH_LOG);
+        defaultDropConversions.put(Material.SPRUCE_WOOD, Material.SPRUCE_LOG);
+        defaultDropConversions.put(Material.JUNGLE_WOOD, Material.JUNGLE_LOG);
+        defaultDropConversions.put(Material.ACACIA_WOOD, Material.ACACIA_LOG);
+        defaultDropConversions.put(Material.DARK_OAK_WOOD, Material.DARK_OAK_LOG);
+        defaultDropConversions.put(Material.CRIMSON_HYPHAE, Material.CRIMSON_STEM);
+        defaultDropConversions.put(Material.WARPED_HYPHAE, Material.WARPED_STEM);
     }
     public static ArrayList<Option> options = new ArrayList<>();
     //console/debugging stuff
@@ -1617,14 +1625,102 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
-    public static OptionBoolean CONVERT_WOOD_TO_LOG = new OptionBoolean("Convert Wood To Log", true, true, true, true){
+    public static Option<HashMap<Material, Material>> DROP_CONVERSIONS = new Option<HashMap<Material, Material>>("Drop Conversions", true, true, true, defaultDropConversions){
         @Override
-        public String getDesc(boolean ingame){
-            return "Should _WOOD blocks in trees be converted to _LOG when they drop as items?";
+        public String writeToConfig(HashMap<Material, Material> value){
+            String s = "";
+            if(value==null)return s;
+            ArrayList<Material> keys = new ArrayList<>(value.keySet());
+            Collections.sort(keys);
+            for(Material m : keys){
+                s+="\n    "+m.toString()+": "+value.get(m).toString();
+            }
+            return s;
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+        public String getDefaultConfigValue(){
+            return writeToConfig(defaultValue);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "A list of drops to convert into other drops when felling."+(ingame?"":" add entries like this:\n"
+                    + "    oak_wood: oak_log\n"
+                    + "    oak_fence: stick");
+        }
+        @Override
+        public HashMap<Material, Material> get(Tool tool, Tree tree){
+            HashMap<Material, Material> conversions = new HashMap<>();
+            if(globalValue!=null)conversions.putAll(globalValue);
+            if(toolValues.containsKey(tool))conversions.putAll(toolValues.get(tool));
+            if(treeValues.containsKey(tree))conversions.putAll(treeValues.get(tree));
+            return conversions;
+        }
+        @Override
+        public HashMap<Material, Material> load(Object o){
+            if(o instanceof MemorySection m){
+                HashMap<Material, Material> conversions = new HashMap<>();
+                for(String key : m.getKeys(false)){
+                    conversions.put(loadMaterial(key), loadMaterial(conversions.get(key)));
+                }
+                return conversions;
+            }
+            if(o instanceof Map m){
+                HashMap<Material, Material> conversions = new HashMap<>();
+                for(Object okey : m.keySet()){
+                    if(okey instanceof String key){
+                        conversions.put(loadMaterial(key), loadMaterial(conversions.get(key)));
+                    }
+                }
+                return conversions;
+            }
+            if(o instanceof List l){
+                HashMap<Material, Material> conversions = new HashMap<>();
+                for(Object ob : l){
+                    if(ob instanceof MemorySection m){
+                        for(String key : m.getKeys(false)){
+                            conversions.put(loadMaterial(key), loadMaterial(conversions.get(key)));
+                        }
+                    }
+                }
+                return conversions;
+            }
+            return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashMap<Material, Material> value){
             return new ItemBuilder(Material.OAK_WOOD);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialMaterialMap(parent, parent.plugin, parent.player, name, "item", (t)->{
+                return t.isItem();
+            }, "item", (t)->{
+                return t.isItem();
+            }, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialMaterialMap(parent, parent.plugin, parent.player, name, "item", (t)->{
+                return t.isItem();
+            }, "item", (t)->{
+                return t.isItem();
+            }, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialMaterialMap(parent, parent.plugin, parent.player, name, "item", (t)->{
+                return t.isItem();
+            }, "item", (t)->{
+                return t.isItem();
+            }, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
         }
     };
     public static Option<Double> LEAF_DROP_CHANCE = new Option<Double>("Leaf Drop Chance", true, true, true, 1d){

@@ -893,7 +893,6 @@ public class TreeFeller extends JavaPlugin{
             xp[0] += randbetween(exp.get(block.getType()));
         }
         ArrayList<ItemStack> drops = new ArrayList<>();
-        boolean convert = Option.CONVERT_WOOD_TO_LOG.get(tool, tree);
         boolean fortune, silk;
         if(tree.trunk.contains(block.getType())){
             fortune = Option.LOG_FORTUNE.get(tool, tree);
@@ -910,14 +909,10 @@ public class TreeFeller extends JavaPlugin{
         }
         if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
         if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
-        if(convert){
+        HashMap<Material, Material> conversions = Option.DROP_CONVERSIONS.get(tool, tree);
+        if(!conversions.isEmpty()){
             for(ItemStack s : drops){
-                if(s.getType().name().endsWith("_WOOD")){
-                    s.setType(Material.matchMaterial(s.getType().name().replace("_WOOD", "_LOG")));
-                }
-                if(s.getType().name().endsWith("_HYPHAE")){
-                    s.setType(Material.matchMaterial(s.getType().name().replace("_HYPHAE", "_STEM")));
-                }
+                if(conversions.containsKey(s.getType()))s.setType(conversions.get(s.getType()));
             }
         }
         return drops;

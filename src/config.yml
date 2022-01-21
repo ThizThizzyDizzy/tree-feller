@@ -214,8 +214,18 @@ leave-stump: false
 # (Only used when log or leaf behavior is set to FALL or similar)
 rotate-logs: true
 
-# Should _WOOD blocks in trees be converted to _LOG when they drop as items?
-convert-wood-to-log: true
+# A list of drops to convert into other drops when felling. add entries like this:
+#     oak_wood: oak_log
+#     oak_fence: stick
+drop-conversions: 
+    OAK_WOOD: OAK_LOG
+    SPRUCE_WOOD: SPRUCE_LOG
+    BIRCH_WOOD: BIRCH_LOG
+    JUNGLE_WOOD: JUNGLE_LOG
+    ACACIA_WOOD: ACACIA_LOG
+    DARK_OAK_WOOD: DARK_OAK_LOG
+    CRIMSON_HYPHAE: CRIMSON_STEM
+    WARPED_HYPHAE: WARPED_STEM
 
 # How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)
 leaf-drop-chance: 1.0
@@ -440,7 +450,7 @@ compatibility-ecoskills: true
 # log-silk-touch
 # leave-stump
 # rotate-logs
-# convert-wood-to-log
+# drop-conversions
 # leaf-drop-chance
 # log-drop-chance
 # global-effects
@@ -535,7 +545,7 @@ tools:
 # log-silk-touch
 # leave-stump
 # rotate-logs
-# convert-wood-to-log
+# drop-conversions
 # leaf-drop-chance
 # log-drop-chance
 # global-effects

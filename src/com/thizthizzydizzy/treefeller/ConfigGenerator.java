@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller;
-
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -11,10 +10,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Objects;
-
-/**
- *  This class is not used at runtime.
- */
 public class ConfigGenerator{
     public static void generateConfiguration(TreeFeller plugin){
         String version = plugin.getDescription().getVersion();
