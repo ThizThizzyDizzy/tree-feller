@@ -84,7 +84,7 @@ public abstract class Option<E>{
     public static OptionBoolean DEFAULT_ENABLED = new OptionBoolean("Default Enabled", true, false, false, true, true){
         @Override
         public String getDesc(boolean ingame){
-            return "If set to false, the tree feller will be toggled off for each player ttttby default (as with /treefeller toggle)"+(ingame?"\nOnly takes effect on reload/restart":"");
+            return "If set to false, the tree feller will be toggled off for each player by default (as with /treefeller toggle)"+(ingame?"\nOnly takes effect on reload/restart":"");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
@@ -1682,7 +1682,7 @@ public abstract class Option<E>{
             if(o instanceof MemorySection m){
                 HashMap<Material, Material> conversions = new HashMap<>();
                 for(String key : m.getKeys(false)){
-                    conversions.put(loadMaterial(key), loadMaterial(conversions.get(key)));
+                    conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                 }
                 return conversions;
             }
@@ -1690,7 +1690,7 @@ public abstract class Option<E>{
                 HashMap<Material, Material> conversions = new HashMap<>();
                 for(Object okey : m.keySet()){
                     if(okey instanceof String key){
-                        conversions.put(loadMaterial(key), loadMaterial(conversions.get(key)));
+                        conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                     }
                 }
                 return conversions;
@@ -1700,7 +1700,7 @@ public abstract class Option<E>{
                 for(Object ob : l){
                     if(ob instanceof MemorySection m){
                         for(String key : m.getKeys(false)){
-                            conversions.put(loadMaterial(key), loadMaterial(conversions.get(key)));
+                            conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                         }
                     }
                 }

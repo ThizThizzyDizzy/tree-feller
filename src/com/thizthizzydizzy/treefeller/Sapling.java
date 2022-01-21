@@ -28,22 +28,18 @@ public class Sapling{
     }
     public void tick(){
         timer++;
-        if(timer==timeout){
-            if(player!=null){
-                var inv = player.getInventory();
-                ItemStack[] contents = inv.getContents();
-                for(int i = 0; i<contents.length; i++){
-                    ItemStack content = contents[i];
-                    if(materials.contains(content.getType())){
-                        if(place(content.getType())){
-                            content.setAmount(content.getAmount()-1);
-                            contents[i] = content;
-                            inv.setContents(contents);
-                        }
-                        break;
-                    }
+        if(player!=null){
+            var inv = player.getInventory();
+            ItemStack[] contents = inv.getContents();
+            for(int i = 0; i<contents.length; i++){
+                ItemStack content = contents[i];
+                if(tryPlace(content)){
+                    inv.setContents(contents);
+                    break;
                 }
             }
+        }
+        if(timer==timeout){
             if(spawn)place(null);
         }
     }

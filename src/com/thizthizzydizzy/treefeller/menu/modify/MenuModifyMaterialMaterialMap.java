@@ -95,6 +95,7 @@ public class MenuModifyMaterialMaterialMap extends Menu{//TODO make this multi-p
             if(valueFilter.test(stack.getType())){
                 if(value==null)value = new HashMap<>();
                 value.put(selected, stack.getType());
+                selected = null;
                 setFunc.accept(value);
                 refresh();
             }
