@@ -96,6 +96,7 @@ public class TreeFeller extends JavaPlugin{
                 durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
                 if(durabilityCost<1)durabilityCost++;
             }
+            if(Option.RESPECT_UNBREAKABLE.get(tool, tree))durabilityCost = 0;
             if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
             if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
             if(Option.PREVENT_BREAKAGE.get(tool, tree)){
@@ -131,6 +132,7 @@ public class TreeFeller extends JavaPlugin{
             durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
             if(durabilityCost<1)durabilityCost++;
         }
+        if(Option.RESPECT_UNBREAKABLE.get(tool, tree))durabilityCost = 0;
         if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
         if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
         debug(player, true, true, "success");

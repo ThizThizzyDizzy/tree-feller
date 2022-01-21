@@ -1510,12 +1510,24 @@ public abstract class Option<E>{
     public static OptionBoolean RESPECT_UNBREAKING = new OptionBoolean("Respect Unbreaking", true, true, true, true){
         @Override
         public String getDesc(boolean ingame){
-            return "If a tool has unbreaking, should it take less damage from cutting trees?";
+            return "If a tool has unbreaking, should it take less damage from felling trees?";
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
             ItemBuilder builder = new ItemBuilder(Material.IRON_AXE);
             if(Objects.equals(value, true))builder.enchant(Enchantment.DURABILITY);
+            return builder;
+        }
+    };
+    public static OptionBoolean RESPECT_UNBREAKABLE = new OptionBoolean("Respect Unbreakable", true, true, true, true){
+        @Override
+        public String getDesc(boolean ingame){
+            return "If a tool has the (vanilla) Unbreakable tag, should it take no damage from felling trees?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            ItemBuilder builder = new ItemBuilder(Material.NETHERITE_AXE);
+            if(Objects.equals(value, true))builder.setUnbreakable(true);
             return builder;
         }
     };
