@@ -293,7 +293,7 @@ min-time:
 # What should the maximum time be for felling trees? (0-24000)
 max-time:
 
-# What should the maximum phase be for felling trees? (0-7)
+# What should the minimum phase be for felling trees? (0-7)
 # Phases:
 # 0 = full moon
 # 1 = waning gibbous
@@ -305,7 +305,7 @@ max-time:
 # 7 = waxing gibbous
 min-phase:
 
-# What should the minimum phase be for felling trees? (0-7)
+# What should the maximum phase be for felling trees? (0-7)
 # Phases:
 # 0 = full moon
 # 1 = waning gibbous

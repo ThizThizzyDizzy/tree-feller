@@ -2787,7 +2787,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "What should the maximum phase be for felling trees? (0-7)\n" +
+            return "What should the minimum phase be for felling trees? (0-7)\n" +
                 "Phases:\n" +
                 "0 = full moon\n" +
                 "1 = waning gibbous\n" +
@@ -2852,7 +2852,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "What should the minimum phase be for felling trees? (0-7)\n" +
+            return "What should the maximum phase be for felling trees? (0-7)\n" +
                 "Phases:\n" +
                 "0 = full moon\n" +
                 "1 = waning gibbous\n" +
