@@ -1,11 +1,11 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.17
+# Version 1.17.1
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
 startup-logs: true
 
-# If set to false, the tree feller will be toggled off for each player ttttby default (as with /treefeller toggle)
+# If set to false, the tree feller will be toggled off for each player by default (as with /treefeller toggle)
 default-enabled: true
 
 # How far should the plugin scan for logs? (If a tree is larger, only the part within this distance will be felled)

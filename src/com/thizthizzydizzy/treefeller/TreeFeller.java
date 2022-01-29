@@ -80,6 +80,8 @@ public class TreeFeller extends JavaPlugin{
      * @return the items that would have been dropped. <b>This is not the actual dropped items, but possible dropped items</b> Returns null if the tree was not felled.
      */
     public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){
+        var meta = axe.hasItemMeta()?axe.getItemMeta():null;
+        boolean unbreakable = meta!=null&&meta.isUnbreakable();
         DetectedTree detectedTree = detectTree(block, player, axe, (testTree) -> {
             Tool tool = testTree.tool;
             Tree tree = testTree.tree;
@@ -96,7 +98,7 @@ public class TreeFeller extends JavaPlugin{
                 durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
                 if(durabilityCost<1)durabilityCost++;
             }
-            if(Option.RESPECT_UNBREAKABLE.get(tool, tree))durabilityCost = 0;
+            if(Option.RESPECT_UNBREAKABLE.get(tool, tree)&&unbreakable)durabilityCost = 0;
             if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
             if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
             if(Option.PREVENT_BREAKAGE.get(tool, tree)){
@@ -132,7 +134,7 @@ public class TreeFeller extends JavaPlugin{
             durabilityCost/=(axe.getEnchantmentLevel(Enchantment.DURABILITY)+1);
             if(durabilityCost<1)durabilityCost++;
         }
-        if(Option.RESPECT_UNBREAKABLE.get(tool, tree))durabilityCost = 0;
+        if(Option.RESPECT_UNBREAKABLE.get(tool, tree)&&unbreakable)durabilityCost = 0;
         if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
         if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
         debug(player, true, true, "success");
