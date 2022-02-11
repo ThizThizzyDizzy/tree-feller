@@ -55,6 +55,7 @@ public class Sapling{
         return true;
     }
     public boolean tryPlace(ItemStack stack){
+        if(stack==null)return false;
         if(materials.contains(stack.getType())){
             if(place(stack.getType())){
                 stack.setAmount(stack.getAmount()-1);
