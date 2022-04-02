@@ -34,6 +34,7 @@ import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -59,8 +60,10 @@ public class TreeFeller extends JavaPlugin{
     public ArrayList<Sapling> saplings = new ArrayList<>();
     boolean debug = false;
     ArrayList<NaturalFall> naturalFalls = new ArrayList<>();
+    ArrayList<Cascade> pendingCascades = new ArrayList<>();
     private static final HashMap<Material, int[]> exp = new HashMap<>();
     public final ArrayList<String> patrons = new ArrayList<>();
+    private BukkitTask cascadeTask;
     {//fallback list in case downloading fails
         patrons.add("Thalzamar");
         patrons.add("Mstk");
@@ -412,6 +415,9 @@ public class TreeFeller extends JavaPlugin{
         return null;
     }
     private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
+        return getBlocks(materialTypes, startingBlock, maxDistance, maxBlocks, diagonal, playerLeaves, ignoreLeafData, false);
+    }
+    private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData, boolean invertLeafDirection){
         //layer zero
         HashMap<Integer, ArrayList<Block>> results = new HashMap<>();
         int total = 0;
@@ -447,8 +453,10 @@ public class TreeFeller extends JavaPlugin{
                                     if(!ignoreLeafData){
                                         if(block.getBlockData() instanceof Leaves){
                                             Leaves oldLeaf = (Leaves)block.getBlockData();
-                                            if(newLeaf.getDistance()<=oldLeaf.getDistance()){
-                                                continue;
+                                            if(invertLeafDirection){
+                                                if(newLeaf.getDistance()>=oldLeaf.getDistance())continue;
+                                            }else{
+                                                if(newLeaf.getDistance()<=oldLeaf.getDistance())continue;
                                             }
                                         }
                                     }
@@ -495,8 +503,10 @@ public class TreeFeller extends JavaPlugin{
                             if(!ignoreLeafData){
                                 if(block.getBlockData() instanceof Leaves){
                                     Leaves oldLeaf = (Leaves)block.getBlockData();
-                                    if(newLeaf.getDistance()<=oldLeaf.getDistance()){
-                                        continue;
+                                    if(invertLeafDirection){
+                                        if(newLeaf.getDistance()>=oldLeaf.getDistance())continue;
+                                    }else{
+                                        if(newLeaf.getDistance()<=oldLeaf.getDistance())continue;
                                     }
                                 }
                             }
@@ -847,6 +857,9 @@ public class TreeFeller extends JavaPlugin{
         ArrayList<Material> overridables = new ArrayList<>(Option.OVERRIDABLES.get(tool, tree));
         ArrayList<Effect> effects = new ArrayList<>();
         boolean isLeaf = !tree.trunk.contains(block.getType());
+        if(Option.CASCADE.get(tool, tree)){
+            cascade(detectedTree, dropItems, tree, tool, axe, block, player);
+        }
         for(Effect e : Option.EFFECTS.get(tool, tree)){
             if(e.location==Effect.EffectLocation.TREE)effects.add(e);
             if(isLeaf){
@@ -875,6 +888,74 @@ public class TreeFeller extends JavaPlugin{
         for(Effect e : effects){
             if(rand.nextDouble()<e.chance)e.play(block);
         }
+    }
+    private void cascade(DetectedTree detectedTree, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Player player){
+        pendingCascades.add(new Cascade(detectedTree, dropItems, tree, tool, axe, block, player));
+        if(cascadeTask==null){
+            cascadeTask = new BukkitRunnable(){
+                @Override
+                public void run(){
+                    int maxChecks = Option.CASCADE_CHECK_LIMIT.getValue();
+                    int maxCascades = Option.PARALLEL_CASCADE_LIMIT.getValue();
+                    int checks = 0;
+                    int cascades = 0;
+                    while(checks<maxChecks&&cascades<maxCascades&&!pendingCascades.isEmpty()){
+                        checks++;
+                        Cascade cascade = pendingCascades.remove(0);
+                        ArrayList<Tree> trees = Option.CASCADE_TREES.get(cascade.tool, cascade.tree);
+                        if(trees==null){
+                            trees = new ArrayList<>();
+                            trees.add(cascade.tree);
+                        }
+                        HashSet<Material> allLeaves = new HashSet<>();
+                        HashSet<Material> allTrunks = new HashSet<>();
+                        int maxRange = 0;
+                        boolean diagonal = false, player = false, ignoreData = false;
+                        for(Tree tree : trees){
+                            allLeaves.addAll(tree.leaves);
+                            allTrunks.addAll(tree.trunk);
+                            int range = Option.LEAF_DETECT_RANGE.get(cascade.tool, tree);
+                            if(range>maxRange)maxRange = range;
+                            if(Option.DIAGONAL_LEAVES.get(cascade.tool, tree))diagonal = true;
+                            if(Option.PLAYER_LEAVES.get(cascade.tool, cascade.tree))player = true;
+                            if(Option.IGNORE_LEAF_DATA.get(cascade.tool, cascade.tree))ignoreData = true;
+                        }
+                        HashSet<Block> prevTrunks = new HashSet<>(toList(cascade.detectedTree.trunk));
+                        HashSet<Block> prevLeaves = new HashSet<>(toList(cascade.detectedTree.leaves));
+                        BlockFace[] directions = new BlockFace[]{BlockFace.NORTH,BlockFace.EAST,BlockFace.SOUTH,BlockFace.WEST,BlockFace.UP,BlockFace.DOWN};
+                        for(BlockFace dir : directions){
+                            Block start = cascade.block.getRelative(dir);
+                            if(prevLeaves.contains(start)||prevTrunks.contains(start))continue;
+                            ArrayList<Block> detectedLeaves = toList(getBlocks(new ArrayList<>(allLeaves), start, maxRange, 64, diagonal, player, ignoreData, true));
+                            HashSet<Block> trunks = new HashSet<>();
+                            for(Block b : detectedLeaves){
+                                if(prevLeaves.contains(b))continue;
+                                for(BlockFace direction : directions){
+                                    Block bl = b.getRelative(direction);
+                                    if(allTrunks.contains(bl.getType())){
+                                        if(prevTrunks.contains(bl))continue;
+                                        if(tryCascade(bl, cascade.player, cascade.axe, cascade.dropItems)!=null){
+                                            cascades++;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if(pendingCascades.isEmpty()){
+                        cascadeTask.cancel();
+                        cascadeTask = null;
+                    }
+                }
+            }.runTaskTimer(this, 1, 1);
+        }
+    }
+    public boolean cascading = false;
+    public ArrayList<ItemStack> tryCascade(Block block, Player player, ItemStack axe, boolean dropItems){
+        cascading = true;
+        ArrayList<ItemStack> ret = fellTree(block, player, axe, dropItems);
+        cascading = false;
+        return ret;
     }
     int randbetween(int[] minmax){
         return randbetween(minmax[0], minmax[1]);

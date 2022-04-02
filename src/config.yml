@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.17.2
+# Version 1.18
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -343,6 +343,18 @@ world-blacklist: false
 # How long (in ticks) should players have to wait before felling another tree?
 cooldown:
 
+# If enabled, connected trees will also be felled resulting in a cascade that could fell an entire forest
+enable-cascade: false
+
+# If cascade is enabled, how many times can it cascade? (How many additional trees can be felled?)
+cascade-limit: 64
+
+# How many cascades can happen in the same tick? (Keep low to prevent runaway performance)
+parallel-cascade-limit: 1
+
+# How many cascade checks can happen in the same tick? (Much less performance impact, but will help performance when cutting down big trees)
+cascade-check-limit: 64
+
 # EXP will be provided to these professions when a tree is felled
 # EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)
 # use "global" to add global experience
@@ -477,7 +489,7 @@ compatibility-ecoskills: true
 # min-phase
 # max-phase
 # custom-model-data
-# allowed-trees                      If set, the tool can only fell specific trees. The given value is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)
+# allowed-trees                      If set, the tool can only fell specific trees. The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # enable-adventure
 # enable-survival
 # enable-creative
@@ -486,6 +498,10 @@ compatibility-ecoskills: true
 # worlds
 # world-blacklist
 # cooldown
+# enable-cascade
+# cascade-limit
+# parallel-cascade-limit
+# cascade-check-limit
 # mcmmo-double-drops
 # ecoskills-trunk-woodcutting-xp
 # ecoskills-trunk-mining-xp
@@ -582,6 +598,11 @@ tools:
 # worlds
 # world-blacklist
 # cooldown
+# enable-cascade
+# cascade-limit
+# parallel-cascade-limit
+# cascade-check-limit
+# cascade-trees                      Which trees should be checked during a cascade? (If not set, only the tree which was originally cut will be checked) The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # mmocore-trunk-xp
 # mmocore-leaves-xp
 # mcmmo-double-drops

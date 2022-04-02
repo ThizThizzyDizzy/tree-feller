@@ -5,6 +5,7 @@ import com.thizthizzydizzy.simplegui.Label;
 import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.function.Consumer;
 import org.bukkit.Material;
@@ -15,9 +16,9 @@ public class MenuModifyTreeSet extends Menu{
     private HashSet<Tree> value;
     private final boolean allowNull;
     private final Consumer<HashSet<Tree>> setFunc;
-    public MenuModifyTreeSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, HashSet<Tree> defaultValue, Consumer<HashSet<Tree>> setFunc){
+    public MenuModifyTreeSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, Collection<Tree> defaultValue, Consumer<HashSet<Tree>> setFunc){
         super(parent, plugin, player, "Modify Tree Set ("+name+")", getSize(allowNull));
-        this.value = defaultValue;
+        this.value = defaultValue==null?null:new HashSet<>(defaultValue);
         this.allowNull = allowNull;
         refresh();
         this.setFunc = setFunc;

@@ -364,6 +364,7 @@ public abstract class Option<E>{
         }
         @Override
         public DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+            if(plugin.cascading)return new DebugResult(this, SUCCESS);
             int minY = block.getY();
             for(int i : blocks.keySet()){
                 for(Block b : blocks.get(i)){
@@ -2994,7 +2995,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "If set, the tool can only fell specific trees. The given value is a list of tree indexes, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
+            return "If set, the tool can only fell specific trees. The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
         }
         @Override
         public String[] getDebugText(){
@@ -3006,20 +3007,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(globalValue), (value) -> {
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
                 globalValue = new ArrayList<>(value);
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(toolValues.get(tool)), (value) -> {
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, new ArrayList<>(value));
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, new HashSet<>(treeValues.get(tree)), (value) -> {
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, new ArrayList<>(value));
             }));
@@ -3321,6 +3322,162 @@ public abstract class Option<E>{
             }));
         }
     };
+    
+    public static OptionBoolean CASCADE = new OptionBoolean("Cascade", true, true, true, false){
+        @Override
+        public String getDesc(boolean ingame){
+            return "If enabled, connected trees will also be felled resulting in a cascade that could fell an entire forest";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            ItemBuilder builder = new ItemBuilder(Material.CHAIN_COMMAND_BLOCK);
+            if(Objects.equals(value, true))builder.enchant(Enchantment.ARROW_INFINITE);
+            return builder;
+        }
+    };
+    public static Option<Integer> PARALLEL_CASCADE_LIMIT = new Option<Integer>("Parallel Cascade Limit", true, false, false, 1){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How many cascades can happen in the same tick? (Keep low to prevent runaway performance)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.CHAIN).setCount(value);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> CASCADE_CHECK_LIMIT = new Option<Integer>("Cascade Check Limit", true, false, false, 64){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How many cascade checks can happen in the same tick? (Much less performance impact, but will help performance when cutting down big trees)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.CHAIN).setCount(value);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<ArrayList<Tree>> CASCADE_TREES = new Option<ArrayList<Tree>>("Cascade Trees", false, false, true, null){
+        @Override
+        public ArrayList<Tree> load(Object o){
+            if(o instanceof Iterable){
+                ArrayList<Tree> trees = new ArrayList<>();
+                for(Object ob : (Iterable)o){
+                    ArrayList<Tree> newTrees = load(ob);
+                    if(newTrees!=null)trees.addAll(newTrees);
+                }
+                return trees;
+            }
+            if(o instanceof Tree){
+                ArrayList<Tree> trees = new ArrayList<>();
+                trees.add((Tree)o);
+                return trees;
+            }
+            if(o instanceof String){
+                ArrayList<Tree> trees = new ArrayList<>();
+                for(Tree tree : TreeFeller.trees){
+                    for(Material m : tree.trunk){
+                        if(m.toString().contains(((String)o).toUpperCase().replace(" ", "_"))){
+                            trees.add(tree);
+                            break;
+                        }
+                    }
+                }
+                return trees;
+            }
+            if(o instanceof Integer){
+                ArrayList<Tree> trees = new ArrayList<>();
+                int i = (int)o;
+                if(i>=0&&i<TreeFeller.trees.size()){
+                    trees.add(TreeFeller.trees.get(i));
+                    return trees;
+                }
+            }
+            return null;
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "Which trees should be checked during a cascade? (If not set, only the tree which was originally cut will be checked) The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(ArrayList<Tree> value){
+            return new ItemBuilder(Material.JUNGLE_SAPLING);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = new ArrayList<>(value);
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, new ArrayList<>(value));
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyTreeSet(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, new ArrayList<>(value));
+            }));
+        }
+        @Override
+        public String writeToConfig(ArrayList<Tree> value){
+            ArrayList<Integer> indicies = new ArrayList<>();
+            for(Tree t : value){
+                indicies.add(TreeFeller.trees.indexOf(t));
+            }
+            return indicies.toString();
+        }
+    };//TODO make this a HashSet
     protected final String name;
     public final boolean global;
     public final boolean tool;

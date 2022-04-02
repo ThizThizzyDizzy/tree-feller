@@ -33,10 +33,7 @@ public class Sapling{
             ItemStack[] contents = inv.getContents();
             for(int i = 0; i<contents.length; i++){
                 ItemStack content = contents[i];
-                if(tryPlace(content)){
-                    inv.setContents(contents);
-                    break;
-                }
+                if(tryPlace(content))break;
             }
         }
         if(timer==timeout){
