@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.menu;
 import com.thizthizzydizzy.simplegui.Button;
+import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.simplegui.Label;
 import com.thizthizzydizzy.simplegui.Menu;
 import com.thizthizzydizzy.treefeller.ConfigGenerator;
@@ -49,6 +50,10 @@ public class MenuConfiguration extends Menu{
                 ConfigGenerator.generateConfiguration(treefeller);
             }
         }));
-        add(new Label(size-11, makeItem(Material.ORANGE_CONCRETE).setDisplayName("Thank you to my patrons:").addLore("Thalzamar").addLore("Mstk")));
+        ItemBuilder patrons = makeItem(Material.ORANGE_CONCRETE).setDisplayName("Thank you to my patrons:");
+        for(String patron : treefeller.patrons){
+            patrons.addLore(patron);
+        }
+        add(new Label(size-11, patrons));
     }
 }
