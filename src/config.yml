@@ -344,10 +344,7 @@ world-blacklist: false
 cooldown:
 
 # If enabled, connected trees will also be felled resulting in a cascade that could fell an entire forest
-enable-cascade: false
-
-# If cascade is enabled, how many times can it cascade? (How many additional trees can be felled?)
-cascade-limit: 64
+cascade: false
 
 # How many cascades can happen in the same tick? (Keep low to prevent runaway performance)
 parallel-cascade-limit: 1
@@ -498,10 +495,7 @@ compatibility-ecoskills: true
 # worlds
 # world-blacklist
 # cooldown
-# enable-cascade
-# cascade-limit
-# parallel-cascade-limit
-# cascade-check-limit
+# cascade
 # mcmmo-double-drops
 # ecoskills-trunk-woodcutting-xp
 # ecoskills-trunk-mining-xp
@@ -598,10 +592,7 @@ tools:
 # worlds
 # world-blacklist
 # cooldown
-# enable-cascade
-# cascade-limit
-# parallel-cascade-limit
-# cascade-check-limit
+# cascade
 # cascade-trees                      Which trees should be checked during a cascade? (If not set, only the tree which was originally cut will be checked) The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # mmocore-trunk-xp
 # mmocore-leaves-xp
