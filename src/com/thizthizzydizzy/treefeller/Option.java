@@ -1763,8 +1763,8 @@ public abstract class Option<E>{
         public Double get(Tool tool, Tree tree){
             double glob = 1;
             if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
-            Double tl = toolValues.getOrDefault(tool, 0d);
-            Double tr = treeValues.getOrDefault(tree, 0d);
+            Double tl = toolValues.getOrDefault(tool, 1d);
+            Double tr = treeValues.getOrDefault(tree, 1d);
             return tl*tr*glob;
         }
         @Override
@@ -1805,8 +1805,8 @@ public abstract class Option<E>{
         public Double get(Tool tool, Tree tree){
             double glob = 1;
             if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
-            Double tl = toolValues.getOrDefault(tool, 0d);
-            Double tr = treeValues.getOrDefault(tree, 0d);
+            Double tl = toolValues.getOrDefault(tool, 1d);
+            Double tr = treeValues.getOrDefault(tree, 1d);
             return tl*tr*glob;
         }
         @Override
