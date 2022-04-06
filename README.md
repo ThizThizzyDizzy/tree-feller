@@ -1,6 +1,6 @@
 # Thizzy'z Tree Feller
-A Bukkit plugin for Minecraft 1.16+
-(Versions 1.12.2 and below are available for 1.13-1.15)
+A Bukkit plugin for Minecraft 1.18+
+(Older versions are available for 1.13-1.17)
 
 ## Full customization
 - Configure custom trees with any combination of blocks for its leaves and logs
@@ -22,12 +22,15 @@ The default configuration will reliably cut down all vanilla trees, while not di
 ## Compatibility with the following plugins:
 - McMMO
 - MMOCore
+- EcoSkills
 - Zrip’s Jobs Reborn
 - CoreProtect
 - GriefPrevention
 - WorldGuard
 - Towny
 - Ore Regenerator
+- Drop2Inventory
+- And more!
 
 ## FAQ
 ### Does it work with custom trees?
@@ -53,17 +56,13 @@ For example, if you want a single tree to require no leaves:
 2. Set the global `required-leaves` to 0
 3. Set `required-leaves` for the target tree to 0 (For readability)
 
-### How do I get [BLANK] to work?
+### Troubleshooting
+If you can't get something to work:
 - Make sure you’re using the latest version
 - Run /treefeller debug and try to cut down a tree.
 - Check the startup logs in the server console
 
 If you are unable to pinpoint the problem, I’m happy to help on discord or GitHub. Make sure to provide the config, startup logs, and the debug information from /treefeller debug
-
-### 1.12?
-The 1.12-1.13 transition involved *The Flattening* and a lot of other changes, making the code fundamentally different.
-
-If you want a tree feller for 1.12 or lower, find a different plugin.
 
 ## Tips/Fun Facts
 ### You can use the tree feller for ores
@@ -79,8 +78,6 @@ Set allowed-trees for the axes to LOG
 Fore more specific configuration, allowed-trees should be set to a list of tree indexes, such as [0, 1, 2, 3, 4, 5] for the first 6 trees defined
 
 (you may need to set max-height higher as well)
-
-Note: You will need to adjust global and other trees' settings to allow for this- See "My Tool/Tree settings aren't working" under the FAQ
 
 ### You can define more than one tool or tree of the same type
 This is useful if you want OR behavior. In this example, a golden axe must have either unbreaking 1 or efficiency 2:
