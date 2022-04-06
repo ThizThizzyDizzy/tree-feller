@@ -202,7 +202,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
             int total = getTotal(blocks);
-            if(globalValue!=null&&total<globalValue){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&total<globalValue){
                 return new DebugResult(this, GLOBAL, total, globalValue);
             }
             if(toolValues.get(tool)!=null&&total<toolValues.get(tool)){
@@ -253,7 +253,7 @@ public abstract class Option<E>{
         }
         @Override
         public DebugResult doCheckTree(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
-            if(globalValue!=null&&leaves<globalValue){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&leaves<globalValue){
                 return new DebugResult(this, GLOBAL, leaves, globalValue);
             }
             if(toolValues.get(tool)!=null&&leaves<toolValues.get(tool)){
@@ -305,7 +305,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
             int total = getTotal(blocks);
-            if(globalValue!=null&&total>globalValue){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&total>globalValue){
                 return new DebugResult(this, GLOBAL, total, globalValue);
             }
             if(toolValues.get(tool)!=null&&total>toolValues.get(tool)){
@@ -351,7 +351,7 @@ public abstract class Option<E>{
         @Override
         public Integer get(Tool tool, Tree tree){
             Integer val = null;
-            if(getValue()!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue());
+            if(getValue(tool)==null&&getValue(tree)==null&&getValue()!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue());
             if(getValue(tool)!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue(tool));
             if(getValue(tree)!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue(tree));
             return val;
@@ -371,7 +371,7 @@ public abstract class Option<E>{
                     minY = Math.min(minY, b.getY());
                 }
             }
-            if(globalValue!=null&&block.getY()-minY>globalValue-1){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&block.getY()-minY>globalValue-1){
                 int i = block.getY()-minY-(globalValue-1);
                 return new DebugResult(this, GLOBAL, i);
             }
@@ -461,12 +461,12 @@ public abstract class Option<E>{
     public static OptionBoolean REQUIRE_CROSS_SECTION = new OptionBoolean("Require Cross Section", true, true, true, false){
         @Override
         public DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
-            if(Objects.equals(globalValue, true)||Objects.equals(toolValues.get(tool), true)||Objects.equals(treeValues.get(tree), true)){
+            if((toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, true))||Objects.equals(toolValues.get(tool), true)||Objects.equals(treeValues.get(tree), true)){
                 for(int x = -1; x<=1; x++){
                     for(int z = -1; z<=1; z++){
                         if(x==0&&z==0)continue;
                         if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
-                            if(Objects.equals(globalValue, true))return new DebugResult(this, GLOBAL);
+                            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, true))return new DebugResult(this, GLOBAL);
                             if(Objects.equals(toolValues.get(tool), true))return new DebugResult(this, TOOL);
                             if(Objects.equals(treeValues.get(tree), true))return new DebugResult(this, TREE);
                         }
@@ -544,7 +544,7 @@ public abstract class Option<E>{
             for(ArrayList<Block> blox : blocks.values()){
                 for(Block blok : blox){
                     Material mat = blok.getType();
-                    if(globalValue!=null&&globalValue.contains(mat)){
+                    if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&globalValue.contains(mat)){
                         return new DebugResult(this, GLOBAL, mat);
                     }
                     if(toolValues.get(tool)!=null&&toolValues.get(tool).contains(mat)){
@@ -606,7 +606,7 @@ public abstract class Option<E>{
             for(ArrayList<Block> blox : blocks.values()){
                 for(Block blok : blox){
                     Material mat = blok.getType();
-                    if(globalValue!=null&&globalValue.contains(mat)){
+                    if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&globalValue.contains(mat)){
                         return new DebugResult(this, GLOBAL, mat);
                     }
                     if(toolValues.get(tool)!=null&&toolValues.get(tool).contains(mat)){
@@ -731,7 +731,7 @@ public abstract class Option<E>{
                 actual = Math.max(actual, line.size());
                 zAxis.removeAll(line);//don't need to recheck the same line many times. Maybe this will actually make it faster even with all the nonsense above
             }
-            if(globalValue!=null&&actual>globalValue)return new DebugResult(this, GLOBAL, actual, globalValue);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&actual>globalValue)return new DebugResult(this, GLOBAL, actual, globalValue);
             if(treeValues.containsKey(tree)&&actual>treeValues.get(tree))return new DebugResult(this, TREE, actual, treeValues.get(tree));
             if(toolValues.containsKey(tool)&&actual>toolValues.get(tool))return new DebugResult(this, TOOL, actual, toolValues.get(tool));
             return new DebugResult(this, SUCCESS);
@@ -788,7 +788,7 @@ public abstract class Option<E>{
                 trunkSlice.removeAll(trunk);
                 value++;
             }
-            if(globalValue!=null&&value>globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&value>globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
             if(treeValues.containsKey(tree)&&value>treeValues.get(tree))return new DebugResult(this, TREE, value, treeValues.get(tree));
             if(toolValues.containsKey(tool)&&value>toolValues.get(tool))return new DebugResult(this, TOOL, value, toolValues.get(tool));
             return new DebugResult(this, SUCCESS);
@@ -952,8 +952,8 @@ public abstract class Option<E>{
         @Override
         public Integer get(Tool tool, Tree tree){
             if(toolValues.containsKey(tool)||treeValues.containsKey(tree)){
-                Integer tl = toolValues.containsKey(tool)?toolValues.get(tool):0;
-                Integer tr = treeValues.containsKey(tree)?treeValues.get(tree):0;
+                Integer tl = toolValues.getOrDefault(tool, 0);
+                Integer tr = treeValues.getOrDefault(tree, 0);
                 return Math.max(tl, tr);
             }
             return globalValue;
@@ -1038,8 +1038,8 @@ public abstract class Option<E>{
         @Override
         public Integer get(Tool tool, Tree tree){
             if(toolValues.containsKey(tool)||treeValues.containsKey(tree)){
-                Integer tl = toolValues.containsKey(tool)?toolValues.get(tool):0;
-                Integer tr = treeValues.containsKey(tree)?treeValues.get(tree):0;
+                Integer tl = toolValues.getOrDefault(tool, 0);
+                Integer tr = treeValues.getOrDefault(tree, 0);
                 return Math.max(tl, tr);
             }
             return globalValue;
@@ -1359,9 +1359,11 @@ public abstract class Option<E>{
         }
         @Override
         public Double get(Tool tool, Tree tree){
-            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):0d;
-            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):0d;
-            return tl+tr+globalValue;
+            double glob = 0;
+            if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
+            Double tl = toolValues.getOrDefault(tool, 0d);
+            Double tr = treeValues.getOrDefault(tree, 0d);
+            return tl+tr+glob;
         }
         @Override
         public String getDesc(boolean ingame){
@@ -1401,9 +1403,11 @@ public abstract class Option<E>{
         }
         @Override
         public Double get(Tool tool, Tree tree){
-            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):0d;
-            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):0d;
-            return tl+tr+globalValue;
+            double glob = 0;
+            if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
+            Double tl = toolValues.getOrDefault(tool, 0d);
+            Double tr = treeValues.getOrDefault(tree, 0d);
+            return tl+tr+glob;
         }
         @Override
         public String getDesc(boolean ingame){
@@ -1442,9 +1446,11 @@ public abstract class Option<E>{
         }
         @Override
         public Double get(Tool tool, Tree tree){
-            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):0d;
-            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):0d;
-            return tl+tr+globalValue;
+            double glob = 0;
+            if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
+            Double tl = toolValues.getOrDefault(tool, 0d);
+            Double tr = treeValues.getOrDefault(tree, 0d);
+            return tl+tr+glob;
         }
         @Override
         public String getDesc(boolean ingame){
@@ -1483,9 +1489,11 @@ public abstract class Option<E>{
         }
         @Override
         public Double get(Tool tool, Tree tree){
-            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):0d;
-            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):0d;
-            return tl+tr+globalValue;
+            double glob = 0;
+            if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
+            Double tl = toolValues.getOrDefault(tool, 0d);
+            Double tr = treeValues.getOrDefault(tree, 0d);
+            return tl+tr+glob;
         }
         @Override
         public String getDesc(boolean ingame){
@@ -1673,7 +1681,7 @@ public abstract class Option<E>{
         @Override
         public HashMap<Material, Material> get(Tool tool, Tree tree){
             HashMap<Material, Material> conversions = new HashMap<>();
-            if(globalValue!=null)conversions.putAll(globalValue);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null)conversions.putAll(globalValue);
             if(toolValues.containsKey(tool))conversions.putAll(toolValues.get(tool));
             if(treeValues.containsKey(tree))conversions.putAll(treeValues.get(tree));
             return conversions;
@@ -1753,9 +1761,11 @@ public abstract class Option<E>{
         }
         @Override
         public Double get(Tool tool, Tree tree){
-            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):1d;
-            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):1d;
-            return tl*tr*globalValue;
+            double glob = 1;
+            if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
+            Double tl = toolValues.getOrDefault(tool, 0d);
+            Double tr = treeValues.getOrDefault(tree, 0d);
+            return tl*tr*glob;
         }
         @Override
         public String getDesc(boolean ingame){
@@ -1793,9 +1803,11 @@ public abstract class Option<E>{
         }
         @Override
         public Double get(Tool tool, Tree tree){
-            Double tl = toolValues.containsKey(tool)?toolValues.get(tool):1d;
-            Double tr = treeValues.containsKey(tree)?treeValues.get(tree):1d;
-            return tl*tr*globalValue;
+            double glob = 1;
+            if(toolValues.get(tool)==null||treeValues.get(tree)==null)glob = globalValue;
+            Double tl = toolValues.getOrDefault(tool, 0d);
+            Double tr = treeValues.getOrDefault(tree, 0d);
+            return tl*tr*glob;
         }
         @Override
         public String getDesc(boolean ingame){
@@ -1857,7 +1869,7 @@ public abstract class Option<E>{
         @Override
         public ArrayList<Effect> get(Tool tool, Tree tree){
             ArrayList<Effect> effects = new ArrayList<>();
-            if(globalValue!=null)effects.addAll(globalValue);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null)effects.addAll(globalValue);
             if(toolValues.containsKey(tool))effects.addAll(toolValues.get(tool));
             if(treeValues.containsKey(tree))effects.addAll(treeValues.get(tree));
             return effects;
@@ -1972,7 +1984,7 @@ public abstract class Option<E>{
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)<globalValue.get(e)){
                         return new DebugResult(this, GLOBAL, e.toString(), globalValue.get(e));
@@ -2122,7 +2134,7 @@ public abstract class Option<E>{
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)>=globalValue.get(e)){
                         return new DebugResult(this, GLOBAL, e.toString(), globalValue.get(e)-1);
@@ -2209,7 +2221,7 @@ public abstract class Option<E>{
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(durability<globalValue)return new DebugResult(this, GLOBAL, durability, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
@@ -2263,7 +2275,7 @@ public abstract class Option<E>{
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(durability>globalValue)return new DebugResult(this, GLOBAL, durability, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
@@ -2318,7 +2330,7 @@ public abstract class Option<E>{
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(durabilityPercent<globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
                 }
                 if(toolValues.containsKey(tool)){
@@ -2373,7 +2385,7 @@ public abstract class Option<E>{
             int durability = axe.getType().getMaxDurability()-axe.getDurability();
             float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(durabilityPercent>globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
                 }
                 if(toolValues.containsKey(tool)){
@@ -2455,7 +2467,7 @@ public abstract class Option<E>{
                     lore = new ArrayList<>(meta.getLore());
                 }
             }
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 for(String s : globalValue){
                     boolean has = false;
                     for(String lor : lore){
@@ -2531,7 +2543,7 @@ public abstract class Option<E>{
                 ItemMeta meta = axe.getItemMeta();
                 name = meta.getDisplayName();
             }
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 if(!globalValue.equals(name))return new DebugResult(this, GLOBAL, globalValue);
             }
             if(toolValues.containsKey(tool)){
@@ -2597,7 +2609,7 @@ public abstract class Option<E>{
         }
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe) {
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 for(String s : globalValue){
                     if(!player.hasPermission(s)){
                         return new DebugResult(this, GLOBAL, s);
@@ -2664,7 +2676,7 @@ public abstract class Option<E>{
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(dayTime<globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
@@ -2718,7 +2730,7 @@ public abstract class Option<E>{
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(dayTime>globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
@@ -2774,7 +2786,7 @@ public abstract class Option<E>{
             long day = gameTime/24000;
             long phase = day%8;
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(phase<globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
@@ -2839,7 +2851,7 @@ public abstract class Option<E>{
             long day = gameTime/24000;
             long phase = day%8;
             if(axe.getType().getMaxDurability()>0){
-                if(globalValue!=null){
+                if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                     if(phase>globalValue)return new DebugResult(this, GLOBAL, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
@@ -2902,7 +2914,7 @@ public abstract class Option<E>{
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             ItemMeta meta = axe.getItemMeta();
             int data = (meta==null||!meta.hasCustomModelData()?0:meta.getCustomModelData());
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 if(data!=globalValue)return new DebugResult(this, GLOBAL, data, globalValue);
             }
             if(toolValues.containsKey(tool)){
@@ -3038,7 +3050,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(player==null||player.getGameMode()!=GameMode.ADVENTURE)return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
             return new DebugResult(this, SUCCESS);
@@ -3060,7 +3072,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(player==null||player.getGameMode()!=GameMode.SURVIVAL)return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
             return new DebugResult(this, SUCCESS);
@@ -3082,7 +3094,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(player==null||player.getGameMode()!=GameMode.CREATIVE)return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
             return new DebugResult(this, SUCCESS);
@@ -3104,7 +3116,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(player==null||!player.isSneaking())return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
             return new DebugResult(this, SUCCESS);
@@ -3126,7 +3138,7 @@ public abstract class Option<E>{
         @Override
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(player==null||player.isSneaking())return null;
-            if(Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, false))return new DebugResult(this, GLOBAL);
             if(Objects.equals(treeValues.get(tree), false))return new DebugResult(this, TREE);
             if(Objects.equals(toolValues.get(tool), false))return new DebugResult(this, TOOL);
             return new DebugResult(this, SUCCESS);
@@ -3179,7 +3191,7 @@ public abstract class Option<E>{
                 }
                 if(!blacklist&&!foundWorld)return new DebugResult(this, TREE, block.getWorld().getName()+" ("+block.getWorld().getUID().toString()+")");
             }
-            if(globalValue!=null){
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 boolean blacklist = Objects.equals(WORLD_BLACKLIST.globalValue, true);
                 boolean foundWorld = false;
                 for(String world : globalValue){
