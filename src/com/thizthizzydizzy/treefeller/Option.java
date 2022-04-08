@@ -1688,26 +1688,31 @@ public abstract class Option<E>{
         }
         @Override
         public HashMap<Material, Material> load(Object o){
-            if(o instanceof MemorySection m){
+            if(o instanceof MemorySection){
+                MemorySection m = (MemorySection)o;
                 HashMap<Material, Material> conversions = new HashMap<>();
                 for(String key : m.getKeys(false)){
                     conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                 }
                 return conversions;
             }
-            if(o instanceof Map m){
+            if(o instanceof Map){
+                Map m = (Map)o;
                 HashMap<Material, Material> conversions = new HashMap<>();
                 for(Object okey : m.keySet()){
-                    if(okey instanceof String key){
+                    if(okey instanceof String){
+                        String key = (String)okey;
                         conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                     }
                 }
                 return conversions;
             }
-            if(o instanceof List l){
+            if(o instanceof List){
+                List l = (List)o;
                 HashMap<Material, Material> conversions = new HashMap<>();
                 for(Object ob : l){
-                    if(ob instanceof MemorySection m){
+                    if(ob instanceof MemorySection){
+                        MemorySection m = (MemorySection)ob;
                         for(String key : m.getKeys(false)){
                             conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                         }
@@ -3811,7 +3816,8 @@ public abstract class Option<E>{
     }
     public String getDefaultConfigValue(){
         if(defaultConfigValue==null)return null;
-        if(defaultConfigValue instanceof HashSet hs){
+        if(defaultConfigValue instanceof HashSet){
+            HashSet hs = (HashSet)defaultConfigValue;
             String str = "";
             ArrayList<String> lst = new ArrayList<>();
             for(Object o : hs){

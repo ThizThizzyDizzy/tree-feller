@@ -43,6 +43,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -100,7 +101,7 @@ public class TreeFeller extends JavaPlugin{
      * @return the items that would have been dropped. <b>This is not the actual dropped items, but possible dropped items</b> Returns null if the tree was not felled.
      */
     public ArrayList<ItemStack> fellTree(Block block, Player player, ItemStack axe, boolean dropItems){
-        var meta = axe.hasItemMeta()?axe.getItemMeta():null;
+        ItemMeta meta = axe.hasItemMeta()?axe.getItemMeta():null;
         boolean unbreakable = meta!=null&&meta.isUnbreakable();
         DetectedTree detectedTree = detectTree(block, player, axe, (testTree) -> {
             Tool tool = testTree.tool;
@@ -155,6 +156,9 @@ public class TreeFeller extends JavaPlugin{
             if(durabilityCost<1)durabilityCost++;
         }
         if(Option.RESPECT_UNBREAKABLE.get(tool, tree)&&unbreakable)durabilityCost = 0;
+        if(durabilityCost>durability&&Option.ALLOW_PARTIAL.get(tool, tree)){
+            durabilityCost = total = durability;
+        }
         if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
         if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
         debug(player, true, true, "success");

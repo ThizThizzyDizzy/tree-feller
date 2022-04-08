@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 public class Sapling{
     public final boolean spawn;
     public final DetectedTree detectedTree;
@@ -29,7 +30,7 @@ public class Sapling{
     public void tick(){
         timer++;
         if(player!=null){
-            var inv = player.getInventory();
+            PlayerInventory inv = player.getInventory();
             ItemStack[] contents = inv.getContents();
             for(int i = 0; i<contents.length; i++){
                 ItemStack content = contents[i];
