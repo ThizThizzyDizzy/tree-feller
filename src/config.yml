@@ -429,6 +429,9 @@ compatibility-logblock: true
 # Toggle compatibility with Lands
 compatibility-lands: true
 
+# Toggle compatibility with PlaceholderAPI
+compatibility-placeholderapi: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}

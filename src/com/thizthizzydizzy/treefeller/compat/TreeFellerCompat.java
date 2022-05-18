@@ -29,6 +29,7 @@ public class TreeFellerCompat{
         compatibilities.add(new EcoSkillsCompat());
         compatibilities.add(new LogBlockCompat());
         compatibilities.add(new LandsCompat());
+        compatibilities.add(new PlaceholderAPICompat());
     }
     public static void init(TreeFeller treeFeller){
         if(treeFeller!=null){

@@ -59,7 +59,7 @@ public class TreeFeller extends JavaPlugin{
     public HashSet<UUID> toggledPlayers = new HashSet<>();
     public ArrayList<FallingTreeBlock> fallingBlocks = new ArrayList<>();
     public ArrayList<Sapling> saplings = new ArrayList<>();
-    boolean debug = false;
+    public boolean debug = false;
     ArrayList<NaturalFall> naturalFalls = new ArrayList<>();
     ArrayList<Cascade> pendingCascades = new ArrayList<>();
     private static final HashMap<Material, int[]> exp = new HashMap<>();
