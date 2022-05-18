@@ -426,6 +426,9 @@ compatibility-ecoskills: true
 # Toggle compatibility with LogBlock
 compatibility-logblock: true
 
+# Toggle compatibility with Lands
+compatibility-lands: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}

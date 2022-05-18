@@ -559,7 +559,7 @@ public class TreeFeller extends JavaPlugin{
     public void onEnable(){
         PluginDescriptionFile pdfFile = getDescription();
         Logger logger = getLogger();
-        TreeFellerCompat.init();
+        TreeFellerCompat.init(this);
         //<editor-fold defaultstate="collapsed" desc="Register Events">
         PluginManager pm = getServer().getPluginManager();
         pm.registerEvents(new TreeFellerEventListener(this), this);

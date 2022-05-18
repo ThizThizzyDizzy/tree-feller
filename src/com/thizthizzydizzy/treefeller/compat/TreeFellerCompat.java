@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.compat;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import com.thizthizzydizzy.treefeller.TreeFeller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,8 +28,15 @@ public class TreeFellerCompat{
         compatibilities.add(new Drop2InventoryCompat());
         compatibilities.add(new EcoSkillsCompat());
         compatibilities.add(new LogBlockCompat());
+        compatibilities.add(new LandsCompat());
     }
-    public static void init(){}//placeholder method for loading the class
+    public static void init(TreeFeller treeFeller){
+        if(treeFeller!=null){
+            for(PluginCompatibility compat : getCompatibilities()){
+                compat.init(treeFeller);
+            }
+        }
+    }
     public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
         for(PluginCompatibility compat : getCompatibilities()){
             compat.breakBlock(tree, tool, player, axe, block, modifiers);

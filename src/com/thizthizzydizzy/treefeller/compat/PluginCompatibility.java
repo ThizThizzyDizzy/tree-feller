@@ -4,6 +4,7 @@ import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import com.thizthizzydizzy.treefeller.TreeFeller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ public abstract class PluginCompatibility{
             }
         };
     }
+    public void init(TreeFeller treeFeller){}
     public abstract String getPluginName();
     /**
      * Called when a block is removed, but not broken, such as when a tree falls over
