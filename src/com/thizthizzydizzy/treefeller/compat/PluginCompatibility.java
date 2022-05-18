@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -50,12 +51,23 @@ public abstract class PluginCompatibility{
      * @param modifiers a list of modifiers for multiplying item/exp drops
      */
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){}
+    @Deprecated
     /**
      * Called when a block is added, such as when trees land from the NATURAL fell behavior
      * @param player the player who caused this to happen
      * @param block the block that was added
+     * @deprecated use addBlock(Player, Block, BlockState) instead
      */
     public void addBlock(Player player, Block block){}
+    /**
+     * Called when a block is added, such as when trees land from the NATURAL fell behavior
+     * @param player the player who caused this to happen
+     * @param block the block that was added
+     * @param was the BlockState before the block was placed
+     */
+    public void addBlock(Player player, Block block, BlockState was){
+        addBlock(player, block);
+    }
     /**
      * Called whenever TreeFeller drops an item
      * @param player the player who dropped the item, if any

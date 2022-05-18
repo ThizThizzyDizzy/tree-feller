@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.18.2
+# Version 1.18.3
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -93,7 +93,6 @@ grass:
     - DIRT
     - GRASS_BLOCK
     - PODZOL
-    - ROOTED_DIRT
 
 # What felling behavior should logs have?
 # Valid options:
@@ -423,6 +422,9 @@ ecoskills-apply-modifiers: true
 
 # Toggle compatibility with EcoSkills
 compatibility-ecoskills: true
+
+# Toggle compatibility with LogBlock
+compatibility-logblock: true
 
 # What tools can be used to cut down trees?
 # Format:

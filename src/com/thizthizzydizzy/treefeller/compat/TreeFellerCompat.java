@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -25,6 +26,7 @@ public class TreeFellerCompat{
         compatibilities.add(new OreRegeneratorCompat());
         compatibilities.add(new Drop2InventoryCompat());
         compatibilities.add(new EcoSkillsCompat());
+        compatibilities.add(new LogBlockCompat());
     }
     public static void init(){}//placeholder method for loading the class
     public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
@@ -32,9 +34,9 @@ public class TreeFellerCompat{
             compat.breakBlock(tree, tool, player, axe, block, modifiers);
         }
     }
-    public static void addBlock(Player player, Block block){
+    public static void addBlock(Player player, Block block, BlockState was){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.addBlock(player, block);
+            compat.addBlock(player, block, was);
         }
     }
     public static void removeBlock(Player player, Block block){

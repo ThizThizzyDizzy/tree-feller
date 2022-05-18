@@ -5,6 +5,7 @@ import org.bukkit.Axis;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.Player;
@@ -37,6 +38,7 @@ public class NaturalFall{
         fell = true;
         double dist = 0;
         Block target = block;
+        BlockState was = block.getState();
         Location l = block.getLocation().add(.5,.5,.5);
         while(dist<height){
             dist+=interval;
@@ -87,7 +89,7 @@ public class NaturalFall{
             ((Orientable)data).setAxis(axis);
             target.setBlockData(data);
         }
-        TreeFellerCompat.addBlock(player, target);
+        TreeFellerCompat.addBlock(player, target, was);
     }
     private void triggerNaturalFall(TreeFeller plugin, Block b){
         for(NaturalFall fall : plugin.naturalFalls){

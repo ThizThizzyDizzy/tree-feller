@@ -7,21 +7,21 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-public class CoreProtectCompat extends InternalCompatibility{
+public class LogBlockCompat extends InternalCompatibility{
     @Override
     public String getPluginName(){
-        return "CoreProtect";
+        return "LogBlock";
     }
     @Override
     public void addBlock(Player player, Block block, BlockState was){
-        net.coreprotect.CoreProtect.getInstance().getAPI().logPlacement(player==null?null:player.getName(), block.getLocation(), block.getType(), block.getBlockData());
+        de.diddiz.util.LoggingUtil.smartLogBlockPlace(de.diddiz.LogBlock.LogBlock.getInstance().getConsumer(), de.diddiz.LogBlock.Actor.actorFromEntity(player), was, block.getState());
     }
     @Override
     public void removeBlock(Player player, Block block){
-        net.coreprotect.CoreProtect.getInstance().getAPI().logRemoval(player==null?null:player.getName(), block.getLocation(), block.getType(), block.getBlockData());
+        de.diddiz.util.LoggingUtil.smartLogBlockBreak(de.diddiz.LogBlock.LogBlock.getInstance().getConsumer(), de.diddiz.LogBlock.Actor.actorFromEntity(player), block);
     }
     @Override
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
-        net.coreprotect.CoreProtect.getInstance().getAPI().logRemoval(player==null?null:player.getName(), block.getLocation(), block.getType(), block.getBlockData());
+        de.diddiz.util.LoggingUtil.smartLogBlockBreak(de.diddiz.LogBlock.LogBlock.getInstance().getConsumer(), de.diddiz.LogBlock.Actor.actorFromEntity(player), block);
     }
 }
