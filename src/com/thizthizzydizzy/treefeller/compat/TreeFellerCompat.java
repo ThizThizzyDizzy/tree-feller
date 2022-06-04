@@ -30,6 +30,7 @@ public class TreeFellerCompat{
         compatibilities.add(new LogBlockCompat());
         compatibilities.add(new LandsCompat());
         compatibilities.add(new PlaceholderAPICompat());
+        compatibilities.add(new FactionsCompat());
     }
     public static void init(TreeFeller treeFeller){
         if(treeFeller!=null){
