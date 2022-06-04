@@ -24,6 +24,7 @@ public class TreeFellerCompat{
         compatibilities.add(new WorldGuardCompat());
         compatibilities.add(new GriefPreventionCompat());
         compatibilities.add(new TownyCompat());
+        compatibilities.add(new FactionsCompat());
         compatibilities.add(new OreRegeneratorCompat());
         compatibilities.add(new Drop2InventoryCompat());
         compatibilities.add(new EcoSkillsCompat());
