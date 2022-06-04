@@ -2,10 +2,10 @@ package com.thizthizzydizzy.treefeller.compat;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
-public class FactionsCompat extends InternalCompatibility{
+public class SaberFactionsCompat extends InternalCompatibility{
     @Override
     public String getPluginName(){
-        return "Factions";
+        return "SaberFactions";
     }
     @Override
     public boolean test(Player player, Block block){
