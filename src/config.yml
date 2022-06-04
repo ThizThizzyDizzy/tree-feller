@@ -432,6 +432,29 @@ compatibility-lands: true
 # Toggle compatibility with PlaceholderAPI
 compatibility-placeholderapi: true
 
+# Toggle compatibility with SaberFactions
+compatibility-saberfactions: true
+
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)
+# ex:
+# - foraging: 8
+aureliumskills-trunk-xp: 
+   - foraging: 1
+
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
+# ex:
+# - foraging: 8
+aureliumskills-leaves-xp: 
+   - foraging: 0
+
+# Should AureliumSkills modifiers be applied to experience earned through TreeFeller?
+aureliumskills-apply-modifiers: true
+
+# Toggle compatibility with AureliumSkills
+compatibility-aureliumskills: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -510,6 +533,7 @@ compatibility-placeholderapi: true
 # ecoskills-leaf-woodcutting-xp
 # ecoskills-leaf-mining-xp
 # ecoskills-apply-modifiers
+# aureliumskills-apply-modifiers
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
 #    - {type: WOODEN_AXE, required-enchantments: {efficiency: 4, unbreaking: 1}, banned-enchantments: {unbreaking: 2}, min-durability: 4, max-durability-percent: 0.9}
@@ -611,6 +635,9 @@ tools:
 # ecoskills-leaf-woodcutting-xp
 # ecoskills-leaf-mining-xp
 # ecoskills-apply-modifiers
+# aureliumskills-trunk-xp
+# aureliumskills-leaves-xp
+# aureliumskills-apply-modifiers
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]
@@ -632,10 +659,11 @@ trees:
 # name: <value>        This is the effect's name. It is used to assign the effect to a tree or tool
 # chance: <value>      This is the chance of the effect happening (0-1, default 1)
 # location: <value>    This is where the effect will occur. valid options:
-#   logs    The effect will occur at every log in the tree
-#   leaves  The effect will occur at every block of leaves in the tree
-#   tree    The effect will occur at every block in the tree
-#   tool    The effect will occur at the block that was cut down
+#   logs       The effect will occur at every log in the tree
+#   leaves     The effect will occur at every block of leaves in the tree
+#   tree       The effect will occur at every block in the tree
+#   tool       The effect will occur at the block that was cut down
+#   tool_break The effect will occur at the block that was cut down, when the tool breaks
 # type: <value>     This is what type of effect should occur. Valid options:
 #   particle  A particle effect, such as flame, block, etc. particles
 #   sound     Any sound

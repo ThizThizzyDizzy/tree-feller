@@ -28,6 +28,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.EntityEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -184,10 +185,16 @@ public class TreeFeller extends JavaPlugin{
                         amt--;
                         durabilityCost-=axe.getType().getMaxDurability();
                     }
+                    playToolBreakEffect(tool, tree, axe, player, block);
                     axe.setAmount(amt);
                 }
+                if(durability==durabilityCost){
+                    playToolBreakEffect(tool, tree, axe, player, block);
+                }
                 axe.setDurability((short)(axe.getDurability()+durabilityCost));
-                if(durability==durabilityCost)axe.setAmount(0);
+                if(durability==durabilityCost){
+                    axe.setAmount(0);
+                }
             }
         }
         //now the blocks
@@ -1660,5 +1667,13 @@ public class TreeFeller extends JavaPlugin{
             throw new Exception("Unable to download "+currentFile);
         }
         return is[0];
+    }
+    private void playToolBreakEffect(Tool tool, Tree tree, ItemStack axe, Player player, Block block){
+        player.playEffect(EntityEffect.BREAK_EQUIPMENT_MAIN_HAND);
+        for(Effect e : Option.EFFECTS.get(tool, tree)){
+            if(e.location==Effect.EffectLocation.TOOL_BREAK){
+                if(new Random().nextDouble()<e.chance)e.play(block);
+            }
+        }
     }
 }

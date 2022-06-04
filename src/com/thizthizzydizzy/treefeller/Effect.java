@@ -110,7 +110,8 @@ public class Effect{
         LOGS(Material.OAK_WOOD),
         LEAVES(Material.OAK_LEAVES),
         TREE(Material.OAK_SAPLING),
-        TOOL(Material.IRON_AXE);
+        TOOL(Material.IRON_AXE),
+        TOOL_BREAK(Material.WOODEN_AXE);
         private final Material item;
         private EffectLocation(Material item){
             this.item = item;

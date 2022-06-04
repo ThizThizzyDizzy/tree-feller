@@ -18,7 +18,7 @@ import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class AureliumSkillsCompat extends InternalCompatibility{
-    public static Option<HashMap<String, Double>> AURELIUMSKILLS_TRUNK_XP = new Option<HashMap<String, Double>>("AureliumSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - global: 1"){
+    public static Option<HashMap<String, Double>> AURELIUMSKILLS_TRUNK_XP = new Option<HashMap<String, Double>>("AureliumSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - foraging: 1"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these skills when a tree is felled\n"
@@ -125,7 +125,7 @@ public class AureliumSkillsCompat extends InternalCompatibility{
             return s+"}";
         }
     };
-    public static Option<HashMap<String, Double>> AURELIUMSKILLS_LEAVES_XP = new Option<HashMap<String, Double>>("AureliumSkills Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
+    public static Option<HashMap<String, Double>> AURELIUMSKILLS_LEAVES_XP = new Option<HashMap<String, Double>>("AureliumSkills Leaves XP", true, false, true, new HashMap<>(), "\n   - foraging: 0"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these skills when a tree is felled\n"
