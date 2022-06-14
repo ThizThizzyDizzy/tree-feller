@@ -36,6 +36,7 @@ import org.bukkit.Particle;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.data.type.Leaves;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
@@ -310,7 +311,14 @@ public class TreeFeller extends JavaPlugin{
         debugIndent = 0;
         Material material = block.getType();
         TREE:for(Tree tree : trees){
-            if(!tree.trunk.contains(material))continue;
+            if(!tree.trunk.contains(material)){
+                HashSet<Material> roots = Option.ROOTS.getValue(tree);
+                if(roots!=null&&roots.contains(material)){
+                    Block b = getNearest(block, tree.trunk, roots, Option.ROOT_DISTANCE.get(null, tree), true, Option.PLAYER_LEAVES.get(null, tree));
+                    if(b!=null)return detectTree(b, player, axe, checkFunc);
+                }
+                continue;
+            }
             TOOL:for(Tool tool : tools){
                 if(player!=null&&!isToggledOn(player)){
                     debug(player, true, false, "toggle");
@@ -425,10 +433,10 @@ public class TreeFeller extends JavaPlugin{
         }
         return null;
     }
-    private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
+    private static HashMap<Integer, ArrayList<Block>> getBlocks(Collection<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData){
         return getBlocks(materialTypes, startingBlock, maxDistance, maxBlocks, diagonal, playerLeaves, ignoreLeafData, false);
     }
-    private static HashMap<Integer, ArrayList<Block>> getBlocks(ArrayList<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData, boolean invertLeafDirection){
+    private static HashMap<Integer, ArrayList<Block>> getBlocks(Collection<Material> materialTypes, Block startingBlock, int maxDistance, int maxBlocks, boolean diagonal, boolean playerLeaves, boolean ignoreLeafData, boolean invertLeafDirection){
         //layer zero
         HashMap<Integer, ArrayList<Block>> results = new HashMap<>();
         int total = 0;
@@ -551,6 +559,16 @@ public class TreeFeller extends JavaPlugin{
             list.addAll(blocks.get(i));
         }
         return list;
+    }
+    private Block getNearest(Block from, ArrayList<Material> to, Collection<Material> materialTypes, int max, boolean diagonal, boolean playerLeaves){
+        materialTypes.add(from.getType());
+        materialTypes.addAll(to);
+        for(int d = 0; d<max; d++){
+            for(Block b : toList(getBlocks(materialTypes, from, d, Integer.MAX_VALUE, diagonal, playerLeaves, true))){
+                if(to.contains(b.getType()))return b;
+            }
+        }
+        return null;
     }
     private int distance(Block from, ArrayList<Material> to, ArrayList<Material> materialTypes, int max, boolean diagonal, boolean playerLeaves){
         materialTypes.add(from.getType());
@@ -888,13 +906,21 @@ public class TreeFeller extends JavaPlugin{
         boolean rotate = Option.ROTATE_LOGS.get(tool, tree);
         DirectionalFallBehavior directionalFallBehavior = Option.DIRECTIONAL_FALL_BEHAVIOR.get(tool, tree);
         boolean lockCardinal = Option.LOCK_FALL_CARDINAL.get(tool, tree);
-        ArrayList<Modifier> modifiers = new ArrayList<>();
-        if(behavior==FellBehavior.FALL||behavior==FellBehavior.FALL_HURT||behavior==FellBehavior.NATURAL){
+        HashMap<Material, Material> conversions = Option.BLOCK_CONVERSIONS.get(tool, tree);
+        if(conversions.containsKey(block.getType())){
+            BlockState state = block.getState();
             TreeFellerCompat.removeBlock(player, block);
+            block.setType(conversions.get(block.getType()));
+            TreeFellerCompat.addBlock(player, block, state);
         }else{
-            TreeFellerCompat.breakBlock(tree, tool, player, axe, block, modifiers);
+            ArrayList<Modifier> modifiers = new ArrayList<>();
+            if(behavior==FellBehavior.FALL||behavior==FellBehavior.FALL_HURT||behavior==FellBehavior.NATURAL){
+                TreeFellerCompat.removeBlock(player, block);
+            }else{
+                TreeFellerCompat.breakBlock(tree, tool, player, axe, block, modifiers);
+            }
+            behavior.breakBlock(detectedTree, this, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         }
-        behavior.breakBlock(detectedTree, this, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         Random rand = new Random();
         for(Effect e : effects){
             if(rand.nextDouble()<e.chance)e.play(block);
@@ -1240,12 +1266,23 @@ public class TreeFeller extends JavaPlugin{
         ArrayList<Integer> ints = new ArrayList<>();
         ints.addAll(someLeaves.keySet());
         Collections.sort(ints);
-        for(int d : ints){
+        int done = -1;
+        for(int i = 0; i<ints.size(); i++){
+            int d = ints.get(i);
             for(Iterator<Block> it = someLeaves.get(d).iterator(); it.hasNext();){
                 Block leaf = it.next();
                 if(distance(leaf, trunk, leaves, d, diagonal, playerLeaves)<d){
                     it.remove();
                 }
+            }
+            if(i>0&&someLeaves.get(d).isEmpty()){
+                done = i;
+                break;
+            }
+        }
+        if(done>-1){
+            for(int i = done; i<ints.size(); i++){
+                someLeaves.remove(ints.get(i));
             }
         }
     }

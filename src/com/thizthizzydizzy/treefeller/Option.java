@@ -40,6 +40,7 @@ public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
     private static final HashSet<Material> defaultGrasses = new HashSet<>();
     private static final HashMap<Material, Material> defaultDropConversions = new HashMap<>();
+    private static final HashMap<Material, Material> defaultBlockConversions = new HashMap<>();
     static{
         defaultOverridables.add(Material.GRASS);
         defaultOverridables.add(Material.AIR);
@@ -63,6 +64,9 @@ public abstract class Option<E>{
         defaultDropConversions.put(Material.DARK_OAK_WOOD, Material.DARK_OAK_LOG);
         defaultDropConversions.put(Material.CRIMSON_HYPHAE, Material.CRIMSON_STEM);
         defaultDropConversions.put(Material.WARPED_HYPHAE, Material.WARPED_STEM);
+        Material roots = Material.matchMaterial("MUDDY_MANGROVE_ROOTS");
+        Material mud = Material.matchMaterial("MUD");
+        if(roots!=null)defaultBlockConversions.put(roots, mud);
     }
     public static ArrayList<Option> options = new ArrayList<>();
     //console/debugging stuff
@@ -492,7 +496,7 @@ public abstract class Option<E>{
         @Override
         public String getDesc(boolean ingame){
             return "If set to true, all non-leaf-block leaves will be distance-checked to make sure they belong to the tree being felled (ex. mushrooms or nether 'tree' leaves)\n"
-                    + "WARNING: THIS CAN CAUSE SIGNIFICANT LAG AND MAY LEAD TO UNSTABLE BEHAVIOR";
+                    + "WARNING: THIS CAN CAUSE SIGNIFICANT LAG";
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
@@ -1147,6 +1151,84 @@ public abstract class Option<E>{
             }));
         }
     };
+    public static Option<HashSet<Material>> ROOTS = new Option<HashSet<Material>>("Roots", false, false, true, null){
+        @Override
+        public HashSet<Material> load(Object o){
+            return loadMaterialSet(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "Roots can be used to cut down a tree when you can't reach the trunk. (The nearest tree will be attempted to be cut down)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashSet<Material> value){
+            Material m = Material.matchMaterial("MANGROVE_ROOTS");
+            if(m==null)m = Material.OAK_WOOD;
+            return new ItemBuilder(m);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, false, "block", globalValue, (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", toolValues.get(tool), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialSet(parent, parent.plugin, parent.player, name, true, "block", treeValues.get(tree), (material) -> {
+                return material.isBlock();
+            }, (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> ROOT_DISTANCE = new Option<Integer>("Root Distance", true, false, true, 6){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How far away from the trunk can you use roots to cut down a tree?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            Material m = Material.matchMaterial("MANGROVE_ROOTS");
+            if(m==null)m = Material.OAK_WOOD;
+            return new ItemBuilder(m).setCount(value);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
     //tree falling details
     public static Option<FellBehavior> LOG_BEHAVIOR = new Option<FellBehavior>("Log Behavior", true, true, true, FellBehavior.BREAK){
         @Override
@@ -1677,6 +1759,107 @@ public abstract class Option<E>{
             return "A list of drops to convert into other drops when felling."+(ingame?"":" add entries like this:\n"
                     + "    oak_wood: oak_log\n"
                     + "    oak_fence: stick");
+        }
+        @Override
+        public HashMap<Material, Material> get(Tool tool, Tree tree){
+            HashMap<Material, Material> conversions = new HashMap<>();
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null)conversions.putAll(globalValue);
+            if(toolValues.containsKey(tool))conversions.putAll(toolValues.get(tool));
+            if(treeValues.containsKey(tree))conversions.putAll(treeValues.get(tree));
+            return conversions;
+        }
+        @Override
+        public HashMap<Material, Material> load(Object o){
+            if(o instanceof MemorySection){
+                MemorySection m = (MemorySection)o;
+                HashMap<Material, Material> conversions = new HashMap<>();
+                for(String key : m.getKeys(false)){
+                    conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
+                }
+                return conversions;
+            }
+            if(o instanceof Map){
+                Map m = (Map)o;
+                HashMap<Material, Material> conversions = new HashMap<>();
+                for(Object okey : m.keySet()){
+                    if(okey instanceof String){
+                        String key = (String)okey;
+                        conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
+                    }
+                }
+                return conversions;
+            }
+            if(o instanceof List){
+                List l = (List)o;
+                HashMap<Material, Material> conversions = new HashMap<>();
+                for(Object ob : l){
+                    if(ob instanceof MemorySection){
+                        MemorySection m = (MemorySection)ob;
+                        for(String key : m.getKeys(false)){
+                            conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
+                        }
+                    }
+                }
+                return conversions;
+            }
+            return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashMap<Material, Material> value){
+            return new ItemBuilder(Material.OAK_WOOD);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyMaterialMaterialMap(parent, parent.plugin, parent.player, name, "item", (t)->{
+                return t.isItem();
+            }, "item", (t)->{
+                return t.isItem();
+            }, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyMaterialMaterialMap(parent, parent.plugin, parent.player, name, "item", (t)->{
+                return t.isItem();
+            }, "item", (t)->{
+                return t.isItem();
+            }, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyMaterialMaterialMap(parent, parent.plugin, parent.player, name, "item", (t)->{
+                return t.isItem();
+            }, "item", (t)->{
+                return t.isItem();
+            }, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<HashMap<Material, Material>> BLOCK_CONVERSIONS = new Option<HashMap<Material, Material>>("Block Conversions", true, true, true, defaultBlockConversions){
+        @Override
+        public String writeToConfig(HashMap<Material, Material> value){
+            String s = "";
+            if(value==null)return s;
+            ArrayList<Material> keys = new ArrayList<>(value.keySet());
+            Collections.sort(keys);
+            for(Material m : keys){
+                s+="\n    "+m.toString()+": "+value.get(m).toString();
+            }
+            return s;
+        }
+        @Override
+        public String getDefaultConfigValue(){
+            return writeToConfig(defaultValue);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "Blocks in this list will never be broken; they will be converted instead.";
         }
         @Override
         public HashMap<Material, Material> get(Tool tool, Tree tree){
