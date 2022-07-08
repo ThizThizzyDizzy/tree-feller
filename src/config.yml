@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.19.2
+# Version 1.19.3
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -237,7 +237,6 @@ drop-conversions:
 
 # Blocks in this list will never be broken; they will be converted instead.
 block-conversions: 
-    MUDDY_MANGROVE_ROOTS: MUD
 
 # How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)
 leaf-drop-chance: 1.0

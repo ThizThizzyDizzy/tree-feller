@@ -600,7 +600,12 @@ public class TreeFeller extends JavaPlugin{
         getCommand("treefeller").setExecutor(new CommandTreeFeller(this));
         logger.log(Level.INFO, "{0} has been enabled! (Version {1}) by ThizThizzyDizzy", new Object[]{pdfFile.getName(), pdfFile.getVersion()});
         reload();
-        refreshPatronsList();
+        new BukkitRunnable() {
+            @Override
+            public void run(){
+                refreshPatronsList();
+            }
+        }.runTaskAsynchronously(this);
     }
     @Override
     public void onDisable(){
