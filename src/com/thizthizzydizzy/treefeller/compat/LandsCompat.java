@@ -15,6 +15,7 @@ public class LandsCompat extends InternalCompatibility{
     
     @Override
     public boolean test(Player player, Block block) {
-        return integration.getAreaByLoc(block.getLocation()).hasFlag(player, me.angeschossen.lands.api.flags.Flags.BLOCK_BREAK, false);
+        me.angeschossen.lands.api.land.Area area = integration.getAreaByLoc(block.getLocation());
+        return area==null||area.hasFlag(player, me.angeschossen.lands.api.flags.Flags.BLOCK_BREAK, false);
     }
 }

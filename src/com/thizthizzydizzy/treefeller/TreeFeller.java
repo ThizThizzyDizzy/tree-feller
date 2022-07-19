@@ -745,12 +745,13 @@ public class TreeFeller extends JavaPlugin{
             }
         }
 //</editor-fold>
+        TreeFellerCompat.init(null);//don't actually initialize the compatibilities, just their settings
         for(Option option : Option.options){
             if(option.global){
                 option.setValue(option.loadFromConfig(getConfig()));
             }
         }
-        TreeFellerCompat.init(this);
+        TreeFellerCompat.init(this);//now initialize the compatibilities
         for(Message message : Message.messages){
             message.load(getConfig());
         }
