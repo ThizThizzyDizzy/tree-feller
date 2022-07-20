@@ -178,7 +178,29 @@ public class TreeFeller extends JavaPlugin{
             if(b.getY()<lower)lower = b.getY();
         }
         int lowest = lower;
-        if(player!=null&&player.getGameMode()!=GameMode.CREATIVE){
+        if(player!=null&&player.getGameMode()!=GameMode.CREATIVE&&player.getGameMode()!=GameMode.SPECTATOR){
+            int logCount = 0, leafCount = 0;
+            for(int i : detectedTree.trunk.keySet())logCount+=detectedTree.trunk.get(i).size();
+            for(int i : detectedTree.leaves.keySet())leafCount+=detectedTree.leaves.get(i).size();
+            double consumeFood = Option.CONSUMED_FOOD_BASE.get(tool, tree)+Option.CONSUMED_FOOD_LOGS.get(tool, tree)*logCount+Option.CONSUMED_FOOD_LEAVES.get(tool, tree)*leafCount;
+            double consumeHealth = Option.CONSUMED_HEALTH_BASE.get(tool, tree)+Option.CONSUMED_HEALTH_LOGS.get(tool, tree)*logCount+Option.CONSUMED_HEALTH_LEAVES.get(tool, tree)*leafCount;
+            if(consumeFood>0){
+                float satCost = (float)Math.min(player.getSaturation(), consumeFood);
+                int foodCost = (int)(consumeFood-satCost);
+                player.setSaturation(Math.max(0, player.getSaturation()-satCost));
+                player.setFoodLevel(Math.max(0, player.getFoodLevel()-foodCost));
+            }
+            if(consumeFood<0){
+                int foodBonus = Math.min((int)-consumeFood, 20-player.getFoodLevel());
+                player.setFoodLevel(player.getFoodLevel()+foodBonus);
+                player.setSaturation((float)(player.getSaturation()+(-consumeFood-foodBonus)));
+            }
+            if(consumeHealth>0){
+                player.damage(consumeHealth);
+            }
+            if(consumeHealth<0){
+                player.setHealth(Math.min(player.getMaxHealth(), Math.max(0, player.getHealth()-consumeHealth)));
+            }
             if(axe.getType().getMaxDurability()>0){
                 if(Option.STACKED_TOOLS.get(tool, tree)){
                     int amt = axe.getAmount();

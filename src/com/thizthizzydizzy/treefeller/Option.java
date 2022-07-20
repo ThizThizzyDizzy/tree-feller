@@ -1459,20 +1459,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1502,20 +1502,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1545,20 +1545,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1588,20 +1588,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, -Double.MAX_VALUE, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1647,20 +1647,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1965,20 +1965,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2007,20 +2007,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2094,6 +2094,210 @@ public abstract class Option<E>{
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
             parent.open(new MenuModifyEffectList(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> CONSUMED_FOOD_BASE = new Option<Double>("Consumed Food Base", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much food should be be consumed upon felling a tree? (This is in addition to per-block settings)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.COOKED_CHICKEN);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> CONSUMED_FOOD_LOGS = new Option<Double>("Consumed Food Logs", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much food should be be consumed per block of log upon felling a tree? (This is in addition to the base setting)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.ACACIA_LOG);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> CONSUMED_FOOD_LEAVES = new Option<Double>("Consumed Food Leaves", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much food should be be consumed per block of leaves upon felling a tree? (This is in addition to the base setting)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.ACACIA_LEAVES);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> CONSUMED_HEALTH_BASE = new Option<Double>("Consumed Health Base", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much health should be be consumed upon felling a tree? (This is in addition to per-block settings)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.SALMON);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> CONSUMED_HEALTH_LOGS = new Option<Double>("Consumed Health Logs", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much health should be be consumed per block of log upon felling a tree? (This is in addition to the base setting)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.CRIMSON_STEM);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> CONSUMED_HEALTH_LEAVES = new Option<Double>("Consumed Health Leaves", true, true, true, 0d){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much health should be be consumed per block of leaves upon felling a tree? (This is in addition to the base setting)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.NETHER_WART_BLOCK);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -3088,6 +3292,214 @@ public abstract class Option<E>{
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
             parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 7, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> MIN_FOOD = new Option<Integer>("Min Food", true, true, true, null){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            int food = player.getFoodLevel();
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
+                if(food<globalValue)return new DebugResult(this, GLOBAL, food, globalValue);
+            }
+            if(toolValues.containsKey(tool)){
+                if(food<toolValues.get(tool))return new DebugResult(this, TOOL, food, toolValues.get(tool));
+            }
+            if(treeValues.containsKey(tree)){
+                if(food<treeValues.get(tree))return new DebugResult(this, TREE, food, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS, food);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much food should be required to fell trees? (0 - 20)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Not enough food$: {0}<{1}", "Food meets minimum requirement");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.BREAD);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 20, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 20, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 20, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> MAX_FOOD = new Option<Integer>("Max Food", true, true, true, null){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            int food = player.getFoodLevel();
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
+                if(food>globalValue)return new DebugResult(this, GLOBAL, food, globalValue);
+            }
+            if(toolValues.containsKey(tool)){
+                if(food>toolValues.get(tool))return new DebugResult(this, TOOL, food, toolValues.get(tool));
+            }
+            if(treeValues.containsKey(tree)){
+                if(food>treeValues.get(tree))return new DebugResult(this, TREE, food, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS, food);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the maximum food level allowed in order to fell trees? (0 - 20)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Too much food$: {0}>{1}", "Food meets maximum requirement");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.COOKED_BEEF);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 20, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 20, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, 20, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> MIN_HEALTH = new Option<Double>("Min Health", true, true, true, null){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            double health = player.getHealth();
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
+                if(health<globalValue)return new DebugResult(this, GLOBAL, health, globalValue);
+            }
+            if(toolValues.containsKey(tool)){
+                if(health<toolValues.get(tool))return new DebugResult(this, TOOL, health, toolValues.get(tool));
+            }
+            if(treeValues.containsKey(tree)){
+                if(health<treeValues.get(tree))return new DebugResult(this, TREE, health, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS, health);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much health should be required to fell trees?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Not enough health$: {0}<{1}", "Health meets minimum requirement");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.GOLDEN_CARROT);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Double> MAX_HEALTH = new Option<Double>("Max Health", true, true, true, null){
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            double health = player.getHealth();
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
+                if(health>globalValue)return new DebugResult(this, GLOBAL, health, globalValue);
+            }
+            if(toolValues.containsKey(tool)){
+                if(health>toolValues.get(tool))return new DebugResult(this, TOOL, health, toolValues.get(tool));
+            }
+            if(treeValues.containsKey(tree)){
+                if(health>treeValues.get(tree))return new DebugResult(this, TREE, health, treeValues.get(tree));
+            }
+            return new DebugResult(this, SUCCESS, health);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the maximum health level allowed in order to fell trees?";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Too much health$: {0}>{1}", "Health meets maximum requirement");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.GOLDEN_APPLE);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
