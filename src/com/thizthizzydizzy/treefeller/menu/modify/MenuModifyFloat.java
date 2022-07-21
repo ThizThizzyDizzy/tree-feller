@@ -11,6 +11,12 @@ public class MenuModifyFloat extends Menu{
     private Float value;
     private final Button display;
     public MenuModifyFloat(Menu parent, Plugin plugin, Player player, String name, float min, float max, boolean allowNull, Float defaultValue, Consumer<Float> setFunc){
+        this(parent, plugin, player, name, min, max, 0.1f, allowNull, defaultValue, setFunc);
+    }
+    public MenuModifyFloat(Menu parent, Plugin plugin, Player player, String name, float min, float max, float majorIncrement, boolean allowNull, Float defaultValue, Consumer<Float> setFunc){
+        this(parent, plugin, player, name, min, max, majorIncrement, majorIncrement/10f, allowNull, defaultValue, setFunc);
+    }
+    public MenuModifyFloat(Menu parent, Plugin plugin, Player player, String name, float min, float max, float majorIncrement, float minorIncrement, boolean allowNull, Float defaultValue, Consumer<Float> setFunc){
         super(parent, plugin, player, "Modify Float ("+name+")", 9);
         value = defaultValue;
         display = add(new Button(0, makeItem(Material.PAPER).setDisplayName(Objects.toString(defaultValue)).addLore("Click to set value"), (click) -> {
@@ -24,17 +30,17 @@ public class MenuModifyFloat extends Menu{
                 refresh();
             });
         }));
-        add(new Button(2, makeItem(Material.RED_CONCRETE).setDisplayName("-.1"), (click) -> {
+        add(new Button(2, makeItem(Material.RED_CONCRETE).setDisplayName("-"+majorIncrement), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0f;
-            value = Math.min(max,Math.max(min, value-.1f));
+            value = Math.min(max,Math.max(min, value-majorIncrement));
             setFunc.accept(value);
                 refresh();
         }));
-        add(new Button(3, makeItem(Material.RED_TERRACOTTA).setDisplayName("-.01"), (click) -> {
+        add(new Button(3, makeItem(Material.RED_TERRACOTTA).setDisplayName("-"+minorIncrement), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0f;
-            value = Math.min(max,Math.max(min, value-.01f));
+            value = Math.min(max,Math.max(min, value-minorIncrement));
             setFunc.accept(value);
                 refresh();
         }));
@@ -53,17 +59,17 @@ public class MenuModifyFloat extends Menu{
                 refresh();
             }));
         }
-        add(new Button(5, makeItem(Material.GREEN_TERRACOTTA).setDisplayName("+.01"), (click) -> {
+        add(new Button(5, makeItem(Material.GREEN_TERRACOTTA).setDisplayName("+"+minorIncrement), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0f;
-            value = Math.min(max,Math.max(min, value+.01f));
+            value = Math.min(max,Math.max(min, value+minorIncrement));
             setFunc.accept(value);
                 refresh();
         }));
-        add(new Button(6, makeItem(Material.GREEN_CONCRETE).setDisplayName("+.1"), (click) -> {
+        add(new Button(6, makeItem(Material.GREEN_CONCRETE).setDisplayName("+"+majorIncrement), (click) -> {
             if(click!=ClickType.LEFT)return;
             if(value==null)value = 0f;
-            value = Math.min(max,Math.max(min, value+.1f));
+            value = Math.min(max,Math.max(min, value+majorIncrement));
             setFunc.accept(value);
                 refresh();
         }));

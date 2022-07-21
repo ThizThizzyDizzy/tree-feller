@@ -1647,20 +1647,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -1965,20 +1965,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2007,20 +2007,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2114,20 +2114,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2148,20 +2148,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2182,20 +2182,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2216,20 +2216,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2250,20 +2250,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -2284,20 +2284,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, false, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, Integer.MIN_VALUE, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -3434,20 +3434,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
@@ -3486,20 +3486,20 @@ public abstract class Option<E>{
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
