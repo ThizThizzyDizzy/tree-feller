@@ -105,13 +105,13 @@ root-distance: 6
 # FALL                        blocks will fall as falling blocks
 # FALL_HURT                   blocks will fall as falling blocks and hurt any entity they land on
 # FALL_BREAK                  blocks will fall as falling blocks and break when they reach the ground
-# FALL_HURT_BREAK             blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground
+# FALL_HURT_BREAK             blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground
 # FALL_INVENTORY              blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
 # FALL_HURT_INVENTORY         blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
 # FALL_NATURAL                blocks will fall as falling blocks. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_HURT           blocks will fall as falling blocks and hurt any entity they land on. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_BREAK          blocks will fall as falling blocks and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
-# FALL_NATURAL_HURT_BREAK     blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
+# FALL_NATURAL_HURT_BREAK     blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_INVENTORY      blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_HURT_INVENTORY blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
 # Note that falling blocks occasionally drop as items if they land wrong
@@ -125,17 +125,23 @@ log-behavior: BREAK
 # FALL                        blocks will fall as falling blocks
 # FALL_HURT                   blocks will fall as falling blocks and hurt any entity they land on
 # FALL_BREAK                  blocks will fall as falling blocks and break when they reach the ground
-# FALL_HURT_BREAK             blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground
+# FALL_HURT_BREAK             blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground
 # FALL_INVENTORY              blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground
 # FALL_HURT_INVENTORY         blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground
 # FALL_NATURAL                blocks will fall as falling blocks. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_HURT           blocks will fall as falling blocks and hurt any entity they land on. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_BREAK          blocks will fall as falling blocks and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
-# FALL_NATURAL_HURT_BREAK     blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
+# FALL_NATURAL_HURT_BREAK     blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_INVENTORY      blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
 # FALL_NATURAL_HURT_INVENTORY blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground. Blocks will attempt to target a position to land as if the tree fell over realistically
 # Note that falling blocks occasionally drop as items if they land wrong
 leaf-behavior: BREAK
+
+# How much damage should falling blocks deal per block fallen? (Only applies to FALL_HURT fell behaviors)
+fall-hurt-amount: 2.0
+
+# What is the maximum amount of damage a falling block may deal upon landing? (Only applies to FALL_HURT fell behaviors)
+fall-hurt-max: 40
 
 # Which direction should the tree fall in?
 # (Only used when log or leaf behavior is set to FALL or similar)
@@ -517,6 +523,8 @@ compatibility-aureliumskills: true
 # sapling-timeout
 # log-behavior
 # leaf-behavior
+# fall-hurt-amount
+# fall-hurt-max
 # directional-fall-behavior
 # overridables
 # lock-fall-cardinal
@@ -630,6 +638,8 @@ tools:
 # root-distance
 # log-behavior
 # leaf-behavior
+# fall-hurt-amount
+# fall-hurt-max
 # directional-fall-behavior
 # overridables
 # lock-fall-cardinal
