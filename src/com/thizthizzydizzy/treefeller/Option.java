@@ -1332,6 +1332,74 @@ public abstract class Option<E>{
             }));
         }
     };
+    public static Option<Float> FALL_HURT_AMOUNT = new Option<Float>("Fall Hurt Amount", true, true, true, 2.0f){
+        @Override
+        public Float load(Object o){
+            return loadFloat(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "How much damage should falling blocks deal per block fallen? (Only applies to FALL_HURT fell behaviors)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Float value){
+            return new ItemBuilder(Material.CHIPPED_ANVIL);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, Integer.MAX_VALUE, 1, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, Integer.MAX_VALUE, 1, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyFloat(parent, parent.plugin, parent.player, name, 0f, Integer.MAX_VALUE, 1, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static Option<Integer> FALL_HURT_MAX = new Option<Integer>("Fall Hurt Max", true, true, true, 40){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the maximum amount of damage a falling block may deal upon landing? (Only applies to FALL_HURT fell behaviors)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.DAMAGED_ANVIL);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
     public static Option<DirectionalFallBehavior> DIRECTIONAL_FALL_BEHAVIOR = new Option<DirectionalFallBehavior>("Directional Fall Behavior", true, true, true, DirectionalFallBehavior.RANDOM){
         @Override
         public DirectionalFallBehavior load(Object o){

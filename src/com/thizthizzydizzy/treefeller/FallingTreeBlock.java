@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller;
+import com.thizthizzydizzy.vanillify.Vanillify;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Axis;
@@ -40,6 +41,8 @@ public class FallingTreeBlock{
             entity = falling;
             falling.setVelocity(new Vector(0, event.getEntity().getVelocity().getY(), 0));
             falling.setHurtEntities(((FallingBlock)event.getEntity()).canHurtEntities());
+            Vanillify.modifyEntityNBT(falling, "FallHurtAmount", Vanillify.getEntityNBTFloat(entity, "FallHurtAmount"));
+            Vanillify.modifyEntityNBT(falling, "FallHurtMax", Vanillify.getEntityNBTFloat(entity, "FallHurtMax"));
             for(String s : event.getEntity().getScoreboardTags()){
                 falling.addScoreboardTag(s);
             }

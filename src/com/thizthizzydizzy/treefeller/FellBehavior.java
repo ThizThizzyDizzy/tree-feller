@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller;
+import com.thizthizzydizzy.vanillify.Vanillify;
 import java.util.ArrayList;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -63,7 +64,7 @@ public enum FellBehavior{
             processFallBehavior(detectedTree, false, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         }
     },
-    FALL_HURT_BREAK(Material.DAMAGED_ANVIL, "blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground"){
+    FALL_HURT_BREAK(Material.DAMAGED_ANVIL, "blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processFallBehavior(detectedTree, true, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
@@ -99,7 +100,7 @@ public enum FellBehavior{
             processNaturalFallBehavior(detectedTree, false, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
         }
     },
-    FALL_NATURAL_HURT_BREAK(Material.DAMAGED_ANVIL, "blocks will fall as falling brocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically"){
+    FALL_NATURAL_HURT_BREAK(Material.DAMAGED_ANVIL, "blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processNaturalFallBehavior(detectedTree, true, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
@@ -155,6 +156,8 @@ public enum FellBehavior{
         }
         falling.setVelocity(v);
         falling.setHurtEntities(hurt);
+        Vanillify.modifyEntityNBT(falling, "FallHurtAmount", Option.FALL_HURT_AMOUNT.get(tool, tree));
+        Vanillify.modifyEntityNBT(falling, "FallHurtMax", Option.FALL_HURT_MAX.get(tool, tree));
         Player inv = null;
         if(inventory){
             if(player==null)doBreak = true;
@@ -180,6 +183,8 @@ public enum FellBehavior{
             falling.setVelocity(v);
         }catch(IllegalArgumentException ex){}
         falling.setHurtEntities(hurt);
+        Vanillify.modifyEntityNBT(falling, "FallHurtAmount", Option.FALL_HURT_AMOUNT.get(tool, tree));
+        Vanillify.modifyEntityNBT(falling, "FallHurtMax", Option.FALL_HURT_MAX.get(tool, tree));
         Player inv = null;
         if(inventory){
             if(player==null)doBreak = true;
