@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Axis;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.FallingBlock;
 import org.bukkit.entity.Player;
@@ -35,7 +36,8 @@ public class FallingTreeBlock{
     }
     public void land(TreeFeller plugin, EntityChangeBlockEvent event){
         if(event.getTo()==Material.AIR)return;
-        if(event.getBlock().getRelative(0, -1, 0).isPassable()){
+        Block on = event.getBlock().getRelative(0, -1, 0);
+        if(on.isPassable()&&!on.getType().getKey().getKey().equals("powder_snow")){
             event.setCancelled(true);
             FallingBlock falling = event.getBlock().getWorld().spawnFallingBlock(event.getBlock().getLocation().add(.5,.5,.5), event.getBlockData());
             entity = falling;
