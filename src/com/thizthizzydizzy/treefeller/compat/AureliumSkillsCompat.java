@@ -1,10 +1,12 @@
 package com.thizthizzydizzy.treefeller.compat;
+import com.archyx.aureliumskills.skills.Skill;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import com.thizthizzydizzy.treefeller.TreeFeller;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
@@ -12,11 +14,14 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 public class AureliumSkillsCompat extends InternalCompatibility{
     public static Option<HashMap<String, Double>> AURELIUMSKILLS_TRUNK_XP = new Option<HashMap<String, Double>>("AureliumSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - foraging: 1"){
         @Override
@@ -242,9 +247,17 @@ public class AureliumSkillsCompat extends InternalCompatibility{
             return new ItemBuilder(Material.EXPERIENCE_BOTTLE);
         }
     };
+    private BukkitTask pendingTask = null;
+    private TreeFeller treefeller;
+    private HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> modsMap = new HashMap<>();
+    private HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> noModsMap = new HashMap<>();
     @Override
     public String getPluginName(){
         return "AureliumSkills";
+    }
+    @Override
+    public void init(TreeFeller treefeller){
+        this.treefeller = treefeller;
     }
     @Override
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
@@ -261,8 +274,37 @@ public class AureliumSkillsCompat extends InternalCompatibility{
             double amount = xp.get(key);
             com.archyx.aureliumskills.skills.Skill skill = com.archyx.aureliumskills.api.AureliumAPI.getPlugin().getSkillRegistry().getSkill(key);
             if(skill==null)continue;
-            if(applyMods)com.archyx.aureliumskills.api.AureliumAPI.addXp(player, skill, amount);
-            else com.archyx.aureliumskills.api.AureliumAPI.addXpRaw(player, skill, amount);
+            HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> map = null;
+            if(applyMods){
+                map = modsMap;
+            }else{
+                map = noModsMap;
+            }
+            if(!map.containsKey(player)){
+                map.put(player, new HashMap<>());
+            }
+            HashMap<Skill, Double> mp = map.get(player);
+            mp.put(skill, mp.getOrDefault(skill, 0d)+amount);
         }
+        if(pendingTask==null)pendingTask = new BukkitRunnable() {
+            @Override
+            public void run(){
+                pendingTask = null;
+                for(Player p : noModsMap.keySet()){
+                    HashMap<Skill, Double> map = noModsMap.get(p);
+                    for(com.archyx.aureliumskills.skills.Skill skill : map.keySet()){
+                        com.archyx.aureliumskills.api.AureliumAPI.addXpRaw(p, skill, map.get(skill));
+                    }
+                }
+                noModsMap.clear();
+                for(Player p : modsMap.keySet()){
+                    HashMap<Skill, Double> map = modsMap.get(p);
+                    for(com.archyx.aureliumskills.skills.Skill skill : map.keySet()){
+                        com.archyx.aureliumskills.api.AureliumAPI.addXp(p, skill, map.get(skill));
+                    }
+                }
+                modsMap.clear();
+            }
+        }.runTaskLater(treefeller, Option.CUTTING_ANIMATION.get(tool, tree)==true?10:1);
     }
 }
