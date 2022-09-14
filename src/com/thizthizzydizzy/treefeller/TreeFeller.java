@@ -1075,8 +1075,8 @@ public class TreeFeller extends JavaPlugin{
             ItemStack next = it.next();
             if(next.getType().isAir())it.remove();//don't try to drop air
         }
-        if(axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS)&&fortune)applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
-        if(axe.containsEnchantment(Enchantment.SILK_TOUCH)&&silk)applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
+        if(fortune&&axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS))applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
+        if(silk&&axe.containsEnchantment(Enchantment.SILK_TOUCH))applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
         HashMap<Material, Material> conversions = Option.DROP_CONVERSIONS.get(tool, tree);
         if(!conversions.isEmpty()){
             for(ItemStack s : drops){
