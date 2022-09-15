@@ -1177,6 +1177,7 @@ public class TreeFeller extends JavaPlugin{
     }
     static void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
         if(enchantmentLevel==0)return;
+        int tp = 0;
         switch(type){
             case BEEHIVE:
             case BEE_NEST:
@@ -1251,9 +1252,7 @@ public class TreeFeller extends JavaPlugin{
             case SEA_LANTERN:
             case TURTLE_EGG:
             case SOUL_CAMPFIRE:
-                drops.clear();
-                drops.add(new ItemStack(type));
-                xp[0] = 0;
+                tp = 1;
                 break;
             //pickaxe only (conditional too!)
             case COAL_ORE:
@@ -1271,22 +1270,52 @@ public class TreeFeller extends JavaPlugin{
             case NETHER_GOLD_ORE:
             case GILDED_BLACKSTONE:
             case STONE:
-                if(axe.getType().name().toLowerCase().contains("pickaxe")){
-                    xp[0] = 0;
-                    if(drops.isEmpty())return;
-                    drops.clear();
-                    drops.add(new ItemStack(type));
-                }
+                tp = 2;
                 break;
             //shovel only
             case SNOW:
             case SNOW_BLOCK:
-                if(axe.getType().name().toLowerCase().contains("shovel")){
-                    drops.clear();
-                    drops.add(new ItemStack(type));
-                    xp[0] = 0;
-                }
+                tp = 3;
                 break;
+            default:
+                switch(type.getKey().getKey()){
+                    case "small_amethyst_bud":
+                    case "medium_amethyst_bud":
+                    case "large_amethyst_bud":
+                    case "amethyst_cluster":
+                        tp = 2;
+                        break;
+                    case "skulk":
+                    case "skulk_catalyst":
+                    case "skulk_sensor":
+                    case "sculk_shrieker":
+                    case "sculk_vein":
+                    case "mangrove_leaves":
+                    case "azalea_leaves":
+                    case "flowering_azalea_leaves":
+                        tp = 1;
+                        break;
+                }
+        }
+        if(tp==1){//always work        
+            drops.clear();
+            drops.add(new ItemStack(type));
+            xp[0] = 0;    
+        }
+        if(tp==2){//pickaxe only
+            if(axe.getType().name().toLowerCase().contains("pickaxe")){
+                xp[0] = 0;
+                if(drops.isEmpty())return;
+                drops.clear();
+                drops.add(new ItemStack(type));
+            }
+        }
+        if(tp==3){//shovel only
+            if(axe.getType().name().toLowerCase().contains("shovel")){
+                drops.clear();
+                drops.add(new ItemStack(type));
+                xp[0] = 0;
+            }
         }
     }
     private void leafCheck(HashMap<Integer, ArrayList<Block>> someLeaves, ArrayList<Material> trunk, ArrayList<Material> leaves, Boolean diagonal, Boolean playerLeaves, Boolean ignoreLeafData){
