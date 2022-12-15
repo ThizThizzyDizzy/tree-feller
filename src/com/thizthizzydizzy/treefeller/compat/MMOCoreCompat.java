@@ -4,9 +4,12 @@ import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Option;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
+import com.thizthizzydizzy.treefeller.DebugResult;
+import com.thizthizzydizzy.treefeller.TreeFeller;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import java.util.HashMap;
 import java.util.List;
@@ -17,6 +20,10 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
+
 public class MMOCoreCompat extends InternalCompatibility{
     public static Option<HashMap<String, Double>> MMOCORE_TRUNK_XP = new Option<HashMap<String, Double>>("MMOCore Trunk XP", true, false, true, new HashMap<>(), "\n   - global: 1"){
         @Override
@@ -236,6 +243,72 @@ public class MMOCoreCompat extends InternalCompatibility{
             return s+"}";
         }
     };
+    
+    //implemented as INT to allow per-tree level requirement
+    //example:
+    //- [[OAK_LOG, OAK_WOOD], [OAK_LEAVES], {sapling: [OAK_SAPLING], max-saplings: 1, mmocore-required-woodcutting-level: 10}]
+    public static Option<Integer> MMOCORE_REQUIRED_WOODCUTTING_LEVEL = new Option<Integer>("MMOCore Required Woodcutting Level", false, false, true, 1 ){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "MMOCore levels required for to fell tree - profession name is \"woodcutting\"";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.GOLDEN_PICKAXE).setCount(value);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, ( value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        
+        @Override
+        protected DebugResult doCheck( TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe ){
+            System.out.println( "[SOP] hello from mmocore compat OPTION" );
+            
+            String profession = "woodcutting";
+            Integer lvlreq = this.get( tool, tree );
+            if( lvlreq==null  ){
+                System.out.println( "[SOP] lvlreq null, returning" );
+                return null;
+            }
+            
+            net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
+            int playerLevel = data.getCollectionSkills().getLevel( profession );
+            
+            System.out.println( "[SOP] mmocore \"" + profession + "\" level reqd:" + lvlreq );
+            System.out.println( "[SOP] mmocore player's \"" + profession + "\" level:" + playerLevel );
+            
+            if( lvlreq > playerLevel ){
+                System.out.println( "[SOP] You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
+                player.sendMessage("You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
+                return new DebugResult(this, GLOBAL, lvlreq, globalValue );
+            } else {
+                //ok to chop down
+                return new DebugResult(this, SUCCESS);
+            }
+        }
+    };
+    
     @Override
     public String getPluginName(){
         return "MMOCore";
@@ -251,18 +324,21 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
         if(xp==null||xp.isEmpty())return;
         net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
-        player.sendMessage(data.getCollectionSkills().getClass().getName());
-        player.sendMessage(net.Indyuce.mmocore.MMOCore.plugin.professionManager.getClass().getName());
-        if(xp.containsKey("global"))data.giveExperience(convert(xp.get("global")), net.Indyuce.mmocore.api.experience.EXPSource.SOURCE);
+        //player.sendMessage(data.getCollectionSkills().getClass().getName());
+        //player.sendMessage(net.Indyuce.mmocore.MMOCore.plugin.professionManager.getClass().getName());
+        if(xp.containsKey("global")){
+            data.giveExperience(convert(xp.get("global")), net.Indyuce.mmocore.experience.EXPSource.SOURCE);
+        }
         for(String profession : xp.keySet()){
             int exp = convert(xp.get(profession));
             if(profession.equals("global")){
-                data.giveExperience(exp, net.Indyuce.mmocore.api.experience.EXPSource.SOURCE);
+                data.giveExperience(exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
             }else{
-                data.getCollectionSkills().giveExperience(net.Indyuce.mmocore.MMOCore.plugin.professionManager.get(profession), exp, net.Indyuce.mmocore.api.experience.EXPSource.SOURCE);
+                data.getCollectionSkills().giveExperience(net.Indyuce.mmocore.MMOCore.plugin.professionManager.get(profession), exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
             }
         }
     }
+    
     private int convert(double d){
         int i = (int)d;
         double remainder = d-i;
