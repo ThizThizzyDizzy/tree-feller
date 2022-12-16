@@ -9,8 +9,8 @@ import com.thizthizzydizzy.treefeller.TreeFeller;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
-import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringIntegerMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -248,69 +248,149 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
     };
     
-    //implemented as INT to allow per-tree level requirement
-    //example:
-    //- [[OAK_LOG, OAK_WOOD], [OAK_LEAVES], {sapling: [OAK_SAPLING], max-saplings: 1, mmocore-required-woodcutting-level: 10}]
-    public static Option<Integer> MMOCORE_REQUIRED_WOODCUTTING_LEVEL = new Option<Integer>("MMOCore Required Woodcutting Level", false, false, true, 1 ){
-        @Override
-        public Integer load(Object o){
-            return loadInt(o);
-        }
+    public static Option<HashMap<String, Integer>> MMOCORE_REQUIRED_PROFESSION_LEVEL = new Option<HashMap<String, Integer>>("MMOCore Required Profession Level", true, false, true, new HashMap<>(), "\n   - woodcutting: 1"){
         @Override
         public String getDesc(boolean ingame){
-            return "MMOCore levels required for to fell tree - profession name is \"woodcutting\"";
+            return "These professions levels will be checked before a tree is felled";
         }
         @Override
-        public ItemBuilder getConfigurationDisplayItem(Integer value){
-            return new ItemBuilder(Material.GOLDEN_PICKAXE).setCount(value);
+        public HashMap<String, Integer> load(Object o){
+            if(o instanceof MemorySection){
+                HashMap<String, Integer> professions = new HashMap<>();
+                MemorySection m = (MemorySection)o;
+                for(String key : m.getKeys(false)){
+                    String profession = key;
+                    if(profession==null)continue;
+                    Integer lvlreq = Option.loadInt(m.get(key));
+                    if(lvlreq==null)continue;
+                    if(professions.containsKey(profession)){
+                        professions.put(profession, professions.get(profession)+lvlreq);
+                    }else{
+                        professions.put(profession, lvlreq);
+                    }
+                }
+                return professions;
+            }
+            if(o instanceof Map){
+                HashMap<String, Integer> professions = new HashMap<>();
+                Map m = (Map)o;
+                for(Object obj : m.keySet()){
+                    String profession = null;
+                    if(obj instanceof String){
+                        profession = (String)obj;
+                    }
+                    if(profession==null)continue;
+                    Integer lvlreq = Option.loadInt(m.get(obj));
+                    if(lvlreq==null)continue;
+                    if(professions.containsKey(profession)){
+                        professions.put(profession, professions.get(profession)+lvlreq);
+                    }else{
+                        professions.put(profession, lvlreq);
+                    }
+                }
+                return professions;
+            }
+            if(o instanceof List){
+                List l = (List)o;
+                HashMap<String, Integer> professions = new HashMap<>();
+                for(Object lbj : l){
+                    if(lbj instanceof Map){
+                        Map m = (Map)lbj;
+                        for(Object obj : m.keySet()){
+                            String profession = null;
+                            if(obj instanceof String){
+                                profession = (String)obj;
+                            }
+                            if(profession==null)continue;
+                            Integer lvlreq = Option.loadInt(m.get(obj));
+                            if(lvlreq==null)continue;
+                            if(professions.containsKey(profession)){
+                                professions.put(profession, professions.get(profession)+lvlreq);
+                            }else{
+                                professions.put(profession, lvlreq);
+                            }
+                        }
+                    }
+                }
+                return professions;
+            }
+            return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Integer> value){
+            return new ItemBuilder(Material.GOLDEN_PICKAXE);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, false, globalValue, ( value) -> {
+            parent.open(new MenuModifyStringIntegerMap(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, false, false, globalValue, ( value) -> {
                 globalValue = value;
             }));
         }
         @Override
         public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+            parent.open(new MenuModifyStringIntegerMap(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, false, toolValues.get(tool), (value) -> {
                 if(value==null)toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
         @Override
         public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 1, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+            parent.open(new MenuModifyStringIntegerMap(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, false, treeValues.get(tree), (value) -> {
                 if(value==null)treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
         }
-        
+        @Override
+        public String writeToConfig(HashMap<String, Integer> value){
+            if(value==null)return "";
+            String s = "{";
+            String str = "";
+            for(String st : value.keySet()){
+                str+=", "+st+": "+value.get(st);
+            }
+            if(!str.isEmpty())s+=str.substring(2);
+            return s+"}";
+        }
         @Override
         protected DebugResult doCheck( TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe ){
             //System.out.println( "[SOP] hello from mmocore compat OPTION" );
-            
-            String profession = "woodcutting";
-            Integer lvlreq = this.get( tool, tree );
-            if( lvlreq==null  ){
+    
+    
+            HashMap<String, Integer> lvlReqs = this.get( tool, tree );
+    
+            if( lvlReqs == null ){
                 //System.out.println( "[SOP] lvlreq null, returning" );
                 return null;
             }
-            
-            net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
-            int playerLevel = data.getCollectionSkills().getLevel( profession );
-            
-            //System.out.println( "[SOP] mmocore \"" + profession + "\" level reqd:" + lvlreq );
-            //System.out.println( "[SOP] mmocore player's \"" + profession + "\" level:" + playerLevel );
-            
-            if( lvlreq > playerLevel ){
-                //System.out.println( "[SOP] You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
-                player.sendMessage("You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
-                return new DebugResult(this, GLOBAL, lvlreq, globalValue );
-            } else {
-                //ok to chop down
-                return new DebugResult(this, SUCCESS);
+            net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get( player );
+    
+            boolean allowFell = true;
+            for( String profession : lvlReqs.keySet( ) ){
+                int lvlReq = lvlReqs.get( profession );
+                int playerLevel;
+    
+                if( profession.equals( "global" ) ){
+                    playerLevel = data.getLevel( );
+                } else {
+                    playerLevel = data.getCollectionSkills( ).getLevel( profession );
+                }
+    
+                if( lvlReq > playerLevel ){
+                    //System.out.println( "[SOP] You need at least level " + lvlReq + " " + profession + " to chop down this tree" );
+                    player.sendMessage( "You need at least level " + lvlReq + " " + profession + " to chop down this tree" );
+                    
+                    allowFell = false;
+                }
+    
             }
+            if( allowFell ){
+                return new DebugResult( this, SUCCESS );
+            } else {
+                return new DebugResult( this, GLOBAL, 0, globalValue );
+            }
+            
         }
+        
     };
     
     @Override
@@ -342,7 +422,7 @@ public class MMOCoreCompat extends InternalCompatibility{
             }
         }
         
-        //MMOCore's Regen (see mining.yml)
+        //MMOCore's Regen (see MMOCore/professions/mining.yml)
         //MMOCore's "temp-block" option must not be set
         BlockInfo info = MMOCore.plugin.mineManager.getInfo( block );
         String savedData = block.getBlockData( ).getAsString( );
