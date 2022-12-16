@@ -15,6 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import net.Indyuce.mmocore.MMOCore;
+import net.Indyuce.mmocore.api.block.BlockInfo;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
@@ -283,23 +287,23 @@ public class MMOCoreCompat extends InternalCompatibility{
         
         @Override
         protected DebugResult doCheck( TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe ){
-            System.out.println( "[SOP] hello from mmocore compat OPTION" );
+            //System.out.println( "[SOP] hello from mmocore compat OPTION" );
             
             String profession = "woodcutting";
             Integer lvlreq = this.get( tool, tree );
             if( lvlreq==null  ){
-                System.out.println( "[SOP] lvlreq null, returning" );
+                //System.out.println( "[SOP] lvlreq null, returning" );
                 return null;
             }
             
             net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
             int playerLevel = data.getCollectionSkills().getLevel( profession );
             
-            System.out.println( "[SOP] mmocore \"" + profession + "\" level reqd:" + lvlreq );
-            System.out.println( "[SOP] mmocore player's \"" + profession + "\" level:" + playerLevel );
+            //System.out.println( "[SOP] mmocore \"" + profession + "\" level reqd:" + lvlreq );
+            //System.out.println( "[SOP] mmocore player's \"" + profession + "\" level:" + playerLevel );
             
             if( lvlreq > playerLevel ){
-                System.out.println( "[SOP] You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
+                //System.out.println( "[SOP] You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
                 player.sendMessage("You need at least level " + lvlreq + " " + profession + " to chop down this tree" );
                 return new DebugResult(this, GLOBAL, lvlreq, globalValue );
             } else {
@@ -336,6 +340,21 @@ public class MMOCoreCompat extends InternalCompatibility{
             }else{
                 data.getCollectionSkills().giveExperience(net.Indyuce.mmocore.MMOCore.plugin.professionManager.get(profession), exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
             }
+        }
+        
+        //MMOCore's Regen (see mining.yml)
+        //MMOCore's "temp-block" option must not be set
+        BlockInfo info = MMOCore.plugin.mineManager.getInfo( block );
+        String savedData = block.getBlockData( ).getAsString( );
+        if( info == null ){
+            //System.out.println( "[SOP] mmocore blockinfo null" );
+        } else if( info.hasRegen()){
+            //System.out.println( "[SOP] attempting to schedule mmocore regen: " + savedData );
+            Bukkit.getScheduler().runTaskLater( MMOCore.plugin, () ->
+                    MMOCore.plugin.mineManager.initialize(
+                            info.startRegeneration( Bukkit.createBlockData( savedData ), block.getLocation( ) ),
+                            true ), 1
+            );
         }
     }
     
