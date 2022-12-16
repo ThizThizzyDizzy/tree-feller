@@ -411,10 +411,9 @@ mmocore-trunk-xp:
 mmocore-leaves-xp: 
    - global: 0
 
-# mmocore "woodcutting" profession level required to chop down the tree
+# mmocore profession level(s) required to chop down the tree
 # may be set per-tree, see "trees:" section below for example
-# profession name "woodcutting" is hardcoded (temporary)
-mmocore-required-woodcutting-level: 1
+mmocore-required-profession-level: {woodcutting: 1}
 
 # Toggle compatibility with MMOCore
 compatibility-mmocore: true
@@ -731,7 +730,7 @@ trees:
     - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
 
 # MMOCore "mmocore-required-woodcutting-level" example:
-#    - [[OAK_LOG, OAK_WOOD], [OAK_LEAVES], {sapling: [OAK_SAPLING], max-saplings: 1, mmocore-required-woodcutting-level: 10}]
+#    - [[OAK_LOG, OAK_WOOD], [OAK_LEAVES], {mmocore-trunk-xp: {"woodcutting":1}, mmocore-required-profession-level: {"woodcutting":1}}]
 
 # Here, you can create custom effects for trees or tools
 # Fields:
