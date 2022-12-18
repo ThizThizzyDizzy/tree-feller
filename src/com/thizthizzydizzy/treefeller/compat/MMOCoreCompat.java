@@ -29,6 +29,7 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
 
 public class MMOCoreCompat extends InternalCompatibility{
+    private static boolean installed;
     public static Option<HashMap<String, Double>> MMOCORE_TRUNK_XP = new Option<HashMap<String, Double>>("MMOCore Trunk XP", true, false, true, new HashMap<>(), "\n   - global: 1"){
         @Override
         public String getDesc(boolean ingame){
@@ -353,6 +354,7 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
         @Override
         protected DebugResult doCheck( TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe ){
+            if(!installed)return null;
             //System.out.println( "[SOP] hello from mmocore compat OPTION" );
     
     
@@ -397,6 +399,12 @@ public class MMOCoreCompat extends InternalCompatibility{
     public String getPluginName(){
         return "MMOCore";
     }
+
+    @Override
+    public void reload() {
+        installed = isInstalled();
+    }
+    
     @Override
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
         if(player==null)return;

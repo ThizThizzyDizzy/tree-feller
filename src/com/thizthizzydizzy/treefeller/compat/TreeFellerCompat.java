@@ -109,8 +109,7 @@ public class TreeFellerCompat{
     private static ArrayList<PluginCompatibility> getCompatibilities(){
         ArrayList<PluginCompatibility> compats = new ArrayList<>();
         for(PluginCompatibility compat : compatibilities){
-            if(!compat.isEnabled())continue;
-            if(Bukkit.getPluginManager().getPlugin(compat.getPluginName())!=null)compats.add(compat);
+            if(compat.isEnabled()&&compat.isInstalled())compats.add(compat);
         }
         return compats;
     }
