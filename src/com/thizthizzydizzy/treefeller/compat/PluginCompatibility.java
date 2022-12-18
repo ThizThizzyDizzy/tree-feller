@@ -8,6 +8,7 @@ import com.thizthizzydizzy.treefeller.TreeFeller;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -120,4 +121,7 @@ public abstract class PluginCompatibility{
         return new ItemBuilder(Material.JIGSAW);
     }
     public void reload(){}
+    public boolean isInstalled() {
+        return Bukkit.getPluginManager().getPlugin(getPluginName())!=null;
+    }
 }

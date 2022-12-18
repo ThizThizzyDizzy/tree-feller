@@ -32,6 +32,7 @@ public class TreeFellerCompat{
         compatibilities.add(new PlaceholderAPICompat());
         compatibilities.add(new SaberFactionsCompat());
         compatibilities.add(new AureliumSkillsCompat());
+        compatibilities.add(new BlockRegenCompat());
     }
     public static void init(TreeFeller treeFeller){
         if(treeFeller!=null){
@@ -108,8 +109,7 @@ public class TreeFellerCompat{
     private static ArrayList<PluginCompatibility> getCompatibilities(){
         ArrayList<PluginCompatibility> compats = new ArrayList<>();
         for(PluginCompatibility compat : compatibilities){
-            if(!compat.isEnabled())continue;
-            if(Bukkit.getPluginManager().getPlugin(compat.getPluginName())!=null)compats.add(compat);
+            if(compat.isEnabled()&&compat.isInstalled())compats.add(compat);
         }
         return compats;
     }

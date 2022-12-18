@@ -14,7 +14,7 @@ public class MenuModifyStringSet extends Menu{
     private final Consumer<HashSet<String>> setFunc;
     private final boolean allowNull;
     public MenuModifyStringSet(Menu parent, Plugin plugin, Player player, String name, boolean allowNull, HashSet<String> defaultValue, Consumer<HashSet<String>> setFunc){
-        super(parent, plugin, player, "Modify String List ("+name+")", 54);
+        super(parent, plugin, player, "Modify String Set ("+name+")", 54);
         this.value = defaultValue;
         this.setFunc = setFunc;
         this.allowNull = allowNull;

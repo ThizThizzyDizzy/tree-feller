@@ -411,6 +411,9 @@ mmocore-trunk-xp:
 mmocore-leaves-xp: 
    - global: 0
 
+# These professions' levels will be checked before a tree is felled
+mmocore-required-profession-level:
+
 # Toggle compatibility with MMOCore
 compatibility-mmocore: true
 
@@ -497,6 +500,9 @@ aureliumskills-apply-modifiers: true
 # Toggle compatibility with AureliumSkills
 compatibility-aureliumskills: true
 
+# Toggle compatibility with BlockRegen
+compatibility-blockregen: false
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -582,6 +588,7 @@ compatibility-aureliumskills: true
 # world-blacklist
 # cooldown
 # cascade
+# mmocore-required-profession-level
 # mcmmo-double-drops
 # ecoskills-trunk-woodcutting-xp
 # ecoskills-trunk-mining-xp
@@ -698,6 +705,7 @@ tools:
 # cascade-trees                      Which trees should be checked during a cascade? (If not set, only the tree which was originally cut will be checked) The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # mmocore-trunk-xp
 # mmocore-leaves-xp
+# mmocore-required-profession-level
 # mcmmo-double-drops
 # oreregenerator-regen-delay
 # ecoskills-trunk-woodcutting-xp
@@ -943,3 +951,7 @@ debug-cooldown: "Cooldown remaining: {0}ms"
 debug-cooldown-tool: "Tool cooldown remaining: {0}ms"
 debug-cooldown-tree: "Tree cooldown remaining: {0}ms"
 debug-cooldown-success: "Cooldown ready"
+debug-mmocore-required-profession-level: "Insufficient MMOCore profession level: {2} - {0}<{1}"
+debug-mmocore-required-profession-level-tool: "Insufficient MMOCore profession level for tool: {2} - {0}<{1}"
+debug-mmocore-required-profession-level-tree: "Insufficient MMOCore profession level for tree: {2} - {0}<{1}"
+debug-mmocore-required-profession-level-success: "All MMOCore profession requirements met"

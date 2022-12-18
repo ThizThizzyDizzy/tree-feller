@@ -17,7 +17,7 @@ public class MenuModifyStringDoubleMap extends Menu{
     private final double min;
     private final boolean allowNullDoubles;
     public MenuModifyStringDoubleMap(Menu parent, Plugin plugin, Player player, String name, double min, double max, boolean allowNull, boolean allowNullDoubles, HashMap<String, Double> defaultValue, Consumer<HashMap<String, Double>> setFunc){
-        super(parent, plugin, player, "Modify String List ("+name+")", 54);
+        super(parent, plugin, player, "Modify String-Double Map ("+name+")", 54);
         this.value = defaultValue;
         this.setFunc = setFunc;
         this.min = min;
