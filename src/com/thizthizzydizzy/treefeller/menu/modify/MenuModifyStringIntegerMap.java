@@ -17,7 +17,7 @@ public class MenuModifyStringIntegerMap extends Menu{
 	private final int min;
 	private final boolean allowNullIntegers;
 	public MenuModifyStringIntegerMap(Menu parent, Plugin plugin, Player player, String name, int min, int max, boolean allowNull, boolean allowNullIntegers, HashMap<String, Integer> defaultValue, Consumer<HashMap<String, Integer>> setFunc){
-		super(parent, plugin, player, "Modify String List ("+name+")", 54);
+		super(parent, plugin, player, "Modify String-Integer Map ("+name+")", 54);
 		this.value = defaultValue;
 		this.setFunc = setFunc;
 		this.min = min;
