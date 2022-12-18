@@ -355,13 +355,10 @@ public class MMOCoreCompat extends InternalCompatibility{
         @Override
         protected DebugResult doCheck( TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe ){
             if(!installed)return null;
-            //System.out.println( "[SOP] hello from mmocore compat OPTION" );
-    
     
             HashMap<String, Integer> lvlReqs = this.get( tool, tree );
     
             if( lvlReqs == null ){
-                //System.out.println( "[SOP] lvlreq null, returning" );
                 return null;
             }
             net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get( player );
@@ -378,7 +375,6 @@ public class MMOCoreCompat extends InternalCompatibility{
                 }
     
                 if( lvlReq > playerLevel ){
-                    //System.out.println( "[SOP] You need at least level " + lvlReq + " " + profession + " to chop down this tree" );
                     player.sendMessage( "You need at least level " + lvlReq + " " + profession + " to chop down this tree" );
                     
                     allowFell = false;
@@ -416,8 +412,6 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
         if(xp==null||xp.isEmpty())return;
         net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
-        //player.sendMessage(data.getCollectionSkills().getClass().getName());
-        //player.sendMessage(net.Indyuce.mmocore.MMOCore.plugin.professionManager.getClass().getName());
         if(xp.containsKey("global")){
             data.giveExperience(convert(xp.get("global")), net.Indyuce.mmocore.experience.EXPSource.SOURCE);
         }
@@ -434,10 +428,7 @@ public class MMOCoreCompat extends InternalCompatibility{
         //MMOCore's "temp-block" option must not be set
         BlockInfo info = MMOCore.plugin.mineManager.getInfo( block );
         String savedData = block.getBlockData( ).getAsString( );
-        if( info == null ){
-            //System.out.println( "[SOP] mmocore blockinfo null" );
-        } else if( info.hasRegen()){
-            //System.out.println( "[SOP] attempting to schedule mmocore regen: " + savedData );
+        if( info != null && info.hasRegen()){
             Bukkit.getScheduler().runTaskLater( MMOCore.plugin, () ->
                     MMOCore.plugin.mineManager.initialize(
                             info.startRegeneration( Bukkit.createBlockData( savedData ), block.getLocation( ) ),
