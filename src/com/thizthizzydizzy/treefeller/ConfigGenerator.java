@@ -165,7 +165,7 @@ public class ConfigGenerator{
     public static void main(String[] args){
         if(args.length==1&&args[0].equals("genConfig")){
             TreeFellerCompat.init(null);
-            String version = read(new File("src\\plugin.yml"));//Not the best way to do it, but it works
+            String version = read(new File("src/plugin.yml"));//Not the best way to do it, but it works
             int i = version.indexOf("version:");
             if(i==-1){
                 throw new IllegalArgumentException("Version is not specified in plugin.yml");
@@ -325,7 +325,7 @@ public class ConfigGenerator{
             for(Message m : Message.messages){
                 add("debug-"+m.name+": \""+m.getDebugText()+"\"");
             }
-            write(new File("src\\config.yml"));
+            write(new File("src/config.yml"));
             return;
         }
         System.out.println("To install the Tree Feller, put this file in the plugins folder on your server");
