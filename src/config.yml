@@ -411,9 +411,8 @@ mmocore-trunk-xp:
 mmocore-leaves-xp: 
    - global: 0
 
-# mmocore profession level(s) required to chop down the tree
-# may be set per-tree, see "trees:" section below for example
-mmocore-required-profession-level: {woodcutting: 1}
+# These professions' levels will be checked before a tree is felled
+mmocore-required-profession-level:
 
 # Toggle compatibility with MMOCore
 compatibility-mmocore: true
@@ -501,6 +500,9 @@ aureliumskills-apply-modifiers: true
 # Toggle compatibility with AureliumSkills
 compatibility-aureliumskills: true
 
+# Toggle compatibility with BlockRegen
+compatibility-blockregen: false
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}
@@ -586,6 +588,7 @@ compatibility-aureliumskills: true
 # world-blacklist
 # cooldown
 # cascade
+# mmocore-required-profession-level
 # mcmmo-double-drops
 # ecoskills-trunk-woodcutting-xp
 # ecoskills-trunk-mining-xp
@@ -702,6 +705,7 @@ tools:
 # cascade-trees                      Which trees should be checked during a cascade? (If not set, only the tree which was originally cut will be checked) The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)
 # mmocore-trunk-xp
 # mmocore-leaves-xp
+# mmocore-required-profession-level
 # mcmmo-double-drops
 # oreregenerator-regen-delay
 # ecoskills-trunk-woodcutting-xp
@@ -728,9 +732,6 @@ trees:
     - [[MANGROVE_LOG, MANGROVE_WOOD], [MANGROVE_ROOTS, MANGROVE_LEAVES], {roots: [MANGROVE_ROOTS], sapling: [MANGROVE_PROPAGULE], max-saplings: 1, max-trunks: 16, max-horizontal-trunk-pillar-length: 16, leaf-detect-range: 16, leaf-break-range: 16, required-logs: 3, root-distance: 16, diagonal-leaves: true}]
     - [[CRIMSON_STEM, CRIMSON_HYPHAE], [NETHER_WART_BLOCK, SHROOMLIGHT], {sapling: CRIMSON_FUNGUS, max-saplings: 1, grass: [CRIMSON_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
     - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
-
-# MMOCore "mmocore-required-woodcutting-level" example:
-#    - [[OAK_LOG, OAK_WOOD], [OAK_LEAVES], {mmocore-trunk-xp: {"woodcutting":1}, mmocore-required-profession-level: {"woodcutting":1}}]
 
 # Here, you can create custom effects for trees or tools
 # Fields:
@@ -950,3 +951,7 @@ debug-cooldown: "Cooldown remaining: {0}ms"
 debug-cooldown-tool: "Tool cooldown remaining: {0}ms"
 debug-cooldown-tree: "Tree cooldown remaining: {0}ms"
 debug-cooldown-success: "Cooldown ready"
+debug-mmocore-required-profession-level: "Insufficient MMOCore profession level: {2} - {0}<{1}"
+debug-mmocore-required-profession-level-tool: "Insufficient MMOCore profession level for tool: {2} - {0}<{1}"
+debug-mmocore-required-profession-level-tree: "Insufficient MMOCore profession level for tree: {2} - {0}<{1}"
+debug-mmocore-required-profession-level-success: "All MMOCore profession requirements met"
