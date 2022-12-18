@@ -4512,10 +4512,10 @@ public abstract class Option<E>{
     public String getSuccessDebugText(){
         return getDebugText()[3];
     }
-    private static String[] generateDebugText(String globalWith$, String success){
+    public static String[] generateDebugText(String globalWith$, String success){
         return new String[]{globalWith$.replace("$", ""),globalWith$.replace("$", " for tool"),globalWith$.replace("$", " for tree"),success};
     }
-    private static String[] generateDebugText(String global, String tool, String tree, String success){
+    public static String[] generateDebugText(String global, String tool, String tree, String success){
         return new String[]{global,tool,tree,success};
     }
     public abstract ItemBuilder getConfigurationDisplayItem(E value);

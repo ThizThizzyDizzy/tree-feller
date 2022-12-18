@@ -25,8 +25,7 @@ import org.bukkit.configuration.MemorySection;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import static com.thizthizzydizzy.treefeller.DebugResult.Type.GLOBAL;
-import static com.thizthizzydizzy.treefeller.DebugResult.Type.SUCCESS;
+import static com.thizthizzydizzy.treefeller.DebugResult.Type.*;
 
 public class MMOCoreCompat extends InternalCompatibility{
     private static boolean installed;
@@ -249,10 +248,10 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
     };
     
-    public static Option<HashMap<String, Integer>> MMOCORE_REQUIRED_PROFESSION_LEVEL = new Option<HashMap<String, Integer>>("MMOCore Required Profession Level", true, false, true, new HashMap<>(), "\n   - woodcutting: 1"){
+    public static Option<HashMap<String, Integer>> MMOCORE_REQUIRED_PROFESSION_LEVEL = new Option<HashMap<String, Integer>>("MMOCore Required Profession Level", true, true, true, null){
         @Override
         public String getDesc(boolean ingame){
-            return "These professions levels will be checked before a tree is felled";
+            return "These professions' levels will be checked before a tree is felled";
         }
         @Override
         public HashMap<String, Integer> load(Object o){
@@ -355,39 +354,38 @@ public class MMOCoreCompat extends InternalCompatibility{
         @Override
         protected DebugResult doCheck( TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe ){
             if(!installed)return null;
-    
-            HashMap<String, Integer> lvlReqs = this.get( tool, tree );
-    
-            if( lvlReqs == null ){
-                return null;
-            }
             net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get( player );
-    
-            boolean allowFell = true;
-            for( String profession : lvlReqs.keySet( ) ){
-                int lvlReq = lvlReqs.get( profession );
-                int playerLevel;
-    
-                if( profession.equals( "global" ) ){
-                    playerLevel = data.getLevel( );
-                } else {
-                    playerLevel = data.getCollectionSkills( ).getLevel( profession );
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
+                for(String profession : globalValue.keySet()){
+                    int lvl = globalValue.get(profession);
+                    int playerLevel = profession.equals("global")?data.getLevel():data.getCollectionSkills().getLevel(profession);
+                    if(playerLevel<lvl)return new DebugResult(this, GLOBAL, playerLevel, lvl, profession);
                 }
-    
-                if( lvlReq > playerLevel ){
-                    player.sendMessage( "You need at least level " + lvlReq + " " + profession + " to chop down this tree" );
-                    
-                    allowFell = false;
+            }
+            HashMap<String, Integer> lvlReqs = toolValues.get(tool);
+            if(lvlReqs!=null){
+                for(String profession : lvlReqs.keySet()){
+                    int lvl = lvlReqs.get(profession);
+                    int playerLevel = profession.equals("global")?data.getLevel():data.getCollectionSkills().getLevel(profession);
+                    if(playerLevel<lvl)return new DebugResult(this, TOOL, playerLevel, lvl, profession);
                 }
-    
             }
-            if( allowFell ){
-                return new DebugResult( this, SUCCESS );
-            } else {
-                return new DebugResult( this, GLOBAL, 0, globalValue );
+            lvlReqs = treeValues.get(tree);
+            if(lvlReqs!=null){
+                for(String profession : lvlReqs.keySet()){
+                    int lvl = lvlReqs.get(profession);
+                    int playerLevel = profession.equals("global")?data.getLevel():data.getCollectionSkills().getLevel(profession);
+                    if(playerLevel<lvl)return new DebugResult(this, TREE, playerLevel, lvl, profession);
+                }
             }
-            
+            return new DebugResult(this, SUCCESS);
         }
+
+        @Override
+        public String[] getDebugText() {
+            return Option.generateDebugText("Insufficient MMOCore profession level$: {2} - {0}<{1}", "All MMOCore profession requirements met");
+        }
+        
         
     };
     
