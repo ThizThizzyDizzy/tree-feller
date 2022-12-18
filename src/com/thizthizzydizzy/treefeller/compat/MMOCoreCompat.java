@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import net.Indyuce.mmocore.MMOCore;
-import net.Indyuce.mmocore.api.block.BlockInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -424,11 +422,11 @@ public class MMOCoreCompat extends InternalCompatibility{
         
         //MMOCore's Regen (see MMOCore/professions/mining.yml)
         //MMOCore's "temp-block" option must not be set
-        BlockInfo info = MMOCore.plugin.mineManager.getInfo( block );
+        net.Indyuce.mmocore.api.block.BlockInfo info = net.Indyuce.mmocore.MMOCore.plugin.mineManager.getInfo( block );
         String savedData = block.getBlockData( ).getAsString( );
         if( info != null && info.hasRegen()){
-            Bukkit.getScheduler().runTaskLater( MMOCore.plugin, () ->
-                    MMOCore.plugin.mineManager.initialize(
+            Bukkit.getScheduler().runTaskLater( net.Indyuce.mmocore.MMOCore.plugin, () ->
+                    net.Indyuce.mmocore.MMOCore.plugin.mineManager.initialize(
                             info.startRegeneration( Bukkit.createBlockData( savedData ), block.getLocation( ) ),
                             true ), 1
             );
