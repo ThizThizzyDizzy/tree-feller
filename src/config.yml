@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.20.1
+# Version 1.21.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -468,6 +468,18 @@ ecoskills-apply-modifiers: true
 # Toggle compatibility with EcoSkills
 compatibility-ecoskills: true
 
+# How much Job experience should be given per block of trunk felled?
+ecojobs-trunk-xp:
+
+# How much Job experience should be given per block of leaves felled?
+ecojobs-leaf-xp:
+
+# Should EcoJobs multipliers be applied to experience earned through TreeFeller?
+ecojobs-apply-multipliers: true
+
+# Toggle compatibility with EcoJobs
+compatibility-ecojobs: true
+
 # Toggle compatibility with LogBlock
 compatibility-logblock: true
 
@@ -595,6 +607,9 @@ compatibility-blockregen: false
 # ecoskills-leaf-woodcutting-xp
 # ecoskills-leaf-mining-xp
 # ecoskills-apply-modifiers
+# ecojobs-trunk-xp
+# ecojobs-leaf-xp
+# ecojobs-apply-multipliers
 # aureliumskills-apply-modifiers
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
@@ -713,6 +728,9 @@ tools:
 # ecoskills-leaf-woodcutting-xp
 # ecoskills-leaf-mining-xp
 # ecoskills-apply-modifiers
+# ecojobs-trunk-xp
+# ecojobs-leaf-xp
+# ecojobs-apply-multipliers
 # aureliumskills-trunk-xp
 # aureliumskills-leaves-xp
 # aureliumskills-apply-modifiers
