@@ -491,7 +491,8 @@ public class MMOCoreCompat extends InternalCompatibility{
     public static OptionBoolean MMOCORE_EMULATE_REGEN = new OptionBoolean("MMOCore Emulate Regen", true, false, true, false){
         @Override
         public String getDesc(boolean ingame){
-            return "Should MMOCore's Block Regen functionality be emulated? (\"temp-block\" in MMOCore's profession config must not be set for Tree Feller to function properly)";
+            return "Toggle emulating MMOCore's Block Regen" + (ingame?"": " (see MMOCore/professions/mining.yml)\n"
+                    + "MMOCore's \"temp-block\" option must not be set, otherwise tree will not fell\n");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
