@@ -419,8 +419,7 @@ mmocore-tree-xp:
 #  - global: 1
 #  - woodcutting: 10
 
-# Toggle emulating MMOCore's Block Regen
-# MMOCore's Regen (see MMOCore/professions/mining.yml)
+# Toggle emulating MMOCore's Block Regen (see MMOCore/professions/mining.yml)
 # MMOCore's "temp-block" option must not be set, otherwise tree will not fell
 mmocore-emulate-regen: false
 
