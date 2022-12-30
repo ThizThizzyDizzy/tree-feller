@@ -68,14 +68,17 @@ If you are unable to pinpoint the problem, I’m happy to help on discord or Git
 ### You can use the tree feller for ores
 Add trees using ore for the trunk and with leaves disabled:
 
-[COAL_ORE, STONE, {required-leaves: 0, leaf-range: 0, max-height: 256}]
+[COAL_ORE, STONE, {required-leaves: 0, leaf-detect-range: 0, leaf-break-range: 0, max-height: 256}]
+
 Add tools for each pickaxe with allowed-trees set to ORE
 
 {type: IRON_PICKAXE, allowed-trees: ORE}
+
 Set allowed-trees for the axes to LOG
 
 {type: IRON_AXE, allowed-trees: LOG}
-Fore more specific configuration, allowed-trees should be set to a list of tree indexes, such as [0, 1, 2, 3, 4, 5] for the first 6 trees defined
+
+For more specific configuration, allowed-trees should be set to a list of tree indexes, such as [0, 1, 2, 3, 4, 5] for the first 6 trees defined
 
 (you may need to set max-height higher as well)
 
