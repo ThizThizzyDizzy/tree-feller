@@ -414,6 +414,15 @@ mmocore-leaves-xp:
 # These professions' levels will be checked before a tree is felled
 mmocore-required-profession-level:
 
+# same as mmocore-trunk-xp, but per-tree
+mmocore-tree-xp:
+#  - global: 1
+#  - woodcutting: 10
+
+# Toggle emulating MMOCore's Block Regen (see MMOCore/professions/mining.yml)
+# MMOCore's "temp-block" option must not be set, otherwise tree will not fell
+mmocore-emulate-regen: false
+
 # Toggle compatibility with MMOCore
 compatibility-mmocore: true
 
