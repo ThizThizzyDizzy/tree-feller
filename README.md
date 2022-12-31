@@ -1,6 +1,6 @@
 # Thizzy'z Tree Feller
-A Bukkit plugin for Minecraft 1.18+
-(Older versions are available for 1.13-1.17)
+A Bukkit plugin for Minecraft 1.16+
+(Older versions are available for 1.13-1.15)
 
 ## Full customization
 - Configure custom trees with any combination of blocks for its leaves and logs
