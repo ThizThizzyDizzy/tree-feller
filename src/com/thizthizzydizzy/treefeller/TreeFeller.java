@@ -1035,19 +1035,14 @@ public class TreeFeller extends JavaPlugin{
         for(Modifier mod : modifiers){
             dropChance = mod.apply(dropChance, tree, block);
         }
-        boolean drop = true;
-        int bonus = 0;
-        if(dropChance<=1){
-            drop = new Random().nextDouble()<dropChance;
-        }else{
-            while(dropChance>1){
-                dropChance--;
-                bonus++;
-            }
-            if(new Random().nextDouble()<dropChance)bonus++;
+        int numDrops = 0;
+        while(dropChance>=1){
+            dropChance--;
+            numDrops++;
         }
-        if(drop){
-            for(int i = 0; i<bonus+1; i++){
+        if(dropChance>0&&new Random().nextDouble()<dropChance)numDrops++;
+        if(numDrops>0){
+            for(int i = 0; i<numDrops; i++){
                 int[] blockXP = new int[1];
                 drops.addAll(getDrops(block, tool, tree, axe, blockXP));
                 xp[0]+=blockXP[0];
