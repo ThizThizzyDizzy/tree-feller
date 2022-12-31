@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.21.0
+# Version 1.21.1
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -414,10 +414,14 @@ mmocore-leaves-xp:
 # These professions' levels will be checked before a tree is felled
 mmocore-required-profession-level:
 
-# same as mmocore-trunk-xp, but per-tree
-mmocore-tree-xp:
-#  - global: 1
-#  - woodcutting: 10
+# EXP will be provided to these professions when a tree is felled
+# EXP is provided per-tree (a value of 1 means 1 EXP per tree)
+# use "global" to add global experience
+# ex:
+# - global: 3
+# - woodcutting: 8
+mmocore-tree-xp: 
+   - global: 0
 
 # Toggle emulating MMOCore's Block Regen (see MMOCore/professions/mining.yml)
 # MMOCore's "temp-block" option must not be set, otherwise tree will not fell
@@ -730,6 +734,8 @@ tools:
 # mmocore-trunk-xp
 # mmocore-leaves-xp
 # mmocore-required-profession-level
+# mmocore-tree-xp
+# mmocore-emulate-regen
 # mcmmo-double-drops
 # oreregenerator-regen-delay
 # ecoskills-trunk-woodcutting-xp

@@ -454,7 +454,7 @@ public class MMOCoreCompat extends InternalCompatibility{
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value){
-            return new ItemBuilder(Material.MANGROVE_LOG);
+            return new ItemBuilder(Material.JUNGLE_LOG);
         }
         @Override
         public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
