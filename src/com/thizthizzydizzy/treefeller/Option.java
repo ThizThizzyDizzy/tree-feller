@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -3021,7 +3022,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool name {0} does not match required name$: {1}", "Tool name matches");
+            return generateDebugText("Tool name {0} "+ChatColor.RESET+"does not match required name$: {1}", "Tool name matches");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(String value){
