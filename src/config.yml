@@ -308,7 +308,7 @@ prevent-breakage: false
 # - Can fell trees
 required-lore:
 
-# A tool's name must match exactly in order to fell trees (colors can be designated with &)
+# A tool's name must match exactly in order to fell trees (colors can be designated with §)
 required-name:
 
 # Trees can only be cut down by players who have all permissons listed here

@@ -3018,7 +3018,7 @@ public abstract class Option<E>{
         }
         @Override
         public String getDesc(boolean ingame){
-            return "A tool's name must match exactly in order to fell trees (colors can be designated with &)";
+            return "A tool's name must match exactly in order to fell trees (colors can be designated with §)";
         }
         @Override
         public String[] getDebugText(){
