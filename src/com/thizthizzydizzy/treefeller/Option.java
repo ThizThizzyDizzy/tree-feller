@@ -375,17 +375,18 @@ public abstract class Option<E>{
                     minY = Math.min(minY, b.getY());
                 }
             }
-            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&block.getY()-minY>globalValue-1){
-                int i = block.getY()-minY-(globalValue-1);
-                return new DebugResult(this, GLOBAL, i);
+            int h = block.getY()-minY+1;
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&h>globalValue){
+                int i = h-globalValue;
+                return new DebugResult(this, GLOBAL, i, h, globalValue);
             }
-            if(toolValues.containsKey(tool)&&block.getY()-minY>toolValues.get(tool)-1){
-                int i = block.getY()-minY-(toolValues.get(tool)-1);
-                return new DebugResult(this, TOOL, i);
+            if(toolValues.containsKey(tool)&&h>toolValues.get(tool)){
+                int i = h-toolValues.get(tool);
+                return new DebugResult(this, TOOL, i, h, toolValues.get(tool));
             }
-            if(treeValues.containsKey(tree)&&block.getY()-minY>treeValues.get(tree)-1){
-                int i = block.getY()-minY-(treeValues.get(tree)-1);
-                return new DebugResult(this, TREE, i);
+            if(treeValues.containsKey(tree)&&h>treeValues.get(tree)){
+                int i = h-treeValues.get(tree);
+                return new DebugResult(this, TREE, i, h, treeValues.get(tree));
             }
             return new DebugResult(this, SUCCESS);
         }
@@ -470,9 +471,9 @@ public abstract class Option<E>{
                     for(int z = -1; z<=1; z++){
                         if(x==0&&z==0)continue;
                         if(tree.trunk.contains(block.getRelative(x, 0, z).getType())){
-                            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, true))return new DebugResult(this, GLOBAL);
-                            if(Objects.equals(toolValues.get(tool), true))return new DebugResult(this, TOOL);
-                            if(Objects.equals(treeValues.get(tree), true))return new DebugResult(this, TREE);
+                            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&Objects.equals(globalValue, true))return new DebugResult(this, GLOBAL, block.getX()+x, block.getY()+" "+block.getZ()+z);
+                            if(Objects.equals(toolValues.get(tool), true))return new DebugResult(this, TOOL, block.getX()+x, block.getY()+" "+block.getZ()+z);
+                            if(Objects.equals(treeValues.get(tree), true))return new DebugResult(this, TREE, block.getX()+x, block.getY()+" "+block.getZ()+z);
                         }
                     }
                 }
@@ -485,7 +486,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("A full cross-section has not been cut$", "A full cross-section has been cut");
+            return generateDebugText("A full cross-section has not been cut$ at ({0}, {1}, {2})", "A full cross-section has been cut");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
@@ -2447,7 +2448,7 @@ public abstract class Option<E>{
             if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)<globalValue.get(e)){
-                        return new DebugResult(this, GLOBAL, e.toString(), globalValue.get(e));
+                        return new DebugResult(this, GLOBAL, e.toString(), axe.getEnchantmentLevel(e), globalValue.get(e));
                     }
                 }
             }
@@ -2455,7 +2456,7 @@ public abstract class Option<E>{
             if(values!=null){
                 for(Enchantment e : values.keySet()){
                     if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(this, TOOL, e.toString(), values.get(e));
+                        return new DebugResult(this, TOOL, e.toString(), axe.getEnchantmentLevel(e), values.get(e));
                     }
                 }
             }
@@ -2463,7 +2464,7 @@ public abstract class Option<E>{
             if(values!=null){
                 for(Enchantment e : values.keySet()){
                     if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(this, TREE, e.toString(), values.get(e));
+                        return new DebugResult(this, TREE, e.toString(), axe.getEnchantmentLevel(e), values.get(e));
                     }
                 }
             }
@@ -2478,7 +2479,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Enchantment missing$: {0} at minimum level {1}", "All required enchantments met");
+            return generateDebugText("Enchantment missing$: {0} ({1}<{2})", "All required enchantments met");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(HashMap<Enchantment, Integer> value){
@@ -2597,23 +2598,23 @@ public abstract class Option<E>{
             if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
                 for(Enchantment e : globalValue.keySet()){
                     if(axe.getEnchantmentLevel(e)>=globalValue.get(e)){
-                        return new DebugResult(this, GLOBAL, e.toString(), globalValue.get(e)-1);
+                        return new DebugResult(this, GLOBAL, e.toString(), axe.getEnchantmentLevel(e), globalValue.get(e)-1);
                     }
                 }
             }
             HashMap<Enchantment, Integer> values = toolValues.get(tool);
             if(values!=null){
                 for(Enchantment e : values.keySet()){
-                    if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(this, TOOL, e.toString(), globalValue.get(e)-1);
+                    if(axe.getEnchantmentLevel(e)>=values.get(e)){
+                        return new DebugResult(this, TOOL, e.toString(), axe.getEnchantmentLevel(e), values.get(e)-1);
                     }
                 }
             }
             values = treeValues.get(tree);
             if(values!=null){
                 for(Enchantment e : values.keySet()){
-                    if(axe.getEnchantmentLevel(e)<values.get(e)){
-                        return new DebugResult(this, TREE, e.toString(), globalValue.get(e)-1);
+                    if(axe.getEnchantmentLevel(e)>=values.get(e)){
+                        return new DebugResult(this, TREE, e.toString(), axe.getEnchantmentLevel(e), values.get(e)-1);
                     }
                 }
             }
@@ -2628,7 +2629,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool contains banned enchantment$: {0} above level {1}", "No banned enchantments found");
+            return generateDebugText("Tool contains banned enchantment$: {0} ({1}>{2})", "No banned enchantments found");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(HashMap<Enchantment, Integer> value){
@@ -2699,7 +2700,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
+            return generateDebugText("Tool durability is less than minimum allowed$: {0}<{1}", "Tool meets minimum durability requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Short value){
@@ -2753,7 +2754,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
+            return generateDebugText("Tool durability is greater than maximum allowed: {0}>{1}", "Tool meets maximum durability requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Short value){
@@ -2791,13 +2792,13 @@ public abstract class Option<E>{
             float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                    if(durabilityPercent<globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
+                    if(durabilityPercent<globalValue)return new DebugResult(this, GLOBAL, Math.round(durabilityPercent*1000)/10f, Math.round(globalValue*1000)/10f);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(durabilityPercent<toolValues.get(tool))return new DebugResult(this, TOOL, durability, toolValues.get(tool)*100+"%");
+                    if(durabilityPercent<toolValues.get(tool))return new DebugResult(this, TOOL, Math.round(durabilityPercent*1000)/10f, Math.round(toolValues.get(tool)*1000)/10f);
                 }
                 if(treeValues.containsKey(tree)){
-                    if(durabilityPercent<treeValues.get(tree))return new DebugResult(this, TREE, durability, treeValues.get(tree)*100+"%");
+                    if(durabilityPercent<treeValues.get(tree))return new DebugResult(this, TREE, Math.round(durabilityPercent*1000)/10f, Math.round(treeValues.get(tree)*1000)/10f);
                 }
             }
             return new DebugResult(this, SUCCESS);
@@ -2808,7 +2809,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool durability is less than minimum allowed$: {1}", "Tool meets minimum durability requirement");
+            return generateDebugText("Tool durability is less than minimum allowed$: {0}%<{1}%", "Tool meets minimum durability percentage requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Float value){
@@ -2846,13 +2847,13 @@ public abstract class Option<E>{
             float durabilityPercent = durability/(float)axe.getType().getMaxDurability();
             if(axe.getType().getMaxDurability()>0){
                 if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                    if(durabilityPercent>globalValue)return new DebugResult(this, GLOBAL, durability, globalValue*100+"%");
+                    if(durabilityPercent>globalValue)return new DebugResult(this, GLOBAL, Math.round(durabilityPercent*1000)/10f, Math.round(globalValue*1000)/10f);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(durabilityPercent>toolValues.get(tool))return new DebugResult(this, TOOL, durability, toolValues.get(tool)*100+"%");
+                    if(durabilityPercent>toolValues.get(tool))return new DebugResult(this, TOOL, Math.round(durabilityPercent*1000)/10f, Math.round(toolValues.get(tool)*1000)/10f);
                 }
                 if(treeValues.containsKey(tree)){
-                    if(durabilityPercent>treeValues.get(tree))return new DebugResult(this, TREE, durability, treeValues.get(tree)*100+"%");
+                    if(durabilityPercent>treeValues.get(tree))return new DebugResult(this, TREE, Math.round(durabilityPercent*1000)/10f, Math.round(treeValues.get(tree)*1000)/10f);
                 }
             }
             return new DebugResult(this, SUCCESS);
@@ -2863,7 +2864,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool durability is greater than maximum allowed: {1}", "Tool meets maximum durability requirement");
+            return generateDebugText("Tool durability is greater than maximum allowed: {0}%>{1}%", "Tool meets maximum durability percentage requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Float value){
@@ -3004,13 +3005,13 @@ public abstract class Option<E>{
                 name = meta.getDisplayName();
             }
             if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                if(!globalValue.equals(name))return new DebugResult(this, GLOBAL, globalValue);
+                if(!globalValue.equals(name))return new DebugResult(this, GLOBAL, name, globalValue);
             }
             if(toolValues.containsKey(tool)){
-                if(!toolValues.get(tool).equals(name))return new DebugResult(this, TOOL, toolValues.get(tool));
+                if(!toolValues.get(tool).equals(name))return new DebugResult(this, TOOL, name, toolValues.get(tool));
             }
             if(treeValues.containsKey(tree)){
-                if(!treeValues.get(tree).equals(name))return new DebugResult(this, TREE, treeValues.get(tree));
+                if(!treeValues.get(tree).equals(name))return new DebugResult(this, TREE, name, treeValues.get(tree));
             }
             return new DebugResult(this, SUCCESS);
         }
@@ -3020,7 +3021,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Tool name does not match required name$: {0}", "Tool name matches");
+            return generateDebugText("Tool name {0} does not match required name$: {1}", "Tool name matches");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(String value){
@@ -3137,13 +3138,13 @@ public abstract class Option<E>{
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
                 if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                    if(dayTime<globalValue)return new DebugResult(this, GLOBAL, globalValue);
+                    if(dayTime<globalValue)return new DebugResult(this, GLOBAL, dayTime, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(dayTime<toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
+                    if(dayTime<toolValues.get(tool))return new DebugResult(this, TOOL, dayTime, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(dayTime<treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
+                    if(dayTime<treeValues.get(tree))return new DebugResult(this, TREE, dayTime, treeValues.get(tree));
                 }
             }
             return new DebugResult(this, SUCCESS);
@@ -3154,7 +3155,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Time is less than minimum allowed$: {0}", "Time meets minimum requirement");
+            return generateDebugText("Time is less than minimum allowed$: {0}<{1}", "Time meets minimum requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Integer value){
@@ -3191,13 +3192,13 @@ public abstract class Option<E>{
             long dayTime = block.getWorld().getTime();
             if(axe.getType().getMaxDurability()>0){
                 if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                    if(dayTime>globalValue)return new DebugResult(this, GLOBAL, globalValue);
+                    if(dayTime>globalValue)return new DebugResult(this, GLOBAL, dayTime, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(dayTime>toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
+                    if(dayTime>toolValues.get(tool))return new DebugResult(this, TOOL, dayTime, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(dayTime>treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
+                    if(dayTime>treeValues.get(tree))return new DebugResult(this, TREE, dayTime, treeValues.get(tree));
                 }
             }
             return new DebugResult(this, SUCCESS);
@@ -3208,7 +3209,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Time is greater than maximum allowed$: {0}", "Time meets maximum requirement");
+            return generateDebugText("Time is greater than maximum allowed$: {0}>{1}", "Time meets maximum requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Integer value){
@@ -3247,13 +3248,13 @@ public abstract class Option<E>{
             long phase = day%8;
             if(axe.getType().getMaxDurability()>0){
                 if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                    if(phase<globalValue)return new DebugResult(this, GLOBAL, globalValue);
+                    if(phase<globalValue)return new DebugResult(this, GLOBAL, phase, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(phase<toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
+                    if(phase<toolValues.get(tool))return new DebugResult(this, TOOL, phase, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(phase<treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
+                    if(phase<treeValues.get(tree))return new DebugResult(this, TREE, phase, treeValues.get(tree));
                 }
             }
             return new DebugResult(this, SUCCESS);
@@ -3273,7 +3274,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Phase is less than minimum allowed$: {0}", "Phase meets minimum requirement");
+            return generateDebugText("Phase is less than minimum allowed$: {0}<{1}", "Phase meets minimum requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Integer value){
@@ -3312,13 +3313,13 @@ public abstract class Option<E>{
             long phase = day%8;
             if(axe.getType().getMaxDurability()>0){
                 if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
-                    if(phase>globalValue)return new DebugResult(this, GLOBAL, globalValue);
+                    if(phase>globalValue)return new DebugResult(this, GLOBAL, phase, globalValue);
                 }
                 if(toolValues.containsKey(tool)){
-                    if(phase>toolValues.get(tool))return new DebugResult(this, TOOL, toolValues.get(tool));
+                    if(phase>toolValues.get(tool))return new DebugResult(this, TOOL, phase, toolValues.get(tool));
                 }
                 if(treeValues.containsKey(tree)){
-                    if(phase>treeValues.get(tree))return new DebugResult(this, TREE, treeValues.get(tree));
+                    if(phase>treeValues.get(tree))return new DebugResult(this, TREE, phase, treeValues.get(tree));
                 }
             }
             return new DebugResult(this, SUCCESS);
@@ -3338,7 +3339,7 @@ public abstract class Option<E>{
         }
         @Override
         public String[] getDebugText(){
-            return generateDebugText("Phase is greater than maximum allowed$: {0}", "Phase meets maximum requirement");
+            return generateDebugText("Phase is greater than maximum allowed$: {0}>{1}", "Phase meets maximum requirement");
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Integer value){
@@ -3668,7 +3669,7 @@ public abstract class Option<E>{
         public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
             if(toolValues.containsKey(tool)){
                 if(!toolValues.get(tool).contains(tree)){
-                    return new DebugResult(this, TOOL, tree.toString());
+                    return new DebugResult(this, TOOL, TreeFeller.trees.indexOf(tree));
                 }
             }
             return new DebugResult(this, SUCCESS);

@@ -14,7 +14,6 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
