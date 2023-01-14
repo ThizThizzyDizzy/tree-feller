@@ -23,13 +23,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 public class AuraSkillsCompat extends InternalCompatibility{
-    public static Option<HashMap<String, Double>> AURASKILLS_TRUNK_XP = new Option<HashMap<String, Double>>("AuraSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - foraging: 1"){
+    public static Option<HashMap<String, Double>> AURASKILLS_TRUNK_XP = new Option<HashMap<String, Double>>("AuraSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - auraskills/foraging: 1"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these skills when a tree is felled\n"
                     + "EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)"+(ingame?"":("\n"
                     + "ex:\n"
-                    + "- foraging: 8"));
+                    + "- auraskills/foraging: 8"));
         }
         @Override
         public HashMap<String, Double> load(Object o){
@@ -130,13 +130,13 @@ public class AuraSkillsCompat extends InternalCompatibility{
             return s+"}";
         }
     };
-    public static Option<HashMap<String, Double>> AURASKILLS_LEAVES_XP = new Option<HashMap<String, Double>>("AuraSkills Leaves XP", true, false, true, new HashMap<>(), "\n   - foraging: 0"){
+    public static Option<HashMap<String, Double>> AURASKILLS_LEAVES_XP = new Option<HashMap<String, Double>>("AuraSkills Leaves XP", true, false, true, new HashMap<>(), "\n   - auraskills/foraging: 0"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these skills when a tree is felled\n"
                     + "EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)"+(ingame?"":("\n"
                     + "ex:\n"
-                    + "- foraging: 8"));
+                    + "- auraskills/foraging: 8"));
         }
         @Override
         public HashMap<String, Double> load(Object o){
