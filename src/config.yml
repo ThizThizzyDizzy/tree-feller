@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.21.3
+# Version 1.21.4
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -193,6 +193,10 @@ explosive-fall-velocity: 0.0
 # How much random sideways velocity should falling blocks get?
 # (Only used when log or leaf behavior is set to FALL or similar)
 random-fall-velocity: 0.0
+
+# An extra delay between breaking a block and spawning a falling block. (Only affects FALL behaviors)
+# This is intended as a workaround for collision issues between fall behaviors and the cutting animation
+fall-delay: 0
 
 # If a tool has unbreaking, should it take less damage from felling trees?
 respect-unbreaking: true
@@ -563,6 +567,7 @@ compatibility-blockregen: false
 # vertical-fall-velocity
 # explosive-fall-velocity
 # random-fall-velocity
+# fall-delay
 # respect-unbreaking
 # respect-unbreakable
 # damage-mult
@@ -682,6 +687,7 @@ tools:
 # vertical-fall-velocity
 # explosive-fall-velocity
 # random-fall-velocity
+# fall-delay
 # respect-unbreaking
 # respect-unbreakable
 # damage-mult
