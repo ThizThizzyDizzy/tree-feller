@@ -97,6 +97,7 @@ public enum DirectionalFallBehavior{
     public Vector getDirectionalVel(long seed, Player player, Block block, boolean lockCardinal, double directionalFallVelocity){
         Vector directionalVel = getDefaultDirectionalVel(seed, player, block, lockCardinal, directionalFallVelocity);
         if(directionalVel==null)directionalVel = new Vector(0, 0, 0);
+        directionalVel.setY(0);
         if(lockCardinal){
             if(Math.abs(directionalVel.getX())>Math.abs(directionalVel.getZ())){
                 if(directionalVel.getX()>0)directionalVel = new Vector(1, 0, 0);
