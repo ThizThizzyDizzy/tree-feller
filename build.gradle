@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.thizthizzydizzy'
-version = '1.21.5'
+version = '1.21.4'
 
 repositories {
     mavenCentral()
