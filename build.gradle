@@ -1,0 +1,88 @@
+plugins {
+    id 'java'
+    id 'idea'
+}
+
+group = 'com.thizthizzydizzy'
+version = '1.21.5'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://repo1.maven.org/maven2/' }
+    maven { url 'https://maven.playpro.com/' }
+    maven { url 'https://mvn.lumine.io/repository/maven-public/' }
+    maven { url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { url 'https://maven.addstar.com.au/artifactory/ext-release-local/' }
+    maven { url 'https://repo.songoda.com/repository/public/' }
+    maven { url 'https://repo.md-5.net/content/repositories/public/' }
+    maven { url 'https://repo.extendedclip.com/content/repositories/placeholderapi/' }
+    maven { url 'https://hub.jeff-media.com/nexus/repository/jeff-media-public/' }
+    maven { url 'https://repo.auxilor.io/repository/maven-public/' }
+    maven { url 'https://nexus.neetgames.com/repository/maven-public/' }
+    maven { url 'https://maven.enginehub.org/repo/' }
+    maven { url 'https://nexus.phoenixdevt.fr/repository/maven-public/' }
+    maven { url 'https://repo.dustplanet.de/artifactory/ext-release-local/' }
+    maven { url 'https://repo.codemc.io/repository/maven-public/' }
+    maven { url 'https://repo.dustplanet.de/artifactory/ext-release-local/' }
+    maven { url 'https://jitpack.io' }
+    maven { url 'https://jcenter.bintray.com/' }
+    maven { url 'https://rayzr.dev/repo/' }
+    maven { url = 'https://repo.glaremasters.me/repository/towny/' }
+    maven {
+        url 'https://repo.papermc.io/repository/maven-public/'
+    }
+    flatDir {
+        dirs('libs')
+    }
+}
+
+dependencies {
+    compileOnly 'io.papermc.paper:paper-api:1.19.4-R0.1-SNAPSHOT'
+    compileOnly 'net.coreprotect:coreprotect:21.3'
+    compileOnly 'com.archyx:AureliumSkills:1.2.8'
+    compileOnly 'de.diddiz:logblock:1.15.1'
+    compileOnly 'com.github.angeschossen:LandsAPI:6.29.12'
+    compileOnly 'me.clip:placeholderapi:2.11.3'
+    compileOnly 'org.apache.commons:commons-lang3:3.12.0'
+    compileOnly 'de.jeff_media:Drop2InventoryAPI:1.0.0-SNAPSHOT'
+    compileOnly 'com.willfp:EcoJobs:3.17.0'
+    compileOnly 'com.github.TechFortress:GriefPrevention:16.18.1'
+    compileOnly 'com.github.Zrips:Jobs:4.17.2'
+    compileOnly 'com.gmail.nossr50.mcMMO:mcMMO:2.1.218'
+    compileOnly 'net.Indyuce:MMOCore-API:1.12-SNAPSHOT'
+    compileOnly 'io.lumine:MythicLib-dist:1.6-SNAPSHOT'
+    compileOnly 'com.github.SaberLLC:Saber-Factions:2.9.1-RC'
+    compileOnly 'com.palmergames.bukkit.towny:towny:0.99.1.0'
+    compileOnly fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+def targetJavaVersion = 17
+java {
+    toolchain {
+        implementation = JvmImplementation.J9
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+    def javaVersion = JavaVersion.toVersion(targetJavaVersion)
+    sourceCompatibility = javaVersion
+    targetCompatibility = javaVersion
+    if (JavaVersion.current() < javaVersion) {
+        toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    }
+
+
+}
+
+tasks.withType(JavaCompile).configureEach {
+    if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
+        options.release = targetJavaVersion
+    }
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching('plugin.yml') {
+        expand props
+    }
+}
