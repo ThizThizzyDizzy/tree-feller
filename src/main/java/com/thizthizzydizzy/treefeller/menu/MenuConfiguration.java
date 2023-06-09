@@ -28,7 +28,7 @@ public class MenuConfiguration extends Menu{
             String additional = "";
             if(i<size-18)additional = " below";
             if(i>=size-9)additional = " above";
-            add(new Label(i, makeItem(Material.RED_STAINED_GLASS_PANE).setDisplayName(ChatColor.DARK_RED+"WARNING").addLore("All changes made are applied immediately!").addLore("To revert changes, run /trefeller reload").addLore("To save changes, click the save button"+additional)));
+            add(new Label(i, makeItem(Material.RED_STAINED_GLASS_PANE).setDisplayName(ChatColor.DARK_RED+"WARNING").addLore("All changes made are applied immediately!").addLore("To revert changes, run /treefeller reload").addLore("To save changes, click the save button"+additional)));
         }
         add(new Button(11, makeItem(Material.GRASS_BLOCK).setDisplayName("Global"), (click) -> {
             if(click==ClickType.LEFT)open(new MenuGlobalConfiguration(this, plugin, player));
