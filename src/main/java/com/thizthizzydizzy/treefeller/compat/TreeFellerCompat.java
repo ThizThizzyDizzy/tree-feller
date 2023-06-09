@@ -1,8 +1,5 @@
 package com.thizthizzydizzy.treefeller.compat;
-import com.thizthizzydizzy.treefeller.Modifier;
-import com.thizthizzydizzy.treefeller.Tool;
-import com.thizthizzydizzy.treefeller.Tree;
-import com.thizthizzydizzy.treefeller.TreeFeller;
+import com.thizthizzydizzy.treefeller.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +31,7 @@ public class TreeFellerCompat{
         compatibilities.add(new SaberFactionsCompat());
         compatibilities.add(new AureliumSkillsCompat());
         compatibilities.add(new BlockRegenCompat());
+        compatibilities.add(new PrismCompat());
     }
     public static void init(TreeFeller treeFeller){
         if(treeFeller!=null){
@@ -82,6 +80,13 @@ public class TreeFellerCompat{
             compat.fellTree(block, player, axe, tool, tree, blocks);
         }
     }
+
+    public static void placeSapling(Sapling sapling, Player player){
+        for(PluginCompatibility compat : getCompatibilities()){
+            compat.placeSapling(sapling, player);
+        }
+    }
+
     public static void addPluginCompatibility(PluginCompatibility compatibility){
         PluginCompatibility override = null;
         for(PluginCompatibility compat : compatibilities){

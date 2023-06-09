@@ -1,10 +1,6 @@
 package com.thizthizzydizzy.treefeller.compat;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
-import com.thizthizzydizzy.treefeller.Modifier;
-import com.thizthizzydizzy.treefeller.OptionBoolean;
-import com.thizthizzydizzy.treefeller.Tool;
-import com.thizthizzydizzy.treefeller.Tree;
-import com.thizthizzydizzy.treefeller.TreeFeller;
+import com.thizthizzydizzy.treefeller.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -96,6 +92,14 @@ public abstract class PluginCompatibility{
      * @param blocks the blocks of the tree, stored by distance from the first block
      */
     public void fellTree(Block block, Player player, ItemStack axe, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks){}
+
+    /**
+     * Called when a sapling is placed by a felled tree. This is only called if sapling placement is enabled in the configuration file.
+     * @param sapling A {@link Sapling} that is being placed.
+     * @param player The {@link Player} who felled the tree.
+     */
+    public void placeSapling(Sapling sapling, Player player) {}
+
     public boolean defaultEnabled(){
         return true;
     }
