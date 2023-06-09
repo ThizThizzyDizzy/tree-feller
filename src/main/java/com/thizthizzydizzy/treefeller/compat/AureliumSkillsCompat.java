@@ -1,19 +1,12 @@
 package com.thizthizzydizzy.treefeller.compat;
+
 import com.archyx.aureliumskills.skills.Skill;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
-import com.thizthizzydizzy.treefeller.Modifier;
-import com.thizthizzydizzy.treefeller.Option;
-import com.thizthizzydizzy.treefeller.OptionBoolean;
-import com.thizthizzydizzy.treefeller.Tool;
-import com.thizthizzydizzy.treefeller.Tree;
-import com.thizthizzydizzy.treefeller.TreeFeller;
+import com.thizthizzydizzy.treefeller.*;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
@@ -21,69 +14,74 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
-public class AureliumSkillsCompat extends InternalCompatibility{
-    public static Option<HashMap<String, Double>> AURELIUMSKILLS_TRUNK_XP = new Option<HashMap<String, Double>>("AureliumSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - foraging: 1"){
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+public class AureliumSkillsCompat extends InternalCompatibility {
+    public static Option<HashMap<String, Double>> AURELIUMSKILLS_TRUNK_XP = new Option<HashMap<String, Double>>(
+            "AureliumSkills Trunk XP", true, false, true, new HashMap<>(), "\n   - foraging: 1") {
         @Override
-        public String getDesc(boolean ingame){
+        public String getDesc(boolean ingame) {
             return "EXP will be provided to these skills when a tree is felled\n"
-                    + "EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)"+(ingame?"":("\n"
+                    + "EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)" + (ingame ? "" : ("\n"
                     + "ex:\n"
                     + "- foraging: 8"));
         }
+
         @Override
-        public HashMap<String, Double> load(Object o){
-            if(o instanceof MemorySection){
+        public HashMap<String, Double> load(Object o) {
+            if (o instanceof MemorySection) {
                 HashMap<String, Double> skills = new HashMap<>();
-                MemorySection m = (MemorySection)o;
-                for(String key : m.getKeys(false)){
+                MemorySection m = (MemorySection) o;
+                for (String key : m.getKeys(false)) {
                     String skill = key;
-                    if(skill==null)continue;
+                    if (skill == null) continue;
                     Double xp = Option.loadDouble(m.get(key));
-                    if(xp==null)continue;
-                    if(skills.containsKey(skill)){
-                        skills.put(skill, skills.get(skill)+xp);
-                    }else{
+                    if (xp == null) continue;
+                    if (skills.containsKey(skill)) {
+                        skills.put(skill, skills.get(skill) + xp);
+                    } else {
                         skills.put(skill, xp);
                     }
                 }
                 return skills;
             }
-            if(o instanceof Map){
+            if (o instanceof Map) {
                 HashMap<String, Double> skills = new HashMap<>();
-                Map m = (Map)o;
-                for(Object obj : m.keySet()){
+                Map m = (Map) o;
+                for (Object obj : m.keySet()) {
                     String skill = null;
-                    if(obj instanceof String){
-                        skill = (String)obj;
+                    if (obj instanceof String) {
+                        skill = (String) obj;
                     }
-                    if(skill==null)continue;
+                    if (skill == null) continue;
                     Double xp = Option.loadDouble(m.get(obj));
-                    if(xp==null)continue;
-                    if(skills.containsKey(skill)){
-                        skills.put(skill, skills.get(skill)+xp);
-                    }else{
+                    if (xp == null) continue;
+                    if (skills.containsKey(skill)) {
+                        skills.put(skill, skills.get(skill) + xp);
+                    } else {
                         skills.put(skill, xp);
                     }
                 }
                 return skills;
             }
-            if(o instanceof List){
-                List l = (List)o;
+            if (o instanceof List l) {
                 HashMap<String, Double> skills = new HashMap<>();
-                for(Object lbj : l){
-                    if(lbj instanceof Map){
-                        Map m = (Map)lbj;
-                        for(Object obj : m.keySet()){
+                for (Object lbj : l) {
+                    if (lbj instanceof Map m) {
+                        for (Object obj : m.keySet()) {
                             String skill = null;
-                            if(obj instanceof String){
-                                skill = (String)obj;
+                            if (obj instanceof String) {
+                                skill = (String) obj;
                             }
-                            if(skill==null)continue;
+                            if (skill == null) continue;
                             Double xp = Option.loadDouble(m.get(obj));
-                            if(xp==null)continue;
-                            if(skills.containsKey(skill)){
-                                skills.put(skill, skills.get(skill)+xp);
-                            }else{
+                            if (xp == null) continue;
+                            if (skills.containsKey(skill)) {
+                                skills.put(skill, skills.get(skill) + xp);
+                            } else {
                                 skills.put(skill, xp);
                             }
                         }
@@ -93,104 +91,112 @@ public class AureliumSkillsCompat extends InternalCompatibility{
             }
             return null;
         }
+
         @Override
-        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value){
+        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value) {
             return new ItemBuilder(Material.OAK_LOG);
         }
+
         @Override
-        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, false, globalValue, (value) -> {
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent) {
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE
+                    , false, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
+
         @Override
-        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, false, toolValues.get(tool), (value) -> {
-                if(value==null)toolValues.remove(tool);
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool) {
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE
+                    , true, false, toolValues.get(tool), (value) -> {
+                if (value == null) toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
+
         @Override
-        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, false, treeValues.get(tree), (value) -> {
-                if(value==null)treeValues.remove(tree);
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree) {
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE
+                    , true, false, treeValues.get(tree), (value) -> {
+                if (value == null) treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
         }
+
         @Override
-        public String writeToConfig(HashMap<String, Double> value){
-            if(value==null)return "";
+        public String writeToConfig(HashMap<String, Double> value) {
+            if (value == null) return "";
             String s = "{";
             String str = "";
-            for(String st : value.keySet()){
-                str+=", "+st+": "+value.get(st);
+            for (String st : value.keySet()) {
+                str += ", " + st + ": " + value.get(st);
             }
-            if(!str.isEmpty())s+=str.substring(2);
-            return s+"}";
+            if (!str.isEmpty()) s += str.substring(2);
+            return s + "}";
         }
     };
-    public static Option<HashMap<String, Double>> AURELIUMSKILLS_LEAVES_XP = new Option<HashMap<String, Double>>("AureliumSkills Leaves XP", true, false, true, new HashMap<>(), "\n   - foraging: 0"){
+    public static Option<HashMap<String, Double>> AURELIUMSKILLS_LEAVES_XP = new Option<HashMap<String, Double>>(
+            "AureliumSkills Leaves XP", true, false, true, new HashMap<>(), "\n   - foraging: 0") {
         @Override
-        public String getDesc(boolean ingame){
+        public String getDesc(boolean ingame) {
             return "EXP will be provided to these skills when a tree is felled\n"
-                    + "EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)"+(ingame?"":("\n"
+                    + "EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)" + (ingame ? "" : ("\n"
                     + "ex:\n"
                     + "- foraging: 8"));
         }
+
         @Override
-        public HashMap<String, Double> load(Object o){
-            if(o instanceof MemorySection){
+        public HashMap<String, Double> load(Object o) {
+            if (o instanceof MemorySection) {
                 HashMap<String, Double> skills = new HashMap<>();
-                MemorySection m = (MemorySection)o;
-                for(String key : m.getKeys(false)){
+                MemorySection m = (MemorySection) o;
+                for (String key : m.getKeys(false)) {
                     String skill = key;
-                    if(skill==null)continue;
+                    if (skill == null) continue;
                     Double xp = Option.loadDouble(m.get(key));
-                    if(xp==null)continue;
-                    if(skills.containsKey(skill)){
-                        skills.put(skill, skills.get(skill)+xp);
-                    }else{
+                    if (xp == null) continue;
+                    if (skills.containsKey(skill)) {
+                        skills.put(skill, skills.get(skill) + xp);
+                    } else {
                         skills.put(skill, xp);
                     }
                 }
                 return skills;
             }
-            if(o instanceof Map){
+            if (o instanceof Map) {
                 HashMap<String, Double> skills = new HashMap<>();
-                Map m = (Map)o;
-                for(Object obj : m.keySet()){
+                Map m = (Map) o;
+                for (Object obj : m.keySet()) {
                     String skill = null;
-                    if(obj instanceof String){
-                        skill = (String)obj;
+                    if (obj instanceof String) {
+                        skill = (String) obj;
                     }
-                    if(skill==null)continue;
+                    if (skill == null) continue;
                     Double xp = Option.loadDouble(m.get(obj));
-                    if(xp==null)continue;
-                    if(skills.containsKey(skill)){
-                        skills.put(skill, skills.get(skill)+xp);
-                    }else{
+                    if (xp == null) continue;
+                    if (skills.containsKey(skill)) {
+                        skills.put(skill, skills.get(skill) + xp);
+                    } else {
                         skills.put(skill, xp);
                     }
                 }
                 return skills;
             }
-            if(o instanceof List){
-                List l = (List)o;
+            if (o instanceof List l) {
                 HashMap<String, Double> skills = new HashMap<>();
-                for(Object lbj : l){
-                    if(lbj instanceof Map){
-                        Map m = (Map)lbj;
-                        for(Object obj : m.keySet()){
+                for (Object lbj : l) {
+                    if (lbj instanceof Map m) {
+                        for (Object obj : m.keySet()) {
                             String skill = null;
-                            if(obj instanceof String){
-                                skill = (String)obj;
+                            if (obj instanceof String) {
+                                skill = (String) obj;
                             }
-                            if(skill==null)continue;
+                            if (skill == null) continue;
                             Double xp = Option.loadDouble(m.get(obj));
-                            if(xp==null)continue;
-                            if(skills.containsKey(skill)){
-                                skills.put(skill, skills.get(skill)+xp);
-                            }else{
+                            if (xp == null) continue;
+                            if (skills.containsKey(skill)) {
+                                skills.put(skill, skills.get(skill) + xp);
+                            } else {
                                 skills.put(skill, xp);
                             }
                         }
@@ -200,110 +206,124 @@ public class AureliumSkillsCompat extends InternalCompatibility{
             }
             return null;
         }
+
         @Override
-        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value){
+        public ItemBuilder getConfigurationDisplayItem(HashMap<String, Double> value) {
             return new ItemBuilder(Material.OAK_LEAVES);
         }
+
         @Override
-        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
-            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, false, false, globalValue, (value) -> {
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent) {
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE
+                    , false, false, globalValue, (value) -> {
                 globalValue = value;
             }));
         }
+
         @Override
-        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
-            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, false, toolValues.get(tool), (value) -> {
-                if(value==null)toolValues.remove(tool);
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool) {
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE
+                    , true, false, toolValues.get(tool), (value) -> {
+                if (value == null) toolValues.remove(tool);
                 else toolValues.put(tool, value);
             }));
         }
+
         @Override
-        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
-            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE, true, false, treeValues.get(tree), (value) -> {
-                if(value==null)treeValues.remove(tree);
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree) {
+            parent.open(new MenuModifyStringDoubleMap(parent, parent.plugin, parent.player, name, 0, Double.MAX_VALUE
+                    , true, false, treeValues.get(tree), (value) -> {
+                if (value == null) treeValues.remove(tree);
                 else treeValues.put(tree, value);
             }));
         }
+
         @Override
-        public String writeToConfig(HashMap<String, Double> value){
-            if(value==null)return "";
+        public String writeToConfig(HashMap<String, Double> value) {
+            if (value == null) return "";
             String s = "{";
             String str = "";
-            for(String st : value.keySet()){
-                str+=", "+st+": "+value.get(st);
+            for (String st : value.keySet()) {
+                str += ", " + st + ": " + value.get(st);
             }
-            if(!str.isEmpty())s+=str.substring(2);
-            return s+"}";
+            if (!str.isEmpty()) s += str.substring(2);
+            return s + "}";
         }
     };
-    public static OptionBoolean AURELIUMSKILLS_APPLY_MODIFIERS = new OptionBoolean("AureliumSkills Apply Modifiers", true, true, true, true){
+    public static OptionBoolean AURELIUMSKILLS_APPLY_MODIFIERS = new OptionBoolean("AureliumSkills Apply Modifiers",
+            true, true, true, true) {
         @Override
-        public String getDesc(boolean ingame){
+        public String getDesc(boolean ingame) {
             return "Should AureliumSkills modifiers be applied to experience earned through TreeFeller?";
         }
+
         @Override
-        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+        public ItemBuilder getConfigurationDisplayItem(Boolean value) {
             return new ItemBuilder(Material.EXPERIENCE_BOTTLE);
         }
     };
     private BukkitTask pendingTask = null;
     private TreeFeller treefeller;
-    private HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> modsMap = new HashMap<>();
-    private HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> noModsMap = new HashMap<>();
+    private final HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> modsMap = new HashMap<>();
+    private final HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> noModsMap = new HashMap<>();
+
     @Override
-    public String getPluginName(){
+    public String getPluginName() {
         return "AureliumSkills";
     }
+
     @Override
-    public void init(TreeFeller treefeller){
+    public void init(TreeFeller treefeller) {
         this.treefeller = treefeller;
     }
+
     @Override
-    public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
-        if(player==null)return;
+    public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers) {
+        if (player == null) return;
         HashMap<String, Double> xp = null;
-        if(tree.trunk.contains(block.getType())){
+        if (tree.trunk.contains(block.getType())) {
             xp = AURELIUMSKILLS_TRUNK_XP.get(tool, tree);
-        }else if(tree.leaves.contains(block.getType())){
+        } else if (tree.leaves.contains(block.getType())) {
             xp = AURELIUMSKILLS_LEAVES_XP.get(tool, tree);
         }
-        if(xp==null||xp.isEmpty())return;
+        if (xp == null || xp.isEmpty()) return;
         boolean applyMods = AURELIUMSKILLS_APPLY_MODIFIERS.get(tool, tree);
-        for(String key : xp.keySet()){
+        for (String key : xp.keySet()) {
             double amount = xp.get(key);
-            com.archyx.aureliumskills.skills.Skill skill = com.archyx.aureliumskills.api.AureliumAPI.getPlugin().getSkillRegistry().getSkill(key);
-            if(skill==null)continue;
+            com.archyx.aureliumskills.skills.Skill skill =
+                    com.archyx.aureliumskills.api.AureliumAPI.getPlugin().getSkillRegistry().getSkill(key);
+            if (skill == null) continue;
             HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> map = null;
-            if(applyMods){
+            if (applyMods) {
                 map = modsMap;
-            }else{
+            } else {
                 map = noModsMap;
             }
-            if(!map.containsKey(player)){
+            if (!map.containsKey(player)) {
                 map.put(player, new HashMap<>());
             }
             HashMap<Skill, Double> mp = map.get(player);
-            mp.put(skill, mp.getOrDefault(skill, 0d)+amount);
+            mp.put(skill, mp.getOrDefault(skill, 0d) + amount);
         }
-        if(pendingTask==null)pendingTask = new BukkitRunnable() {
+        if (pendingTask == null) pendingTask = new BukkitRunnable() {
             @Override
-            public void run(){
+            public void run() {
                 pendingTask = null;
-                for(Player p : noModsMap.keySet()){
+                for (Player p : noModsMap.keySet()) {
                     HashMap<Skill, Double> map = noModsMap.get(p);
-                    for(com.archyx.aureliumskills.skills.Skill skill : map.keySet()){
+                    for (com.archyx.aureliumskills.skills.Skill skill : map.keySet()) {
                         com.archyx.aureliumskills.api.AureliumAPI.addXpRaw(p, skill, map.get(skill));
                     }
                 }
                 noModsMap.clear();
-                for(Player p : modsMap.keySet()){
+                for (Player p : modsMap.keySet()) {
                     HashMap<Skill, Double> map = modsMap.get(p);
-                    for(com.archyx.aureliumskills.skills.Skill skill : map.keySet()){
+                    for (com.archyx.aureliumskills.skills.Skill skill : map.keySet()) {
                         com.archyx.aureliumskills.api.AureliumAPI.addXp(p, skill, map.get(skill));
                     }
                 }
                 modsMap.clear();
             }
-        }.runTaskLater(treefeller, Option.CUTTING_ANIMATION.get(tool, tree)==true?10:1);
+        }.runTaskLater(treefeller, Option.CUTTING_ANIMATION.get(tool, tree) ? 10 : 1);
     }
 }
