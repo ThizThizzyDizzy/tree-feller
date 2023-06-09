@@ -46,6 +46,7 @@ dependencies {
     compileOnly 'org.apache.commons:commons-lang3:3.12.0'
     compileOnly 'de.jeff_media:Drop2InventoryAPI:1.0.0-SNAPSHOT'
     compileOnly 'com.willfp:EcoJobs:3.17.0'
+    compileOnly 'com.willfp:EcoSkills:2.11.0'
     compileOnly 'com.github.TechFortress:GriefPrevention:16.18.1'
     compileOnly 'com.github.Zrips:Jobs:4.17.2'
     compileOnly 'com.gmail.nossr50.mcMMO:mcMMO:2.1.218'
