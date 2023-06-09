@@ -12,6 +12,8 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.willfp.ecojobs.api.EcoJobsAPI;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
@@ -257,9 +259,8 @@ public class EcoJobsCompat extends InternalCompatibility{
             }
         }
         boolean applyMultipliers = ECOJOBS_APPLY_MULTIPLIERS.get(tool, tree);
-        com.willfp.ecojobs.api.EcoJobsAPI api = com.willfp.ecojobs.api.EcoJobsAPI.instance;
         for(com.willfp.ecojobs.jobs.Job job : exp.keySet()){
-            if(exp.get(job)!=0)api.giveJobExperience(player, job, exp.get(job), applyMultipliers);
+            if(exp.get(job)!=0)EcoJobsAPI.giveJobExperience(player, job, exp.get(job), applyMultipliers);
         }
     }
 }
