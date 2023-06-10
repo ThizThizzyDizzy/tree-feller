@@ -1,0 +1,29 @@
+package com.thizthizzydizzy.treefeller.compat;
+
+import com.thizthizzydizzy.treefeller.Modifier;
+import com.thizthizzydizzy.treefeller.Tool;
+import com.thizthizzydizzy.treefeller.Tree;
+import de.jeff_media.drop2inventory.Drop2InventoryAPI;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
+import java.util.List;
+
+public class Drop2InventoryCompat extends InternalCompatibility {
+    @Override
+    public String getPluginName() {
+        return "Drop2Inventory";
+    }
+
+    @Override
+    public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers) {
+        Drop2InventoryAPI.registerFutureDrop(player, block);
+    }
+
+    @Override
+    public void dropItem(Player player, Item item) {
+        Drop2InventoryAPI.registerFutureDrop(player, item.getLocation().getBlock());
+    }
+}

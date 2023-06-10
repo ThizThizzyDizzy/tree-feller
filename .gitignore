@@ -4,3 +4,17 @@
 /nbproject/
 /build/
 /dist/
+
+libs/
+
+gradle/
+
+.idea/
+
+.gradle/
+
+gradle.properties
+
+gradlew
+
+gradlew.bat
