@@ -7,6 +7,10 @@ import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringIntegerMap;
+import net.Indyuce.mmocore.MMOCore;
+import net.Indyuce.mmocore.api.block.BlockInfo;
+import net.Indyuce.mmocore.api.player.PlayerData;
+import net.Indyuce.mmocore.experience.EXPSource;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -500,7 +504,7 @@ public class MMOCoreCompat extends InternalCompatibility {
         protected DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player,
                                       ItemStack axe) {
             if (!installed) return null;
-            net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
+            PlayerData data = PlayerData.get(player);
             if (toolValues.get(tool) == null && treeValues.get(tree) == null && globalValue != null) {
                 for (String profession : globalValue.keySet()) {
                     int lvl = globalValue.get(profession);
@@ -554,14 +558,15 @@ public class MMOCoreCompat extends InternalCompatibility {
             ArrayList<Block>> blocks) {
         HashMap<String, Double> treeXp = MMOCORE_TREE_XP.get(tool, tree);
         if (treeXp == null || treeXp.isEmpty()) return;
-        net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
+        PlayerData data = PlayerData.get(player);
 
         for (String profession : treeXp.keySet()) {
             int exp = convert(treeXp.get(profession));
             if (profession.equals("global")) {
-                data.giveExperience(exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
+                data.giveExperience(exp, EXPSource.SOURCE);
             } else {
-                data.getCollectionSkills().giveExperience(net.Indyuce.mmocore.MMOCore.plugin.professionManager.get(profession), exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
+                data.getCollectionSkills().giveExperience(MMOCore.plugin.professionManager.get(profession), exp,
+                        EXPSource.SOURCE);
             }
         }
     }
@@ -576,16 +581,17 @@ public class MMOCoreCompat extends InternalCompatibility {
             xp = MMOCORE_LEAVES_XP.get(tool, tree);
         }
         if (player != null && xp != null && !xp.isEmpty()) {
-            net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
+            PlayerData data = PlayerData.get(player);
             if (xp.containsKey("global")) {
-                data.giveExperience(convert(xp.get("global")), net.Indyuce.mmocore.experience.EXPSource.SOURCE);
+                data.giveExperience(convert(xp.get("global")), EXPSource.SOURCE);
             }
             for (String profession : xp.keySet()) {
                 int exp = convert(xp.get(profession));
                 if (profession.equals("global")) {
-                    data.giveExperience(exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
+                    data.giveExperience(exp, EXPSource.SOURCE);
                 } else {
-                    data.getCollectionSkills().giveExperience(net.Indyuce.mmocore.MMOCore.plugin.professionManager.get(profession), exp, net.Indyuce.mmocore.experience.EXPSource.SOURCE);
+                    data.getCollectionSkills().giveExperience(MMOCore.plugin.professionManager.get(profession), exp,
+                            EXPSource.SOURCE);
                 }
             }
         }
@@ -594,12 +600,11 @@ public class MMOCoreCompat extends InternalCompatibility {
         if (doRegen) {
             //MMOCore's Regen (see MMOCore/professions/mining.yml)
             //MMOCore's "temp-block" option must not be set
-            net.Indyuce.mmocore.api.block.BlockInfo info =
-                    net.Indyuce.mmocore.MMOCore.plugin.mineManager.getInfo(block);
+            BlockInfo info = MMOCore.plugin.mineManager.getInfo(block);
             String savedData = block.getBlockData().getAsString();
             if (info != null && info.hasRegen()) {
-                Bukkit.getScheduler().runTaskLater(net.Indyuce.mmocore.MMOCore.plugin,
-                        () -> net.Indyuce.mmocore.MMOCore.plugin.mineManager.initialize(info.startRegeneration(Bukkit.createBlockData(savedData), block.getLocation()), true), 1);
+                Bukkit.getScheduler().runTaskLater(MMOCore.plugin,
+                        () -> MMOCore.plugin.mineManager.initialize(info.startRegeneration(Bukkit.createBlockData(savedData), block.getLocation()), true), 1);
             }
         }
     }

@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.compat;
 
+import com.gmail.nossr50.api.ExperienceAPI;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
@@ -48,6 +49,6 @@ public class McMMOClassicCompat extends InternalCompatibility {
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers) {
         if (!installed || player == null) return;
         if (!exp.containsKey(block.getType())) return;
-        com.gmail.nossr50.api.ExperienceAPI.addXP(player, "Woodcutting", exp.get(block.getType()));
+        ExperienceAPI.addXP(player, "Woodcutting", exp.get(block.getType()), "TreeFeller");
     }
 }

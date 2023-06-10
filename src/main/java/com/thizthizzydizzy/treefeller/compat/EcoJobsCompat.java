@@ -7,6 +7,8 @@ import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringDoubleMap;
 import com.willfp.ecojobs.api.EcoJobsAPI;
+import com.willfp.ecojobs.jobs.Job;
+import com.willfp.ecojobs.jobs.Jobs;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.MemorySection;
@@ -262,22 +264,22 @@ public class EcoJobsCompat extends InternalCompatibility {
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers) {
         if (player == null) return;
 
-        HashMap<com.willfp.ecojobs.jobs.Job, Double> exp = new HashMap<>();
+        HashMap<Job, Double> exp = new HashMap<>();
         if (tree.trunk.contains(block.getType())) {
             HashMap<String, Double> trunk = ECOJOBS_TRUNK_XP.get(tool, tree);
             for (String key : trunk.keySet()) {
-                com.willfp.ecojobs.jobs.Job job = com.willfp.ecojobs.jobs.Jobs.getByID(key);
+                Job job = Jobs.getByID(key);
                 exp.put(job, exp.getOrDefault(job, 0d) + trunk.get(key));
             }
         } else if (tree.leaves.contains(block.getType())) {
             HashMap<String, Double> leaves = ECOJOBS_LEAF_XP.get(tool, tree);
             for (String key : leaves.keySet()) {
-                com.willfp.ecojobs.jobs.Job job = com.willfp.ecojobs.jobs.Jobs.getByID(key);
+                Job job = Jobs.getByID(key);
                 exp.put(job, exp.getOrDefault(job, 0d) + leaves.get(key));
             }
         }
         boolean applyMultipliers = ECOJOBS_APPLY_MULTIPLIERS.get(tool, tree);
-        for (com.willfp.ecojobs.jobs.Job job : exp.keySet()) {
+        for (Job job : exp.keySet()) {
             if (exp.get(job) != 0) EcoJobsAPI.giveJobExperience(player, job, exp.get(job), applyMultipliers);
         }
     }

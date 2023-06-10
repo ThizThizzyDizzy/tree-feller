@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.compat;
 
 import com.thizthizzydizzy.treefeller.Cooldown;
 import com.thizthizzydizzy.treefeller.TreeFeller;
+import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -17,7 +18,7 @@ public class PlaceholderAPICompat extends InternalCompatibility {
         new TreeFellerExpansion(treeFeller).register();
     }
 
-    public class TreeFellerExpansion extends me.clip.placeholderapi.expansion.PlaceholderExpansion {
+    public class TreeFellerExpansion extends PlaceholderExpansion {
         private final TreeFeller treefeller;
 
         private TreeFellerExpansion(TreeFeller treeFeller) {
@@ -56,48 +57,46 @@ public class PlaceholderAPICompat extends InternalCompatibility {
             if (player != null) {
                 if (params.equals("toggled")) return treefeller.isToggledOn(player) ? "ON" : "OFF";
             }
-            if (oplayer != null) {
-                if (params.startsWith("cooldown")) {
-                    Cooldown cooldown = TreeFeller.cooldowns.get(oplayer.getUniqueId());
-                    if (params.startsWith("cooldown_global")) {
-                        long ms = cooldown.getGlobal();
-                        if (params.equals("cooldown_global_ms")) return String.valueOf(ms);
-                        if (params.equals("cooldown_global_t")) return String.valueOf(ms / 50);
-                        if (params.equals("cooldown_global_s")) return String.valueOf(ms / 1000);
-                    }
-                    if (params.startsWith("cooldown_tree_")) {
-                        int tree = Integer.parseInt(params.split("_")[2]);
-                        long ms = cooldown.get(TreeFeller.trees.get(tree));
-                        if (params.equals("cooldown_tree_" + tree + "_ms")) return String.valueOf(ms);
-                        if (params.equals("cooldown_tree_" + tree + "_t")) return String.valueOf(ms / 50);
-                        if (params.equals("cooldown_tree_" + tree + "_s")) return String.valueOf(ms / 1000);
-                    }
-                    if (params.startsWith("cooldown_tool_")) {
-                        int tool = Integer.parseInt(params.split("_")[2]);
-                        long ms = cooldown.get(TreeFeller.trees.get(tool));
-                        if (params.equals("cooldown_tool_" + tool + "_ms")) return String.valueOf(ms);
-                        if (params.equals("cooldown_tool_" + tool + "_t")) return String.valueOf(ms / 50);
-                        if (params.equals("cooldown_tool_" + tool + "_s")) return String.valueOf(ms / 1000);
-                    }
-                    if (params.startsWith("cooldown_longest")) {
-                        long ms = 0;
-                        for (long l : cooldown.getCooldowns()) if (l > ms) ms = l;
-                        if (params.equals("cooldown_longest_ms")) return String.valueOf(ms);
-                        if (params.equals("cooldown_longest_t")) return String.valueOf(ms / 50);
-                        if (params.equals("cooldown_longest_s")) return String.valueOf(ms / 1000);
-                    }
-                    if (params.startsWith("cooldown_shortest")) {
-                        long ms = -1;
-                        for (long l : cooldown.getCooldowns()) if (ms == -1 || l < ms) ms = l;
-                        if (params.equals("cooldown_shortest_ms")) return String.valueOf(ms);
-                        if (params.equals("cooldown_shortest_t")) return String.valueOf(ms / 50);
-                        if (params.equals("cooldown_shortest_s")) return String.valueOf(ms / 1000);
-                    }
-                    if (params.equals("cooldown_count")) {
-                        int count = 0;
-                        for (long l : cooldown.getCooldowns()) if (l > 0) count++;
-                        if (params.equals("cooldown_count")) return String.valueOf(count);
-                    }
+            if (oplayer != null && params.startsWith("cooldown")) {
+                Cooldown cooldown = TreeFeller.cooldowns.get(oplayer.getUniqueId());
+                if (params.startsWith("cooldown_global")) {
+                    long ms = cooldown.getGlobal();
+                    if (params.equals("cooldown_global_ms")) return String.valueOf(ms);
+                    if (params.equals("cooldown_global_t")) return String.valueOf(ms / 50);
+                    if (params.equals("cooldown_global_s")) return String.valueOf(ms / 1000);
+                }
+                if (params.startsWith("cooldown_tree_")) {
+                    int tree = Integer.parseInt(params.split("_")[2]);
+                    long ms = cooldown.get(TreeFeller.trees.get(tree));
+                    if (params.equals("cooldown_tree_" + tree + "_ms")) return String.valueOf(ms);
+                    if (params.equals("cooldown_tree_" + tree + "_t")) return String.valueOf(ms / 50);
+                    if (params.equals("cooldown_tree_" + tree + "_s")) return String.valueOf(ms / 1000);
+                }
+                if (params.startsWith("cooldown_tool_")) {
+                    int tool = Integer.parseInt(params.split("_")[2]);
+                    long ms = cooldown.get(TreeFeller.trees.get(tool));
+                    if (params.equals("cooldown_tool_" + tool + "_ms")) return String.valueOf(ms);
+                    if (params.equals("cooldown_tool_" + tool + "_t")) return String.valueOf(ms / 50);
+                    if (params.equals("cooldown_tool_" + tool + "_s")) return String.valueOf(ms / 1000);
+                }
+                if (params.startsWith("cooldown_longest")) {
+                    long ms = 0;
+                    for (long l : cooldown.getCooldowns()) if (l > ms) ms = l;
+                    if (params.equals("cooldown_longest_ms")) return String.valueOf(ms);
+                    if (params.equals("cooldown_longest_t")) return String.valueOf(ms / 50);
+                    if (params.equals("cooldown_longest_s")) return String.valueOf(ms / 1000);
+                }
+                if (params.startsWith("cooldown_shortest")) {
+                    long ms = -1;
+                    for (long l : cooldown.getCooldowns()) if (ms == -1 || l < ms) ms = l;
+                    if (params.equals("cooldown_shortest_ms")) return String.valueOf(ms);
+                    if (params.equals("cooldown_shortest_t")) return String.valueOf(ms / 50);
+                    if (params.equals("cooldown_shortest_s")) return String.valueOf(ms / 1000);
+                }
+                if (params.equals("cooldown_count")) {
+                    int count = 0;
+                    for (long l : cooldown.getCooldowns()) if (l > 0) count++;
+                    if (params.equals("cooldown_count")) return String.valueOf(count);
                 }
             }
             return null;

@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.compat;
 
+import com.archyx.aureliumskills.api.AureliumAPI;
 import com.archyx.aureliumskills.skills.Skill;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.*;
@@ -264,8 +265,8 @@ public class AureliumSkillsCompat extends InternalCompatibility {
     };
     private BukkitTask pendingTask = null;
     private TreeFeller treefeller;
-    private final HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> modsMap = new HashMap<>();
-    private final HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> noModsMap = new HashMap<>();
+    private final HashMap<Player, HashMap<Skill, Double>> modsMap = new HashMap<>();
+    private final HashMap<Player, HashMap<Skill, Double>> noModsMap = new HashMap<>();
 
     @Override
     public String getPluginName() {
@@ -290,10 +291,10 @@ public class AureliumSkillsCompat extends InternalCompatibility {
         boolean applyMods = AURELIUMSKILLS_APPLY_MODIFIERS.get(tool, tree);
         for (String key : xp.keySet()) {
             double amount = xp.get(key);
-            com.archyx.aureliumskills.skills.Skill skill =
-                    com.archyx.aureliumskills.api.AureliumAPI.getPlugin().getSkillRegistry().getSkill(key);
+            Skill skill =
+                    AureliumAPI.getPlugin().getSkillRegistry().getSkill(key);
             if (skill == null) continue;
-            HashMap<Player, HashMap<com.archyx.aureliumskills.skills.Skill, Double>> map = null;
+            HashMap<Player, HashMap<Skill, Double>> map = null;
             if (applyMods) {
                 map = modsMap;
             } else {
@@ -311,15 +312,15 @@ public class AureliumSkillsCompat extends InternalCompatibility {
                 pendingTask = null;
                 for (Player p : noModsMap.keySet()) {
                     HashMap<Skill, Double> map = noModsMap.get(p);
-                    for (com.archyx.aureliumskills.skills.Skill skill : map.keySet()) {
-                        com.archyx.aureliumskills.api.AureliumAPI.addXpRaw(p, skill, map.get(skill));
+                    for (Skill skill : map.keySet()) {
+                        AureliumAPI.addXpRaw(p, skill, map.get(skill));
                     }
                 }
                 noModsMap.clear();
                 for (Player p : modsMap.keySet()) {
                     HashMap<Skill, Double> map = modsMap.get(p);
-                    for (com.archyx.aureliumskills.skills.Skill skill : map.keySet()) {
-                        com.archyx.aureliumskills.api.AureliumAPI.addXp(p, skill, map.get(skill));
+                    for (Skill skill : map.keySet()) {
+                        AureliumAPI.addXp(p, skill, map.get(skill));
                     }
                 }
                 modsMap.clear();

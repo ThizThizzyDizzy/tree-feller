@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.compat;
 
+import com.massivecraft.factions.listeners.FactionsBlockListener;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -11,7 +12,7 @@ public class SaberFactionsCompat extends InternalCompatibility {
 
     @Override
     public boolean test(Player player, Block block) {
-        return com.massivecraft.factions.listeners.FactionsBlockListener.playerCanBuildDestroyBlock(player,
+        return FactionsBlockListener.playerCanBuildDestroyBlock(player,
                 block.getLocation(), "destroy", true);
     }
 }

@@ -6,6 +6,8 @@ import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyDouble;
+import com.willfp.ecoskills.api.EcoSkillsAPI;
+import com.willfp.ecoskills.skills.Skills;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -249,11 +251,11 @@ public class EcoSkillsCompat extends InternalCompatibility {
         }
         if (mining == 0 && woodcutting == 0) return;
         boolean applyModifiers = ECOSKILLS_APPLY_MODIFIERS.get(tool, tree);
-        com.willfp.ecoskills.api.EcoSkillsAPI api = com.willfp.ecoskills.api.EcoSkillsAPI.getInstance();
+        EcoSkillsAPI api = EcoSkillsAPI.getInstance();
         if (woodcutting != 0)
-            api.giveSkillExperience(player, com.willfp.ecoskills.skills.Skills.WOODCUTTING, woodcutting,
+            api.giveSkillExperience(player, Skills.WOODCUTTING, woodcutting,
                     applyModifiers);
         if (mining != 0)
-            api.giveSkillExperience(player, com.willfp.ecoskills.skills.Skills.MINING, mining, applyModifiers);
+            api.giveSkillExperience(player, Skills.MINING, mining, applyModifiers);
     }
 }

@@ -1,5 +1,14 @@
 package com.thizthizzydizzy.treefeller.compat;
 
+import com.gmail.nossr50.api.ExperienceAPI;
+import com.gmail.nossr50.datatypes.player.McMMOPlayer;
+import com.gmail.nossr50.datatypes.skills.SubSkillType;
+import com.gmail.nossr50.mcMMO;
+import com.gmail.nossr50.util.Permissions;
+import com.gmail.nossr50.util.player.UserManager;
+import com.gmail.nossr50.util.random.RandomChanceUtil;
+import com.gmail.nossr50.util.skills.RankUtils;
+import com.gmail.nossr50.util.skills.SkillActivationType;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
@@ -37,27 +46,29 @@ public class McMMOCompat extends InternalCompatibility {
     public void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers) {
         if (player == null) return;
         try {
-            com.gmail.nossr50.datatypes.player.McMMOPlayer mcmmoPlayer =
-                    com.gmail.nossr50.util.player.UserManager.getPlayer(player);
-            com.gmail.nossr50.api.ExperienceAPI.addXpFromBlock(block.getState(), mcmmoPlayer);
+            McMMOPlayer mcmmoPlayer =
+                    UserManager.getPlayer(player);
+            ExperienceAPI.addXpFromBlock(block.getState(), mcmmoPlayer);
             //canGetDoubleDrops and checkForDoubleDrop are private, so I'll just do it myself
-            if (com.gmail.nossr50.util.Permissions.isSubSkillEnabled(player,
-                    com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER)
-                    && com.gmail.nossr50.util.skills.RankUtils.hasReachedRank(1, player,
-                    com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER)
-                    && com.gmail.nossr50.util.random.RandomChanceUtil.isActivationSuccessful(com.gmail.nossr50.util.skills.SkillActivationType.RANDOM_LINEAR_100_SCALE_WITH_CAP, com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER, player)) {
+            if (Permissions.isSubSkillEnabled(player,
+                    SubSkillType.WOODCUTTING_HARVEST_LUMBER)
+                    && RankUtils.hasReachedRank(1, player,
+                    SubSkillType.WOODCUTTING_HARVEST_LUMBER)
+                    && RandomChanceUtil.isActivationSuccessful(SkillActivationType.RANDOM_LINEAR_100_SCALE_WITH_CAP,
+                    SubSkillType.WOODCUTTING_HARVEST_LUMBER, player)) {
                 BlockState blockState = block.getState();
                 if (MCMMO_DOUBLE_DROPS.get(tool, tree)) {
-                    if (com.gmail.nossr50.mcMMO.getModManager().isCustomLog(blockState) && com.gmail.nossr50.mcMMO.getModManager().getBlock(blockState).isDoubleDropEnabled()) {
+                    if (mcMMO.getModManager().isCustomLog(blockState) && mcMMO.getModManager().getBlock(blockState).isDoubleDropEnabled()) {
                         modifiers.add(new Modifier(Modifier.Type.LOG_MULT, 2));
                     } else {
-                        if (com.gmail.nossr50.mcMMO.p.getGeneralConfig().getWoodcuttingDoubleDropsEnabled(blockState.getBlockData())) {
+                        if (mcMMO.p.getGeneralConfig().getWoodcuttingDoubleDropsEnabled(blockState.getBlockData())) {
                             modifiers.add(new Modifier(Modifier.Type.LOG_MULT, 2));
                         }
                     }
                 }
             }
         } catch (Exception ex) {
+            //TODO some sort of logging should happen here
         }
     }
 }
