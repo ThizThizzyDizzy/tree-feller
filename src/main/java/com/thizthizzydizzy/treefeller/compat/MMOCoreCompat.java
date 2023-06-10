@@ -41,14 +41,13 @@ public class MMOCoreCompat extends InternalCompatibility {
                 HashMap<String, Double> professions = new HashMap<>();
                 MemorySection m = (MemorySection) o;
                 for (String key : m.getKeys(false)) {
-                    String profession = key;
-                    if (profession == null) continue;
+                    if (key == null) continue;
                     Double xp = Option.loadDouble(m.get(key));
                     if (xp == null) continue;
-                    if (professions.containsKey(profession)) {
-                        professions.put(profession, professions.get(profession) + xp);
+                    if (professions.containsKey(key)) {
+                        professions.put(key, professions.get(key) + xp);
                     } else {
-                        professions.put(profession, xp);
+                        professions.put(key, xp);
                     }
                 }
                 return professions;
@@ -132,11 +131,11 @@ public class MMOCoreCompat extends InternalCompatibility {
         public String writeToConfig(HashMap<String, Double> value) {
             if (value == null) return "";
             String s = "{";
-            String str = "";
+            StringBuilder str = new StringBuilder();
             for (String st : value.keySet()) {
-                str += ", " + st + ": " + value.get(st);
+                str.append(", ").append(st).append(": ").append(value.get(st));
             }
-            if (!str.isEmpty()) s += str.substring(2);
+            if (str.length() > 0) s += str.substring(2);
             return s + "}";
         }
     };
@@ -144,12 +143,18 @@ public class MMOCoreCompat extends InternalCompatibility {
             "Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0") {
         @Override
         public String getDesc(boolean ingame) {
-            return "EXP will be provided to these professions when a tree is felled\n"
-                    + "EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)\n"
-                    + "use \"global\" to add global experience" + (ingame ? "" : ("\n"
-                    + "ex:\n"
-                    + "- global: 3\n"
-                    + "- woodcutting: 8"));
+            StringBuilder sb = new StringBuilder();
+            sb.append(
+                    """
+                    EXP will be provided to these professions when a tree is felled
+                    EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
+                    use "global" to add global experience"""
+            );
+
+            if (!ingame) {
+                sb.append("\nex:\n- global: 3\n- woodcutting: 8");
+            }
+            return sb.toString();
         }
 
         @Override
@@ -157,10 +162,9 @@ public class MMOCoreCompat extends InternalCompatibility {
             if (o instanceof MemorySection) {
                 HashMap<String, Double> professions = new HashMap<>();
                 MemorySection m = (MemorySection) o;
-                for (String key : m.getKeys(false)) {
-                    String profession = key;
+                for (String profession : m.getKeys(false)) {
                     if (profession == null) continue;
-                    Double xp = Option.loadDouble(m.get(key));
+                    Double xp = Option.loadDouble(m.get(profession));
                     if (xp == null) continue;
                     if (professions.containsKey(profession)) {
                         professions.put(profession, professions.get(profession) + xp);
@@ -249,15 +253,15 @@ public class MMOCoreCompat extends InternalCompatibility {
         public String writeToConfig(HashMap<String, Double> value) {
             if (value == null) return "";
             String s = "{";
-            String str = "";
+            StringBuilder str = new StringBuilder();
             for (String st : value.keySet()) {
-                str += ", " + st + ": " + value.get(st);
+                str.append(", ").append(st).append(": ").append(value.get(st));
             }
-            if (!str.isEmpty()) s += str.substring(2);
+            if (str.length() > 0) s += str.substring(2);
             return s + "}";
         }
     };
-    public static Option<HashMap<String, Double>> MMOCORE_TREE_XP = new Option<HashMap<String, Double>>("MMOCore Tree" +
+    public static Option<HashMap<String, Double>> MMOCORE_TREE_XP = new Option<>("MMOCore Tree" +
             " XP", true, false, true, new HashMap<>(), "\n   - global: 0") {
         @Override
         public String getDesc(boolean ingame) {
@@ -274,10 +278,9 @@ public class MMOCoreCompat extends InternalCompatibility {
             if (o instanceof MemorySection) {
                 HashMap<String, Double> professions = new HashMap<>();
                 MemorySection m = (MemorySection) o;
-                for (String key : m.getKeys(false)) {
-                    String profession = key;
+                for (String profession : m.getKeys(false)) {
                     if (profession == null) continue;
-                    Double xp = Option.loadDouble(m.get(key));
+                    Double xp = Option.loadDouble(m.get(profession));
                     if (xp == null) continue;
                     if (professions.containsKey(profession)) {
                         professions.put(profession, professions.get(profession) + xp);
@@ -366,11 +369,11 @@ public class MMOCoreCompat extends InternalCompatibility {
         public String writeToConfig(HashMap<String, Double> value) {
             if (value == null) return "";
             String s = "{";
-            String str = "";
+            StringBuilder str = new StringBuilder();
             for (String st : value.keySet()) {
-                str += ", " + st + ": " + value.get(st);
+                str.append(", ").append(st).append(": ").append(value.get(st));
             }
-            if (!str.isEmpty()) s += str.substring(2);
+            if (str.length() > 0) s += str.substring(2);
             return s + "}";
         }
     };
@@ -378,8 +381,15 @@ public class MMOCoreCompat extends InternalCompatibility {
             false) {
         @Override
         public String getDesc(boolean ingame) {
-            return "Toggle emulating MMOCore's Block Regen" + (ingame ? "" : " (see MMOCore/professions/mining.yml)\n"
-                    + "MMOCore's \"temp-block\" option must not be set, otherwise tree will not fell\n");
+            StringBuilder sb = new StringBuilder();
+            sb.append("Toggle emulating MMOCore's Block Regen");
+            if (!ingame) {
+                sb.append("""
+                          (see MMOCore/professions/mining.yml)
+                          MMOCore's "temp-block" option must not be set, otherwise tree will not fell
+                          """);
+            }
+            return sb.toString();
         }
 
         @Override
@@ -400,10 +410,9 @@ public class MMOCoreCompat extends InternalCompatibility {
             if (o instanceof MemorySection) {
                 HashMap<String, Integer> professions = new HashMap<>();
                 MemorySection m = (MemorySection) o;
-                for (String key : m.getKeys(false)) {
-                    String profession = key;
+                for (String profession : m.getKeys(false)) {
                     if (profession == null) continue;
-                    Integer lvlreq = Option.loadInt(m.get(key));
+                    Integer lvlreq = Option.loadInt(m.get(profession));
                     if (lvlreq == null) continue;
                     if (professions.containsKey(profession)) {
                         professions.put(profession, professions.get(profession) + lvlreq);
@@ -492,11 +501,11 @@ public class MMOCoreCompat extends InternalCompatibility {
         public String writeToConfig(HashMap<String, Integer> value) {
             if (value == null) return "";
             String s = "{";
-            String str = "";
+            StringBuilder str = new StringBuilder();
             for (String st : value.keySet()) {
-                str += ", " + st + ": " + value.get(st);
+                str.append(", ").append(st).append(": ").append(value.get(st));
             }
-            if (!str.isEmpty()) s += str.substring(2);
+            if (str.length() > 0) s += str.substring(2);
             return s + "}";
         }
 
@@ -611,8 +620,7 @@ public class MMOCoreCompat extends InternalCompatibility {
 
     private int convert(double d) {
         int i = (int) d;
-        double remainder = d - i;
-        if (new Random().nextDouble() < remainder) i++;
+        if (new Random().nextDouble() < d - i) i++;
         return i;
     }
 }
