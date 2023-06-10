@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller;
 import java.util.ArrayList;
 import java.util.HashSet;
+import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -50,6 +51,7 @@ public class Sapling{
         placed = true;
         if(material==null)material = new ArrayList<>(materials).get(0);
         block.setType(material);
+        TreeFellerCompat.placeSapling(this, player);
         return true;
     }
     public boolean tryPlace(ItemStack stack){
