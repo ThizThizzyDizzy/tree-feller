@@ -1813,7 +1813,7 @@ public abstract class Option<E>{
     public static OptionBoolean LOG_SILK_TOUCH = new OptionBoolean("Log Silk Touch", true, true, true, true){
         @Override
         public String getDesc(boolean ingame){
-            return "Should Silk Touch on an axe be applied to leaves?";
+            return "Should Silk Touch on an axe be applied to logs?";
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
