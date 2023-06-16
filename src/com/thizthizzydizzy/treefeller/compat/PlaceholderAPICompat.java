@@ -5,13 +5,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 public class PlaceholderAPICompat extends InternalCompatibility{
+    private boolean initialized = false;
     @Override
     public String getPluginName(){
         return "PlaceholderAPI";
     }
     @Override
     public void init(TreeFeller treeFeller){
+        if(initialized)return;
         new TreeFellerExpansion(treeFeller).register();
+        initialized = true;
     }
     public class TreeFellerExpansion extends me.clip.placeholderapi.expansion.PlaceholderExpansion{
         private final TreeFeller treefeller;
