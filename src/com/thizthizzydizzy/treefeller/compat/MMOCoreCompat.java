@@ -513,7 +513,7 @@ public class MMOCoreCompat extends InternalCompatibility{
     @Override
     public void fellTree(Block block, Player player, ItemStack axe, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks){
         HashMap<String, Double> treeXp = MMOCORE_TREE_XP.get( tool, tree );
-        if(treeXp==null||treeXp.isEmpty())return;
+        if(treeXp==null||treeXp.isEmpty()||player==null)return;
         net.Indyuce.mmocore.api.player.PlayerData data = net.Indyuce.mmocore.api.player.PlayerData.get(player);
         
         for(String profession : treeXp.keySet()){
