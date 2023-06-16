@@ -509,7 +509,7 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.DETECTOR_RAIL);
         }
     };
-    public static Option<ArrayList<DecorationDetector>> DECORATIONS = new Option<ArrayList<DecorationDetector>>("Decorations", false, true, false, DecorationDetector.detectors){
+    public static Option<ArrayList<DecorationDetector>> DECORATIONS = new Option<ArrayList<DecorationDetector>>("Decorations", true, true, true, DecorationDetector.detectors, "\n    - snow\n    - vines\n    - cocoa\n    - weeping vines\n    - moss"){
         @Override
         public ArrayList<DecorationDetector> load(Object o){
             if(o instanceof Iterable){
@@ -531,8 +531,8 @@ public abstract class Option<E>{
                     if(dec.name.equalsIgnoreCase((String)o))decor.add(dec);
                 }
                 if(decor.isEmpty()){//TODO let this be used
-                    Material m = Material.matchMaterial(name);
-                    if(m.isBlock()){
+                    Material m = Material.matchMaterial((String)o);
+                    if(m!=null&&m.isBlock()){
                         decor.add(new AdjacentDecorationDetector(m.getKey().toString(), m, BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
                     }
                 }
@@ -580,6 +580,14 @@ public abstract class Option<E>{
                 strs.add(dec.name);
             }
             return strs.toString();
+        }
+        @Override
+        public ArrayList<DecorationDetector> get(Tool tool, Tree tree) {
+            HashSet<DecorationDetector> allofem = new HashSet<>();
+            if(globalValue!=null)allofem.addAll(globalValue);
+            if(toolValues.containsKey(tool))allofem.addAll(toolValues.get(tool));
+            if(treeValues.containsKey(tree))allofem.addAll(treeValues.get(tree));
+            return new ArrayList<>(allofem);
         }
     };//TODO make this a HashSet
     //unnatural tree detection settings

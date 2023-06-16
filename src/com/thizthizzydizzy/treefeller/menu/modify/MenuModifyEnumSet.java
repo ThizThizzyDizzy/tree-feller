@@ -21,8 +21,8 @@ public class MenuModifyEnumSet<T> extends Menu{//TODO make multi-page
         this.value = defaultValue==null?null:new HashSet<>(defaultValue);
         this.allowNull = allowNull;
         this.values = values;
-        refresh();
         this.materials = materials;
+        refresh();
         this.setFunc = setFunc;
     }
     private void refresh(){

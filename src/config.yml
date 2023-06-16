@@ -48,6 +48,14 @@ require-cross-section: false
 # WARNING: THIS CAN CAUSE SIGNIFICANT LAG
 force-distance-check: false
 
+# Which decorations should be removed when felling? (ex. snow, vines)
+decorations: 
+    - snow
+    - vines
+    - cocoa
+    - weeping vines
+    - moss
+
 # Which trunk blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)
 # (For this to work, these must also be included in the tree trunk materials)
 # Ex. planks/glass
@@ -557,7 +565,7 @@ compatibility-blockregen: false
 # allow-partial
 # player-leaves
 # require-cross-section
-# decorations                        Which decorations should be removed when felling? (ex. snow, vines)
+# decorations
 # banned-logs
 # banned-leaves
 # max-horizontal-trunk-pillar-length
@@ -668,6 +676,7 @@ tools:
 # ignore-leaf-data
 # require-cross-section
 # force-distance-check
+# decorations
 # banned-logs
 # banned-leaves
 # max-horizontal-trunk-pillar-length

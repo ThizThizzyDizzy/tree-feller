@@ -8,8 +8,10 @@ public abstract class DecorationDetector{
     static{
         detectors.add(new AdjacentDecorationDetector("snow", Material.SNOW, BlockFace.UP));
         detectors.add(new AdjacentColumnDecorationDetector("vines", Material.VINE, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
-        detectors.add(new AdjacentDecorationDetector("cocoa", Material.COCOA, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
+        detectors.add(new AdjacentDecorationDetector("cocoa", new Material[]{Material.COCOA_BEANS, Material.COCOA}, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
         detectors.add(new AdjacentColumnDecorationDetector("weeping vines", new Material[]{Material.WEEPING_VINES, Material.WEEPING_VINES_PLANT}, BlockFace.DOWN));
+        Material moss = Material.matchMaterial("moss_carpet");
+        if(moss!=null)detectors.add(new AdjacentDecorationDetector("moss", moss, BlockFace.UP));
     }
     public final String name;
     private final Material material;
@@ -27,5 +29,9 @@ public abstract class DecorationDetector{
             mats[i] = detectors.get(i).material;
         }
         return mats;
+    }
+    @Override
+    public String toString(){
+        return name;
     }
 }

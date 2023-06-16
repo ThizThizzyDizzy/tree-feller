@@ -241,10 +241,10 @@ public class TreeFeller extends JavaPlugin{
                     if(ttl<=0)break;
                     for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                         droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
-                        for(Block d : detectedTree.decorations.get(leaf))droppedItems.addAll(getDrops(d, tool, tree, axe, new int[1]));
+                        for(Block d : detectedTree.getDecorations(leaf))droppedItems.addAll(getDrops(d, tool, tree, axe, new int[1]));
                     }
                     droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
-                    for(Block d : detectedTree.decorations.get(b))droppedItems.addAll(getDrops(d, tool, tree, axe, new int[1]));
+                    for(Block d : detectedTree.getDecorations(b))droppedItems.addAll(getDrops(d, tool, tree, axe, new int[1]));
                     ttl--;
                 }
                 new BukkitRunnable() {
@@ -255,10 +255,10 @@ public class TreeFeller extends JavaPlugin{
                             if(tTl<=0)break;
                             for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                                 breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed, true);
-                                for(Block d : detectedTree.decorations.get(leaf))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, true);
+                                for(Block d : detectedTree.getDecorations(leaf))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, true);
                             }
                             breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed, false);
-                            for(Block d : detectedTree.decorations.get(b))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, false);
+                            for(Block d : detectedTree.getDecorations(b))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, false);
                             tTl--;
                         }
                         processNaturalFalls();
@@ -285,10 +285,10 @@ public class TreeFeller extends JavaPlugin{
                     if(total<=0)break;
                     for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                         breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed, true);
-                        for(Block d : detectedTree.decorations.get(leaf))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, true);
+                        for(Block d : detectedTree.getDecorations(leaf))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, true);
                     }
                     breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed, false);
-                    for(Block d : detectedTree.decorations.get(b))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, false);
+                    for(Block d : detectedTree.getDecorations(b))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, false);
                     total--;
                 }
             }
@@ -411,8 +411,8 @@ public class TreeFeller extends JavaPlugin{
                 HashMap<Block, ArrayList<Block>> decorations = new HashMap<>();
                 for(Block b : everything){
                     ArrayList<Block> decor = new ArrayList<>();
-                    for(DecorationDetector detector : DecorationDetector.detectors){
-                        detector.detect(block, decor);
+                    for(DecorationDetector detector : Option.DECORATIONS.get(tool, tree)){
+                        detector.detect(b, decor);
                     }
                     if(!decor.isEmpty())decorations.put(b, decor);
                 }
@@ -779,7 +779,7 @@ public class TreeFeller extends JavaPlugin{
                 }else if(o instanceof String){
                     Material m = Material.matchMaterial((String)o);
                     if(m==null){
-                        log(logger, source, Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
+                        log(logger, source, Level.WARNING, "Unknown material: {0}; Skipping...", o);
                     }
                     Tool tool = new Tool(m);
                     if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
@@ -921,7 +921,7 @@ public class TreeFeller extends JavaPlugin{
             }else if(o instanceof String){
                 Material m = Material.matchMaterial((String)o);
                 if(m==null){
-                    log(logger, source, Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
+                    log(logger, source, Level.WARNING, "Unknown material: {0}; Skipping...", o);
                 }
                 Tool tool = new Tool(m);
                 if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
@@ -1791,7 +1791,7 @@ public class TreeFeller extends JavaPlugin{
         logger.log(level, message, params);
         if(source!=null){
             ChatColor color = ChatColor.RESET;
-            if(level==Level.INFO)color = ChatColor.GRAY;
+            if(level==Level.INFO)return;
             if(level==Level.WARNING)color = ChatColor.YELLOW;
             if(level==Level.SEVERE)color = ChatColor.RED;
             for(int i = 0; i<params.length; i++){
