@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
@@ -35,51 +36,91 @@ public class TreeFellerCompat{
         compatibilities.add(new AureliumSkillsCompat());
         compatibilities.add(new BlockRegenCompat());
     }
-    public static void init(TreeFeller treeFeller){
-        if(treeFeller!=null){
+    public static void init(TreeFeller treefeller){
+        if(treefeller!=null){
             for(PluginCompatibility compat : getCompatibilities()){
-                compat.init(treeFeller);
+                try{
+                    compat.init(treefeller);
+                }catch(Exception ex){
+                    treefeller.getLogger().log(Level.SEVERE, compat.getFriendlyName()+" compatibility failed to initalize!", ex);
+                    compat.enabled.setValue(false);
+                }
             }
         }
     }
-    public static void breakBlock(Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
+    public static void breakBlock(TreeFeller treefeller, Tree tree, Tool tool, Player player, ItemStack axe, Block block, List<Modifier> modifiers){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.breakBlock(tree, tool, player, axe, block, modifiers);
+            try{
+                compat.breakBlock(tree, tool, player, axe, block, modifiers);
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+            }
         }
     }
-    public static void addBlock(Player player, Block block, BlockState was){
+    public static void addBlock(TreeFeller treefeller, Player player, Block block, BlockState was){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.addBlock(player, block, was);
+            try{
+                compat.addBlock(player, block, was);
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+            }
         }
     }
-    public static void removeBlock(Player player, Block block){
+    public static void removeBlock(TreeFeller treefeller, Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.removeBlock(player, block);
+            try{
+                compat.removeBlock(player, block);
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+            }
         }
     }
-    public static void dropItem(Player player, Item item){
+    public static void dropItem(TreeFeller treefeller, Player player, Item item){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.dropItem(player, item);
+            try{
+                compat.dropItem(player, item);
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+            }
         }
     }
-    static String test(Player player, Block block){
+    static String test(TreeFeller treefeller, Player player, Block block){
         for(PluginCompatibility compat : getCompatibilities()){
-            if(!compat.test(player, block))return compat.getPluginName();
-        }
-        return null;
-    }
-    public static TestResult test(Player player, Iterable<Block> blocks){
-        for(PluginCompatibility compat : getCompatibilities()){
-            Block block = compat.test(player, blocks);
-            if(block!=null){
-                return new TestResult(compat.getPluginName(), block);
+            try{
+                if(!compat.test(player, block))return compat.getPluginName();
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
         return null;
     }
-    public static void fellTree(Block block, Player player, ItemStack axe, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks){
+    public static TestResult test(TreeFeller treefeller, Player player, Iterable<Block> blocks){
         for(PluginCompatibility compat : getCompatibilities()){
-            compat.fellTree(block, player, axe, tool, tree, blocks);
+            try{
+                Block block = compat.test(player, blocks);
+                if(block!=null){
+                    return new TestResult(compat.getPluginName(), block);
+                }
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+            }
+        }
+        return null;
+    }
+    public static void fellTree(TreeFeller treefeller, Block block, Player player, ItemStack axe, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks){
+        for(PluginCompatibility compat : getCompatibilities()){
+            try{
+                compat.fellTree(block, player, axe, tool, tree, blocks);
+            }catch(Exception ex){
+                treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
+                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+            }
         }
     }
     public static void addPluginCompatibility(PluginCompatibility compatibility){

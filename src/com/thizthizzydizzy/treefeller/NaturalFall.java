@@ -89,7 +89,7 @@ public class NaturalFall{
             ((Orientable)data).setAxis(axis);
             target.setBlockData(data);
         }
-        TreeFellerCompat.addBlock(player, target, was);
+        TreeFellerCompat.addBlock(plugin, player, target, was);
     }
     private void triggerNaturalFall(TreeFeller plugin, Block b){
         for(NaturalFall fall : plugin.naturalFalls){

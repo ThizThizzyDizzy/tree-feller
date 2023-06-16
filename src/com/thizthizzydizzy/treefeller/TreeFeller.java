@@ -164,7 +164,7 @@ public class TreeFeller extends JavaPlugin{
         if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
         if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
         debug(player, true, true, "success");
-        TreeFellerCompat.fellTree(block, player, axe, tool, tree, detectedTree.trunk);
+        TreeFellerCompat.fellTree(this, block, player, axe, tool, tree, detectedTree.trunk);
         if(Option.LEAVE_STUMP.get(tool, tree)){
             for(int i : detectedTree.trunk.keySet()){
                 for(Iterator<Block> it = detectedTree.trunk.get(i).iterator(); it.hasNext();){
@@ -389,7 +389,7 @@ public class TreeFeller extends JavaPlugin{
                 ArrayList<Block> everything = new ArrayList<>();
                 everything.addAll(toList(blocks));
                 everything.addAll(toList(allLeaves));
-                TestResult res = TreeFellerCompat.test(player, everything);
+                TestResult res = TreeFellerCompat.test(this, player, everything);
                 if(res!=null){
                     debug(player, false, false, "protected", res.plugin, res.block.getX(), res.block.getY(), res.block.getZ());
                     continue TREE;
@@ -941,15 +941,15 @@ public class TreeFeller extends JavaPlugin{
         HashMap<Material, Material> conversions = Option.BLOCK_CONVERSIONS.get(tool, tree);
         if(conversions.containsKey(block.getType())){
             BlockState state = block.getState();
-            TreeFellerCompat.removeBlock(player, block);
+            TreeFellerCompat.removeBlock(this, player, block);
             block.setType(conversions.get(block.getType()));
-            TreeFellerCompat.addBlock(player, block, state);
+            TreeFellerCompat.addBlock(this, player, block, state);
         }else{
             ArrayList<Modifier> modifiers = new ArrayList<>();
             if(behavior==FellBehavior.FALL||behavior==FellBehavior.FALL_HURT||behavior==FellBehavior.NATURAL){
-                TreeFellerCompat.removeBlock(player, block);
+                TreeFellerCompat.removeBlock(this, player, block);
             }else{
-                TreeFellerCompat.breakBlock(tree, tool, player, axe, block, modifiers);
+                TreeFellerCompat.breakBlock(this, tree, tool, player, axe, block, modifiers);
             }
             behavior.breakBlock(detectedTree, this, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         }
@@ -1631,7 +1631,7 @@ public class TreeFeller extends JavaPlugin{
             }
         }
         item.setItemStack(stack);
-        TreeFellerCompat.dropItem(player, item);
+        TreeFellerCompat.dropItem(this, player, item);
     }
     public boolean isToggledOn(Player player){
         boolean inverted = Option.DEFAULT_ENABLED.isTrue();

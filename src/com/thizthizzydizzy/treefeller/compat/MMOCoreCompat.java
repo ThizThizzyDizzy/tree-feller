@@ -21,7 +21,7 @@ import static com.thizthizzydizzy.treefeller.DebugResult.Type.*;
 
 public class MMOCoreCompat extends InternalCompatibility{
     private static boolean installed;
-    public static Option<HashMap<String, Double>> MMOCORE_TRUNK_XP = new Option<HashMap<String, Double>>("MMOCore Trunk XP", true, false, true, new HashMap<>(), "\n   - global: 1"){
+    public static Option<HashMap<String, Double>> MMOCORE_TRUNK_XP = new Option<HashMap<String, Double>>("MMOCore Trunk XP", true, false, true, new HashMap<>(), "\n   - woodcutting: 1"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these professions when a tree is felled\n"
@@ -130,7 +130,7 @@ public class MMOCoreCompat extends InternalCompatibility{
             return s+"}";
         }
     };
-    public static Option<HashMap<String, Double>> MMOCORE_LEAVES_XP = new Option<HashMap<String, Double>>("MMOCore Leaves XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
+    public static Option<HashMap<String, Double>> MMOCORE_LEAVES_XP = new Option<HashMap<String, Double>>("MMOCore Leaves XP", true, false, true, new HashMap<>(), "\n   - woodcutting: 0"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these professions when a tree is felled\n"
@@ -379,7 +379,7 @@ public class MMOCoreCompat extends InternalCompatibility{
         
         
     };
-    public static Option<HashMap<String, Double>> MMOCORE_TREE_XP = new Option<HashMap<String, Double>>("MMOCore Tree XP", true, false, true, new HashMap<>(), "\n   - global: 0"){
+    public static Option<HashMap<String, Double>> MMOCORE_TREE_XP = new Option<HashMap<String, Double>>("MMOCore Tree XP", true, false, true, new HashMap<>(), "\n   - woodcutting: 0"){
         @Override
         public String getDesc(boolean ingame){
             return "EXP will be provided to these professions when a tree is felled\n"
