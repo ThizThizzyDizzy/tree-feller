@@ -221,7 +221,7 @@ leaf-silk-touch: false
 # Should Fortune on an axe be applied to logs?
 log-fortune: true
 
-# Should Silk Touch on an axe be applied to leaves?
+# Should Silk Touch on an axe be applied to logs?
 log-silk-touch: true
 
 # When a tree is felled, should a stump be left? (The stump consists of any log blocks below the point at which the tree was felled)
