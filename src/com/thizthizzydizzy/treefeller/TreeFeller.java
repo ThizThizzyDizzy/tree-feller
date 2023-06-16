@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.compat.TestResult;
 import com.thizthizzydizzy.treefeller.compat.TreeFellerCompat;
+import com.thizthizzydizzy.treefeller.decoration.DecorationDetector;
 import com.thizthizzydizzy.treefeller.menu.MenuTreesConfiguration;
 import java.io.BufferedReader;
 import java.io.File;
@@ -240,8 +241,10 @@ public class TreeFeller extends JavaPlugin{
                     if(ttl<=0)break;
                     for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
                         droppedItems.addAll(getDrops(leaf, tool, tree, axe, new int[1]));
+                        for(Block d : detectedTree.decorations.get(leaf))droppedItems.addAll(getDrops(d, tool, tree, axe, new int[1]));
                     }
                     droppedItems.addAll(getDrops(b, tool, tree, axe, new int[1]));
+                    for(Block d : detectedTree.decorations.get(b))droppedItems.addAll(getDrops(d, tool, tree, axe, new int[1]));
                     ttl--;
                 }
                 new BukkitRunnable() {
@@ -251,9 +254,11 @@ public class TreeFeller extends JavaPlugin{
                         for(Block b : detectedTree.trunk.get(i)){
                             if(tTl<=0)break;
                             for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
-                                breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
+                                breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed, true);
+                                for(Block d : detectedTree.decorations.get(leaf))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, true);
                             }
-                            breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed);
+                            breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed, false);
+                            for(Block d : detectedTree.decorations.get(b))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, false);
                             tTl--;
                         }
                         processNaturalFalls();
@@ -274,14 +279,16 @@ public class TreeFeller extends JavaPlugin{
                     }.runTaskLater(this, delay+1);
                 }
             }
-        }else{
+        }else{//TODO what about dropped items?
             for(int i : distances){
                 for(Block b : detectedTree.trunk.get(i)){
                     if(total<=0)break;
                     for(Block leaf : toList(getBlocksWithLeafCheck(tree.trunk, tree.leaves, b, Option.LEAF_BREAK_RANGE.get(tool, tree), Option.DIAGONAL_LEAVES.get(tool, tree), Option.PLAYER_LEAVES.get(tool, tree), Option.IGNORE_LEAF_DATA.get(tool, tree), Option.FORCE_DISTANCE_CHECK.get(tool, tree)))){
-                        breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed);
+                        breakBlock(detectedTree, dropItems, tree, tool, axe, leaf, block, lowest, player, seed, true);
+                        for(Block d : detectedTree.decorations.get(leaf))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, true);
                     }
-                    breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed);
+                    breakBlock(detectedTree, dropItems, tree, tool, axe, b, block, lowest, player, seed, false);
+                    for(Block d : detectedTree.decorations.get(b))breakBlock(detectedTree, dropItems, tree, tool, axe, d, block, lowest, player, seed, false);
                     total--;
                 }
             }
@@ -401,7 +408,15 @@ public class TreeFeller extends JavaPlugin{
                     debug(player, false, result);
                     if(!result.isSuccess())continue TOOL;
                 }
-                DetectedTree detected = new DetectedTree(tool, tree, blocks, allLeaves);
+                HashMap<Block, ArrayList<Block>> decorations = new HashMap<>();
+                for(Block b : everything){
+                    ArrayList<Block> decor = new ArrayList<>();
+                    for(DecorationDetector detector : DecorationDetector.detectors){
+                        detector.detect(block, decor);
+                    }
+                    if(!decor.isEmpty())decorations.put(b, decor);
+                }
+                DetectedTree detected = new DetectedTree(tool, tree, blocks, allLeaves, decorations);
                 Boolean result = checkFunc.apply(detected);
                 if(result==null)continue;
                 if(Objects.equals(result, false))continue TREE;
@@ -918,22 +933,21 @@ public class TreeFeller extends JavaPlugin{
 //</editor-fold>
         TreeFellerCompat.reload();
     }
-    private void breakBlock(DetectedTree detectedTree, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed){
+    private void breakBlock(DetectedTree detectedTree, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, boolean isLeaves){
         ArrayList<Material> overridables = new ArrayList<>(Option.OVERRIDABLES.get(tool, tree));
         ArrayList<Effect> effects = new ArrayList<>();
-        boolean isLeaf = !tree.trunk.contains(block.getType());
+        Effect.EffectLocation type = Effect.EffectLocation.DECORATION;//TODO use a special enum for this?
+        if(tree.leaves.contains(block.getType()))type = Effect.EffectLocation.LEAVES;
+        if(tree.trunk.contains(block.getType()))type = Effect.EffectLocation.LOGS;
         if(Option.CASCADE.get(tool, tree)){
             cascade(detectedTree, dropItems, tree, tool, axe, block, player);
         }
         for(Effect e : Option.EFFECTS.get(tool, tree)){
             if(e.location==Effect.EffectLocation.TREE)effects.add(e);
-            if(isLeaf){
-                if(e.location==Effect.EffectLocation.LEAVES)effects.add(e);
-            }else{
-                if(e.location==Effect.EffectLocation.LOGS)effects.add(e);
-            }
+            if(type==e.location)effects.add(e);
         }
-        FellBehavior behavior = isLeaf?Option.LEAF_BEHAVIOR.get(tool, tree):Option.LOG_BEHAVIOR.get(tool, tree);
+        FellBehavior behavior = isLeaves?Option.LEAF_BEHAVIOR.get(tool, tree):Option.LOG_BEHAVIOR.get(tool, tree);
+        if(type==Effect.EffectLocation.DECORATION)behavior = behavior.getDecorationBehavior();
 //        double dropChance = dropItems?(isLeaf?Option.LEAF_DROP_CHANCE.get(tool, tree):Option.LOG_DROP_CHANCE.get(tool, tree)):0;
         double directionalFallVelocity = Option.DIRECTIONAL_FALL_VELOCITY.get(tool, tree);
         double verticalFallVelocity = Option.VERTICAL_FALL_VELOCITY.get(tool, tree);

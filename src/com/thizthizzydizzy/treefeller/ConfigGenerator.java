@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.Objects;
 public class ConfigGenerator{
     public static void generateConfiguration(TreeFeller plugin){
@@ -81,11 +82,13 @@ public class ConfigGenerator{
         add("# name: <value>        This is the effect's name. It is used to assign the effect to a tree or tool");
         add("# chance: <value>      This is the chance of the effect happening (0-1, default 1)");
         add("# location: <value>    This is where the effect will occur. valid options:");
-        add("#   logs       The effect will occur at every log in the tree");
-        add("#   leaves     The effect will occur at every block of leaves in the tree");
-        add("#   tree       The effect will occur at every block in the tree");
-        add("#   tool       The effect will occur at the block that was cut down");
-        add("#   tool_break The effect will occur at the block that was cut down, when the tool breaks");
+        len = 0;
+        for(Effect.EffectLocation loc : Effect.EffectLocation.values()){
+            len = Math.max(len, ("#   "+loc.name()).length());
+        }
+        for(Effect.EffectLocation loc : Effect.EffectLocation.values()){
+            add(normalize("#   "+loc.name().toLowerCase(Locale.ROOT), len)+" "+loc.description);
+        }
         add("# type: <value>     This is what type of effect should occur. Valid options:");
         add("#   particle  A particle effect, such as flame, block, etc. particles");
         add("#   sound     Any sound");
@@ -247,6 +250,7 @@ public class ConfigGenerator{
             add("    - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, max-saplings: 1}]");
             add("    - [[OAK_LOG, OAK_WOOD], [AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES], {sapling: [AZALEA, FLOWERING_AZALEA], max-saplings: 1, diagonal-leaves: true}]");
             add("    - [[MANGROVE_LOG, MANGROVE_WOOD], [MANGROVE_ROOTS, MANGROVE_LEAVES], {roots: [MANGROVE_ROOTS], sapling: [MANGROVE_PROPAGULE], max-saplings: 1, max-trunks: 16, max-horizontal-trunk-pillar-length: 16, leaf-detect-range: 16, leaf-break-range: 16, required-logs: 3, root-distance: 16, diagonal-leaves: true}]");
+            add("    - [[CHERRY_LOG, CHERRY_WOOD], CHERRY_LEAVES, {sapling: CHERRY_SAPLING, max-saplings: 1}]");
             add("    - [[CRIMSON_STEM, CRIMSON_HYPHAE], [NETHER_WART_BLOCK, SHROOMLIGHT], {sapling: CRIMSON_FUNGUS, max-saplings: 1, grass: [CRIMSON_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]");
             add("    - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]");
             add();
@@ -255,11 +259,13 @@ public class ConfigGenerator{
             add("# name: <value>        This is the effect's name. It is used to assign the effect to a tree or tool");
             add("# chance: <value>      This is the chance of the effect happening (0-1, default 1)");
             add("# location: <value>    This is where the effect will occur. valid options:");
-            add("#   logs       The effect will occur at every log in the tree");
-            add("#   leaves     The effect will occur at every block of leaves in the tree");
-            add("#   tree       The effect will occur at every block in the tree");
-            add("#   tool       The effect will occur at the block that was cut down");
-            add("#   tool_break The effect will occur at the block that was cut down, when the tool breaks");
+            len = 0;
+            for(Effect.EffectLocation loc : Effect.EffectLocation.values()){
+                len = Math.max(len, ("#   "+loc.name()).length());
+            }
+            for(Effect.EffectLocation loc : Effect.EffectLocation.values()){
+                add(normalize("#   "+loc.name().toLowerCase(Locale.ROOT), len)+" "+loc.description);
+            }
             add("# type: <value>     This is what type of effect should occur. Valid options:");
             add("#   particle  A particle effect, such as flame, block, etc. particles");
             add("#   sound     Any sound");

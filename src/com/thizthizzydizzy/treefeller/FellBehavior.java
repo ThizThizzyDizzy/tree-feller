@@ -24,6 +24,10 @@ public enum FellBehavior{
             }
             block.setType(Material.AIR);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
+        }
     },
     INVENTORY(Material.CHEST, "blocks will appear in the player's inventory as items, or fall as items if the player inventory is full"){
         @Override
@@ -40,6 +44,10 @@ public enum FellBehavior{
             }
             block.setType(Material.AIR);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return INVENTORY;
+        }
     },
     NATURAL(Material.OAK_SAPLING, "blocks will instantly fall in a more natural way (May not work with cutting-animation)"){
         @Override
@@ -48,11 +56,19 @@ public enum FellBehavior{
             plugin.naturalFalls.add(new NaturalFall(player, v, origin, block, block.getY()-lowest, rotate, overridables));
             block.setType(Material.AIR);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
+        }
     },
     FALL(Material.SAND, "blocks will fall as falling blocks"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedFallBehavior(detectedTree, false, false, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
+        }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
         }
     },
     FALL_HURT(Material.ANVIL, "blocks will fall as falling blocks and hurt any entity they land on"){
@@ -60,11 +76,19 @@ public enum FellBehavior{
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedFallBehavior(detectedTree, true, false, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
+        }
     },
     FALL_BREAK(Material.GRAVEL, "blocks will fall as falling blocks and break when they reach the ground"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedFallBehavior(detectedTree, false, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
+        }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
         }
     },
     FALL_HURT_BREAK(Material.DAMAGED_ANVIL, "blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground"){
@@ -72,11 +96,19 @@ public enum FellBehavior{
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedFallBehavior(detectedTree, true, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
+        }
     },
     FALL_INVENTORY(Material.ENDER_CHEST, "blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedFallBehavior(detectedTree, false, false, true, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
+        }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return INVENTORY;
         }
     },
     FALL_HURT_INVENTORY(Material.TRAPPED_CHEST, "blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground"){
@@ -84,11 +116,19 @@ public enum FellBehavior{
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedFallBehavior(detectedTree, true, false, true, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, directionalFallVelocity, rotate, overridables, randomFallVelocity, explosiveFallVelocity, verticalFallVelocity);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return INVENTORY;
+        }
     },
     FALL_NATURAL(Material.SAND, "blocks will fall as falling blocks. Blocks will attempt to target a position to land as if the tree fell over realistically"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedNaturalFallBehavior(detectedTree, false, false, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
+        }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
         }
     },
     FALL_NATURAL_HURT(Material.ANVIL, "blocks will fall as falling blocks and hurt any entity they land on. Blocks will attempt to target a position to land as if the tree fell over realistically"){
@@ -96,11 +136,19 @@ public enum FellBehavior{
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedNaturalFallBehavior(detectedTree, true, false, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
+        }
     },
     FALL_NATURAL_BREAK(Material.GRAVEL, "blocks will fall as falling blocks and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedNaturalFallBehavior(detectedTree, false, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
+        }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
         }
     },
     FALL_NATURAL_HURT_BREAK(Material.DAMAGED_ANVIL, "blocks will fall as falling blocks, hurt entities they land on, and break when they reach the ground. Blocks will attempt to target a position to land as if the tree fell over realistically"){
@@ -108,17 +156,29 @@ public enum FellBehavior{
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedNaturalFallBehavior(detectedTree, true, true, false, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return BREAK;
+        }
     },
     FALL_NATURAL_INVENTORY(Material.ENDER_CHEST, "blocks will fall as falling blocks, break, and appear in the player's inventory upon reaching the ground. Blocks will attempt to target a position to land as if the tree fell over realistically"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedNaturalFallBehavior(detectedTree, false, false, true, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
         }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return INVENTORY;
+        }
     },
     FALL_NATURAL_HURT_INVENTORY(Material.TRAPPED_CHEST, "blocks will fall as falling blocks, break, hurt entities they land on, and appear in the player's inventory upon reaching the ground. Blocks will attempt to target a position to land as if the tree fell over realistically"){
         @Override
         void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
             processDelayedNaturalFallBehavior(detectedTree, true, false, true, plugin, dropItems, tree, tool, axe, block, origin, lowest, player, seed, modifiers, directionalFallBehavior, lockCardinal, rotate, overridables, verticalFallVelocity);
+        }
+        @Override
+        public FellBehavior getDecorationBehavior(){
+            return INVENTORY;
         }
     };
     private final Material item;
@@ -134,6 +194,7 @@ public enum FellBehavior{
         return item;
     }
     abstract void breakBlock(DetectedTree detectedTree, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity);
+    public abstract FellBehavior getDecorationBehavior();
     private static void processDelayedFallBehavior(DetectedTree detectedTree, boolean hurt, boolean doBreak, boolean inventory, TreeFeller plugin, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, ArrayList<Modifier> modifiers, DirectionalFallBehavior directionalFallBehavior, boolean lockCardinal, double directionalFallVelocity, boolean rotate, ArrayList<Material> overridables, double randomFallVelocity, double explosiveFallVelocity, double verticalFallVelocity){
         BlockData data = block.getBlockData();
         block.setType(Material.AIR);

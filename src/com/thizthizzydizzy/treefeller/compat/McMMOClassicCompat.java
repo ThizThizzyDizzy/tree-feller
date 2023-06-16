@@ -19,7 +19,7 @@ public class McMMOClassicCompat extends InternalCompatibility{
         return "mcMMO";
     }
     @Override
-    public String getFriendlyName(){
+    public String getCompatibilityName() {
         return "mcMMO Classic";
     }
     @Override

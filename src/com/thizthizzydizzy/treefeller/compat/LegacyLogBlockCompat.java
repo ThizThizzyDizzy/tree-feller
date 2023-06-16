@@ -13,6 +13,10 @@ public class LegacyLogBlockCompat extends InternalCompatibility{
         return "LogBlock (pre-1.19)";
     }
     @Override
+    public String getCompatibilityName() {
+        return "LogBlock Legacy";
+    }
+    @Override
     public String getPluginName(){
         return "LogBlock";
     }

@@ -107,14 +107,17 @@ public class Effect{
         return s+"}";
     }
     public static enum EffectLocation{
-        LOGS(Material.OAK_WOOD),
-        LEAVES(Material.OAK_LEAVES),
-        TREE(Material.OAK_SAPLING),
-        TOOL(Material.IRON_AXE),
-        TOOL_BREAK(Material.WOODEN_AXE);
+        LOGS(Material.OAK_WOOD, "The effect will occur at every log in the tree"),
+        LEAVES(Material.OAK_LEAVES, "The effect will occur at every block of leaves in the tree"),
+        TREE(Material.OAK_SAPLING, "The effect will occur at every block in the tree"),
+        DECORATION(Material.SNOW, "The effect will occur at every block of decorations removed from the tree"),
+        TOOL(Material.IRON_AXE, "The effect will occur at the block that was cut down"),
+        TOOL_BREAK(Material.WOODEN_AXE, "The effect will occur at the block that was cut down, when the tool breaks");
         private final Material item;
-        private EffectLocation(Material item){
+        public final String description;
+        private EffectLocation(Material item, String description){
             this.item = item;
+            this.description = description;
         }
         public Material getItem(){
             return item;

@@ -21,7 +21,7 @@ public abstract class PluginCompatibility{
      */
     public OptionBoolean enabled;
     public PluginCompatibility(){
-        enabled = new OptionBoolean("Compatibility "+getPluginName(), true, false, false, defaultEnabled(), defaultEnabled()){
+        enabled = new OptionBoolean("Compatibility "+getCompatibilityName(), true, false, false, defaultEnabled(), defaultEnabled()){
             @Override
             public String getDesc(boolean ingame){
                 return "Toggle compatibility with "+PluginCompatibility.this.getFriendlyName();
@@ -37,6 +37,13 @@ public abstract class PluginCompatibility{
         };
     }
     public void init(TreeFeller treeFeller){}
+    /**
+     * The name of the compatibility used in the config.
+     * This should be the same as the plugin name, except in special cases (such as multiple plugins with the same name)
+    */
+    public String getCompatibilityName(){
+        return getPluginName();
+    }
     public abstract String getPluginName();
     /**
      * Called when a block is removed, but not broken, such as when a tree falls over
@@ -106,7 +113,7 @@ public abstract class PluginCompatibility{
         return null;
     }
     public String getFriendlyName(){
-        return getPluginName();
+        return getCompatibilityName();
     }
     /**
      * If the compatibility is enabled or not.

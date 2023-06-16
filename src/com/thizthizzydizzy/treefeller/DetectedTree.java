@@ -12,11 +12,13 @@ public class DetectedTree{
     public final HashMap<Integer, ArrayList<Block>> leaves;
     public ArrayList<Block> stump = new ArrayList<>();
     public ArrayList<Sapling> saplings = new ArrayList<>();
-    public DetectedTree(Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> trunk, HashMap<Integer, ArrayList<Block>> leaves){
+    public final HashMap<Block, ArrayList<Block>> decorations;
+    public DetectedTree(Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> trunk, HashMap<Integer, ArrayList<Block>> leaves, HashMap<Block, ArrayList<Block>> decorations){
         this.tool = tool;
         this.tree = tree;
         this.trunk = trunk;
         this.leaves = leaves;
+        this.decorations = decorations;
     }
     public void addSapling(Player player, Block block, HashSet<Material> saplings){
         this.saplings.add(new Sapling(this, player, block, saplings, Option.SPAWN_SAPLINGS.get(tool, tree)==2, Option.SAPLING_TIMEOUT.get(tool, tree)));

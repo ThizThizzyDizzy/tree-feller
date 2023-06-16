@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.21.4
+# Version 1.22.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -404,7 +404,7 @@ cascade-check-limit: 64
 # - global: 3
 # - woodcutting: 8
 mmocore-trunk-xp: 
-   - global: 1
+   - woodcutting: 1
 
 # EXP will be provided to these professions when a tree is felled
 # EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
@@ -413,7 +413,7 @@ mmocore-trunk-xp:
 # - global: 3
 # - woodcutting: 8
 mmocore-leaves-xp: 
-   - global: 0
+   - woodcutting: 0
 
 # These professions' levels will be checked before a tree is felled
 mmocore-required-profession-level:
@@ -425,7 +425,7 @@ mmocore-required-profession-level:
 # - global: 3
 # - woodcutting: 8
 mmocore-tree-xp: 
-   - global: 0
+   - woodcutting: 0
 
 # Toggle emulating MMOCore's Block Regen (see MMOCore/professions/mining.yml)
 # MMOCore's "temp-block" option must not be set, otherwise tree will not fell
@@ -444,7 +444,7 @@ mcmmo-double-drops: true
 compatibility-mcmmo: true
 
 # Toggle compatibility with mcMMO Classic
-compatibility-mcmmo: true
+compatibility-mcmmo-classic: true
 
 # Toggle compatibility with CoreProtect
 compatibility-coreprotect: true
@@ -467,20 +467,28 @@ compatibility-oreregenerator: false
 # Toggle compatibility with Drop2Inventory
 compatibility-drop2inventory: true
 
-# How much Woodcutting experience should be given per block of trunk felled?
-ecoskills-trunk-woodcutting-xp: 1.0
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)
+ecoskills-trunk-xp: 
+   - Woodcutting: 1
 
-# How much Mining experience should be given per block of trunk felled?
-ecoskills-trunk-mining-xp: 0.0
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
+# use "global" to add global experience
+# ex:
+# - global: 3
+# - woodcutting: 8
+ecoskills-leaves-xp: 
+   - woodcutting: 0
 
-# How much Woodcutting experience should be given per block of leaves felled?
-ecoskills-leaf-woodcutting-xp: 0.0
-
-# How much Mining experience should be given per block of leaves felled?
-ecoskills-leaf-mining-xp: 0.0
-
-# Should EcoSkills modifiers be applied to experience earned through TreeFeller?
-ecoskills-apply-modifiers: true
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-tree (a value of 1 means 1 EXP per tree)
+# use "global" to add global experience
+# ex:
+# - global: 3
+# - woodcutting: 8
+ecoskills-tree-xp: 
+   - woodcutting: 0
 
 # Toggle compatibility with EcoSkills
 compatibility-ecoskills: true
@@ -497,7 +505,10 @@ ecojobs-apply-multipliers: true
 # Toggle compatibility with EcoJobs
 compatibility-ecojobs: true
 
-# Toggle compatibility with LogBlock
+# Toggle compatibility with LogBlock (pre-1.19)
+compatibility-logblock-legacy: true
+
+# Toggle compatibility with LogBlock (1.19)
 compatibility-logblock: true
 
 # Toggle compatibility with Lands
@@ -546,6 +557,7 @@ compatibility-blockregen: false
 # allow-partial
 # player-leaves
 # require-cross-section
+# decorations                        Which decorations should be removed when felling? (ex. snow, vines)
 # banned-logs
 # banned-leaves
 # max-horizontal-trunk-pillar-length
@@ -620,11 +632,6 @@ compatibility-blockregen: false
 # cascade
 # mmocore-required-profession-level
 # mcmmo-double-drops
-# ecoskills-trunk-woodcutting-xp
-# ecoskills-trunk-mining-xp
-# ecoskills-leaf-woodcutting-xp
-# ecoskills-leaf-mining-xp
-# ecoskills-apply-modifiers
 # ecojobs-trunk-xp
 # ecojobs-leaf-xp
 # ecojobs-apply-multipliers
@@ -744,11 +751,9 @@ tools:
 # mmocore-emulate-regen
 # mcmmo-double-drops
 # oreregenerator-regen-delay
-# ecoskills-trunk-woodcutting-xp
-# ecoskills-trunk-mining-xp
-# ecoskills-leaf-woodcutting-xp
-# ecoskills-leaf-mining-xp
-# ecoskills-apply-modifiers
+# ecoskills-trunk-xp
+# ecoskills-leaves-xp
+# ecoskills-tree-xp
 # ecojobs-trunk-xp
 # ecojobs-leaf-xp
 # ecojobs-apply-multipliers
@@ -769,6 +774,7 @@ trees:
     - [[ACACIA_LOG, ACACIA_WOOD], ACACIA_LEAVES, {sapling: ACACIA_SAPLING, max-saplings: 1}]
     - [[OAK_LOG, OAK_WOOD], [AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES], {sapling: [AZALEA, FLOWERING_AZALEA], max-saplings: 1, diagonal-leaves: true}]
     - [[MANGROVE_LOG, MANGROVE_WOOD], [MANGROVE_ROOTS, MANGROVE_LEAVES], {roots: [MANGROVE_ROOTS], sapling: [MANGROVE_PROPAGULE], max-saplings: 1, max-trunks: 16, max-horizontal-trunk-pillar-length: 16, leaf-detect-range: 16, leaf-break-range: 16, required-logs: 3, root-distance: 16, diagonal-leaves: true}]
+    - [[CHERRY_LOG, CHERRY_WOOD], CHERRY_LEAVES, {sapling: CHERRY_SAPLING, max-saplings: 1}]
     - [[CRIMSON_STEM, CRIMSON_HYPHAE], [NETHER_WART_BLOCK, SHROOMLIGHT], {sapling: CRIMSON_FUNGUS, max-saplings: 1, grass: [CRIMSON_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
     - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
 
@@ -780,6 +786,7 @@ trees:
 #   logs       The effect will occur at every log in the tree
 #   leaves     The effect will occur at every block of leaves in the tree
 #   tree       The effect will occur at every block in the tree
+#   decoration The effect will occur at every block of decorations removed from the tree
 #   tool       The effect will occur at the block that was cut down
 #   tool_break The effect will occur at the block that was cut down, when the tool breaks
 # type: <value>     This is what type of effect should occur. Valid options:

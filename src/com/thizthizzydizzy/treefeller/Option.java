@@ -1,11 +1,14 @@
 package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import static com.thizthizzydizzy.treefeller.DebugResult.Type.*;
+import com.thizthizzydizzy.treefeller.decoration.AdjacentDecorationDetector;
+import com.thizthizzydizzy.treefeller.decoration.DecorationDetector;
 import com.thizthizzydizzy.treefeller.menu.MenuGlobalConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuToolConfiguration;
 import com.thizthizzydizzy.treefeller.menu.MenuTreeConfiguration;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyDouble;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnchantmentMap;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnumSet;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyFloat;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialMaterialMap;
@@ -30,6 +33,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -505,6 +509,79 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.DETECTOR_RAIL);
         }
     };
+    public static Option<ArrayList<DecorationDetector>> DECORATIONS = new Option<ArrayList<DecorationDetector>>("Decorations", false, true, false, DecorationDetector.detectors){
+        @Override
+        public ArrayList<DecorationDetector> load(Object o){
+            if(o instanceof Iterable){
+                ArrayList<DecorationDetector> decor = new ArrayList<>();
+                for(Object ob : (Iterable)o){
+                    ArrayList<DecorationDetector> newDecor = load(ob);
+                    if(newDecor!=null)decor.addAll(newDecor);
+                }
+                return decor;
+            }
+            if(o instanceof DecorationDetector){
+                ArrayList<DecorationDetector> decor = new ArrayList<>();
+                decor.add((DecorationDetector)o);
+                return decor;
+            }
+            if(o instanceof String){
+                ArrayList<DecorationDetector> decor = new ArrayList<>();
+                for(DecorationDetector dec : DecorationDetector.detectors){
+                    if(dec.name.equalsIgnoreCase((String)o))decor.add(dec);
+                }
+                if(decor.isEmpty()){//TODO let this be used
+                    Material m = Material.matchMaterial(name);
+                    if(m.isBlock()){
+                        decor.add(new AdjacentDecorationDetector(m.getKey().toString(), m, BlockFace.UP, BlockFace.DOWN, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
+                    }
+                }
+                return decor;
+            }
+            return null;
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            String bi = "";
+            for(DecorationDetector det : DecorationDetector.detectors){
+                bi+="\n    - "+det.name;
+            }
+            return "Which decorations should be removed when felling? (ex. snow, vines)"+(ingame?"\n"
+                    + "Valid options:"+bi:"");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(ArrayList<DecorationDetector> value){
+            return new ItemBuilder(Material.SNOW);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyEnumSet<DecorationDetector>(parent, parent.plugin, parent.player, name, "Decorations", true, globalValue, DecorationDetector.getDetectors(), DecorationDetector.getMaterials(), (value) -> {
+                globalValue = new ArrayList<>(value);
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyEnumSet<DecorationDetector>(parent, parent.plugin, parent.player, name, "Decorations", true, toolValues.get(tool), DecorationDetector.getDetectors(), DecorationDetector.getMaterials(), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, new ArrayList<>(value));
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyEnumSet<DecorationDetector>(parent, parent.plugin, parent.player, name, "Decorations", true, treeValues.get(tree), DecorationDetector.getDetectors(), DecorationDetector.getMaterials(), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, new ArrayList<>(value));
+            }));
+        }
+        @Override
+        public String writeToConfig(ArrayList<DecorationDetector> value){
+            ArrayList<String> strs = new ArrayList<>();
+            for(DecorationDetector dec : value){
+                strs.add(dec.name);
+            }
+            return strs.toString();
+        }
+    };//TODO make this a HashSet
     //unnatural tree detection settings
     public static Option<HashSet<Material>> BANNED_LOGS = new Option<HashSet<Material>>("Banned Logs", true, true, true, new HashSet<>()){
         @Override
