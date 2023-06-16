@@ -29,6 +29,7 @@ public class TreeFellerCompat{
         compatibilities.add(new Drop2InventoryCompat());
         compatibilities.add(new EcoSkillsCompat());
         compatibilities.add(new EcoJobsCompat());
+        compatibilities.add(new LegacyLogBlockCompat());
         compatibilities.add(new LogBlockCompat());
         compatibilities.add(new LandsCompat());
         compatibilities.add(new PlaceholderAPICompat());
@@ -124,12 +125,12 @@ public class TreeFellerCompat{
         }
     }
     public static void addPluginCompatibility(PluginCompatibility compatibility){
-        PluginCompatibility override = null;
+        ArrayList<PluginCompatibility> override = new ArrayList<>();
         for(PluginCompatibility compat : compatibilities){
             if(compat.getPluginName().equalsIgnoreCase(compatibility.getPluginName())){
                 if(compat instanceof InternalCompatibility){
                     Bukkit.getLogger().log(Level.WARNING, "Overriding internal compatibility for {0}!", compat.getPluginName());
-                    override = compat;
+                    override.add(compat);
                     break;
                 }else{
                     Bukkit.getLogger().log(Level.SEVERE, "External compatibility already exists for {0}! Ignoring...", compat.getPluginName());
@@ -137,9 +138,9 @@ public class TreeFellerCompat{
                 }
             }
         }
-        if(override!=null){
-            compatibilities.remove(override);
-            compatibility.enabled = override.enabled;
+        if(!override.isEmpty()){
+            compatibilities.removeAll(override);
+            compatibility.enabled = override.get(0).enabled;//they should all be the same, so first one is fine
         }
         compatibilities.add(compatibility);
     }
