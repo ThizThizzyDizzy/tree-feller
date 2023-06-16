@@ -38,6 +38,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.type.Leaves;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ExperienceOrb;
@@ -713,6 +714,9 @@ public class TreeFeller extends JavaPlugin{
         }
     }
     public void reload(){
+        reload(null);
+    }
+    public void reload(CommandSender source){
         Logger logger = getLogger();
         trees.clear();
         tools.clear();
@@ -727,27 +731,27 @@ public class TreeFeller extends JavaPlugin{
         try{
             effects = new ArrayList<>(getConfig().getList("effects"));
         }catch(NullPointerException ex){
-            if(getConfig().get("effects")!=null)logger.log(Level.WARNING, "Failed to load effects!");
+            if(getConfig().get("effects")!=null)log(logger, source, Level.WARNING, "Failed to load effects!");
         }
         if(effects!=null){
             for(Object o : effects){
                 if(o instanceof LinkedHashMap){
                     LinkedHashMap map = (LinkedHashMap) o;
                     if(!map.containsKey("name")||!(map.get("name") instanceof String)){
-                        logger.log(Level.WARNING, "Cannot find effect name! Skipping...");
+                        log(logger, source, Level.WARNING, "Cannot find effect name! Skipping...");
                         continue;
                     }
                     String name = (String)map.get("name");
                     String typ = (String) map.get("type");
                     Effect.EffectType type = Effect.EffectType.valueOf(typ.toUpperCase().trim());
                     if(type==null){
-                        logger.log(Level.WARNING, "Invalid effect type: {0}! Skipping...", typ);
+                        log(logger, source, Level.WARNING, "Invalid effect type: {0}! Skipping...", typ);
                         continue;
                     }
                     String loc = (String) map.get("location");
                     Effect.EffectLocation location = Effect.EffectLocation.valueOf(loc.toUpperCase().trim());
                     if(location==null){
-                        logger.log(Level.WARNING, "Invalid effect location: {0}! Skipping...", loc);
+                        log(logger, source, Level.WARNING, "Invalid effect location: {0}! Skipping...", loc);
                         continue;
                     }
                     double chance = 1;
@@ -760,13 +764,13 @@ public class TreeFeller extends JavaPlugin{
                 }else if(o instanceof String){
                     Material m = Material.matchMaterial((String)o);
                     if(m==null){
-                        logger.log(Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
+                        log(logger, source, Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
                     }
                     Tool tool = new Tool(m);
                     if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
                     this.tools.add(tool);
                 }else{
-                    logger.log(Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
+                    log(logger, source, Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
                 }
             }
         }
@@ -782,12 +786,12 @@ public class TreeFeller extends JavaPlugin{
             message.load(getConfig());
         }
         if(Option.STARTUP_LOGS.isTrue()){
-            logger.log(Level.INFO, "Server version: {0}", Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1));
-            logger.log(Level.INFO, "Loaded global values:");
+            log(logger, source, Level.INFO, "Server version: {0}", Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1));
+            log(logger, source, Level.INFO, "Loaded global values:");
             for(Option option : Option.options){
                 Object value = option.getValue();
                 if(value!=null){
-                    logger.log(Level.INFO, "- {0}: {1}", new Object[]{option.name, option.makeReadable(value)});
+                    log(logger, source, Level.INFO, "- {0}: {1}", new Object[]{option.name, option.makeReadable(value)});
                 }
             }
         }
@@ -820,7 +824,7 @@ public class TreeFeller extends JavaPlugin{
                     }
                 }
                 if(trunk.isEmpty()||leaves.isEmpty()){
-                    logger.log(Level.WARNING, "Cannot load tree: {0}", o);
+                    log(logger, source, Level.WARNING, "Cannot load tree: {0}", o);
                     continue;
                 }
                 Tree tree = new Tree(trunk, leaves);
@@ -828,7 +832,7 @@ public class TreeFeller extends JavaPlugin{
                     LinkedHashMap map = (LinkedHashMap) ((ArrayList) o).get(2);
                     for(Object key : map.keySet()){
                         if(!(key instanceof String)){
-                            logger.log(Level.WARNING, "invalid tree option: {0}", key);
+                            log(logger, source, Level.WARNING, "invalid tree option: {0}", key);
                             continue;
                         }
                         String s = ((String)key).toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
@@ -840,7 +844,7 @@ public class TreeFeller extends JavaPlugin{
                                 option.setValue(tree, option.load(map.get(key)));
                             }
                         }
-                        if(!found)logger.log(Level.WARNING, "Found unknown tree option: {0}", key);
+                        if(!found)log(logger, source, Level.WARNING, "Found unknown tree option: {0}", key);
                     }
                 }
                 if(Option.STARTUP_LOGS.isTrue())tree.print(logger);
@@ -853,14 +857,14 @@ public class TreeFeller extends JavaPlugin{
                 if(t!=null)trunk.add(t);
                 if(l!=null)leaves.add(l);
                 if(trunk.isEmpty()||leaves.isEmpty()){
-                    logger.log(Level.WARNING, "Cannot load tree: {0}", o);
+                    log(logger, source, Level.WARNING, "Cannot load tree: {0}", o);
                     continue;
                 }
                 Tree tree = new Tree(trunk, leaves);
                 if(Option.STARTUP_LOGS.isTrue())tree.print(logger);
                 this.trees.add(tree);
             }else{
-                logger.log(Level.WARNING, "Cannot load tree: {0}", o);
+                log(logger, source, Level.WARNING, "Cannot load tree: {0}", o);
             }
         }
 //</editor-fold>
@@ -870,20 +874,20 @@ public class TreeFeller extends JavaPlugin{
             if(o instanceof LinkedHashMap){
                 LinkedHashMap map = (LinkedHashMap) o;
                 if(!map.containsKey("type")||!(map.get("type") instanceof String)){
-                    logger.log(Level.WARNING, "Cannot find tool material! Skipping...");
+                    log(logger, source, Level.WARNING, "Cannot find tool material! Skipping...");
                     continue;
                 }
                 String typ = (String) map.get("type");
                 Material type = Material.matchMaterial(typ.trim());
                 if(type==null){
-                    logger.log(Level.WARNING, "Unknown tool material: {0}! Skipping...", map.get("type"));
+                    log(logger, source, Level.WARNING, "Unknown tool material: {0}! Skipping...", map.get("type"));
                     continue;
                 }
                 Tool tool = new Tool(type);
                 for(Object key : map.keySet()){
                     if(key.equals("type"))continue;//already got that
                     if(!(key instanceof String)){
-                        logger.log(Level.WARNING, "Unknown tool property: {0}; Skipping...", key);
+                        log(logger, source, Level.WARNING, "Unknown tool property: {0}; Skipping...", key);
                         continue;
                     }
                     String s = ((String)key).toLowerCase().replace("-", "").replace("_", "").replace(" ", "");
@@ -895,20 +899,20 @@ public class TreeFeller extends JavaPlugin{
                             option.setValue(tool, option.load(map.get(key)));
                         }
                     }
-                    if(!found)logger.log(Level.WARNING, "Found unknown tool option: {0}", key);
+                    if(!found)log(logger, source, Level.WARNING, "Found unknown tool option: {0}", key);
                 }
                 if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
                 this.tools.add(tool);
             }else if(o instanceof String){
                 Material m = Material.matchMaterial((String)o);
                 if(m==null){
-                    logger.log(Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
+                    log(logger, source, Level.WARNING, "Unknown enchantment: {0}; Skipping...", o);
                 }
                 Tool tool = new Tool(m);
                 if(Option.STARTUP_LOGS.isTrue())tool.print(logger);
                 this.tools.add(tool);
             }else{
-                logger.log(Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
+                log(logger, source, Level.INFO, "Unknown tool declaration: {0} | {1}", new Object[]{o.getClass().getName(), o.toString()});
             }
         }
 //</editor-fold>
@@ -1767,6 +1771,19 @@ public class TreeFeller extends JavaPlugin{
             if(e.location==Effect.EffectLocation.TOOL_BREAK){
                 if(new Random().nextDouble()<e.chance)e.play(block);
             }
+        }
+    }
+    private void log(Logger logger, CommandSender source, Level level, String message, Object... params) {
+        logger.log(level, message, params);
+        if(source!=null){
+            ChatColor color = ChatColor.RESET;
+            if(level==Level.INFO)color = ChatColor.GRAY;
+            if(level==Level.WARNING)color = ChatColor.YELLOW;
+            if(level==Level.SEVERE)color = ChatColor.RED;
+            for(int i = 0; i<params.length; i++){
+                message = message.replace("{"+i+"}", Objects.toString(params[i]));
+            }
+            source.sendMessage("[TreeFeller] "+color+message);
         }
     }
 }

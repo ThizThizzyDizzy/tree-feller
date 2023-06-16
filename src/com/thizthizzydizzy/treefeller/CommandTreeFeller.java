@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.menu.MenuConfiguration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -53,7 +54,7 @@ public class CommandTreeFeller implements TabExecutor{
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
                 plugin.reloadConfig();
-                plugin.reload();
+                plugin.reload(sender);
                 sender.sendMessage("Tree Feller reloaded!");
                 return true;
             }
