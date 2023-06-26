@@ -20,6 +20,10 @@ public class LegacyLogBlockCompat extends InternalCompatibility{
     public String getPluginName(){
         return "LogBlock";
     }
+	@Override
+	public boolean defaultEnabled(){
+		return false;
+	}
     @Override
     public void addBlock(Player player, Block block, BlockState was){
         de.diddiz.util.LoggingUtil.smartLogBlockPlace(de.diddiz.LogBlock.LogBlock.getInstance().getConsumer(), de.diddiz.LogBlock.Actor.actorFromEntity(player), was, block.getState());

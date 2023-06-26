@@ -114,8 +114,7 @@ public class TreeFeller extends JavaPlugin{
             if(Option.STACKED_TOOLS.get(testTree.tool, testTree.tree)){
                 durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
             }
-            int total = getTotal(testTree.trunk);
-            int durabilityCost = total;
+            int durabilityCost = getTotal(testTree.trunk);
             if(Option.DAMAGE_MULT.globalValue!=null)durabilityCost*=Option.DAMAGE_MULT.globalValue;
             if(Option.DAMAGE_MULT.treeValues.containsKey(tree))durabilityCost*=Option.DAMAGE_MULT.treeValues.get(tree);
             if(Option.DAMAGE_MULT.toolValues.containsKey(tool))durabilityCost*=Option.DAMAGE_MULT.toolValues.get(tool);
@@ -126,6 +125,10 @@ public class TreeFeller extends JavaPlugin{
             if(Option.RESPECT_UNBREAKABLE.get(tool, tree)&&unbreakable)durabilityCost = 0;
             if(axe.getType().getMaxDurability()==0)durabilityCost = 0;//there is no durability
             if(player!=null&&player.getGameMode()==GameMode.CREATIVE)durabilityCost = 0;//Don't cost durability
+            if(durabilityCost>durability&&Option.ALLOW_PARTIAL_TOOL.get(tool, tree)){
+                debug(player, "partial-tool", false);
+                durabilityCost = durability;
+            }
             if(Option.PREVENT_BREAKAGE.get(tool, tree)){
                 if(durabilityCost==durability){
                     debug(player, false, false, "prevent-breakage");
@@ -139,7 +142,6 @@ public class TreeFeller extends JavaPlugin{
                     return null;
                 }
                 debug(player, "partial", false);
-                durabilityCost = total = durability;
             }
             return true;
         });
@@ -160,6 +162,9 @@ public class TreeFeller extends JavaPlugin{
             if(durabilityCost<1)durabilityCost++;
         }
         if(Option.RESPECT_UNBREAKABLE.get(tool, tree)&&unbreakable)durabilityCost = 0;
+        if(durabilityCost>durability&&Option.ALLOW_PARTIAL_TOOL.get(tool, tree)){
+            durabilityCost = durability;
+        }
         if(durabilityCost>durability&&Option.ALLOW_PARTIAL.get(tool, tree)){
             durabilityCost = total = durability;
         }
@@ -1125,6 +1130,8 @@ public class TreeFeller extends JavaPlugin{
                     s.setAmount(s.getAmount()*mult);
                 }
                 break;
+            default:
+                if(!type.getKey().getKey().endsWith("leaves"))return;//apply to all other "leaves" blocks
             case OAK_LEAVES:
             case BIRCH_LEAVES:
             case SPRUCE_LEAVES:
@@ -1295,6 +1302,10 @@ public class TreeFeller extends JavaPlugin{
                 tp = 3;
                 break;
             default:
+                if(type.getKey().getKey().endsWith("leaves")){
+                    tp = 1;
+                    break;
+                }
                 switch(type.getKey().getKey()){
                     case "small_amethyst_bud":
                     case "medium_amethyst_bud":
@@ -1307,9 +1318,6 @@ public class TreeFeller extends JavaPlugin{
                     case "skulk_sensor":
                     case "sculk_shrieker":
                     case "sculk_vein":
-                    case "mangrove_leaves":
-                    case "azalea_leaves":
-                    case "flowering_azalea_leaves":
                         tp = 1;
                         break;
                 }

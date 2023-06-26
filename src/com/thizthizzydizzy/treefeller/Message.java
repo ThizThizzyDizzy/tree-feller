@@ -14,6 +14,7 @@ public class Message{
         addMessage("prevent-breakage-success", "Felling this tree won't break the tool", new ItemBuilder(Material.WOODEN_AXE));
         addMessage("durability-low", "Tool durability is too low: {0}<{1}", new ItemBuilder(Material.GOLDEN_AXE).setDurability(10));
         addMessage("partial", "Tool is cutting partial tree", new ItemBuilder(Material.OAK_PLANKS));
+        addMessage("partial-tool", "Tool has partial durability", new ItemBuilder(Material.WOODEN_AXE));
         addMessage("protected", "This tree is protected by {0} at {1} {2} {3}", new ItemBuilder(Material.SHIELD));
         addMessage("success", "Success! Felling tree...", new ItemBuilder(Material.GREEN_CONCRETE));
         for(Option o : Option.options){

@@ -55,7 +55,7 @@ public class TreeFellerCompat{
                 compat.breakBlock(tree, tool, player, axe, block, modifiers);
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
     }
@@ -65,7 +65,7 @@ public class TreeFellerCompat{
                 compat.addBlock(player, block, was);
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
     }
@@ -75,7 +75,7 @@ public class TreeFellerCompat{
                 compat.removeBlock(player, block);
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
     }
@@ -85,7 +85,7 @@ public class TreeFellerCompat{
                 compat.dropItem(player, item);
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
     }
@@ -95,7 +95,7 @@ public class TreeFellerCompat{
                 if(!compat.test(player, block))return compat.getPluginName();
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
         return null;
@@ -109,7 +109,7 @@ public class TreeFellerCompat{
                 }
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
         return null;
@@ -120,7 +120,7 @@ public class TreeFellerCompat{
                 compat.fellTree(block, player, axe, tool, tree, blocks);
             }catch(Exception ex){
                 treefeller.getLogger().log(Level.SEVERE, "Exception in "+compat.getFriendlyName()+" compatibility!", ex);
-                if(player.isOp())player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
+                if(player.isOp()||treefeller.debug)player.sendMessage(ChatColor.RED+"[TreeFeller] Caught exception in "+compat.getFriendlyName()+" compatiblity! Check server logs for details");
             }
         }
     }

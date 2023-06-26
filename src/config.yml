@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.22.0
+# Version 1.22.1
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -30,7 +30,12 @@ max-logs: 250
 max-height: 5
 
 # Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!
+# This will have no effect if allow-partial-tool is enabled.
 allow-partial: false
+
+# Should a tool be able to fully cut down a tree, even if it has insufficient durability?
+# (This may cause unexpected behavior when combined with prevent-breakage)
+allow-partial-tool: false
 
 # Should leaves placed by players be cut down also? (Only works with _LEAVES materials)
 player-leaves: false
@@ -563,6 +568,7 @@ compatibility-blockregen: false
 # max-logs
 # max-height
 # allow-partial
+# allow-partial-tool
 # player-leaves
 # require-cross-section
 # decorations
@@ -671,6 +677,7 @@ tools:
 # max-logs
 # max-height
 # allow-partial
+# allow-partial-tool
 # player-leaves
 # diagonal-leaves
 # ignore-leaf-data
@@ -866,6 +873,7 @@ debug-prevent-breakage: "Felling this tree would break the tool"
 debug-prevent-breakage-success: "Felling this tree won't break the tool"
 debug-durability-low: "Tool durability is too low: {0}<{1}"
 debug-partial: "Tool is cutting partial tree"
+debug-partial-tool: "Tool has partial durability"
 debug-protected: "This tree is protected by {0} at {1} {2} {3}"
 debug-success: "Success! Felling tree..."
 debug-required-logs: "Tree has too few logs: {0}<{1}"

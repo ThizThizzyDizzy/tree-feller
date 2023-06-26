@@ -431,11 +431,21 @@ public abstract class Option<E>{
     public static OptionBoolean ALLOW_PARTIAL = new OptionBoolean("Allow Partial", true, true, true, false){
         @Override
         public String getDesc(boolean ingame){
-            return "Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!";
+            return "Should trees be able to be partially cut down if the tool has insufficient durability? It cannot be guaranteed what part of the tree will be cut down!\nThis will have no effect if allow-partial-tool is enabled.";
         }
         @Override
         public ItemBuilder getConfigurationDisplayItem(Boolean value){
             return new ItemBuilder(Material.STICK);
+        }
+    };
+    public static OptionBoolean ALLOW_PARTIAL_TOOL = new OptionBoolean("Allow Partial Tool", true, true, true, false){
+        @Override
+        public String getDesc(boolean ingame) {
+            return "Should a tool be able to fully cut down a tree, even if it has insufficient durability?\n(This may cause unexpected behavior when combined with prevent-breakage)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Material.WOODEN_AXE);
         }
     };
     public static OptionBoolean PLAYER_LEAVES = new OptionBoolean("Player Leaves", true, true, true, false){
