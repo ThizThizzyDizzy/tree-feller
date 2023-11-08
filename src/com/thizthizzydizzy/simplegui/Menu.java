@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.simplegui;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.BiConsumer;
 import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Bukkit;
@@ -59,22 +60,22 @@ public abstract class Menu{
     }
     public final void openAnvilGUI(String initialText, String title, BiConsumer<Player, String> completeFunction){
         close();
-        new AnvilGUI.Builder().text(initialText).plugin(plugin).title(title).item(new ItemBuilder(Material.PAPER).setDisplayName(initialText).build()).onClose((plyr) -> {
+        new AnvilGUI.Builder().text(initialText).plugin(plugin).title(title).itemLeft(new ItemBuilder(Material.PAPER).setDisplayName(initialText).build()).onClose((plyr) -> {
             new BukkitRunnable() {
                 @Override
                 public void run(){
                     open(Menu.this);
                 }
             }.runTask(plugin);
-        }).onComplete((plyr, string) -> {
-            completeFunction.accept(plyr, string);
+        }).onClick((i, state) -> {
+            completeFunction.accept(state.getPlayer(), state.getText());
             new BukkitRunnable() {
                 @Override
                 public void run(){
                     open(Menu.this);
                 }
             }.runTask(plugin);
-            return AnvilGUI.Response.close();
+            return Arrays.asList(AnvilGUI.ResponseAction.close());
         }).open(player);
     }
     public <T extends Component> T add(T component){
