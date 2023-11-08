@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.22.1
+# Version 1.22.2
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -519,7 +519,7 @@ ecojobs-apply-multipliers: true
 compatibility-ecojobs: true
 
 # Toggle compatibility with LogBlock (pre-1.19)
-compatibility-logblock-legacy: true
+compatibility-logblock-legacy: false
 
 # Toggle compatibility with LogBlock (1.19)
 compatibility-logblock: true
