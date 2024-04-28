@@ -2,7 +2,9 @@ package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.vanillify.Vanillify;
 import java.util.ArrayList;
+import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 public class Message{
@@ -20,6 +22,14 @@ public class Message{
         for(Option o : Option.options){
             if(o.hasDebugText())addMessage(o);
         }
+        addMessage("reload", null, new ItemBuilder(Material.COMMAND_BLOCK)).chat = "Tree Feller reloaded!";
+        addMessage("debug-enable", null, new ItemBuilder(Material.REPEATING_COMMAND_BLOCK)).chat = "Debug mode enabled";
+        addMessage("debug-disable", null, new ItemBuilder(Material.REPEATING_COMMAND_BLOCK)).chat = "Debug mode disabled";
+        addMessage("toggle-on", null, new ItemBuilder(Material.IRON_AXE)).chat = "Tree Feller enabled";
+        addMessage("toggle-off", null, new ItemBuilder(Material.WOODEN_AXE)).chat = "Tree Feller disabled";
+        addMessage("unknown-command", null, new ItemBuilder(Material.CHAIN_COMMAND_BLOCK)).chat = ChatColor.RED+"Unknown Command";
+        addMessage("no-permission", null, new ItemBuilder(Material.BARRIER)).chat = ChatColor.RED+"Unknown Command";
+        addMessage("command-usage", null, new ItemBuilder(Material.WRITABLE_BOOK)).chat = "Usage: {0}";
     }
     private static void addMessage(Option option){
         if(option.global)addMessage(option.getGlobalName(), option.getGlobalDebugText(), option.getConfigurationDisplayItem());
@@ -27,8 +37,10 @@ public class Message{
         if(option.tree)addMessage(option.getGlobalName()+"-tree", option.getTreeDebugText(), option.getConfigurationDisplayItem());
         addMessage(option.getGlobalName()+"-success", option.getSuccessDebugText(), option.getConfigurationDisplayItem());
     }
-    private static void addMessage(String name, String debug, ItemBuilder icon){
-        messages.add(new Message(name, debug, icon));
+    private static Message addMessage(String name, String debug, ItemBuilder icon){
+        Message message = new Message(name, debug, icon);
+        messages.add(message);
+        return message;
     }
     public final String name;
     public String actionbar = null, chat = null,debug;
@@ -67,6 +79,15 @@ public class Message{
                 cha = cha.replace("{"+i+"}", vars[i].toString());
             }
             player.sendMessage(cha);
+        }
+    }
+    public void send(CommandSender sender, Object... vars){
+        if(chat!=null){
+            String cha = chat;
+            for(int i = 0; i<vars.length; i++){
+                cha = cha.replace("{"+i+"}", vars[i].toString());
+            }
+            sender.sendMessage(cha);
         }
     }
     private void actionbar(Player player, String text){

@@ -48,8 +48,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.loot.LootContext;
-import org.bukkit.loot.LootTable;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -1444,7 +1442,7 @@ public class TreeFeller extends JavaPlugin{
         if(toggledPlayers.contains(uuid)){
             if(!shouldBeToggled)toggledPlayers.remove(uuid);
         }else if(shouldBeToggled)toggledPlayers.add(uuid);
-        player.sendMessage("Tree Feller "+(state?"enabled":"disabled"));
+        Message.getMessage("toggle-"+(state?"on":"off")).send(player);
     }
     private void refreshPatronsList(){
         try{

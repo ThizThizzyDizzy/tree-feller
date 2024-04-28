@@ -1,7 +1,6 @@
 package com.thizthizzydizzy.treefeller;
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 public abstract class TreeFellerCommand{
@@ -20,7 +19,7 @@ public abstract class TreeFellerCommand{
     }
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args, String[] fullArgs){
         if(!hasPermission(sender)){
-            sender.sendMessage(ChatColor.RED+"Unknown Command");
+            Message.getMessage("no-permission").send(sender);
             return true;
         }
         if(args.length<1)return run(sender, command, label, fullArgs);

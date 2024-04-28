@@ -329,7 +329,13 @@ public class ConfigGenerator{
             add("# chat-required-logs: The tree's too small!");
             add();
             for(Message m : Message.messages){
-                add("debug-"+m.name+": \""+m.getDebugText()+"\"");
+                if(m.debug!=null)add("debug-"+m.name+": \""+m.debug+"\"");
+            }
+            for(Message m : Message.messages){
+                if(m.chat!=null)add("chat-"+m.name+": \""+m.chat+"\"");
+            }
+            for(Message m : Message.messages){
+                if(m.actionbar!=null)add("actionbar-"+m.name+": \""+m.actionbar+"\"");
             }
             write(new File("src/config.yml"));
             return;

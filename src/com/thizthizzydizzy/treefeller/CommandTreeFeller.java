@@ -2,8 +2,6 @@ package com.thizthizzydizzy.treefeller;
 import com.thizthizzydizzy.treefeller.menu.MenuConfiguration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
-import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
@@ -55,7 +53,7 @@ public class CommandTreeFeller implements TabExecutor{
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
                 plugin.reloadConfig();
                 plugin.reload(sender);
-                sender.sendMessage("Tree Feller reloaded!");
+                Message.getMessage("reload").send(sender);
                 return true;
             }
         });
@@ -63,7 +61,7 @@ public class CommandTreeFeller implements TabExecutor{
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
                 plugin.debug = true;
-                sender.sendMessage("Debug mode enabled");
+                Message.getMessage("debug-enable").send(sender);
                 return true;
             }
         };
@@ -71,7 +69,7 @@ public class CommandTreeFeller implements TabExecutor{
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
                 plugin.debug = false;
-                sender.sendMessage("Debug mode disabled");
+                Message.getMessage("debug-disable").send(sender);
                 return true;
             }
         };
@@ -79,7 +77,7 @@ public class CommandTreeFeller implements TabExecutor{
             @Override
             protected boolean run(CommandSender sender, Command command, String label, String[] args){
                 plugin.debug = !plugin.debug;
-                sender.sendMessage("Debug mode "+(plugin.debug?"enabled":"disabled"));
+                Message.getMessage("debug-"+(plugin.debug?"enable":"disable")).send(sender);
                 return true;
             }
         });
@@ -148,8 +146,8 @@ public class CommandTreeFeller implements TabExecutor{
     }
     private void sendUsageResponse(CommandSender sender){
         String usage = getFullUsage(sender);
-        if(usage==null)sender.sendMessage(ChatColor.RED+"Unknown Command");
-        else sender.sendMessage("Usage: "+usage);
+        if(usage==null)Message.getMessage("unknown-command").send(sender);
+        else Message.getMessage("command-usage").send(sender);
     }
 }
 //treefeller (help|toggle [on|off]|on|off|reload|debug [on|off]|config)
