@@ -980,6 +980,134 @@ public abstract class Option<E>{
             return properResults;
         }
     };
+    public static Option<Double> MIN_HEIGHT_RATIO = new Option<Double>("Min Height Ratio", true, true, true, .5){
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the minimum ratio of height to width that a tree may have?";
+        }
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.LADDER);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTree(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int minZ = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE;
+            int maxY = Integer.MIN_VALUE;
+            int maxZ = Integer.MIN_VALUE;
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block block : blox){
+                    minX = Math.min(minX,block.getX());
+                    minY = Math.min(minY,block.getY());
+                    minZ = Math.min(minZ,block.getZ());
+                    maxX = Math.max(maxX,block.getX());
+                    maxY = Math.max(maxY,block.getY());
+                    maxZ = Math.max(maxZ,block.getZ());
+                }
+            }
+            int width = Math.max(maxX-minX, maxZ-minZ);
+            int height = maxY-minY;
+            double value = height/(double)width;
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&value<globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
+            if(treeValues.containsKey(tree)&&value<treeValues.get(tree))return new DebugResult(this, TREE, value, treeValues.get(tree));
+            if(toolValues.containsKey(tool)&&value<toolValues.get(tool))return new DebugResult(this, TOOL, value, toolValues.get(tool));
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree height ratio is too low$! {0}<{1}", "Tree height ratio is above minimum");
+        }
+    };
+    public static Option<Double> MAX_HEIGHT_RATIO = new Option<Double>("Max Height Ratio", true, true, true, null){
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the maximum ratio of height to width that a tree may have?";
+        }
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.LADDER);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTree(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, int leaves){
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int minZ = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE;
+            int maxY = Integer.MIN_VALUE;
+            int maxZ = Integer.MIN_VALUE;
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block block : blox){
+                    minX = Math.min(minX,block.getX());
+                    minY = Math.min(minY,block.getY());
+                    minZ = Math.min(minZ,block.getZ());
+                    maxX = Math.max(maxX,block.getX());
+                    maxY = Math.max(maxY,block.getY());
+                    maxZ = Math.max(maxZ,block.getZ());
+                }
+            }
+            int width = Math.max(maxX-minX, maxZ-minZ);
+            int height = maxY-minY;
+            double value = height/(double)width;
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&value>globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
+            if(treeValues.containsKey(tree)&&value>treeValues.get(tree))return new DebugResult(this, TREE, value, treeValues.get(tree));
+            if(toolValues.containsKey(tool)&&value>toolValues.get(tool))return new DebugResult(this, TOOL, value, toolValues.get(tool));
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree height ratio is too high$! {0}>{1}", "Tree height ratio is below maximum");
+        }
+    };
     //tree cutting details
     public static OptionBoolean CUTTING_ANIMATION = new OptionBoolean("Cutting Animation", true, true, true, false){
         @Override

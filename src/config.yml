@@ -80,6 +80,12 @@ max-horizontal-trunk-pillar-length: 6
 # Similarly to leave-stump, this may include low-hanging leaves
 max-trunks:
 
+# What is the minimum ratio of height to width that a tree may have?
+min-height-ratio: 0.5
+
+# What is the maximum ratio of height to width that a tree may have?
+max-height-ratio:
+
 # Should the tree cut down with an animation?
 cutting-animation: false
 
@@ -576,6 +582,8 @@ compatibility-blockregen: false
 # banned-leaves
 # max-horizontal-trunk-pillar-length
 # max-trunks
+# min-height-ratio
+# max-height-ratio
 # cutting-animation
 # anim-delay
 # replant-saplings
@@ -688,6 +696,8 @@ tools:
 # banned-leaves
 # max-horizontal-trunk-pillar-length
 # max-trunks
+# min-height-ratio
+# max-height-ratio
 # cutting-animation
 # anim-delay
 # replant-saplings
@@ -912,6 +922,14 @@ debug-max-trunks: "Tree has too many trunks! {0}>{1}"
 debug-max-trunks-tool: "Tree has too many trunks for tool! {0}>{1}"
 debug-max-trunks-tree: "Tree has too many trunks for tree! {0}>{1}"
 debug-max-trunks-success: "Trunk count is valid"
+debug-min-height-ratio: "Tree height ratio is too low! {0}<{1}"
+debug-min-height-ratio-tool: "Tree height ratio is too low for tool! {0}<{1}"
+debug-min-height-ratio-tree: "Tree height ratio is too low for tree! {0}<{1}"
+debug-min-height-ratio-success: "Tree height ratio is above minimum"
+debug-max-height-ratio: "Tree height ratio is too high! {0}>{1}"
+debug-max-height-ratio-tool: "Tree height ratio is too high for tool! {0}>{1}"
+debug-max-height-ratio-tree: "Tree height ratio is too high for tree! {0}>{1}"
+debug-max-height-ratio-success: "Tree height ratio is below maximum"
 debug-required-enchantments: "Enchantment missing: {0} ({1}<{2})"
 debug-required-enchantments-tool: "Enchantment missing for tool: {0} ({1}<{2})"
 debug-required-enchantments-tree: "Enchantment missing for tree: {0} ({1}<{2})"
