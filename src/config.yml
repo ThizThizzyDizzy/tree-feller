@@ -78,7 +78,7 @@ max-horizontal-trunk-pillar-length: 6
 # What is the maximum number of trunks a tree may have?
 # Note that the trunks are counted at the level at which the tree is cut; not at the base of the tree
 # Similarly to leave-stump, this may include low-hanging leaves
-max-trunks: 1
+max-trunks:
 
 # Should the tree cut down with an animation?
 cutting-animation: false

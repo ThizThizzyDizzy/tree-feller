@@ -842,7 +842,7 @@ public abstract class Option<E>{
             return generateDebugText("Found a horizontal trunk pillar that was too long$! {0}>{1}", "No excessive horizontal trunk pillars found");
         }
     };
-    public static Option<Integer> MAX_TRUNKS = new Option<Integer>("Max Trunks", true, true, true, 1){
+    public static Option<Integer> MAX_TRUNKS = new Option<Integer>("Max Trunks", true, true, true, null){
         @Override
         public String getDesc(boolean ingame){
             return "What is the maximum number of trunks a tree may have?\nNote that the trunks are counted at the level at which the tree is cut; not at the base of the tree\nSimilarly to leave-stump, this may include low-hanging leaves";
