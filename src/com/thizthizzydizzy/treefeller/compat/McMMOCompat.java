@@ -35,7 +35,7 @@ public class McMMOCompat extends InternalCompatibility{
             //canGetDoubleDrops and checkForDoubleDrop are private, so I'll just do it myself
             if(com.gmail.nossr50.util.Permissions.isSubSkillEnabled(player, com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER)
                     &&com.gmail.nossr50.util.skills.RankUtils.hasReachedRank(1, player, com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER)
-                    &&com.gmail.nossr50.util.random.RandomChanceUtil.isActivationSuccessful(com.gmail.nossr50.util.skills.SkillActivationType.RANDOM_LINEAR_100_SCALE_WITH_CAP, com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER, player)){
+                    &&com.gmail.nossr50.util.random.ProbabilityUtil.isSkillRNGSuccessful(com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER, player)){
                 BlockState blockState = block.getState();
                 if(MCMMO_DOUBLE_DROPS.get(tool, tree)){
                     if(com.gmail.nossr50.mcMMO.getModManager().isCustomLog(blockState) && com.gmail.nossr50.mcMMO.getModManager().getBlock(blockState).isDoubleDropEnabled()){
