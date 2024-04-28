@@ -48,6 +48,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.loot.LootContext;
+import org.bukkit.loot.LootTable;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.PluginManager;
@@ -1092,13 +1094,16 @@ public class TreeFeller extends JavaPlugin{
             silk = Option.LEAF_SILK_TOUCH.get(tool, tree);
         }
         Material type = block.getType();
-        drops.addAll(block.getDrops());
-        for(Iterator<ItemStack> it = drops.iterator(); it.hasNext();){
-            ItemStack next = it.next();
-            if(next.getType().isAir())it.remove();//don't try to drop air
+        if(silk&&axe.containsEnchantment(Enchantment.SILK_TOUCH)){
+            List<ItemStack> drop = new ArrayList<>(block.getDrops(axe));
+            //Test if silk touch drops the base item, and if so, use it.
+            if(drop.size()==1&&drop.get(0).getType()==block.getType()){
+                drops.addAll(drop);
+                return drops;
+            }
         }
-        if(fortune&&axe.containsEnchantment(Enchantment.LOOT_BONUS_BLOCKS))applyFortune(type, drops, axe, axe.getEnchantmentLevel(Enchantment.LOOT_BONUS_BLOCKS), xp);
-        if(silk&&axe.containsEnchantment(Enchantment.SILK_TOUCH))applySilkTouch(type, drops, axe, axe.getEnchantmentLevel(Enchantment.SILK_TOUCH), xp);
+        if(fortune&&!axe.containsEnchantment(Enchantment.SILK_TOUCH))drops.addAll(block.getDrops(axe));
+        else drops.addAll(block.getDrops());
         HashMap<Material, Material> conversions = Option.DROP_CONVERSIONS.get(tool, tree);
         if(!conversions.isEmpty()){
             for(ItemStack s : drops){
@@ -1106,242 +1111,6 @@ public class TreeFeller extends JavaPlugin{
             }
         }
         return drops;
-    }
-    //Bukkit API lacks fortune/silk touch handling, so I have to do it the hard way...
-    static void applyFortune(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
-        if(enchantmentLevel==0)return;
-        switch(type){
-            case COAL_ORE:
-            case DIAMOND_ORE:
-            case EMERALD_ORE:
-            case LAPIS_ORE:
-            case NETHER_QUARTZ_ORE:
-            case REDSTONE_ORE://incorrect
-            case NETHER_GOLD_ORE://might be incorrect
-                ArrayList<Integer> mults = new ArrayList<>();
-                mults.add(1);
-                mults.add(1);
-                for(int i = 0; i<enchantmentLevel; i++){
-                    mults.add(i+2);
-                }
-                Random rand = new Random();
-                int mult = mults.get(rand.nextInt(mults.size()));
-                for(ItemStack s : drops){
-                    s.setAmount(s.getAmount()*mult);
-                }
-                break;
-            default:
-                if(!type.getKey().getKey().endsWith("leaves"))return;//apply to all other "leaves" blocks
-            case OAK_LEAVES:
-            case BIRCH_LEAVES:
-            case SPRUCE_LEAVES:
-            case ACACIA_LEAVES:
-            case DARK_OAK_LEAVES:
-            case JUNGLE_LEAVES:
-                Random r = new Random();
-                int fortune = Math.min(4,enchantmentLevel);
-                Material sapling = Material.matchMaterial(type.name().replace("LEAVES", "SAPLING"));
-                if(type==Material.JUNGLE_LEAVES){
-                    switch(fortune){
-                        case 1:
-                            if(r.nextDouble()<.0023)drops.add(new ItemStack(sapling));
-                            break;
-                        case 2:
-                            if(r.nextDouble()<.00625)drops.add(new ItemStack(sapling));
-                            break;
-                        case 3:
-                        case 4:
-                            if(r.nextDouble()<.0167)drops.add(new ItemStack(sapling));
-                            break;
-                    }
-                }else{
-                    switch(fortune){
-                        case 1:
-                            if(r.nextDouble()<.0125)drops.add(new ItemStack(sapling));
-                            break;
-                        case 2:
-                            if(r.nextDouble()<.0333)drops.add(new ItemStack(sapling));
-                            break;
-                        case 3:
-                        case 4:
-                            if(r.nextDouble()<.05)drops.add(new ItemStack(sapling));
-                            break;
-                    }
-                }
-                switch(fortune){
-                    case 1:
-                        if(r.nextDouble()<.0022)drops.add(new ItemStack(Material.STICK));
-                        break;
-                    case 2:
-                        if(r.nextDouble()<.005)drops.add(new ItemStack(Material.STICK));
-                        break;
-                    case 3:
-                        if(r.nextDouble()<.0133)drops.add(new ItemStack(Material.STICK));
-                        break;
-                    case 4:
-                        if(r.nextDouble()<.08)drops.add(new ItemStack(Material.STICK));//why, minecraft, why?
-                        break;
-                }
-                if(type==Material.OAK_LEAVES){
-                    switch(fortune){
-                        case 1:
-                            if(r.nextDouble()<.00056)drops.add(new ItemStack(Material.APPLE));
-                            break;
-                        case 2:
-                            if(r.nextDouble()<.00125)drops.add(new ItemStack(Material.APPLE));
-                            break;
-                        case 3:
-                        case 4:
-                            if(r.nextDouble()<.00333)drops.add(new ItemStack(Material.APPLE));
-                            break;
-                    }
-                }
-                break;
-        }
-    }
-    static void applySilkTouch(Material type, ArrayList<ItemStack> drops, ItemStack axe, int enchantmentLevel, int[] xp){
-        if(enchantmentLevel==0)return;
-        int tp = 0;
-        switch(type){
-            case BEEHIVE:
-            case BEE_NEST:
-            case CAMPFIRE:
-            case BLUE_ICE:
-            case BOOKSHELF:
-            case CLAY:
-            case BUBBLE_CORAL:
-            case HORN_CORAL:
-            case FIRE_CORAL:
-            case TUBE_CORAL:
-            case BRAIN_CORAL:
-            case BUBBLE_CORAL_FAN:
-            case HORN_CORAL_FAN:
-            case FIRE_CORAL_FAN:
-            case TUBE_CORAL_FAN:
-            case BRAIN_CORAL_FAN:
-            case BUBBLE_CORAL_WALL_FAN:
-            case HORN_CORAL_WALL_FAN:
-            case FIRE_CORAL_WALL_FAN:
-            case TUBE_CORAL_WALL_FAN:
-            case BRAIN_CORAL_WALL_FAN:
-            case GLASS:
-            case BLUE_STAINED_GLASS:
-            case RED_STAINED_GLASS:
-            case ORANGE_STAINED_GLASS:
-            case PINK_STAINED_GLASS:
-            case YELLOW_STAINED_GLASS:
-            case LIME_STAINED_GLASS:
-            case GREEN_STAINED_GLASS:
-            case CYAN_STAINED_GLASS:
-            case LIGHT_BLUE_STAINED_GLASS:
-            case MAGENTA_STAINED_GLASS:
-            case PURPLE_STAINED_GLASS:
-            case GRAY_STAINED_GLASS:
-            case LIGHT_GRAY_STAINED_GLASS:
-            case BLACK_STAINED_GLASS:
-            case WHITE_STAINED_GLASS:
-            case BROWN_STAINED_GLASS:
-            case BLUE_STAINED_GLASS_PANE:
-            case RED_STAINED_GLASS_PANE:
-            case ORANGE_STAINED_GLASS_PANE:
-            case PINK_STAINED_GLASS_PANE:
-            case YELLOW_STAINED_GLASS_PANE:
-            case LIME_STAINED_GLASS_PANE:
-            case GREEN_STAINED_GLASS_PANE:
-            case CYAN_STAINED_GLASS_PANE:
-            case LIGHT_BLUE_STAINED_GLASS_PANE:
-            case MAGENTA_STAINED_GLASS_PANE:
-            case PURPLE_STAINED_GLASS_PANE:
-            case GRAY_STAINED_GLASS_PANE:
-            case LIGHT_GRAY_STAINED_GLASS_PANE:
-            case BLACK_STAINED_GLASS_PANE:
-            case WHITE_STAINED_GLASS_PANE:
-            case BROWN_STAINED_GLASS_PANE:
-            case GLOWSTONE:
-            case GRASS_BLOCK:
-            case GRAVEL:
-            case ICE:
-            case OAK_LEAVES:
-            case BIRCH_LEAVES:
-            case SPRUCE_LEAVES:
-            case JUNGLE_LEAVES:
-            case ACACIA_LEAVES:
-            case DARK_OAK_LEAVES:
-            case MELON:
-            case MUSHROOM_STEM:
-            case BROWN_MUSHROOM_BLOCK:
-            case RED_MUSHROOM_BLOCK:
-            case MYCELIUM:
-            case PODZOL:
-            case SEA_LANTERN:
-            case TURTLE_EGG:
-            case SOUL_CAMPFIRE:
-                tp = 1;
-                break;
-            //pickaxe only (conditional too!)
-            case COAL_ORE:
-            case BUBBLE_CORAL_BLOCK:
-            case HORN_CORAL_BLOCK:
-            case FIRE_CORAL_BLOCK:
-            case TUBE_CORAL_BLOCK:
-            case BRAIN_CORAL_BLOCK:
-            case DIAMOND_ORE:
-            case EMERALD_ORE:
-            case ENDER_CHEST:
-            case LAPIS_ORE:
-            case NETHER_QUARTZ_ORE:
-            case REDSTONE_ORE:
-            case NETHER_GOLD_ORE:
-            case GILDED_BLACKSTONE:
-            case STONE:
-                tp = 2;
-                break;
-            //shovel only
-            case SNOW:
-            case SNOW_BLOCK:
-                tp = 3;
-                break;
-            default:
-                if(type.getKey().getKey().endsWith("leaves")){
-                    tp = 1;
-                    break;
-                }
-                switch(type.getKey().getKey()){
-                    case "small_amethyst_bud":
-                    case "medium_amethyst_bud":
-                    case "large_amethyst_bud":
-                    case "amethyst_cluster":
-                        tp = 2;
-                        break;
-                    case "skulk":
-                    case "skulk_catalyst":
-                    case "skulk_sensor":
-                    case "sculk_shrieker":
-                    case "sculk_vein":
-                        tp = 1;
-                        break;
-                }
-        }
-        if(tp==1){//always work        
-            drops.clear();
-            drops.add(new ItemStack(type));
-            xp[0] = 0;    
-        }
-        if(tp==2){//pickaxe only
-            if(axe.getType().name().toLowerCase().contains("pickaxe")){
-                xp[0] = 0;
-                if(drops.isEmpty())return;
-                drops.clear();
-                drops.add(new ItemStack(type));
-            }
-        }
-        if(tp==3){//shovel only
-            if(axe.getType().name().toLowerCase().contains("shovel")){
-                drops.clear();
-                drops.add(new ItemStack(type));
-                xp[0] = 0;
-            }
-        }
     }
     private void leafCheck(HashMap<Integer, ArrayList<Block>> someLeaves, ArrayList<Material> trunk, ArrayList<Material> leaves, Boolean diagonal, Boolean playerLeaves, Boolean ignoreLeafData){
         if(ignoreLeafData)return;
