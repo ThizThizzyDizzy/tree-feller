@@ -28,12 +28,15 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.bukkit.Axis;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Orientable;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -980,7 +983,7 @@ public abstract class Option<E>{
             return properResults;
         }
     };
-    public static Option<Double> MIN_HEIGHT_RATIO = new Option<Double>("Min Height Ratio", true, true, true, .5){
+    public static Option<Double> MIN_HEIGHT_RATIO = new Option<Double>("Min Height Ratio", true, true, true, null){
         @Override
         public String getDesc(boolean ingame){
             return "What is the minimum ratio of height to width that a tree may have?";
@@ -1106,6 +1109,119 @@ public abstract class Option<E>{
         @Override
         public String[] getDebugText(){
             return generateDebugText("Tree height ratio is too high$! {0}>{1}", "Tree height ratio is below maximum");
+        }
+    };
+    public static Option<Double> MIN_VERTICAL_LOG_RATIO = new Option<Double>("Min Vertical Log Ratio", true, true, true, .5){
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the minimum ratio of vertical to horizontal logs that a tree may have?";
+        }
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.ACACIA_LOG);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        protected DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+            int horizontal = 0;
+            int vertical = 0;
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block blok : blox){
+                    BlockData data = blok.getBlockData();
+                    if(data instanceof Orientable){
+                        if(((Orientable)data).getAxis()==Axis.Y)vertical++;
+                        else horizontal++;
+                    }
+                }
+            }
+            double value = vertical/(double)horizontal;
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&value<globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
+            if(treeValues.containsKey(tree)&&value<treeValues.get(tree))return new DebugResult(this, TREE, value, treeValues.get(tree));
+            if(toolValues.containsKey(tool)&&value<toolValues.get(tool))return new DebugResult(this, TOOL, value, toolValues.get(tool));
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree vertical log ratio is too low$! {0}<{1}", "Tree vertical log ratio is above minimum");
+        }
+    };
+    public static Option<Double> MAX_VERTICAL_LOG_RATIO = new Option<Double>("Max Vertical Log Ratio", true, true, true, null){
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the maximum ratio of vertical to horizontal logs that a tree may have?";
+        }
+        @Override
+        public Double load(Object o){
+            return loadDouble(o);
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Double value){
+            return new ItemBuilder(Material.ACACIA_LOG);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyDouble(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        protected DebugResult doCheckTrunk(TreeFeller plugin, Tool tool, Tree tree, HashMap<Integer, ArrayList<Block>> blocks, Block block){
+            int horizontal = 0;
+            int vertical = 0;
+            for(ArrayList<Block> blox : blocks.values()){
+                for(Block blok : blox){
+                    BlockData data = blok.getBlockData();
+                    if(data instanceof Orientable){
+                        if(((Orientable)data).getAxis()==Axis.Y)vertical++;
+                        else horizontal++;
+                    }
+                }
+            }
+            double value = vertical/(double)horizontal;
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null&&value>globalValue)return new DebugResult(this, GLOBAL, value, globalValue);
+            if(treeValues.containsKey(tree)&&value>treeValues.get(tree))return new DebugResult(this, TREE, value, treeValues.get(tree));
+            if(toolValues.containsKey(tool)&&value>toolValues.get(tool))return new DebugResult(this, TOOL, value, toolValues.get(tool));
+            return new DebugResult(this, SUCCESS);
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Tree vertical log ratio is too high$! {0}>{1}", "Tree vertical log ratio is below maximum");
         }
     };
     //tree cutting details
