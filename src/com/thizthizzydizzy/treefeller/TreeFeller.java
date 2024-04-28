@@ -468,7 +468,7 @@ public class TreeFeller extends JavaPlugin{
                         }
                     }
                     for(Block b : possibleSaplings.keySet()){
-                        detected.addSapling(Option.USE_INVENTORY_SAPLINGS.get(tool, tree)?player:null, b, Option.SAPLING.get(tool, tree));
+                        detected.addSapling(this, Option.USE_INVENTORY_SAPLINGS.get(tool, tree)?player:null, b, Option.SAPLING.get(tool, tree));
                     }
                 }
                 return detected;

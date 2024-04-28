@@ -20,8 +20,8 @@ public class DetectedTree{
         this.leaves = leaves;
         this.decorations = decorations;
     }
-    public void addSapling(Player player, Block block, HashSet<Material> saplings){
-        this.saplings.add(new Sapling(this, player, block, saplings, Option.SPAWN_SAPLINGS.get(tool, tree)==2, Option.SAPLING_TIMEOUT.get(tool, tree)));
+    public void addSapling(TreeFeller treefeller, Player player, Block block, HashSet<Material> saplings){
+        this.saplings.add(new Sapling(treefeller, this, player, block, saplings, Option.SPAWN_SAPLINGS.get(tool, tree)==2, Option.SAPLING_TIMEOUT.get(tool, tree)));
     }
     public Iterable<Block> getDecorations(Block b){
         return decorations.getOrDefault(b, new ArrayList<>());

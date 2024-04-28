@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.compat;
 import com.thizthizzydizzy.treefeller.Modifier;
+import com.thizthizzydizzy.treefeller.Sapling;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
@@ -36,6 +37,7 @@ public class TreeFellerCompat{
         compatibilities.add(new SaberFactionsCompat());
         compatibilities.add(new AureliumSkillsCompat());
         compatibilities.add(new BlockRegenCompat());
+        compatibilities.add(new PrismCompat());
     }
     public static void init(TreeFeller treefeller){
         if(treefeller!=null){

@@ -568,6 +568,9 @@ compatibility-aureliumskills: true
 # Toggle compatibility with BlockRegen
 compatibility-blockregen: false
 
+# Toggle compatibility with Prism
+compatibility-prism: true
+
 # What tools can be used to cut down trees?
 # Format:
 #    - {type: AXE_MATERIAL, <variables>}

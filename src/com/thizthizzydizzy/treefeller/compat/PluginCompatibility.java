@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.compat;
 import com.thizthizzydizzy.simplegui.ItemBuilder;
 import com.thizthizzydizzy.treefeller.Modifier;
 import com.thizthizzydizzy.treefeller.OptionBoolean;
+import com.thizthizzydizzy.treefeller.Sapling;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
@@ -15,6 +16,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.Plugin;
 public abstract class PluginCompatibility{
     /**
      * This is the option that enables or disables this compatibility.
@@ -128,7 +130,10 @@ public abstract class PluginCompatibility{
         return new ItemBuilder(Material.JIGSAW);
     }
     public void reload(){}
+    public Plugin getPlugin(){
+        return Bukkit.getPluginManager().getPlugin(getPluginName());
+    }
     public boolean isInstalled() {
-        return Bukkit.getPluginManager().getPlugin(getPluginName())!=null;
+        return getPlugin()!=null&&getPlugin().isEnabled();
     }
 }
