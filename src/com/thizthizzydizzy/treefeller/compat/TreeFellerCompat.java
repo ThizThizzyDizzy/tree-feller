@@ -1,6 +1,5 @@
 package com.thizthizzydizzy.treefeller.compat;
 import com.thizthizzydizzy.treefeller.Modifier;
-import com.thizthizzydizzy.treefeller.Sapling;
 import com.thizthizzydizzy.treefeller.Tool;
 import com.thizthizzydizzy.treefeller.Tree;
 import com.thizthizzydizzy.treefeller.TreeFeller;
