@@ -806,7 +806,7 @@ public class TreeFeller extends JavaPlugin{
             message.load(getConfig());
         }
         if(Option.STARTUP_LOGS.isTrue()){
-            log(logger, source, Level.INFO, "Server version: {0}", Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1));
+            log(logger, source, Level.INFO, "Server version: {0}", Bukkit.getServer().getBukkitVersion());
             log(logger, source, Level.INFO, "Loaded global values:");
             for(Option option : Option.options){
                 Object value = option.getValue();
