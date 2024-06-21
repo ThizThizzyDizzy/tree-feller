@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.23.1
+# Version 1.24.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -100,6 +100,9 @@ anim-delay: 1
 
 # Should saplings be replanted?
 replant-saplings: false
+
+# Should saplings dropped by the tree's leaves be used to replant trees?
+use-tree-saplings: true
 
 # Should saplings be taken from the player's inventory to replant trees?
 use-inventory-saplings: false
@@ -598,6 +601,7 @@ compatibility-prism: true
 # cutting-animation
 # anim-delay
 # replant-saplings
+# use-tree-saplings
 # use-inventory-saplings
 # spawn-saplings
 # sapling-timeout
@@ -714,6 +718,7 @@ tools:
 # cutting-animation
 # anim-delay
 # replant-saplings
+# use-tree-saplings
 # use-inventory-saplings
 # spawn-saplings
 # sapling                            If replant-saplings is enabled, this will replant the tree with this type of sapling

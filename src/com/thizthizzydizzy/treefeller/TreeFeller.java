@@ -1413,12 +1413,14 @@ public class TreeFeller extends JavaPlugin{
      */
     public void dropItem(DetectedTree detectedTree, Player player, Item item){
         ItemStack stack = item.getItemStack();
-        for(Sapling sapling : saplings){
-            if(sapling.detectedTree==detectedTree){
-                if(sapling.tryPlace(stack)){
-                    if(stack.getAmount()==0){
-                        item.remove();
-                        return;
+        if(Option.USE_TREE_SAPLINGS.get(detectedTree.tool, detectedTree.tree)){
+            for(Sapling sapling : saplings){
+                if(sapling.detectedTree==detectedTree){
+                    if(sapling.tryPlace(stack)){
+                        if(stack.getAmount()==0){
+                            item.remove();
+                            return;
+                        }
                     }
                 }
             }

@@ -1279,6 +1279,16 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.OAK_SAPLING);
         }
     };
+    public static OptionBoolean USE_TREE_SAPLINGS = new OptionBoolean("Use Tree Saplings", true, true, true, true){
+        @Override
+        public String getDesc(boolean ingame){
+            return "Should saplings dropped by the tree's leaves be used to replant trees?";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Material.OAK_LEAVES);
+        }
+    };
     public static OptionBoolean USE_INVENTORY_SAPLINGS = new OptionBoolean("Use Inventory Saplings", true, true, true, false){
         @Override
         public String getDesc(boolean ingame){
