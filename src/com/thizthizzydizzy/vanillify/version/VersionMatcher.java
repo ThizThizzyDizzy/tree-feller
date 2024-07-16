@@ -1,42 +1,57 @@
 package com.thizthizzydizzy.vanillify.version;
 
+import java.util.HashMap;
+import java.util.Map;
 import org.bukkit.Bukkit;
 
-import java.util.Arrays;
-import java.util.List;
-//this was copied from AnvilGUI (see net.wesjd.avilgui for license)
 /**
  * Matches the server's NMS version to its {@link VersionWrapper}
  *
  * @author Wesley Smith
+ * @since 1.2.1
  */
 public class VersionMatcher {
+    /** Maps a Minecraft version string to the corresponding revision string */
+    private static final Map<String, String> VERSION_TO_REVISION = new HashMap<String, String>() {
+        {
+            this.put("1.20", "1_20_R1");
+            this.put("1.20.1", "1_20_R1");
+            this.put("1.20.2", "1_20_R2");
+            this.put("1.20.3", "1_20_R3");
+            this.put("1.20.4", "1_20_R3");
+            this.put("1.20.5", "1_20_R4");
+            this.put("1.20.6", "1_20_R4");
+            this.put("1.21", "1_21_R1");
+        }
+    };
+    /* This needs to be updated to reflect the newest available version wrapper */
+    private static final String FALLBACK_REVISION = "1_21_R1";
 
-	/**
-	 * The server's version
-	 */
-	private final String serverVersion = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].substring(1);
-	/**
-	 * All available {@link VersionWrapper}s
-	 */
-	private final List<Class<? extends VersionWrapper>> versions = Arrays.asList(
-	);
+    /**
+     * Matches the server version to it's {@link VersionWrapper}
+     *
+     * @return The {@link VersionWrapper} for this server
+     * @throws IllegalStateException If the version wrapper failed to be instantiated or is unable to be found
+     */
+    public VersionWrapper match() {
+        String craftBukkitPackage = Bukkit.getServer().getClass().getPackage().getName();
 
-	/**
-	 * Matches the server version to it's {@link VersionWrapper}
-	 *
-	 * @return The {@link VersionWrapper} for this server
-	 * @throws RuntimeException If AnvilGUI doesn't support this server version
-	 */
-	public VersionWrapper match() {
-		try {
-			return versions.stream()
-					.filter(version -> version.getSimpleName().substring(7).equals(serverVersion))
-					.findFirst().orElseThrow(() -> new RuntimeException("Your server version isn't supported in Vanillify!"))
-					.newInstance();
-		} catch (IllegalAccessException | InstantiationException ex) {
-			throw new RuntimeException(ex);
-		}
-	}
+        String rVersion;
+        if (!craftBukkitPackage.contains(".v")) { // cb package not relocated (i.e. paper 1.20.5+)
+            final String version = Bukkit.getBukkitVersion().split("-")[0];
+            rVersion = VERSION_TO_REVISION.getOrDefault(version, FALLBACK_REVISION);
+        } else {
+            rVersion = craftBukkitPackage.split("\\.")[3].substring(1);
+        }
 
+        try {
+            return (VersionWrapper) Class.forName(getClass().getPackage().getName() + ".Wrapper" + rVersion)
+                    .getDeclaredConstructor()
+                    .newInstance();
+        } catch (ClassNotFoundException exception) {
+            throw new IllegalStateException("Vanillify does not support server version \"" + rVersion + "\"", exception);
+        } catch (ReflectiveOperationException exception) {
+            throw new IllegalStateException("Failed to instantiate version wrapper for version " + rVersion, exception);
+        }
+    }
 }
