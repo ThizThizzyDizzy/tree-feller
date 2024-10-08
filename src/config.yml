@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.24.1
+# Version 1.24.2
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -568,6 +568,26 @@ aureliumskills-apply-modifiers: true
 # Toggle compatibility with AureliumSkills
 compatibility-aureliumskills: true
 
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)
+# ex:
+# - foraging: 8
+auraskills-trunk-xp: 
+   - foraging: 1
+
+# EXP will be provided to these skills when a tree is felled
+# EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
+# ex:
+# - foraging: 8
+auraskills-leaves-xp: 
+   - foraging: 0
+
+# Should AuraSkills modifiers be applied to experience earned through TreeFeller?
+auraskills-apply-modifiers: true
+
+# Toggle compatibility with AuraSkills
+compatibility-auraskills: true
+
 # Toggle compatibility with BlockRegen
 compatibility-blockregen: false
 
@@ -673,6 +693,7 @@ compatibility-prism: true
 # ecojobs-leaf-xp
 # ecojobs-apply-multipliers
 # aureliumskills-apply-modifiers
+# auraskills-apply-modifiers
 # AIR can be used instead of an item name if you want every item, including an empty hand, to fell a tree
 # Examples of valid tools:
 #    - {type: WOODEN_AXE, required-enchantments: {efficiency: 4, unbreaking: 1}, banned-enchantments: {unbreaking: 2}, min-durability: 4, max-durability-percent: 0.9}
@@ -804,6 +825,9 @@ tools:
 # aureliumskills-trunk-xp
 # aureliumskills-leaves-xp
 # aureliumskills-apply-modifiers
+# auraskills-trunk-xp
+# auraskills-leaves-xp
+# auraskills-apply-modifiers
 # Examples of valid trees:
 #    - [[OAK_LOG, OAK_WOOD], OAK_LEAVES]
 #    - [BIRCH_LOG, BIRCH_LEAVES]

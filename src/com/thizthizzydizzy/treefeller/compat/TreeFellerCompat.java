@@ -35,6 +35,7 @@ public class TreeFellerCompat{
         compatibilities.add(new PlaceholderAPICompat());
         compatibilities.add(new SaberFactionsCompat());
         compatibilities.add(new AureliumSkillsCompat());
+        compatibilities.add(new AuraSkillsCompat());
         compatibilities.add(new BlockRegenCompat());
         compatibilities.add(new PrismCompat());
     }
