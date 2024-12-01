@@ -42,7 +42,7 @@ public class McMMOCompat extends InternalCompatibility{
             if(MCMMO_DOUBLE_DROPS.get(tool, tree)){
                 if(com.gmail.nossr50.util.Permissions.isSubSkillEnabled(player, com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER)
                         &&com.gmail.nossr50.util.skills.RankUtils.hasReachedRank(1, player, com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER)
-                        &&com.gmail.nossr50.util.random.ProbabilityUtil.isSkillRNGSuccessful(com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER, com.gmail.nossr50.util.player.UserManager.getPlayer(player))){
+                        &&com.gmail.nossr50.util.random.ProbabilityUtil.isSkillRNGSuccessful(com.gmail.nossr50.datatypes.skills.SubSkillType.WOODCUTTING_HARVEST_LUMBER, player)){
                     BlockState blockState = block.getState();
                     if(isCustomLogWithDoubleDropEnabled(blockState)){
                         modifiers.add(new Modifier(Modifier.Type.LOG_MULT, 2));
