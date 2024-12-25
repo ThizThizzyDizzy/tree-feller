@@ -47,8 +47,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 public abstract class Option<E>{
     private static final HashSet<Material> defaultOverridables = new HashSet<>();
     private static final HashSet<Material> defaultGrasses = new HashSet<>();
-    private static final HashMap<Material, Material> defaultDropConversions = new HashMap<>();
-    private static final HashMap<Material, Material> defaultBlockConversions = new HashMap<>();
+    private static final HashMap<String, String> defaultDropConversions = new HashMap<>();
+    private static final HashMap<String, String> defaultBlockConversions = new HashMap<>();
     static{
         defaultOverridables.add(Material.GRASS);
         defaultOverridables.add(Material.AIR);
@@ -62,19 +62,38 @@ public abstract class Option<E>{
         defaultGrasses.add(Material.GRASS_BLOCK);
         defaultGrasses.add(Material.DIRT);
         defaultGrasses.add(Material.PODZOL);
-        Material rootedDirt = Material.matchMaterial("ROOTED_DIRT");
+        Material rootedDirt = Material.matchMaterial("rooted_dirt");
         if(rootedDirt!=null)defaultGrasses.add(rootedDirt);
-        defaultDropConversions.put(Material.OAK_WOOD, Material.OAK_LOG);
-        defaultDropConversions.put(Material.BIRCH_WOOD, Material.BIRCH_LOG);
-        defaultDropConversions.put(Material.SPRUCE_WOOD, Material.SPRUCE_LOG);
-        defaultDropConversions.put(Material.JUNGLE_WOOD, Material.JUNGLE_LOG);
-        defaultDropConversions.put(Material.ACACIA_WOOD, Material.ACACIA_LOG);
-        defaultDropConversions.put(Material.DARK_OAK_WOOD, Material.DARK_OAK_LOG);
-        defaultDropConversions.put(Material.CRIMSON_HYPHAE, Material.CRIMSON_STEM);
-        defaultDropConversions.put(Material.WARPED_HYPHAE, Material.WARPED_STEM);
-        Material roots = Material.matchMaterial("MUDDY_MANGROVE_ROOTS");
-        Material mud = Material.matchMaterial("MUD");
-        if(roots!=null)defaultBlockConversions.put(roots, mud);
+        defaultDropConversions.put("OAK_WOOD", "OAK_LOG");
+        defaultDropConversions.put("BIRCH_WOOD", "BIRCH_LOG");
+        defaultDropConversions.put("SPRUCE_WOOD", "SPRUCE_LOG");
+        defaultDropConversions.put("JUNGLE_WOOD", "JUNGLE_LOG");
+        defaultDropConversions.put("ACACIA_WOOD", "ACACIA_LOG");
+        defaultDropConversions.put("DARK_OAK_WOOD", "DARK_OAK_LOG");
+        defaultDropConversions.put("CHERRY_WOOD", "CHERRY_LOG");
+        defaultDropConversions.put("MANGROVE_WOOD", "MANGROVE_LOG");
+        defaultDropConversions.put("PALE_WOOD", "PALE_LOG");
+        defaultDropConversions.put("CRIMSON_HYPHAE", "CRIMSON_STEM");
+        defaultDropConversions.put("WARPED_HYPHAE", "WARPED_STEM");
+        defaultBlockConversions.put("MUDDY_MANGROVE_ROOTS", "MUD");
+    }
+    private static HashMap<Material, Material> buildMaterialMap(HashMap<String, String> map){
+        HashMap<Material, Material> materials = new HashMap<>();
+        for(String key : map.keySet()){
+            Material m = Material.matchMaterial(key);
+            if(m==null)continue;
+            Material m2 = Material.matchMaterial(map.get(key));
+            if(m2==null)continue;
+            materials.put(m, m2);
+        }
+        return materials;
+    }
+    private static String buildMaterialMapString(HashMap<String, String> map){
+        String str = "";
+        for(String key : map.keySet()){
+            str+="\n    "+key+": "+map.get(key);
+        }
+        return str;
     }
     public static ArrayList<Option> options = new ArrayList<>();
     //console/debugging stuff
@@ -522,7 +541,7 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.DETECTOR_RAIL);
         }
     };
-    public static Option<ArrayList<DecorationDetector>> DECORATIONS = new Option<ArrayList<DecorationDetector>>("Decorations", true, true, true, DecorationDetector.detectors, "\n    - snow\n    - vines\n    - cocoa\n    - weeping vines\n    - moss"){
+    public static Option<ArrayList<DecorationDetector>> DECORATIONS = new Option<ArrayList<DecorationDetector>>("Decorations", true, true, true, DecorationDetector.detectors, "\n    - snow\n    - vines\n    - cocoa\n    - weeping vines\n    - moss\n    - pale moss carpet\n    - pale hanging moss"){
         @Override
         public ArrayList<DecorationDetector> load(Object o){
             if(o instanceof Iterable){
@@ -2191,7 +2210,7 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.OAK_LOG);
         }
     };
-    public static Option<HashMap<Material, Material>> DROP_CONVERSIONS = new Option<HashMap<Material, Material>>("Drop Conversions", true, true, true, defaultDropConversions){
+    public static Option<HashMap<Material, Material>> DROP_CONVERSIONS = new Option<HashMap<Material, Material>>("Drop Conversions", true, true, true, buildMaterialMap(defaultDropConversions), buildMaterialMapString(defaultDropConversions)){
         @Override
         public String writeToConfig(HashMap<Material, Material> value){
             String s = "";
@@ -2202,10 +2221,6 @@ public abstract class Option<E>{
                 s+="\n    "+m.toString()+": "+value.get(m).toString();
             }
             return s;
-        }
-        @Override
-        public String getDefaultConfigValue(){
-            return writeToConfig(defaultValue);
         }
         @Override
         public String getDesc(boolean ingame){
@@ -2294,7 +2309,7 @@ public abstract class Option<E>{
             }));
         }
     };
-    public static Option<HashMap<Material, Material>> BLOCK_CONVERSIONS = new Option<HashMap<Material, Material>>("Block Conversions", true, true, true, defaultBlockConversions){
+    public static Option<HashMap<Material, Material>> BLOCK_CONVERSIONS = new Option<HashMap<Material, Material>>("Block Conversions", true, true, true, buildMaterialMap(defaultBlockConversions), buildMaterialMapString(defaultBlockConversions)){
         @Override
         public String writeToConfig(HashMap<Material, Material> value){
             String s = "";
@@ -2305,10 +2320,6 @@ public abstract class Option<E>{
                 s+="\n    "+m.toString()+": "+value.get(m).toString();
             }
             return s;
-        }
-        @Override
-        public String getDefaultConfigValue(){
-            return writeToConfig(defaultValue);
         }
         @Override
         public String getDesc(boolean ingame){

@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.24.3
+# Version 1.25.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -60,6 +60,8 @@ decorations:
     - cocoa
     - weeping vines
     - moss
+    - pale moss carpet
+    - pale hanging moss
 
 # Which trunk blocks should prevent a tree from being felled? (Intended to help prevent player structures from being cut down)
 # (For this to work, these must also be included in the tree trunk materials)
@@ -264,17 +266,21 @@ rotate-logs: true
 #     oak_wood: oak_log
 #     oak_fence: stick
 drop-conversions: 
+    MANGROVE_WOOD: MANGROVE_LOG
     OAK_WOOD: OAK_LOG
+    WARPED_HYPHAE: WARPED_STEM
+    CHERRY_WOOD: CHERRY_LOG
     SPRUCE_WOOD: SPRUCE_LOG
+    DARK_OAK_WOOD: DARK_OAK_LOG
+    PALE_WOOD: PALE_LOG
     BIRCH_WOOD: BIRCH_LOG
     JUNGLE_WOOD: JUNGLE_LOG
-    ACACIA_WOOD: ACACIA_LOG
-    DARK_OAK_WOOD: DARK_OAK_LOG
     CRIMSON_HYPHAE: CRIMSON_STEM
-    WARPED_HYPHAE: WARPED_STEM
+    ACACIA_WOOD: ACACIA_LOG
 
 # Blocks in this list will never be broken; they will be converted instead.
 block-conversions: 
+    MUDDY_MANGROVE_ROOTS: MUD
 
 # How often should leaves drop items? Set this to 0.0 to stop leaves from dropping items altogether (Only works with BREAK behavior)
 leaf-drop-chance: 1.0
@@ -843,6 +849,7 @@ trees:
     - [[OAK_LOG, OAK_WOOD], [AZALEA_LEAVES, FLOWERING_AZALEA_LEAVES], {sapling: [AZALEA, FLOWERING_AZALEA], max-saplings: 1, diagonal-leaves: true}]
     - [[MANGROVE_LOG, MANGROVE_WOOD], [MANGROVE_ROOTS, MANGROVE_LEAVES], {roots: [MANGROVE_ROOTS], sapling: [MANGROVE_PROPAGULE], max-saplings: 1, max-trunks: 16, max-horizontal-trunk-pillar-length: 16, leaf-detect-range: 16, leaf-break-range: 16, required-logs: 3, root-distance: 16, diagonal-leaves: true}]
     - [[CHERRY_LOG, CHERRY_WOOD], CHERRY_LEAVES, {sapling: CHERRY_SAPLING, max-saplings: 1}]
+    - [[PALE_OAK_LOG, PALE_OAK_WOOD], PALE_OAK_LEAVES, {sapling: PALE_OAK_SAPLING, max-saplings: 4}]
     - [[CRIMSON_STEM, CRIMSON_HYPHAE], [NETHER_WART_BLOCK, SHROOMLIGHT], {sapling: CRIMSON_FUNGUS, max-saplings: 1, grass: [CRIMSON_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
     - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]
 

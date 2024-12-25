@@ -10,6 +10,12 @@ public abstract class DecorationDetector{
         detectors.add(new AdjacentColumnDecorationDetector("vines", Material.VINE, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
         detectors.add(new AdjacentDecorationDetector("cocoa", new Material[]{Material.COCOA_BEANS, Material.COCOA}, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
         detectors.add(new AdjacentColumnDecorationDetector("weeping vines", new Material[]{Material.WEEPING_VINES, Material.WEEPING_VINES_PLANT}, BlockFace.DOWN));
+        Material hangingMoss = Material.matchMaterial("PALE_HANGING_MOSS");
+        if(hangingMoss!=null)detectors.add(new AdjacentColumnDecorationDetector("pale hanging moss", hangingMoss, BlockFace.DOWN));
+        Material mossCarpet = Material.matchMaterial("PALE_MOSS_CARPET");
+        if(hangingMoss!=null)detectors.add(new AdjacentDecorationDetector("pale moss carpet", mossCarpet, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST));
+        Material resinClump = Material.matchMaterial("RESIN_CLUMP");
+        if(resinClump!=null)detectors.add(new AdjacentDecorationDetector("resin clump", resinClump, BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN));
         Material moss = Material.matchMaterial("moss_carpet");
         if(moss!=null)detectors.add(new AdjacentDecorationDetector("moss", moss, BlockFace.UP));
     }
