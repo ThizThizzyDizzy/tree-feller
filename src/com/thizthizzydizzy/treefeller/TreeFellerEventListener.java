@@ -23,6 +23,10 @@ public class TreeFellerEventListener implements Listener{
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event){
         if(event.isCancelled())return;
+        if(event.getClass().getName().contains("Fake")){ // Because mcMMO calls events for things that have not actually happened. (This is a performance nightmare)
+            plugin.getLogger().warning("Ignoring fake block break event: "+event.getClass().getName()+"!");
+            return;
+        }
         plugin.fellTree(event);
     }
     @EventHandler
