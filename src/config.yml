@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.25.0
+# Version 1.25.1
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -577,16 +577,16 @@ compatibility-aureliumskills: true
 # EXP will be provided to these skills when a tree is felled
 # EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)
 # ex:
-# - foraging: 8
+# - auraskills/foraging: 8
 auraskills-trunk-xp: 
-   - foraging: 1
+   - auraskills/foraging: 1
 
 # EXP will be provided to these skills when a tree is felled
 # EXP is provided per-block (a value of 1 means 1 EXP per block of leaves)
 # ex:
-# - foraging: 8
+# - auraskills/foraging: 8
 auraskills-leaves-xp: 
-   - foraging: 0
+   - auraskills/foraging: 0
 
 # Should AuraSkills modifiers be applied to experience earned through TreeFeller?
 auraskills-apply-modifiers: true
