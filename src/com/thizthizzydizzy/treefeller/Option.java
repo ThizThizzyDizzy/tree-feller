@@ -72,7 +72,7 @@ public abstract class Option<E>{
         defaultDropConversions.put("DARK_OAK_WOOD", "DARK_OAK_LOG");
         defaultDropConversions.put("CHERRY_WOOD", "CHERRY_LOG");
         defaultDropConversions.put("MANGROVE_WOOD", "MANGROVE_LOG");
-        defaultDropConversions.put("PALE_WOOD", "PALE_LOG");
+        defaultDropConversions.put("PALE_OAK_WOOD", "PALE_OAK_LOG");
         defaultDropConversions.put("CRIMSON_HYPHAE", "CRIMSON_STEM");
         defaultDropConversions.put("WARPED_HYPHAE", "WARPED_STEM");
         defaultBlockConversions.put("MUDDY_MANGROVE_ROOTS", "MUD");
@@ -2244,6 +2244,7 @@ public abstract class Option<E>{
                 for(String key : m.getKeys(false)){
                     conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                 }
+                conversions.remove(null);
                 return conversions;
             }
             if(o instanceof Map){
@@ -2255,6 +2256,7 @@ public abstract class Option<E>{
                         conversions.put(loadMaterial(key), loadMaterial(m.get(key)));
                     }
                 }
+                conversions.remove(null);
                 return conversions;
             }
             if(o instanceof List){
@@ -2268,6 +2270,7 @@ public abstract class Option<E>{
                         }
                     }
                 }
+                conversions.remove(null);
                 return conversions;
             }
             return null;

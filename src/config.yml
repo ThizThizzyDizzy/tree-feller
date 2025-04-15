@@ -272,10 +272,10 @@ drop-conversions:
     CHERRY_WOOD: CHERRY_LOG
     SPRUCE_WOOD: SPRUCE_LOG
     DARK_OAK_WOOD: DARK_OAK_LOG
-    PALE_WOOD: PALE_LOG
     BIRCH_WOOD: BIRCH_LOG
     JUNGLE_WOOD: JUNGLE_LOG
     CRIMSON_HYPHAE: CRIMSON_STEM
+    PALE_OAK_WOOD: PALE_OAK_LOG
     ACACIA_WOOD: ACACIA_LOG
 
 # Blocks in this list will never be broken; they will be converted instead.
