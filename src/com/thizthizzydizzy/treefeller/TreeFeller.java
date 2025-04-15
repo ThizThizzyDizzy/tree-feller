@@ -314,6 +314,7 @@ public class TreeFeller extends JavaPlugin{
             cooldowns.put(player.getUniqueId(), cooldown);
         }
         for(Effect e : Option.EFFECTS.get(tool, tree)){
+            if(!e.filter.isEmpty()&&!e.filter.contains(axe.getType()))continue;
             if(e.location==Effect.EffectLocation.TOOL){
                 if(new Random().nextDouble()<e.chance)e.play(block);
             }
@@ -779,6 +780,19 @@ public class TreeFeller extends JavaPlugin{
                         chance = ((Number)map.get("chance")).doubleValue();
                     }
                     Effect effect = type.loadEffect(name, location, chance, map);
+                    Object filter = map.get("filter");
+                    if(filter instanceof String){
+                        Material f = Material.matchMaterial((String)filter);
+                        effect.filter.add(f);
+                    }
+                    if(filter instanceof ArrayList){
+                        for(Object obj : (ArrayList)filter){
+                            if(obj instanceof String){
+                                Material f = Material.matchMaterial((String)filter);
+                                effect.filter.add(f);
+                            }
+                        }
+                    }
                     if(Option.STARTUP_LOGS.isTrue())effect.print(logger);
                     this.effects.add(effect);
                 }else if(o instanceof String){
@@ -948,6 +962,7 @@ public class TreeFeller extends JavaPlugin{
             cascade(detectedTree, dropItems, tree, tool, axe, block, player);
         }
         for(Effect e : Option.EFFECTS.get(tool, tree)){
+            if(!e.filter.isEmpty()&&!e.filter.contains(block.getType()))continue;
             if(e.location==Effect.EffectLocation.TREE)effects.add(e);
             if(type==e.location)effects.add(e);
         }
@@ -1559,6 +1574,7 @@ public class TreeFeller extends JavaPlugin{
     private void playToolBreakEffect(Tool tool, Tree tree, ItemStack axe, Player player, Block block){
         player.playEffect(EntityEffect.BREAK_EQUIPMENT_MAIN_HAND);
         for(Effect e : Option.EFFECTS.get(tool, tree)){
+            if(!e.filter.isEmpty()&&!e.filter.contains(axe.getType()))continue;
             if(e.location==Effect.EffectLocation.TOOL_BREAK){
                 if(new Random().nextDouble()<e.chance)e.play(block);
             }

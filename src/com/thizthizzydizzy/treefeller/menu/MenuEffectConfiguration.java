@@ -14,9 +14,11 @@ import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyEnum;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyFloat;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyInteger;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterial;
+import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyMaterialSet;
 import com.thizthizzydizzy.treefeller.menu.modify.MenuModifyStringList;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
@@ -56,43 +58,49 @@ public class MenuEffectConfiguration extends Menu{
                 }
             });
         }));
-        add(new Button(2, new ItemBuilder(Material.BELL).setDisplayName("Chance").addLore(effect.chance+""), (click) -> {
+        add(new Button(2, new ItemBuilder(Material.HOPPER).setDisplayName("Filter").addLore(effect.filter.toString()), (click)->{
+            if(click==ClickType.LEFT)open(new MenuModifyMaterialSet(this, plugin, player, effect.name+" Filter", false, "material", new HashSet<>(effect.filter), (material)->true, (value)->{
+                effect.filter.clear();
+                effect.filter.addAll(value);
+            }));
+        }));
+        add(new Button(3, new ItemBuilder(Material.BELL).setDisplayName("Chance").addLore(effect.chance+""), (click) -> {
             if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, 0, 1, false, effect.chance, (value) -> {
                 effect.chance = value;
             }));
         }));
         switch(effect.type){
             case EXPLOSION:
-                add(new Button(3, new ItemBuilder(Material.TNT).setDisplayName("Power").addLore(effect.power+""), (click) -> {
+                add(new Button(4, new ItemBuilder(Material.TNT).setDisplayName("Power").addLore(effect.power+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyFloat(this, plugin, player, effect.name, 0, Float.MAX_VALUE, false, effect.power, (value) -> {
                         effect.power = value;
                     }));
                 }));
-                add(new Button(4, new ItemBuilder(Material.FIRE_CHARGE).setDisplayName("Fire").addLore(effect.fire+""), (click) -> {
+                add(new Button(5, new ItemBuilder(Material.FIRE_CHARGE).setDisplayName("Fire").addLore(effect.fire+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyBoolean(this, plugin, player, effect.name, false, effect.fire, (value) -> {
                         effect.fire = value;
                     }));
                 }));
                 break;
             case SOUND:
-                add(new Button(3, new ItemBuilder(Material.NOTE_BLOCK).setDisplayName("Sound").addLore(effect.sound), (click) -> {
+                add(new Button(4, new ItemBuilder(Material.NOTE_BLOCK).setDisplayName("Sound").addLore(effect.sound), (click) -> {
                     if(click==ClickType.LEFT)openAnvilGUI(effect.sound, "Modify Effect Sound: "+effect.name, (player, str) -> {
                         effect.sound = str;
                     });
                 }));
-                add(new Button(4, new ItemBuilder(Material.NOTE_BLOCK).setDisplayName("Volume").addLore(effect.volume+""), (click) -> {
+                add(new Button(5, new ItemBuilder(Material.NOTE_BLOCK).setDisplayName("Volume").addLore(effect.volume+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyFloat(this, plugin, player, effect.name, 0, Float.MAX_VALUE, false, effect.volume, (value) -> {
                         effect.volume = value;
                     }));
                 }));
-                add(new Button(5, new ItemBuilder(Material.NOTE_BLOCK).setDisplayName("Pitch").addLore(effect.pitch+""), (click) -> {
+                add(new Button(6, new ItemBuilder(Material.NOTE_BLOCK).setDisplayName("Pitch").addLore(effect.pitch+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyFloat(this, plugin, player, effect.name, 0.5f, 2f, false, effect.pitch, (value) -> {
                         effect.pitch = value;
                     }));
                 }));
                 break;
             case PARTICLE:
-                add(new Button(3, new ItemBuilder(Material.FIREWORK_STAR).setDisplayName("Particle").addLore(effect.particle.toString()), (click) -> {
+                add(new Button(4, new ItemBuilder(Material.FIREWORK_STAR).setDisplayName("Particle").addLore(effect.particle.toString()), (click) -> {
                     if(click==ClickType.LEFT){
                         openAnvilGUI(effect.particle.name(), "Modify Effect Particle: "+effect.name, (player, str) -> {
                             try{
@@ -108,50 +116,50 @@ public class MenuEffectConfiguration extends Menu{
 //                        }));
                     }
                 }));
-                add(new Button(4, new ItemBuilder(Material.RED_CONCRETE).setDisplayName("x").addLore(effect.x+""), (click) -> {
+                add(new Button(5, new ItemBuilder(Material.RED_CONCRETE).setDisplayName("x").addLore(effect.x+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, -Double.MAX_VALUE, Double.MAX_VALUE, false, effect.x, (value) -> {
                         effect.x = value;
                     }));
                 }));
-                add(new Button(5, new ItemBuilder(Material.GREEN_CONCRETE).setDisplayName("y").addLore(effect.y+""), (click) -> {
+                add(new Button(6, new ItemBuilder(Material.GREEN_CONCRETE).setDisplayName("y").addLore(effect.y+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, -Double.MAX_VALUE, Double.MAX_VALUE, false, effect.y, (value) -> {
                         effect.y = value;
                     }));
                 }));
-                add(new Button(6, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("z").addLore(effect.z+""), (click) -> {
+                add(new Button(7, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("z").addLore(effect.z+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, -Double.MAX_VALUE, Double.MAX_VALUE, false, effect.z, (value) -> {
                         effect.z = value;
                     }));
                 }));
                 
-                add(new Button(7, new ItemBuilder(Material.RED_CONCRETE).setDisplayName("dx").addLore(effect.dx+""), (click) -> {
+                add(new Button(8, new ItemBuilder(Material.RED_CONCRETE).setDisplayName("dx").addLore(effect.dx+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, -Double.MAX_VALUE, Double.MAX_VALUE, false, effect.dx, (value) -> {
                         effect.dx = value;
                     }));
                 }));
-                add(new Button(8, new ItemBuilder(Material.GREEN_CONCRETE).setDisplayName("dy").addLore(effect.dy+""), (click) -> {
+                add(new Button(9, new ItemBuilder(Material.GREEN_CONCRETE).setDisplayName("dy").addLore(effect.dy+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, -Double.MAX_VALUE, Double.MAX_VALUE, false, effect.dy, (value) -> {
                         effect.dy = value;
                     }));
                 }));
-                add(new Button(9, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("dz").addLore(effect.dz+""), (click) -> {
+                add(new Button(10, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("dz").addLore(effect.dz+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, -Double.MAX_VALUE, Double.MAX_VALUE, false, effect.dz, (value) -> {
                         effect.dz = value;
                     }));
                 }));
-                add(new Button(10, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("Speed").addLore(effect.speed+""), (click) -> {
+                add(new Button(11, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("Speed").addLore(effect.speed+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyDouble(this, plugin, player, effect.name, 0, Double.MAX_VALUE, false, effect.speed, (value) -> {
                         effect.speed = value;
                     }));
                 }));
-                add(new Button(11, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("Count").addLore(effect.count+""), (click) -> {
+                add(new Button(12, new ItemBuilder(Material.BLUE_CONCRETE).setDisplayName("Count").addLore(effect.count+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyInteger(this, plugin, player, effect.name, 0, Integer.MAX_VALUE, false, effect.count, (value) -> {
                         effect.count = value;
                     }));
                 }));
                 switch(effect.particle){
                     case REDSTONE:
-                        add(new Button(12, new ItemBuilder(Material.RED_DYE).setDisplayName("Red").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getColor().getRed()+""), (click) -> {
+                        add(new Button(13, new ItemBuilder(Material.RED_DYE).setDisplayName("Red").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getColor().getRed()+""), (click) -> {
                             if(click==ClickType.LEFT)open(new MenuModifyInteger(this, plugin, player, effect.name, 0, 255, false, effect.extra==null?0:((Particle.DustOptions)effect.extra).getColor().getRed(), (value) -> {
                                 int g = 0;
                                 int b = 0;
@@ -165,7 +173,7 @@ public class MenuEffectConfiguration extends Menu{
                                 effect.extra = new Particle.DustOptions(Color.fromRGB(value, g, b), size);
                             }));
                         }));
-                        add(new Button(13, new ItemBuilder(Material.GREEN_DYE).setDisplayName("Green").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getColor().getGreen()+""), (click) -> {
+                        add(new Button(14, new ItemBuilder(Material.GREEN_DYE).setDisplayName("Green").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getColor().getGreen()+""), (click) -> {
                             if(click==ClickType.LEFT)open(new MenuModifyInteger(this, plugin, player, effect.name, 0, 255, false, effect.extra==null?0:((Particle.DustOptions)effect.extra).getColor().getGreen(), (value) -> {
                                 int r = 0;
                                 int b = 0;
@@ -179,7 +187,7 @@ public class MenuEffectConfiguration extends Menu{
                                 effect.extra = new Particle.DustOptions(Color.fromRGB(r, value, b), size);
                             }));
                         }));
-                        add(new Button(14, new ItemBuilder(Material.BLUE_DYE).setDisplayName("Blue").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getColor().getBlue()+""), (click) -> {
+                        add(new Button(15, new ItemBuilder(Material.BLUE_DYE).setDisplayName("Blue").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getColor().getBlue()+""), (click) -> {
                             if(click==ClickType.LEFT)open(new MenuModifyInteger(this, plugin, player, effect.name, 0, 255, false, effect.extra==null?0:((Particle.DustOptions)effect.extra).getColor().getBlue(), (value) -> {
                                 int r = 0;
                                 int g = 0;
@@ -193,7 +201,7 @@ public class MenuEffectConfiguration extends Menu{
                                 effect.extra = new Particle.DustOptions(Color.fromRGB(r, g, value), size);
                             }));
                         }));
-                        add(new Button(15, new ItemBuilder(Material.PISTON).setDisplayName("Size").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getSize()+""), (click) -> {
+                        add(new Button(16, new ItemBuilder(Material.PISTON).setDisplayName("Size").addLore(effect.extra==null?"null":((Particle.DustOptions)effect.extra).getSize()+""), (click) -> {
                             if(click==ClickType.LEFT)open(new MenuModifyFloat(this, plugin, player, effect.name, 0, Float.MAX_VALUE, false, effect.extra==null?0:((Particle.DustOptions)effect.extra).getSize(), (value) -> {
                                 int r = 0;
                                 int g = 0;
@@ -209,7 +217,7 @@ public class MenuEffectConfiguration extends Menu{
                         }));
                         break;
                     case ITEM_CRACK:
-                        add(new Button(12, new ItemBuilder(Material.IRON_PICKAXE).setDisplayName("Item").addLore(effect.extra==null?"null":((ItemStack)effect.extra).getType().toString()), (click) -> {
+                        add(new Button(13, new ItemBuilder(Material.IRON_PICKAXE).setDisplayName("Item").addLore(effect.extra==null?"null":((ItemStack)effect.extra).getType().toString()), (click) -> {
                             if(click==ClickType.LEFT)open(new MenuModifyMaterial(this, plugin, player, effect.name, false, "item", effect.extra==null?Material.IRON_PICKAXE:((ItemStack)effect.extra).getType(), (mat) -> {
                                 return mat.isItem();
                             }, (value) -> {
@@ -220,7 +228,7 @@ public class MenuEffectConfiguration extends Menu{
                     case BLOCK_CRACK:
                     case BLOCK_DUST:
                     case FALLING_DUST:
-                        add(new Button(12, new ItemBuilder(Material.IRON_PICKAXE).setDisplayName("Block").addLore(effect.extra==null?"null":((BlockData)effect.extra).getMaterial().toString()), (click) -> {
+                        add(new Button(13, new ItemBuilder(Material.IRON_PICKAXE).setDisplayName("Block").addLore(effect.extra==null?"null":((BlockData)effect.extra).getMaterial().toString()), (click) -> {
                             if(click==ClickType.LEFT)open(new MenuModifyMaterial(this, plugin, player, effect.name, false, "block", effect.extra==null?Material.STONE:((BlockData)effect.extra).getMaterial(), (mat) -> {
                                 return mat.isBlock();
                             }, (value) -> {
@@ -231,12 +239,12 @@ public class MenuEffectConfiguration extends Menu{
                 }
                 break;
             case MARKER:
-                add(new Button(3, new ItemBuilder(Material.ARMOR_STAND).setDisplayName("Permanent").addLore(effect.permanent+""), (click) -> {
+                add(new Button(4, new ItemBuilder(Material.ARMOR_STAND).setDisplayName("Permanent").addLore(effect.permanent+""), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyBoolean(this, plugin, player, effect.name, false, effect.permanent, (value) -> {
                         effect.permanent = value;
                     }));
                 }));
-                add(new Button(4, new ItemBuilder(Material.PAPER).setDisplayName("Tags").addLore(Arrays.toString(effect.tags)), (click) -> {
+                add(new Button(5, new ItemBuilder(Material.PAPER).setDisplayName("Tags").addLore(Arrays.toString(effect.tags)), (click) -> {
                     if(click==ClickType.LEFT)open(new MenuModifyStringList(this, plugin, player, effect.name, false, new ArrayList<>(Arrays.asList(effect.tags)), (value) -> {
                         effect.tags = value.toArray(new String[value.size()]);
                     }));

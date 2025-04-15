@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -20,6 +21,7 @@ public class Effect{
     public String name;
     public EffectLocation location;
     public EffectType type;
+    public HashSet<Material> filter = new HashSet<>();
     public double chance;
     public Particle particle;
     public double x;
@@ -100,10 +102,15 @@ public class Effect{
     }
     public String writeToConfig(){
         String s = "{name: "+name;
-        s+=", chance: "+chance;
-        s+=", location: "+location.name();
-        s+=", type: "+type.name();
-        s+= type.writeToConfig(this);
+        s += ", chance: "+chance;
+        s += ", location: "+location.name();
+        s += ", type: "+type.name();
+        if(filter!=null&&!filter.isEmpty()){
+            ArrayList<String> filterStrs = new ArrayList<>();
+            for(Material m : filter)filterStrs.add(m.name());
+            s += ", filter: ["+String.join(", ", filterStrs)+"]";
+        }
+        s += type.writeToConfig(this);
         return s+"}";
     }
     public static enum EffectLocation{

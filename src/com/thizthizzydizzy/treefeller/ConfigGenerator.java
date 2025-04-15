@@ -89,6 +89,7 @@ public class ConfigGenerator{
         for(Effect.EffectLocation loc : Effect.EffectLocation.values()){
             add(normalize("#   "+loc.name().toLowerCase(Locale.ROOT), len)+" "+loc.description);
         }
+        add("# filter: [<values>]   This will only apply the effect for specific blocks or items");
         add("# type: <value>     This is what type of effect should occur. Valid options:");
         add("#   particle  A particle effect, such as flame, block, etc. particles");
         add("#   sound     Any sound");
