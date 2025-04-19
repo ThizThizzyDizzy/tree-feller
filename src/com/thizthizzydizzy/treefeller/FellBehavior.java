@@ -40,7 +40,7 @@ public enum FellBehavior{
                         plugin.dropItem(detectedTree, player, block.getWorld().dropItemNaturally(block.getLocation(), st));
                     }
                 }
-                player.setTotalExperience(player.getTotalExperience()+xp[0]);
+                player.giveExp(xp[0]);
             }
             block.setType(Material.AIR);
         }
