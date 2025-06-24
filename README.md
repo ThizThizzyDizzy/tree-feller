@@ -107,11 +107,11 @@ Permission: treefeller.help<br>
 Displays help for tree feller commands<br>
 
 /treefeller on<br>
-Permission: treefeller.on<br>
+Permission: treefeller.toggle<br>
 Toggles on the tree feller for the player who ran the command<br>
 
 /treefeller off<br>
-Permission: treefeller.off<br>
+Permission: treefeller.toggle<br>
 Toggles off the tree feller for the player who ran the command<br>
 
 /treefeller toggle<br>
