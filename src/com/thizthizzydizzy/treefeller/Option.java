@@ -2320,6 +2320,7 @@ public abstract class Option<E>{
             ArrayList<Material> keys = new ArrayList<>(value.keySet());
             Collections.sort(keys);
             for(Material m : keys){
+                if(m==null)continue;
                 s+="\n    "+m.toString()+": "+value.get(m).toString();
             }
             return s;
