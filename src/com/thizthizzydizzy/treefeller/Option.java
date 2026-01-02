@@ -4336,6 +4336,120 @@ public abstract class Option<E>{
             return new ItemBuilder(Material.GRASS_BLOCK);
         }
     };
+    public static Option<HashSet<String>> BIOMES = new Option<HashSet<String>>("Biomes", true, true, true, null){
+        @Override
+        public DebugResult doCheck(TreeFeller plugin, Tool tool, Tree tree, Block block, Player player, ItemStack axe){
+            NamespacedKey biomeKey = block.getBiome().getKey();
+            if(toolValues.containsKey(tool)){
+                HashSet<String> biomes = toolValues.get(tool);
+                boolean blacklist = Objects.equals(BIOME_BLACKLIST.getValue(tool), true);
+                boolean foundBiome = false;
+                for(String biome : biomes){
+                    if(biome.equalsIgnoreCase(biomeKey.toString())||(biome.equalsIgnoreCase(biomeKey.getKey())&&biomeKey.getNamespace().equalsIgnoreCase("minecraft"))){
+                        if(blacklist){
+                            return new DebugResult(this, TOOL, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+                        }else{
+                            foundBiome = true;
+                            break;
+                        }
+                    }
+                }
+                if(!blacklist&&!foundBiome)return new DebugResult(this, TOOL, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+            }
+            if(treeValues.containsKey(tree)){
+                HashSet<String> biomes = treeValues.get(tree);
+                boolean blacklist = Objects.equals(BIOME_BLACKLIST.getValue(tree), true);
+                boolean foundBiome = false;
+                for(String biome : biomes){
+                    if(biome.equalsIgnoreCase(biomeKey.toString())||(biome.equalsIgnoreCase(biomeKey.getKey())&&biomeKey.getNamespace().equalsIgnoreCase("minecraft"))){
+                        if(blacklist){
+                            return new DebugResult(this, TREE, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+                        }else{
+                            foundBiome = true;
+                            break;
+                        }
+                    }
+                }
+                if(!blacklist&&!foundBiome)return new DebugResult(this, TREE, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+            }
+            if(toolValues.get(tool)==null&&treeValues.get(tree)==null&&globalValue!=null){
+                boolean blacklist = Objects.equals(BIOME_BLACKLIST.globalValue, true);
+                boolean foundBiome = false;
+                for(String biome : globalValue){
+                    if(biome.equalsIgnoreCase(biomeKey.toString())||(biome.equalsIgnoreCase(biomeKey.getKey())&&biomeKey.getNamespace().equalsIgnoreCase("minecraft"))){
+                        if(blacklist){
+                            return new DebugResult(this, GLOBAL, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+                        }else{
+                            foundBiome = true;
+                            break;
+                        }
+                    }
+                }
+                if(!blacklist&&!foundBiome)return new DebugResult(this, GLOBAL, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+            }
+            return new DebugResult(this, SUCCESS, block.getBiome().toString()+" ("+biomeKey.toString()+")");
+        }
+        @Override
+        public HashSet<String> load(Object o){
+            if(o instanceof String){
+                HashSet<String> biomes = new HashSet<>();
+                biomes.add((String)o);
+                return biomes;
+            }
+            if(o instanceof Iterable){
+                HashSet<String> biomes = new HashSet<>();
+                for(Object ob : ((Iterable)o)){
+                    if(ob instanceof String){
+                        biomes.add((String) ob);
+                    }
+                }
+                return biomes;
+            }
+            return null;
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "In what biomes should the tree feller work? (Inverted if biome-blacklist is set to true)";
+        }
+        @Override
+        public String[] getDebugText(){
+            return generateDebugText("Biome {0} is invalid$", "Biome {0} is valid");
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(HashSet<String> value){
+            return new ItemBuilder(Material.PODZOL);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyStringSet(parent, parent.plugin, parent.player, name, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+    };
+    public static OptionBoolean BIOME_BLACKLIST = new OptionBoolean("Biome Blacklist", true, true, true, false){
+        @Override
+        public String getDesc(boolean ingame){
+            return null;
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Material.PODZOL);
+        }
+    };
     public static Option<Integer> COOLDOWN = new Option<Integer>("Cooldown", true, true, true, null){
         @Override
         public Integer load(Object o){
