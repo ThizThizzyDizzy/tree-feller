@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.26.4
+# Version 1.27.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -419,6 +419,11 @@ worlds:
 
 world-blacklist: false
 
+# In what biomes should the tree feller work? (Inverted if biome-blacklist is set to true)
+biomes:
+
+biome-blacklist: false
+
 # How long (in ticks) should players have to wait before felling another tree?
 cooldown:
 
@@ -691,6 +696,8 @@ compatibility-prism: true
 # without-sneak
 # worlds
 # world-blacklist
+# biomes
+# biome-blacklist
 # cooldown
 # cascade
 # mmocore-required-profession-level
@@ -812,6 +819,8 @@ tools:
 # without-sneak
 # worlds
 # world-blacklist
+# biomes
+# biome-blacklist
 # cooldown
 # cascade
 # cascade-trees                      Which trees should be checked during a cascade? (If not set, only the tree which was originally cut will be checked) The given value is a list of tree indicies, starting at 0 (the first tree defined is 0, the second is 1, etc.)
@@ -1085,6 +1094,10 @@ debug-worlds: "World {0} is invalid"
 debug-worlds-tool: "World {0} is invalid for tool"
 debug-worlds-tree: "World {0} is invalid for tree"
 debug-worlds-success: "World {0} is valid"
+debug-biomes: "Biome {0} is invalid"
+debug-biomes-tool: "Biome {0} is invalid for tool"
+debug-biomes-tree: "Biome {0} is invalid for tree"
+debug-biomes-success: "Biome {0} is valid"
 debug-cooldown: "Cooldown remaining: {0}ms"
 debug-cooldown-tool: "Tool cooldown remaining: {0}ms"
 debug-cooldown-tree: "Tree cooldown remaining: {0}ms"
