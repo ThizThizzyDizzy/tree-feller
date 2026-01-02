@@ -83,6 +83,17 @@ public class TreeFeller extends JavaPlugin{
         exp.put(Material.NETHER_QUARTZ_ORE, new int[]{2, 5});
         exp.put(Material.REDSTONE_ORE, new int[]{1, 5});
         exp.put(Material.SPAWNER, new int[]{15, 43});
+
+        Material deepslateCoal = Material.matchMaterial("deepslate_coal_ore");
+        if(deepslateCoal!=null)exp.put(deepslateCoal, new int[]{0, 2});
+        Material deepslateDiamond = Material.matchMaterial("deepslate_diamond_ore");
+        if(deepslateDiamond!=null)exp.put(deepslateDiamond, new int[]{3, 7});
+        Material deepslateEmerald = Material.matchMaterial("deepslate_emerald_ore");
+        if(deepslateEmerald!=null)exp.put(deepslateEmerald, new int[]{3, 7});
+        Material deepslateLapis = Material.matchMaterial("deepslate_lapis_ore");
+        if(deepslateLapis!=null)exp.put(deepslateLapis, new int[]{2, 5});
+        Material deepslateRedstone = Material.matchMaterial("deepslate_redstone_ore");
+        if(deepslateRedstone!=null)exp.put(deepslateRedstone, new int[]{1, 5});
     }
     public void fellTree(BlockBreakEvent event){
         if(fellTree(event.getBlock(), event.getPlayer()))event.setCancelled(true);
@@ -1108,6 +1119,7 @@ public class TreeFeller extends JavaPlugin{
         }
         Material type = block.getType();
         if(silk&&axe.containsEnchantment(Enchantment.SILK_TOUCH)){
+            xp[0] = 0; // no XP drops when using silk touch
             List<ItemStack> drop = new ArrayList<>(block.getDrops(axe));
             //Test if silk touch drops the base item, and if so, use it.
             if(drop.size()==1&&drop.get(0).getType()==block.getType()){
