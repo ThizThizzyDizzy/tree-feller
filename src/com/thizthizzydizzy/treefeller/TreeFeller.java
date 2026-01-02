@@ -1297,7 +1297,7 @@ public class TreeFeller extends JavaPlugin{
             dropExpOrb(world, location, 3);
             xp-=3;
         }
-        while(xp>1){
+        while(xp>=1){
             dropExpOrb(world, location, 1);
             xp--;
         }
