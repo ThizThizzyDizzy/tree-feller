@@ -164,6 +164,11 @@ public class TreeFeller extends JavaPlugin{
             durability+=axe.getType().getMaxDurability()*(axe.getAmount()-1);
         }
         int total = getTotal(detectedTree.trunk);
+        Integer partialLimit = Option.PARTIAL_LOG_LIMIT.get(tool, tree);
+        if(partialLimit!=null&&total>partialLimit&&Option.ALLOW_PARTIAL.get(tool, tree)){
+            total = partialLimit;
+            debug(player, "partial", false);
+        }
         int durabilityCost = total;
         if(Option.DAMAGE_MULT.globalValue!=null)durabilityCost*=Option.DAMAGE_MULT.globalValue;
         if(Option.DAMAGE_MULT.treeValues.containsKey(tree))durabilityCost*=Option.DAMAGE_MULT.treeValues.get(tree);
@@ -197,9 +202,13 @@ public class TreeFeller extends JavaPlugin{
         }
         int lowest = lower;
         if(player!=null&&player.getGameMode()!=GameMode.CREATIVE&&player.getGameMode()!=GameMode.SPECTATOR){
-            int logCount = 0, leafCount = 0;
-            for(int i : detectedTree.trunk.keySet())logCount+=detectedTree.trunk.get(i).size();
-            for(int i : detectedTree.leaves.keySet())leafCount+=detectedTree.leaves.get(i).size();
+            int totalLogs = getTotal(detectedTree.trunk);
+            int totalLeaves = getTotal(detectedTree.leaves);
+            int logCount = Math.min(totalLogs, total);
+            
+            // This is not accurate to the number of leaves that were actually broken, but it is better than what was here before (which always assumed the whole tree was broken, even for partial felling)
+            int leafCount = totalLogs == 0 ? totalLeaves : (int)Math.ceil((double)totalLeaves * logCount / totalLogs);
+            
             double consumeFood = Option.CONSUMED_FOOD_BASE.get(tool, tree)+Option.CONSUMED_FOOD_LOGS.get(tool, tree)*logCount+Option.CONSUMED_FOOD_LEAVES.get(tool, tree)*leafCount;
             double consumeHealth = Option.CONSUMED_HEALTH_BASE.get(tool, tree)+Option.CONSUMED_HEALTH_LOGS.get(tool, tree)*logCount+Option.CONSUMED_HEALTH_LEAVES.get(tool, tree)*leafCount;
             if(consumeFood>0){

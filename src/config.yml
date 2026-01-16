@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.27.0
+# Version 1.28.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -25,6 +25,9 @@ required-leaves: 10
 
 # What is the maximum number of logs that a tree may have and still be counted as a tree?
 max-logs: 250
+
+# What is the maximum number of logs that will be cut down if a tree is too large? (Requires allow-partial)
+partial-log-limit:
 
 # How far from the bottom can you cut down a tree? (Prevents you from cutting it down from the top) 1 = bottom block
 max-height: 5
@@ -615,6 +618,7 @@ compatibility-prism: true
 # required-logs
 # required-leaves
 # max-logs
+# partial-log-limit
 # max-height
 # allow-partial
 # allow-partial-tool
@@ -732,6 +736,7 @@ tools:
 # required-logs
 # required-leaves
 # max-logs
+# partial-log-limit
 # max-height
 # allow-partial
 # allow-partial-tool

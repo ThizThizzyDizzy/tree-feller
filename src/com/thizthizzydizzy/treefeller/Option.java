@@ -388,6 +388,48 @@ public abstract class Option<E>{
             return val;
         }
     };
+    public static Option<Integer> PARTIAL_LOG_LIMIT = new Option<Integer>("Partial Log Limit", true, true, true, null){
+        @Override
+        public Integer load(Object o){
+            return loadInt(o);
+        }
+        @Override
+        public String getDesc(boolean ingame){
+            return "What is the maximum number of logs that will be cut down if a tree is too large? (Requires allow-partial)";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Integer value){
+            return new ItemBuilder(Material.OAK_LOG).setCount(value==null?1:value);
+        }
+        @Override
+        public void openGlobalModifyMenu(MenuGlobalConfiguration parent){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, globalValue, (value) -> {
+                globalValue = value;
+            }));
+        }
+        @Override
+        public void openToolModifyMenu(MenuToolConfiguration parent, Tool tool){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, toolValues.get(tool), (value) -> {
+                if(value==null)toolValues.remove(tool);
+                else toolValues.put(tool, value);
+            }));
+        }
+        @Override
+        public void openTreeModifyMenu(MenuTreeConfiguration parent, Tree tree){
+            parent.open(new MenuModifyInteger(parent, parent.plugin, parent.player, name, 0, Integer.MAX_VALUE, true, treeValues.get(tree), (value) -> {
+                if(value==null)treeValues.remove(tree);
+                else treeValues.put(tree, value);
+            }));
+        }
+        @Override
+        public Integer get(Tool tool, Tree tree){
+            Integer val = null;
+            if(getValue(tool)==null&&getValue(tree)==null&&getValue()!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue());
+            if(getValue(tool)!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue(tool));
+            if(getValue(tree)!=null)val = Math.min(val==null?Integer.MAX_VALUE:val, getValue(tree));
+            return val;
+        }
+    };
     public static Option<Integer> MAX_HEIGHT = new Option<Integer>("Max Height", true, true, true, 5){
         @Override
         public Integer load(Object o) {
