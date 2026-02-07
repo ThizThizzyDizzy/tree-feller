@@ -1,0 +1,9 @@
+{
+    "schemaVersion": 1,
+    "id": "treefeller",
+    "version": "2.0.0",
+    "name": "TreeFeller",
+    "entrypoints": {
+        "main": [ "com.thizthizzydizzy.treefeller.fabric.TreeFellerFabric" ]
+    }
+}

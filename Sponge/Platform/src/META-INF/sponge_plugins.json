@@ -1,0 +1,23 @@
+{
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "GPL-3.0-only",
+    "global": {
+        "version": "2.0.0",
+        "contributors": [
+            {
+                "name": "ThizThizzyDizzy",
+                "description": "Primary Developer"
+            }
+        ]
+    },
+    "plugins": [
+        {
+            "id": "treefeller",
+            "name": "Tree Feller",
+            "entrypoint": "com.thizthizzydizzy.treefeller.sponge.TreeFellerSponge"
+        }
+    ]
+}

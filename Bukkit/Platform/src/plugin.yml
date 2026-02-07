@@ -1,0 +1,5 @@
+main: com.thizthizzydizzy.treefeller.bukkit.TreeFellerBukkit
+version: 2.0.0
+api-version: 1.13
+name: treefeller
+folia-supported: true
