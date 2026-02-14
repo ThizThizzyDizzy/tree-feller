@@ -34,3 +34,6 @@
 /Connector/dist/
 /Core/build/
 /Core/dist/
+/Config/nbproject/private/
+/Config/dist/
+/Config/build/
