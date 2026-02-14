@@ -87,7 +87,8 @@
             <zipgroupfileset dir="${project.TreeFellerSpongePlatform}/dist" includes="*.jar"/>
             
             <zipgroupfileset dir="${project.TreeFellerConnector}/dist" includes="*.jar"/>
-            <zipfileset src="${dist.jar.temp}" includes="META-INF/MANIFEST.MF"/>
+                        <zipgroupfileset dir="${project.TreeFellerConfig}/dist" includes="*.jar"/>
+<zipfileset src="${dist.jar.temp}" includes="META-INF/MANIFEST.MF"/>
         </jar>
         <delete file="${dist.jar.temp}"/>
     </target>
