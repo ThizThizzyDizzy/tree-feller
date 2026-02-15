@@ -1,14 +1,18 @@
 package com.thizthizzydizzy.treefeller.config;
 import com.thizthizzydizzy.treefeller.config.structure.TreeFellerConfiguration;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 public class ConfigWriter{
     public static void write(Path path, TreeFellerConfiguration config) throws IOException{
-        Files.writeString(path, writeToString(config));
+        try(BufferedWriter writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)){
+            writer.write(writeToString(config));
+        }
     }
     public static String writeToString(TreeFellerConfiguration config){
         StringBuilder sb = new StringBuilder();
@@ -28,7 +32,10 @@ public class ConfigWriter{
                     if(i>0)sb.append("\n");
                     writeIndent(sb, indent);
                     sb.append("// ");
-                    sb.append(comment.value().replace("\n", "\n"+"    ".repeat(indent)+"// "));
+                    StringBuilder replacement = new StringBuilder().append("\n");
+                    for(int ind = 0; ind<indent; ind++)
+                        replacement.append("    ");
+                    sb.append(comment.value().replace("\n", replacement.append("// ").toString()));
                     sb.append("\n");
                 }
                 writeIndent(sb, indent);
