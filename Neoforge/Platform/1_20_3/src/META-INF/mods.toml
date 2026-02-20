@@ -1,3 +1,5 @@
+modLoader="javafml"
+loaderVersion="[0,)"
 license="GPL-3.0-only"
 
 [[mods]]
