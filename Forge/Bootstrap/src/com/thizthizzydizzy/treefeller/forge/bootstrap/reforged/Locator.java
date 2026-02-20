@@ -1,6 +1,5 @@
 package com.thizthizzydizzy.treefeller.forge.bootstrap.reforged;
 
-import com.thizthizzydizzy.treefeller.forge.bootstrap.reforged.Bootstrapper;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractModProvider;
