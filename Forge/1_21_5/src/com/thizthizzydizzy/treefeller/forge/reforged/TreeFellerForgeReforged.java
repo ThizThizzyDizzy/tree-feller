@@ -10,8 +10,8 @@ public class TreeFellerForgeReforged{
     public static final String MOD_ID = "treefeller";
     public static final Logger LOGGER = LogUtils.getLogger();
     public static ForgeConnector connector;
-    public TreeFellerForgeReforged(FMLJavaModLoadingContext context){
-        FMLCommonSetupEvent.getBus(context.getModBusGroup()).addListener(this::onCommonSetup);
+    public TreeFellerForgeReforged(){
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::onCommonSetup);
     }
     private void onCommonSetup(FMLCommonSetupEvent event){
         TreeFellerCore.initialize(connector = new ForgeConnector());

@@ -7,8 +7,8 @@
 <!-- the Compile on Save feature is turned off for the project. -->
 <!-- You can turn off the Compile on Save (or Deploy on Save) setting -->
 <!-- in the project's Project Properties dialog box.-->
-<project name="TreeFellerBuilder" default="default" basedir=".">
-    <description>Builds, tests, and runs the project TreeFellerBuilder.</description>
+<project name="TreeFellerForgePlatform" default="default" basedir=".">
+    <description>Builds, tests, and runs the project TreeFellerForgePlatform.</description>
     <import file="nbproject/build-impl.xml"/>
     <!--
 
@@ -38,7 +38,9 @@
             <obfuscate>
                 <fileset dir="${build.classes.dir}"/>
             </obfuscate>
-        </target>
+        
+            <zipgroupfileset dir="${project.TreeFellerConnector}/dist" includes="*.jar"/>
+    </target>
 
     For list of available properties check the imported 
     nbproject/build-impl.xml file. 
@@ -58,11 +60,13 @@
 
     An example of overriding the target for project execution could look like this:
 
-        <target name="run" depends="TreeFellerBuilder-impl.jar">
+        <target name="run" depends="TreeFellerForgePlatform-impl.jar">
             <exec dir="bin" executable="launcher.exe">
                 <arg file="${dist.jar}"/>
             </exec>
-        </target>
+        
+            <zipgroupfileset dir="${project.TreeFellerConnector}/dist" includes="*.jar"/>
+    </target>
 
     Notice that the overridden target depends on the jar target and not only on 
     the compile target as the regular run target does. Again, for a list of available 
@@ -70,41 +74,4 @@
     nbproject/build-impl.xml file. 
 
     -->
-    <target name="-post-jar">
-        <echo message="Merging dependencies into ${dist.jar}..."/>
-        <property name="dist.jar.temp" value="${dist.jar}.tmp"/>
-        <property name="classic.manifest" value="${dist.jar}.classic.manifest"/>
-        
-        <move file="${dist.jar}" tofile="${dist.jar.temp}"/>
-        
-        <!-- Extract Classic platform manifest -->
-        <unjar src="${project.TreeFellerForgeBootstrap}/dist/TreeFellerForgeBootstrap.jar" dest="${build.dir}">
-            <patternset>
-                <include name="META-INF/MANIFEST.MF"/>
-            </patternset>
-        </unjar>
-        <move file="${build.dir}/META-INF/MANIFEST.MF" tofile="${classic.manifest}"/>
-        <delete dir="${build.dir}/META-INF"/>
-        
-        <jar destfile="${dist.jar}" update="false" manifestencoding="UTF-8" manifest="${classic.manifest}">
-            <zipfileset src="${dist.jar.temp}" excludes="META-INF/MANIFEST.MF"/>
-            
-            <zipgroupfileset dir="${project.TreeFellerCore}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerBukkitPlatform}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerFabricPlatform}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerNeoforgePlatform1_21_11}/dist" includes="*.jar"/>
-            <zipfileset dir="${project.TreeFellerNeoforgePlatform1_20_3}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipgroupfileset dir="${project.TreeFellerSpongePlatformClassic}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerSpongePlatformResponged}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerConnector}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerConfig}/dist" includes="*.jar"/>
-            <zipfileset dir="${project.TreeFellerForgeClassicPlatform}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipfileset dir="${project.TreeFellerForgeReforgedPlatform}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipfileset dir="${project.TreeFellerForgePlatform1_21_5}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipgroupfileset dir="${project.TreeFellerForgeBootstrap}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerNeoforgeBootstrap}/dist" includes="*.jar"/>
-        </jar>
-        <delete file="${dist.jar.temp}"/>
-        <delete file="${classic.manifest}"/>
-    </target>
 </project>
