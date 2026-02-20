@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller.sponge;
+package com.thizthizzydizzy.treefeller.sponge.classic;
 import com.thizthizzydizzy.treefeller.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.connector.TreeFellerConnector;
 import java.nio.file.Path;
