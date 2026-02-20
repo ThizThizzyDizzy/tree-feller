@@ -1,0 +1,9 @@
+modLoader="javafml"
+loaderVersion="[0,)"
+license="GPL-3.0-only"
+
+[[mods]]
+modId="treefeller"
+version="1.0"
+displayName="jarjar.inner"
+description="Test"
