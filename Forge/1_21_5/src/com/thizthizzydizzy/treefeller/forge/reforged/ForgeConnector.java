@@ -8,7 +8,7 @@ import net.minecraftforge.fml.loading.FMLPaths;
 public class ForgeConnector implements TreeFellerConnector{
     @Override
     public void log(String text){
-        TreeFellerForgeReforged.LOGGER.atInfo().log("["+TreeFellerForgeReforged.MOD_ID+"] "+text);
+        TreeFellerForgeReforged.LOGGER.info("["+TreeFellerForgeReforged.MOD_ID+"] "+text);
     }
     @Override
     public TreeFellerConfiguration loadConfig(Function<Path, TreeFellerConfiguration> defaultLoader){
