@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller.platform.forge.bootstrap.coremod.version.v1_12_2;
+package com.thizthizzydizzy.treefeller.platform.forge.bootstrap.coremod;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,10 +9,9 @@ import java.util.Map;
 import net.minecraft.launchwrapper.LaunchClassLoader;
 import net.minecraftforge.fml.relauncher.IFMLLoadingPlugin;
 @IFMLLoadingPlugin.Name("Tree Feller Bootstrapper")
-@IFMLLoadingPlugin.MCVersion("1.12.2")
-public class ForgeCoremodBootstrapperV1_12_2 implements IFMLLoadingPlugin{
+public class ForgeCoremodBootstrapper implements IFMLLoadingPlugin{
     private File modsDir;
-    public ForgeCoremodBootstrapperV1_12_2(){
+    public ForgeCoremodBootstrapper(){
         try{
             InputStream is = getClass().getResourceAsStream("/META-INF/jars/TreeFellerPlatformForgeVersionV1_12_2.jar");
             Path tempDir = Files.createDirectories(new File(modsDir, "treefeller").toPath());
