@@ -1092,87 +1092,6 @@ is divided into following sections:
         <propertyfile file="${built-jar.properties}">
             <entry key="${basedir}" value=""/>
         </propertyfile>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerBukkitPlatform}" name="call.subproject"/>
-            <param location="${project.TreeFellerBukkitPlatform}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerConfig}" name="call.subproject"/>
-            <param location="${project.TreeFellerConfig}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerConnector}" name="call.subproject"/>
-            <param location="${project.TreeFellerConnector}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerCore}" name="call.subproject"/>
-            <param location="${project.TreeFellerCore}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerFabricPlatform}" name="call.subproject"/>
-            <param location="${project.TreeFellerFabricPlatform}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerForgeClassicPlatform}" name="call.subproject"/>
-            <param location="${project.TreeFellerForgeClassicPlatform}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerForgeReforgedPlatform}" name="call.subproject"/>
-            <param location="${project.TreeFellerForgeReforgedPlatform}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerNeoforgePlatform1_21_11}" name="call.subproject"/>
-            <param location="${project.TreeFellerNeoforgePlatform1_21_11}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-jar.properties}"/>
-            <param location="${project.TreeFellerSpongePlatform}" name="call.subproject"/>
-            <param location="${project.TreeFellerSpongePlatform}/build.xml" name="call.script"/>
-            <param name="call.target" value="jar"/>
-            <param name="transfer.built-jar.properties" value="${built-jar.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
     </target>
     <target depends="init,-check-automatic-build,-clean-after-automatic-build" name="-verify-automatic-build"/>
     <target depends="init" name="-check-automatic-build">
@@ -1894,6 +1813,15 @@ is divided into following sections:
         </antcall>
         <antcall target="-maybe-call-dep">
             <param name="call.built.properties" value="${built-clean.properties}"/>
+            <param location="${project.TreeFellerForgeBootstrap}" name="call.subproject"/>
+            <param location="${project.TreeFellerForgeBootstrap}/build.xml" name="call.script"/>
+            <param name="call.target" value="clean"/>
+            <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
+            <param name="transfer.not.archive.disabled" value="true"/>
+            <param name="transfer.do.jlink" value="false"/>
+        </antcall>
+        <antcall target="-maybe-call-dep">
+            <param name="call.built.properties" value="${built-clean.properties}"/>
             <param location="${project.TreeFellerForgeClassicPlatform}" name="call.subproject"/>
             <param location="${project.TreeFellerForgeClassicPlatform}/build.xml" name="call.script"/>
             <param name="call.target" value="clean"/>
@@ -1905,24 +1833,6 @@ is divided into following sections:
             <param name="call.built.properties" value="${built-clean.properties}"/>
             <param location="${project.TreeFellerForgeReforgedPlatform}" name="call.subproject"/>
             <param location="${project.TreeFellerForgeReforgedPlatform}/build.xml" name="call.script"/>
-            <param name="call.target" value="clean"/>
-            <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-clean.properties}"/>
-            <param location="${project.TreeFellerNeoforgePlatform1_21_11}" name="call.subproject"/>
-            <param location="${project.TreeFellerNeoforgePlatform1_21_11}/build.xml" name="call.script"/>
-            <param name="call.target" value="clean"/>
-            <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
-            <param name="transfer.not.archive.disabled" value="true"/>
-            <param name="transfer.do.jlink" value="false"/>
-        </antcall>
-        <antcall target="-maybe-call-dep">
-            <param name="call.built.properties" value="${built-clean.properties}"/>
-            <param location="${project.TreeFellerSpongePlatform}" name="call.subproject"/>
-            <param location="${project.TreeFellerSpongePlatform}/build.xml" name="call.script"/>
             <param name="call.target" value="clean"/>
             <param name="transfer.built-clean.properties" value="${built-clean.properties}"/>
             <param name="transfer.not.archive.disabled" value="true"/>

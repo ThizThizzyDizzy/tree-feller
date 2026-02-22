@@ -70,41 +70,86 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <target name="-post-clean">
+        <echo message="Cleaning all projects..."/>
+        
+        <subant target="clean">
+            <fileset dir="..">
+                <include name="Core/build.xml"/>
+                <include name="Platform/**/build.xml"/>
+            </fileset>
+        </subant>
+    </target>
     <target name="-post-jar">
+        <delete file="${dist.jar}"/>
+        <echo message="Building core projects..."/>
+        
+        <subant target="jar">
+            <property name="no.deps" value="true"/>
+            <fileset dir="..">
+                <include name="Core/build.xml"/>
+                <include name="Platform/Utility/build.xml"/>
+            </fileset>
+        </subant>
+        <echo message="Building platforms..."/>
+        
+        <subant target="jar">
+            <property name="no.deps" value="true"/>
+            <fileset dir="..">
+                <include name="Platform/**/build.xml"/>
+                <exclude name="Platform/Utility/build.xml"/>
+            </fileset>
+        </subant>
+        
+        <echo message="Compiling MANIFEST.mf..."/>
+
+        <property name="temp.manifest" value="build/MANIFEST.MF"/>
+
+        <echo file="${temp.manifest}">Manifest-Version: 1.0${line.separator}</echo>
+
+        <fileset id="manifest.files" dir="..">
+            <include name="Core/manifest.mf"/>
+            <include name="Platform/**/manifest.mf"/>
+        </fileset>
+        
+        <pathconvert property="manifest.list" refid="manifest.files" pathsep="${line.separator}  - "/>
+
+        <echo message="Found manifests:${line.separator}  - ${manifest.list}"/>
+
+        <concat destfile="${temp.manifest}" append="true">
+            <fileset refid="manifest.files"/>
+            <filterchain>
+                <linecontainsregexp negate="true">
+                    <regexp pattern="^Manifest-Version:"/>
+                </linecontainsregexp>
+                <linecontainsregexp negate="true">
+                    <regexp pattern="^X-COMMENT:"/>
+                </linecontainsregexp>
+                <ignoreblank/>
+            </filterchain>
+        </concat>
+        
         <echo message="Merging dependencies into ${dist.jar}..."/>
-        <property name="dist.jar.temp" value="${dist.jar}.tmp"/>
-        <property name="classic.manifest" value="${dist.jar}.classic.manifest"/>
-        
-        <move file="${dist.jar}" tofile="${dist.jar.temp}"/>
-        
-        <!-- Extract Classic platform manifest -->
-        <unjar src="${project.TreeFellerForgeBootstrap}/dist/TreeFellerForgeBootstrap.jar" dest="${build.dir}">
-            <patternset>
-                <include name="META-INF/MANIFEST.MF"/>
-            </patternset>
-        </unjar>
-        <move file="${build.dir}/META-INF/MANIFEST.MF" tofile="${classic.manifest}"/>
-        <delete dir="${build.dir}/META-INF"/>
-        
-        <jar destfile="${dist.jar}" update="false" manifestencoding="UTF-8" manifest="${classic.manifest}">
-            <zipfileset src="${dist.jar.temp}" excludes="META-INF/MANIFEST.MF"/>
+        <jar destfile="${dist.jar}" update="false" manifest="${temp.manifest}">
+            <zipgroupfileset dir="..">
+                <include name="Core/dist/*.jar"/>
+                <include name="Platform/**/dist/*.jar"/>
+                <exclude name="**/Forge/Version/**/dist/*.jar"/>
+                <exclude name="**/Neoforge/Version/V1_20_2/dist/*.jar"/>
+            </zipgroupfileset>
             
-            <zipgroupfileset dir="${project.TreeFellerCore}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerBukkitPlatform}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerFabricPlatform}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerNeoforgePlatform1_21_11}/dist" includes="*.jar"/>
-            <zipfileset dir="${project.TreeFellerNeoforgePlatform1_20_3}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipgroupfileset dir="${project.TreeFellerSpongePlatformClassic}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerSpongePlatformResponged}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerConnector}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerConfig}/dist" includes="*.jar"/>
-            <zipfileset dir="${project.TreeFellerForgeClassicPlatform}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipfileset dir="${project.TreeFellerForgeReforgedPlatform}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipfileset dir="${project.TreeFellerForgePlatform1_21_5}/dist" includes="*.jar" prefix="META-INF/jars"/>
-            <zipgroupfileset dir="${project.TreeFellerForgeBootstrap}/dist" includes="*.jar"/>
-            <zipgroupfileset dir="${project.TreeFellerNeoforgeBootstrap}/dist" includes="*.jar"/>
+            <mappedresources>
+                <zipfileset dir=".." prefix="META-INF/jars">
+                    <include name="**/Forge/Version/**/dist/*.jar"/>
+                    <include name="**/Neoforge/Version/V1_20_2/dist/*.jar"/>
+                </zipfileset>
+                
+                <chainedmapper>
+                    <flattenmapper/>
+                    <globmapper from="*" to="META-INF/jars/*"/>
+                </chainedmapper>
+            </mappedresources>
         </jar>
-        <delete file="${dist.jar.temp}"/>
-        <delete file="${classic.manifest}"/>
+        <delete file="${temp.manifest}"/>
     </target>
 </project>

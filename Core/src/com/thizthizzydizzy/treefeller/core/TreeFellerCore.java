@@ -1,8 +1,7 @@
 package com.thizthizzydizzy.treefeller.core;
-import com.thizthizzydizzy.treefeller.config.ConfigReader;
-import com.thizthizzydizzy.treefeller.config.ConfigWriter;
-import com.thizthizzydizzy.treefeller.config.structure.TreeFellerConfiguration;
-import com.thizthizzydizzy.treefeller.connector.TreeFellerConnector;
+import com.thizthizzydizzy.treefeller.core.config.ConfigReader;
+import com.thizthizzydizzy.treefeller.core.config.ConfigWriter;
+import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 public class TreeFellerCore{
     private static TreeFellerConnector connector;
     private static TreeFellerConfiguration config;
