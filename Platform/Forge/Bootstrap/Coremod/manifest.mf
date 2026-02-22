@@ -1,3 +1,0 @@
-Manifest-Version: 1.0
-FMLCorePlugin: com.thizthizzydizzy.treefeller.platform.forge.bootstrap.coremod.ForgeCoremodBootstrapper
-FMLCorePluginContainsFMLMod: true

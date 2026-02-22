@@ -1,0 +1,2 @@
+Manifest-Version: 1.0
+TweakClass: com.thizthizzydizzy.treefeller.platform.forge.bootstrap.tweaker.ForgeTweakerBootstrapper
