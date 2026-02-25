@@ -1,7 +1,6 @@
 package com.thizthizzydizzy.treefeller.lib.com.typesafe.config.parser;
 
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigParseOptions;
-
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.impl.Parseable;
 
 import java.io.File;
