@@ -63,7 +63,7 @@ public class ForgeSPIBootstrapper implements IModLocator{
         String bootstrapperName = VersionMatcher.byMinecraftVersionAscending((String)null)
             .atVersion("1.14.4", "v1_14_4.ForgeSPIBootstrapperV1_14_4")
             .atVersion("1.15.2", "v1_15_2.ForgeSPIBootstrapperV1_15_2")
-            .atVersion("1.17.1", "v1_17.ForgeSPIBootstrapperV1_17_1")
+            .atVersion("1.17.1", "v1_17_1.ForgeSPIBootstrapperV1_17_1")
             .atVersion("1.18.2", "v1_18_2.ForgeSPIBootstrapperV1_18_2")
             .atVersion("1.19", "v1_19.ForgeSPIBootstrapperV1_19")
             .atVersion("1.20.3", "v1_20_3.ForgeSPIBootstrapperV1_20_3")
