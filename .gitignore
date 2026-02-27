@@ -9,4 +9,6 @@ Libraries/*/
 Libraries/embedded/*
 !Libraries/embedded/README.md
 !Libraries/embedded/utility scripts/
+Libraries/embedded/utility scripts/*.jar
+Libraries/embedded/utility scripts/*.class
 .~*
