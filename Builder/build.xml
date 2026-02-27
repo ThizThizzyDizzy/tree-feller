@@ -134,6 +134,7 @@
             <zipgroupfileset dir="..">
                 <include name="Core/dist/*.jar"/>
                 <include name="Platform/**/dist/*.jar"/>
+                <include name="Libraries/embedded/*.jar"/>
                 <exclude name="**/Forge/Version/**/dist/*.jar"/>
                 <exclude name="**/Neoforge/Version/V1_20_2/dist/*.jar"/>
             </zipgroupfileset>
