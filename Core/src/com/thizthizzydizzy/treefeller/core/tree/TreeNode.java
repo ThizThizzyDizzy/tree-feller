@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.tree;
+import com.thizthizzydizzy.treefeller.core.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 public class TreeNode {
@@ -6,6 +7,9 @@ public class TreeNode {
     public TreeNode parent;
     public List<TreeNode> children = null;
     public int sectionId;
+    public TreeNode(BlockPos pos, TreeNode parent, int sectionId){
+        this(pos.asLong(), parent, sectionId);
+    }
     public TreeNode(long pos, TreeNode parent, int sectionId){
         this.pos = pos;
         this.parent = parent;

@@ -6,6 +6,8 @@ import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfigurat
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
+import com.thizthizzydizzy.treefeller.core.event.TreeFellerEvents;
+import com.thizthizzydizzy.treefeller.core.event.player.PlayerBreakBlockEvent;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
 public class TreeFellerCore{
@@ -19,6 +21,11 @@ public class TreeFellerCore{
         if(config.debug.startup_logs){
             connector.log(ConfigWriter.writeToString(config));
         }
+        connector.log("Initializing event listeners...");
+        TreeFellerEvents.on(PlayerBreakBlockEvent.class, (event) -> {
+            throw new UnsupportedOperationException("Not supported yet.");
+        });
+        
         connector.log("Tree Feller initialization complete!");
     }
     public static Class<? extends ISpecialConfigObject> mapSpecialConfigObject(Config rawConfig, String key, ConfigValue value, Class<? extends ISpecialConfigObject> targetType){

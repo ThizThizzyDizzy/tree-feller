@@ -1,9 +1,10 @@
-package com.thizthizzydizzy.treefeller.platform.bukkit.core;
+package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
 import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
+import com.thizthizzydizzy.treefeller.platform.bukkit.core.TreeFellerBukkit;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitBlockDefinition;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItemDefinition;
 import java.io.File;
