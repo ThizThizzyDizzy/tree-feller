@@ -4,7 +4,9 @@
 /**/nbproject/private/
 /**/dist/
 /**/build/
-Libraries/
+Libraries/*/
+!Libraries/embedded/
+Libraries/embedded/*
 !Libraries/embedded/README.md
 !Libraries/embedded/utility scripts/
 .~*
