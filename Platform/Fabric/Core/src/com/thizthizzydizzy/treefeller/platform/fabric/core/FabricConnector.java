@@ -1,6 +1,6 @@
 package com.thizthizzydizzy.treefeller.platform.fabric.core;
-import com.thizthizzydizzy.treefeller.core.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
+import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import java.nio.file.Path;
 import java.util.function.Function;
 import net.fabricmc.loader.api.FabricLoader;

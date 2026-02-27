@@ -1,7 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
+import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
 import java.util.HashMap;
-import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 public class TriggerConfiguration{
     @ConfigComment("Whether TreeFeller should be toggled on by default (per-player toggle)")
     public boolean default_enabled;

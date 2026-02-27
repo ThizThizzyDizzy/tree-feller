@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section.result;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 public class SaplingReplantConfiguration{
     public boolean enable = false;
     
@@ -16,5 +17,5 @@ public class SaplingReplantConfiguration{
     public int sapling_timeout = 50;
     
     @ConfigComment("The blocks that saplings may be planted on")
-    public String[] grasses;
+    public IBlockDefinition[] grasses = new IBlockDefinition[1];
 }

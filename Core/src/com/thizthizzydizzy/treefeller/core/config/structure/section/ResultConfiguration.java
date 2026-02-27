@@ -4,12 +4,14 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.result.Casca
 import com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.result.SaplingReplantConfiguration;
 import java.util.HashMap;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
 public class ResultConfiguration{
     @ConfigComment("Replant saplings after a tree is felled")
     public SaplingReplantConfiguration sapling_replant = new SaplingReplantConfiguration();
     
     @ConfigComment("Blocks that can be overridden if a falling block lands on them")
-    public String[] overrideable_blocks;
+    public IBlockDefinition[] overrideable_blocks;
     
     @ConfigComment("Reduce damage taken for tools with Unbreaking")
     public boolean respect_unbreaking = true;
@@ -51,7 +53,7 @@ public class ResultConfiguration{
     public boolean rotate_logs = true;
     
     @ConfigComment("Convert block drops into other items when felling")
-    public HashMap<String, String> drop_conversions;
+    public HashMap<IItemDefinition, IItemDefinition> drop_conversions;
 
     @ConfigComment("Place dropped items directly in the player inventory")
     public boolean drop_to_inventory = false;

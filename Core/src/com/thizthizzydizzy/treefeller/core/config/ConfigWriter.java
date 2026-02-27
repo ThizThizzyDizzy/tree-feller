@@ -51,6 +51,9 @@ public class ConfigWriter{
         }
     }
     private static void writeValue(StringBuilder sb, Object value, int indent){
+        if(value!=null&&ISpecialConfigObject.class.isAssignableFrom(value.getClass())){
+            value = ((ISpecialConfigObject)value).asSimplified();
+        }
         if(value==null){
             return;
         }else if(value instanceof String){

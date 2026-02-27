@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.config;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigFactory;
@@ -8,16 +9,29 @@ import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 public class ConfigReader{
+    public static TreeFellerConfiguration readFromString(String str){
+        TreeFellerConfiguration config = new TreeFellerConfiguration();
+        Config rawConfig = ConfigFactory.parseString(str);
+        try{
+            parseInto(rawConfig.root(), config);
+        }catch(Exception ex){
+            // Exception handling varies by platform. Failing to parse the config is generally a critical error, and treefeller should not try to keep loading.
+            throw new RuntimeException(ex);
+        }
+        return config;
+    }
     public static TreeFellerConfiguration read(Path path){
         TreeFellerConfiguration config = new TreeFellerConfiguration();
         File file = path.toFile();
@@ -53,13 +67,20 @@ public class ConfigReader{
         field.set(object, parsedValue);
     }
     private static Object parseConfigValue(Config rawConfig, String key, ConfigValue value, Class<?> targetType, Type genericType) throws Exception{
+        if(ISpecialConfigObject.class.isAssignableFrom(targetType)){
+            targetType = TreeFellerCore.mapSpecialConfigObject(rawConfig, key, value, (Class<? extends ISpecialConfigObject>)targetType);
+        }
+        if(targetType.isEnum()){
+            return rawConfig.getEnum((Class<Enum>)targetType, key);
+        }
         switch(value.valueType()){
             case OBJECT:
                 if(Map.class.isAssignableFrom(targetType)){
                     if(genericType instanceof ParameterizedType){
                         ParameterizedType paramType = (ParameterizedType)genericType;
                         Class<?> keyType = (Class<?>)paramType.getActualTypeArguments()[0];
-                        if(keyType!=String.class)throw new IllegalArgumentException("Invalid key type in Map! Expected String, found "+keyType.getName());
+                        if(keyType!=String.class)
+                            throw new IllegalArgumentException("Invalid key type in Map! Expected String, found "+keyType.getName());
                         Class<?> valueType = (Class<?>)paramType.getActualTypeArguments()[1];
                         Type valueGenericType = paramType.getActualTypeArguments()[1];
                         Map<String, Object> result = new HashMap<>();
@@ -87,8 +108,7 @@ public class ConfigReader{
                         List<Object> result = new ArrayList<>();
                         for(int i = 0; i<configList.size(); i++){
                             ConfigValue elementValue = configList.get(i);
-                            String elementKey = key+"."+i;
-                            result.add(parseConfigValue(rawConfig, elementKey, elementValue, elementType, elementGenericType));
+                            result.add(parseConfigValue(elementValue.atPath("v"), "v", elementValue, elementType, elementGenericType));
                         }
                         return result;
                     }
@@ -97,34 +117,46 @@ public class ConfigReader{
                     Object array = Array.newInstance(componentType, configList.size());
                     for(int i = 0; i<configList.size(); i++){
                         ConfigValue elementValue = configList.get(i);
-                        String elementKey = key+"."+i;
-                        Array.set(array, i, parseConfigValue(rawConfig, elementKey, elementValue, componentType, componentType));
+                        Array.set(array, i, parseConfigValue(elementValue.atPath("v"), "v", elementValue, componentType, componentType));
                     }
                     return array;
                 }
                 break;
             case STRING:
                 if(targetType==String.class)return rawConfig.getString(key);
-                break;
+                return tryBasicConstructors(targetType, rawConfig.getString(key), String.class);
             case NUMBER:
                 if(targetType==Integer.class||targetType==int.class)
                     return rawConfig.getInt(key);
+                if(targetType==Float.class||targetType==float.class)
+                    return (float)rawConfig.getDouble(key);
                 if(targetType==Double.class||targetType==double.class)
                     return rawConfig.getDouble(key);
                 if(targetType==Long.class||targetType==long.class)
                     return rawConfig.getLong(key);
-                break;
+
+                return tryBasicConstructors(targetType, rawConfig.getValue(key).unwrapped(), double.class, long.class, int.class);
             case BOOLEAN:
                 if(targetType==Boolean.class||targetType==boolean.class)
                     return rawConfig.getBoolean(key);
-                break;
+                return tryBasicConstructors(targetType, rawConfig.getBoolean(key), boolean.class);
             case NULL:
                 return null;
         }
-        if(targetType.isEnum()){
-            return rawConfig.getEnum((Class<Enum>)targetType, key);
-        }
         throw new IllegalArgumentException("Cannot parse "+value.valueType().toString()+" into type "+targetType.getName());
+    }
+    private static Object tryBasicConstructors(Class<?> targetType, Object val, Class<?>... argTypes) throws Exception{
+        for(Class<?> argType : argTypes){
+            Constructor<?> constructor = Arrays.stream(targetType.getDeclaredConstructors())
+                .filter(c -> c.getParameterCount()==1&&(c.getParameterTypes()[0].isAssignableFrom(argType)
+                ||(argType==boolean.class&&c.getParameterTypes()[0]==Boolean.class)
+                ||(argType==int.class&&c.getParameterTypes()[0]==Integer.class)
+                ||(argType==double.class&&c.getParameterTypes()[0]==Double.class)))
+                .findFirst()
+                .orElse(null);
+            if(constructor!=null)return constructor.newInstance(val);
+        }
+        throw new IllegalArgumentException("Cannot parse "+targetType.toString()+" as any of "+Arrays.toString(argTypes)+", as it has no matching constructors!");
     }
     private static boolean keyMatches(String key, String name){
         key = key.replace('-', '_').replace(' ', '_').replace("_", "");

@@ -1,5 +1,5 @@
 package com.thizthizzydizzy.treefeller.platform.forge.version.v1_7_10;
-import com.thizthizzydizzy.treefeller.core.TreeFellerConnector;
+import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import cpw.mods.fml.common.Loader;
 import java.nio.file.Path;

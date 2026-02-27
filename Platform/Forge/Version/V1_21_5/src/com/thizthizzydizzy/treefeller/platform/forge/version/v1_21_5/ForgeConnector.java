@@ -1,5 +1,5 @@
 package com.thizthizzydizzy.treefeller.platform.forge.version.v1_21_5;
-import com.thizthizzydizzy.treefeller.core.TreeFellerConnector;
+import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import java.nio.file.Path;
 import java.util.function.Function;

@@ -1,8 +1,9 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
+import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.breaking.FallDirection;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.breaking.FellBehavior;
 import java.util.HashMap;
-import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 public class BreakingConfiguration{
     @ConfigComment("How the tree trunk should be felled")
     public FellBehavior trunk_behavior = new FellBehavior();
@@ -38,5 +39,5 @@ public class BreakingConfiguration{
     public int fall_delay = 0;
     
     @ConfigComment("Convert these blocks instead of breaking them")
-    public HashMap<String, String> block_conversions;
+    public HashMap<IBlockDefinition, IBlockDefinition> block_conversions;
 }
