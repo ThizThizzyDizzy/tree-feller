@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.config.structure;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.BreakingConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CriteriaConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CuttingConfiguration;
@@ -12,7 +13,7 @@ public class ToolConfiguration{
     public IItemDefinition item;
     
     @ConfigComment("The indicies of trees that this tool may cut down")
-    public int[] allowed_trees;
+    public DualList<Integer> trees;
     
     public TriggerConfiguration trigger;
     public DetectionConfiguration detection;

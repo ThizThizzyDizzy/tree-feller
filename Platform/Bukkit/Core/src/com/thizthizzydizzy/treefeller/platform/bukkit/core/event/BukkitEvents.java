@@ -1,5 +1,5 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.event;
-import com.thizthizzydizzy.treefeller.core.BlockPos;
+import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.event.TreeFellerEvents;
 import com.thizthizzydizzy.treefeller.core.event.player.PlayerBreakBlockEvent;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.TreeFellerBukkit;
@@ -16,6 +16,7 @@ public class BukkitEvents implements Listener{
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event){
+        if(event.getClass().getName().contains("Fake"))return;
         Block block = event.getBlock();
         TreeFellerEvents.fireEvent(new PlayerBreakBlockEvent(plugin.getPlayerConnector(event.getPlayer()), plugin.getWorldConnector(event.getBlock().getWorld()), new BlockPos(block.getX(), block.getY(), block.getZ())));
     }

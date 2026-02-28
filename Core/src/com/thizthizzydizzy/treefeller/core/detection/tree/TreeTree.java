@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller.core.tree;
+package com.thizthizzydizzy.treefeller.core.detection.tree;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import java.util.ArrayList;

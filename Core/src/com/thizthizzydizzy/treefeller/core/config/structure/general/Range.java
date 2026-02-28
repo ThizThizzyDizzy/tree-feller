@@ -9,4 +9,11 @@ public class Range{
     }
     public Float min;
     public Float max;
+    
+    public boolean matches(float value){
+        if(min!=null&&max!=null&&min>max)return value>=min||value<=max;
+        if(min!=null&&value<min)return false;
+        if(max!=null&&value<max)return false;
+        return true;
+    }
 }

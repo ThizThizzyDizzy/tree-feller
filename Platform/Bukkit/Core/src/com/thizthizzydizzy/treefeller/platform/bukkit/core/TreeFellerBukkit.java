@@ -1,7 +1,7 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
-import com.thizthizzydizzy.treefeller.core.connector.IPlayerConnector;
-import com.thizthizzydizzy.treefeller.core.connector.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
+import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitPlayerConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitWorldConnector;
@@ -20,10 +20,12 @@ public class TreeFellerBukkit extends JavaPlugin{
     
     private final HashMap<Player, BukkitPlayerConnector> playerConnectors = new HashMap<>();
     public IPlayerConnector getPlayerConnector(Player player){
+        if(player==null)return null;
         return playerConnectors.computeIfAbsent(player, BukkitPlayerConnector::new);
     }
     private final HashMap<World, BukkitWorldConnector> worldConnectors = new HashMap<>();
     public IWorldConnector getWorldConnector(World world){
+        if(world==null)return null;
         return worldConnectors.computeIfAbsent(world, BukkitWorldConnector::new);
     }
 }

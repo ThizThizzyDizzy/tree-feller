@@ -8,11 +8,12 @@ import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinit
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.event.TreeFellerEvents;
 import com.thizthizzydizzy.treefeller.core.event.player.PlayerBreakBlockEvent;
+import com.thizthizzydizzy.treefeller.core.trigger.TreeFellerTrigger;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
 public class TreeFellerCore{
     public static TreeFellerConnector connector;
-    private static TreeFellerConfiguration config;
+    public static TreeFellerConfiguration config;
     public static void initialize(TreeFellerConnector connector){
         TreeFellerCore.connector = connector;
         connector.log("Initializing Tree Feller...");
@@ -23,7 +24,7 @@ public class TreeFellerCore{
         }
         connector.log("Initializing event listeners...");
         TreeFellerEvents.on(PlayerBreakBlockEvent.class, (event) -> {
-            throw new UnsupportedOperationException("Not supported yet.");
+            TreeFellerTrigger.trigger(event.player, event.world, event.pos);
         });
         
         connector.log("Tree Feller initialization complete!");

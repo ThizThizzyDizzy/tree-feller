@@ -1,5 +1,5 @@
-package com.thizthizzydizzy.treefeller.core.tree;
-import com.thizthizzydizzy.treefeller.core.BlockPos;
+package com.thizthizzydizzy.treefeller.core.detection.tree;
+import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 public class TreeNode {

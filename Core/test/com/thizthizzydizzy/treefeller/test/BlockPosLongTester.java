@@ -1,5 +1,5 @@
 package com.thizthizzydizzy.treefeller.test;
-import com.thizthizzydizzy.treefeller.core.BlockPos;
+import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import java.util.Random;
 public class BlockPosLongTester{
     public static void main(String[] args){

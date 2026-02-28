@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller.core;
+package com.thizthizzydizzy.treefeller.core.connector.world;
 public class BlockPos{
     private static final int X_BITS = 26;
     private static final int Z_BITS = 26;
