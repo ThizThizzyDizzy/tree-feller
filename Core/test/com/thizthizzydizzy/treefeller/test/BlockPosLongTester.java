@@ -8,15 +8,13 @@ public class BlockPosLongTester{
             int x = rand.nextInt(67108864)-33554432;
             int y = rand.nextInt(4096)-2048;
             int z = rand.nextInt(67108864)-33554432;
-            BlockPos pos = new BlockPos(x, y, z);
-            long l = pos.asLong();
-            pos = BlockPos.fromLong(l);
-            if(pos.x!=x)
-                throw new AssertionError("X does not match! "+x+"!="+pos.x);
-            if(pos.y!=y)
-                throw new AssertionError("Y does not match! "+y+"!="+pos.y);
-            if(pos.z!=z)
-                throw new AssertionError("Z does not match! "+z+"!="+pos.z);
+            long l = BlockPos.toPos(x, y, z);
+            int x2 = BlockPos.getX(l);
+            if(x2!=x)throw new AssertionError("X does not match! "+x+"!="+x2);
+            int y2 = BlockPos.getY(l);
+            if(y2!=y)throw new AssertionError("Y does not match! "+y+"!="+y2);
+            int z2 = BlockPos.getZ(l);
+            if(z2!=z)throw new AssertionError("Z does not match! "+z+"!="+z2);
             System.out.println("Matches: "+x+" "+y+" "+z+" = "+l);
         }
     }

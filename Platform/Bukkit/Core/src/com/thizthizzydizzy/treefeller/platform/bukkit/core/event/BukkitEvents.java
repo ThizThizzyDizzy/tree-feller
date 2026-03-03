@@ -18,6 +18,6 @@ public class BukkitEvents implements Listener{
     public void onBlockBreak(BlockBreakEvent event){
         if(event.getClass().getName().contains("Fake"))return;
         Block block = event.getBlock();
-        TreeFellerEvents.fireEvent(new PlayerBreakBlockEvent(plugin.getPlayerConnector(event.getPlayer()), plugin.getWorldConnector(event.getBlock().getWorld()), new BlockPos(block.getX(), block.getY(), block.getZ())));
+        TreeFellerEvents.fireEvent(new PlayerBreakBlockEvent(plugin.getPlayerConnector(event.getPlayer()), plugin.getWorldConnector(event.getBlock().getWorld()), BlockPos.toPos(block.getX(), block.getY(), block.getZ())));
     }
 }

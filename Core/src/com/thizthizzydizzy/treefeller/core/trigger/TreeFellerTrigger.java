@@ -5,13 +5,12 @@ import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
-import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.detection.TreeFellerDetection;
 import com.thizthizzydizzy.treefeller.core.player.PlayerSettings;
 import java.util.ArrayList;
 public class TreeFellerTrigger{
-    public static void trigger(IPlayerConnector player, IWorldConnector world, BlockPos pos){
+    public static void trigger(IPlayerConnector player, IWorldConnector world, long pos){
         PlayerSettings playerSettings = PlayerSettings.get(player);
         if(!playerSettings.isToggledOn())return;
 
@@ -36,7 +35,7 @@ public class TreeFellerTrigger{
             }
         }
     }
-    private static boolean checkTrigger(IPlayerConnector player, IWorldConnector world, BlockPos pos, TriggerConfiguration config){
+    private static boolean checkTrigger(IPlayerConnector player, IWorldConnector world, long pos, TriggerConfiguration config){
         // == WORLD CHECKS ==
         if(config.day_time!=null&&!config.day_time.matches(world.getDayTime()))
             return false;
