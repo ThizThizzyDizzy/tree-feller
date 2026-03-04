@@ -10,4 +10,5 @@ public interface TreeFellerConnector{
     public TreeFellerConfiguration loadConfig(Function<Path, TreeFellerConfiguration> defaultLoader);
     public Class<? extends ISpecialConfigObject> mapBlockDefinitionClass(Config rawConfig, String key, ConfigValue value);
     public Class<? extends ISpecialConfigObject> mapItemDefinitionClass(Config rawConfig, String key, ConfigValue value);
+    public void buildDefaultConfig(TreeFellerConfiguration config);
 }

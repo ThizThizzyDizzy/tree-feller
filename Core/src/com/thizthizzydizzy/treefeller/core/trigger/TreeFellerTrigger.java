@@ -46,6 +46,7 @@ public class TreeFellerTrigger{
         }
     }
     private static boolean checkTrigger(DebuggerContext context, IPlayerConnector player, IWorldConnector world, long pos, TriggerConfiguration config){
+        if(config==null)return true;
         // == WORLD CHECKS ==
         if(config.day_time!=null&&!context.checkTrue("Time of Day", config.day_time.matches(world.getDayTime())))
             return false;

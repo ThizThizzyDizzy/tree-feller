@@ -11,6 +11,7 @@ public class BukkitBlockDefinition implements IBlockDefinition{
     }
     @Override
     public Object asSimplified(){
+        if(material==null)return null;
         return material.toString();
     }
     public boolean matches(Block block){

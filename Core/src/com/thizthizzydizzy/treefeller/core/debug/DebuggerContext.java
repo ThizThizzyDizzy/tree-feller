@@ -1,10 +1,13 @@
 package com.thizthizzydizzy.treefeller.core.debug;
+import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import java.util.ArrayList;
+import java.util.Objects;
 public class DebuggerContext{
     private IPlayerConnector player;
     public void info(Object... objects){
@@ -16,6 +19,7 @@ public class DebuggerContext{
                 logs.add(str);
                 continue;
             }
+            
             if(object instanceof Long){
                 long l = (long)object;
                 int x = BlockPos.getX(l);
@@ -24,15 +28,16 @@ public class DebuggerContext{
                 logs.add("Position: "+x+" "+y+" "+z);
                 continue;
             }
+            if(object instanceof PlayerGameMode){
+                PlayerGameMode gameMode = (PlayerGameMode)object;
+                logs.add("Game Mode: "+gameMode.toString());
+                continue;
+            }
+            
             if(object instanceof IPlayerConnector){
                 IPlayerConnector player = (IPlayerConnector)object;
                 this.player = player;
                 logs.add("Player: "+player.getPlayerName());
-                continue;
-            }
-            if(object instanceof PlayerGameMode){
-                PlayerGameMode gameMode = (PlayerGameMode)object;
-                logs.add("Game Mode: "+gameMode.toString());
                 continue;
             }
             if(object instanceof IWorldConnector){
@@ -45,6 +50,22 @@ public class DebuggerContext{
                 logs.add("Item: "+item.getItemId());
                 continue;
             }
+            
+            if(object instanceof ToolConfiguration){
+                ToolConfiguration tool = (ToolConfiguration)object;
+                logs.add("Tool: "+Objects.toString(tool.item.asSimplified()));
+                continue;
+            }
+            if(object instanceof TreeConfiguration){
+                TreeConfiguration tree = (TreeConfiguration)object;
+                String[] trunks = new String[tree.trunk.length];
+                for(int i = 0; i<trunks.length; i++)trunks[i] = Objects.toString(tree.trunk[i].asSimplified());
+                String[] leaves = new String[tree.leaves.length];
+                for(int i = 0; i<leaves.length; i++)leaves[i] = Objects.toString(tree.leaves[i].asSimplified());
+                logs.add("Tree: "+String.join(", ", trunks)+" | "+String.join(", ", leaves));
+                continue;
+            }
+            
             String unknown = object.getClass().getName()+": "+object.toString();
             logs.add(unknown);
         }

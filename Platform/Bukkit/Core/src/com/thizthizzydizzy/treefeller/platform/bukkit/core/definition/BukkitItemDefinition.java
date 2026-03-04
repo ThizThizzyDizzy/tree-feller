@@ -29,6 +29,7 @@ public class BukkitItemDefinition implements IItemDefinition{
     }
     @Override
     public Object asSimplified(){
+        if(material==null)return null;
         if(durability==null&&custom_name==null&&lore==null&&custom_model_data==null&&attributes==null&&enchantments==null)
             return material.toString();
         return this;
