@@ -93,7 +93,7 @@
         </subant>
         <echo message="Building platforms..."/>
         
-        <subant target="jar">
+        <subant target="jar" failonerror="false"> <!-- failonerror=false to allow building for one platform when all others fail -->
             <property name="no.deps" value="true"/>
             <fileset dir="..">
                 <include name="Platform/**/build.xml"/>

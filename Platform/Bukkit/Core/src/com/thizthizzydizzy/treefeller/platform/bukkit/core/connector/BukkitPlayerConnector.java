@@ -47,4 +47,12 @@ public class BukkitPlayerConnector implements IPlayerConnector{
     public IItemConnector getTool(){
         return new BukkitItemConnector(player.getItemInHand());
     }
+    @Override
+    public void sendMessage(String message){
+        player.sendMessage(message);
+    }
+    @Override
+    public String getPlayerName(){
+        return player.getName();
+    }
 }

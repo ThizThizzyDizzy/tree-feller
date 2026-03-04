@@ -19,4 +19,8 @@ public class BukkitItemConnector implements IItemConnector{
         }
         throw new AssertionError("Unsupported item definition: "+definition.getClass().getName());
     }
+    @Override
+    public Object getItemId(){
+        return stack.getType().toString();
+    }
 }

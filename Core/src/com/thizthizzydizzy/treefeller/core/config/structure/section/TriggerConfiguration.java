@@ -6,7 +6,7 @@ public class TriggerConfiguration{
     // PLAYER REQUIREMENTS
     
     @ConfigComment("Whether TreeFeller should be toggled on by default (per-player toggle)")
-    public boolean default_enabled;
+    public boolean default_enabled = true;
 
     @ConfigComment("Minimum time, in ticks, between felling trees. (per player)")
     public int cooldown;

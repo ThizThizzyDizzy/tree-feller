@@ -8,4 +8,6 @@ public interface IPlayerConnector{
     public PlayerGameMode getGameMode();
     public boolean isSneaking();
     public IItemConnector getTool();
+    public void sendMessage(String message);
+    public String getPlayerName();
 }
