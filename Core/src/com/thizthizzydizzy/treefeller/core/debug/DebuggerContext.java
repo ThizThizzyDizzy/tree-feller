@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.debug;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
@@ -6,20 +7,27 @@ import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.event.EventListener;
+import com.thizthizzydizzy.treefeller.core.event.TreeFellerEvent;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Objects;
 public class DebuggerContext{
-    private IPlayerConnector player;
+    private HashSet<IPlayerConnector> players = new HashSet<>();
     public void info(Object... objects){
         // collect all logs before printing, to allow the player (or log context) to not be the very first log item
         ArrayList<String> logs = new ArrayList();
         for(Object object : objects){
+            if(object==TreeFellerDebugger.ADMIN_BROADCAST){
+                players.addAll(TreeFellerCore.connector.getAdminPlayers());
+            }
+
             if(object instanceof String){
                 String str = (String)object;
                 logs.add(str);
                 continue;
             }
-            
+
             if(object instanceof Long){
                 long l = (long)object;
                 int x = BlockPos.getX(l);
@@ -33,10 +41,10 @@ public class DebuggerContext{
                 logs.add("Game Mode: "+gameMode.toString());
                 continue;
             }
-            
+
             if(object instanceof IPlayerConnector){
                 IPlayerConnector player = (IPlayerConnector)object;
-                this.player = player;
+                players.add(player);
                 logs.add("Player: "+player.getPlayerName());
                 continue;
             }
@@ -50,7 +58,7 @@ public class DebuggerContext{
                 logs.add("Item: "+item.getItemId());
                 continue;
             }
-            
+
             if(object instanceof ToolConfiguration){
                 ToolConfiguration tool = (ToolConfiguration)object;
                 logs.add("Tool: "+Objects.toString(tool.item.asSimplified()));
@@ -59,13 +67,38 @@ public class DebuggerContext{
             if(object instanceof TreeConfiguration){
                 TreeConfiguration tree = (TreeConfiguration)object;
                 String[] trunks = new String[tree.trunk.length];
-                for(int i = 0; i<trunks.length; i++)trunks[i] = Objects.toString(tree.trunk[i].asSimplified());
+                for(int i = 0; i<trunks.length; i++)
+                    trunks[i] = Objects.toString(tree.trunk[i].asSimplified());
                 String[] leaves = new String[tree.leaves.length];
-                for(int i = 0; i<leaves.length; i++)leaves[i] = Objects.toString(tree.leaves[i].asSimplified());
+                for(int i = 0; i<leaves.length; i++)
+                    leaves[i] = Objects.toString(tree.leaves[i].asSimplified());
                 logs.add("Tree: "+String.join(", ", trunks)+" | "+String.join(", ", leaves));
                 continue;
             }
-            
+
+            if(object instanceof TreeFellerEvent){
+                logs.add("Event: "+object.getClass().getSimpleName());
+                continue;
+            }
+            if(object instanceof EventListener){
+                logs.add("Listener: "+object.getClass().getSimpleName());
+                continue;
+            }
+            if(object instanceof Throwable){
+                Throwable t = (Throwable)object;
+                boolean first = true;
+                while(t!=null){
+                    logs.add((first?"Exception":"Cause")+": "+object.getClass().getName());
+                    logs.add(t.getMessage());
+                    for(StackTraceElement element : t.getStackTrace()){
+                        logs.add(element.toString());
+                    }
+                    t = t.getCause();
+                    first = false;
+                }
+                continue;
+            }
+
             String unknown = object.getClass().getName()+": "+object.toString();
             logs.add(unknown);
         }
@@ -81,11 +114,13 @@ public class DebuggerContext{
     }
     private void print(String type, String line){
         line = "["+type+"] "+line;
-        if(player==null){
-            System.out.println(line);
+        if(players.isEmpty()){
+            TreeFellerCore.connector.log(line);
             return;
         }
-        player.sendMessage(line);
+        for(IPlayerConnector player : players){
+            player.sendMessage(line);
+        }
     }
     public boolean checkTrue(String label, boolean value){
         if(value){

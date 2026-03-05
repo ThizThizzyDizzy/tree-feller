@@ -20,8 +20,9 @@ public class TreeFellerConfiguration{
             T combined = (T)base.getClass().getConstructor().newInstance();
             for(Field field : base.getClass().getFields()){
                 Object baseValue = field.get(base);
-                Object overlayValue = field.get(overlay);
-                field.set(combined, overlay==null?baseValue:overlayValue);
+                Object overlayValue = overlay==null?baseValue:field.get(overlay);
+                if(baseValue==overlayValue)continue;
+                field.set(combined, overlayValue);
             }
             return combined;
         }catch(Exception ex){

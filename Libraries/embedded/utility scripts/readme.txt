@@ -1,6 +1,6 @@
 to build fastutil-minimal:
 
-./chain_scripts.sh ./fastutil-8.5.16.jar "Int2ObjectOpenHashMap Long2ObjectOpenHashMap AbstractInt2ObjectFunction AbstractLong2ObjectFunction fastutil.Function ReferenceArrayList fastutil.Stack AbstractReferenceCollection IntCollection" ./fastutil-8.5.16-minimal-embedded.jar com.thizthizzydizzy.treefeller.lib
+./chain_scripts.sh ./fastutil-8.5.16.jar "Int2ObjectOpenHashMap Long2ObjectOpenHashMap AbstractInt2ObjectFunction AbstractLong2ObjectFunction fastutil.Function ReferenceArrayList fastutil.Stack AbstractReferenceCollection IntCollection LongCollection ObjectIterable" ./fastutil-8.5.16-minimal-embedded.jar com.thizthizzydizzy.treefeller.lib
 
 to build config:
 

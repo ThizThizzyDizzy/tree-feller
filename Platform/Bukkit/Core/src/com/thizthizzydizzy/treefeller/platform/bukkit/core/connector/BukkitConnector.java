@@ -5,6 +5,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
+import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.TreeFellerBukkit;
@@ -13,9 +14,12 @@ import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItem
 import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.function.Function;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.entity.Player;
 public class BukkitConnector implements TreeFellerConnector{
     private final TreeFellerBukkit treefeller;
     public BukkitConnector(TreeFellerBukkit treefeller){
@@ -61,5 +65,15 @@ public class BukkitConnector implements TreeFellerConnector{
         }
         config.tools = tools.toArray(ToolConfiguration[]::new);
         config.trees = trees.toArray(TreeConfiguration[]::new);
+    }
+    @Override
+    public Collection<IPlayerConnector> getAdminPlayers(){
+        ArrayList<IPlayerConnector> admins = new ArrayList<>();
+        for(World world : treefeller.getServer().getWorlds()){
+            for(Player player : world.getPlayers()){
+                if(player.isOp())admins.add(treefeller.getPlayerConnector(player));
+            }
+        }
+        return admins;
     }
 }

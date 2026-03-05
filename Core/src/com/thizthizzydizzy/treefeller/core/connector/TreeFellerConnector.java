@@ -1,9 +1,11 @@
 package com.thizthizzydizzy.treefeller.core.connector;
 import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
+import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.function.Function;
 public interface TreeFellerConnector{
     public void log(String text);
@@ -11,4 +13,5 @@ public interface TreeFellerConnector{
     public Class<? extends ISpecialConfigObject> mapBlockDefinitionClass(Config rawConfig, String key, ConfigValue value);
     public Class<? extends ISpecialConfigObject> mapItemDefinitionClass(Config rawConfig, String key, ConfigValue value);
     public void buildDefaultConfig(TreeFellerConfiguration config);
+    public Collection<IPlayerConnector> getAdminPlayers();
 }
