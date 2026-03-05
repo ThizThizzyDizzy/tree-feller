@@ -4,7 +4,6 @@ import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
-import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.event.EventListener;
@@ -20,11 +19,17 @@ public class DebuggerContext{
         for(Object object : objects){
             if(object==TreeFellerDebugger.ADMIN_BROADCAST){
                 players.addAll(TreeFellerCore.connector.getAdminPlayers());
+                logs.add("== DEBUGGER BROADCAST TO ALL ONLINE ADMINS ==");
+                continue;
             }
 
             if(object instanceof String){
                 String str = (String)object;
                 logs.add(str);
+                continue;
+            }
+            if(object instanceof Enum){
+                logs.add(object.getClass().getSimpleName()+": "+object.toString());
                 continue;
             }
 
@@ -34,11 +39,6 @@ public class DebuggerContext{
                 int y = BlockPos.getY(l);
                 int z = BlockPos.getZ(l);
                 logs.add("Position: "+x+" "+y+" "+z);
-                continue;
-            }
-            if(object instanceof PlayerGameMode){
-                PlayerGameMode gameMode = (PlayerGameMode)object;
-                logs.add("Game Mode: "+gameMode.toString());
                 continue;
             }
 
@@ -106,10 +106,10 @@ public class DebuggerContext{
             print("INFO", line);
         }
     }
-    private void pass(String line){
+    public void pass(String line){
         print("PASS", line);
     }
-    private void fail(String line){
+    public void fail(String line){
         print("FAIL", line);
     }
     private void print(String type, String line){

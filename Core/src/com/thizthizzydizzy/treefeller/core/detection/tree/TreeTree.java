@@ -23,7 +23,7 @@ public class TreeTree{
             ReferenceArrayList<ReferenceArrayList<TreeNode>> distanceIndexes = sections.computeIfAbsent(node.sectionId, section -> new EnumMap<>(TreeNodeType.class))
                 .computeIfAbsent(node.type, type -> new ReferenceArrayList<>());
             ReferenceArrayList<TreeNode> distanceIndex = null;
-            if(node.distance>distanceIndexes.size()){
+            if(node.distance>=distanceIndexes.size()){
                 distanceIndex = new ReferenceArrayList<>();
                 distanceIndexes.add(distanceIndex);
             }else
@@ -45,7 +45,7 @@ public class TreeTree{
     public int getScanDepth(TreeNodeType type, int sectionId){
         if(sectionId==-1)return getMinimumScanDepth(type);
         EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> section = sections.get(sectionId);
-        ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.get(type);
+        ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.computeIfAbsent(type, (t)->new ReferenceArrayList<>());
         int sectionDepth = 0;
         for(int depth = 0; depth<depthMap.size(); depth++){
             if(!depthMap.get(depth).stream().anyMatch((node) -> node.type==type))

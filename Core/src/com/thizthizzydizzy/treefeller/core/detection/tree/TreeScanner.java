@@ -5,8 +5,10 @@ import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfigurat
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 public class TreeScanner{
-    public static int step(IWorldConnector world, TreeTree tree, TreeConfiguration treeConfig, ScanMode mode, TreeNodeType type, int sectionId){
+    public static int step(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeConfiguration treeConfig, ScanMode mode, TreeNodeType type, int sectionId){
+        context.info("Step (S:"+sectionId+")", mode, type);
         DetectionConfiguration config = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.detection, treeConfig.detection);
 
         IBlockDefinition[] blocks;
@@ -33,8 +35,11 @@ public class TreeScanner{
 
         //TODO A WHOLE LOTTA SCANNIN
         int currentDepth = tree.getScanDepth(type, sectionId);
+        context.info("Current Depth: "+currentDepth);
+        
+        context.info("TODO actual scan lol");
 
-
+//        context.info("Scanned "+count+" blocks");
         return 0;
     }
     private static boolean scanNode(IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, TreeNodeType type){
