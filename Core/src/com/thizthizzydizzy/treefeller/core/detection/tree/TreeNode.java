@@ -8,13 +8,17 @@ public class TreeNode{
     public List<TreeNode> children = null;
     public int sectionId;
     public int distance;
+    public TreeNode(long pos, TreeNode parent){
+        this(pos, parent, parent.sectionId);
+    }
     public TreeNode(long pos, TreeNode parent, int sectionId){
         this.pos = pos;
         this.parent = parent;
         this.sectionId = sectionId;
     }
     public void setType(TreeNodeType type){
-        distance = parent==null?0:(type==parent.type?parent.distance+1:1);
+        this.type = type;
+        distance = parent!=null&&type==parent.type?parent.distance+1:1;
     }
     public void addChild(TreeNode child){
         if(children==null){

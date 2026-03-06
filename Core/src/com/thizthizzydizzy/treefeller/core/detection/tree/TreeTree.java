@@ -6,7 +6,7 @@ import java.util.EnumMap;
 import java.util.function.Predicate;
 public class TreeTree{
     public TreeNode root;
-    private final Long2ObjectOpenHashMap<TreeNode> nodeMap = new Long2ObjectOpenHashMap<>();
+    public final Long2ObjectOpenHashMap<TreeNode> nodeMap = new Long2ObjectOpenHashMap<>();
     private final Int2ObjectOpenHashMap<EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>>> sections = new Int2ObjectOpenHashMap<>();
     public TreeTree(long rootPos){
         root = new TreeNode(rootPos, null, 0);
@@ -44,8 +44,8 @@ public class TreeTree{
     }
     public int getScanDepth(TreeNodeType type, int sectionId){
         if(sectionId==-1)return getMinimumScanDepth(type);
-        EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> section = sections.get(sectionId);
-        ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.computeIfAbsent(type, (t)->new ReferenceArrayList<>());
+        EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> section = sections.computeIfAbsent(sectionId, (s)->new EnumMap<>(TreeNodeType.class));
+        ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.computeIfAbsent(type, (t) -> new ReferenceArrayList<>());
         int sectionDepth = 0;
         for(int depth = 0; depth<depthMap.size(); depth++){
             if(!depthMap.get(depth).stream().anyMatch((node) -> node.type==type))
@@ -54,7 +54,23 @@ public class TreeTree{
         }
         return sectionDepth;
     }
+    public ReferenceArrayList<TreeNode> getNodes(TreeNodeType type, int sectionId, int depth){
+        ReferenceArrayList<TreeNode> allNodes = new ReferenceArrayList<>();
+        for(int sid : sections.keySet()){
+            if(sectionId==-1||sid==sectionId){
+                EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> section = sections.get(sid);
+                ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.computeIfAbsent(type, (t) -> new ReferenceArrayList<>());
+                for(int d = 0; d<depthMap.size(); d++){
+                    if(depth==-1||d==depth){
+                        allNodes.addAll(depthMap.get(d));
+                    }
+                }
+            }
+        }
+        return allNodes;
+    }
     public void rebase(TreeNode newRoot){
+        if(newRoot==null)throw new IllegalArgumentException("Cannot rebase around a null root!");
         if(root==newRoot)return;
         newRoot.parent = null;
         newRoot.distance = 0;
@@ -65,5 +81,8 @@ public class TreeTree{
     }
     public boolean isEmpty(){
         return nodeMap.isEmpty();
+    }
+    public boolean contains(long pos){
+        return nodeMap.containsKey(pos);
     }
 }

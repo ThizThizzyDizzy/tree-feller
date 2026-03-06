@@ -2,6 +2,10 @@ package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
+import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
+import com.thizthizzydizzy.treefeller.core.detection.tree.TreeNode;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 public class BukkitPlayerConnector implements IPlayerConnector{
     private final Player player;
@@ -54,5 +58,27 @@ public class BukkitPlayerConnector implements IPlayerConnector{
     @Override
     public String getPlayerName(){
         return player.getName();
+    }
+    @Override
+    public void debugDisplayTreeNode(TreeNode node){
+        Material m = Material.BEDROCK;
+        switch(node.type){
+            case ROOTS:
+                m = Material.COAL_BLOCK;
+                break;
+            case TRUNK:
+                m = Material.GOLD_BLOCK;
+                break;
+            case LEAVES:
+                m = Material.IRON_BLOCK;
+                break;
+            case DECORATION:
+                m = Material.DIAMOND_BLOCK;
+                break;
+            case NONE:
+                m = Material.STONE;
+                break;
+        }
+        player.sendBlockChange(new Location(player.getWorld(), BlockPos.getX(node.pos), BlockPos.getY(node.pos), BlockPos.getZ(node.pos)), m, (byte)0);
     }
 }

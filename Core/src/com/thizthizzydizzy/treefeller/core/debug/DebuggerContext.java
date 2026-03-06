@@ -6,6 +6,8 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.detection.tree.TreeNode;
+import com.thizthizzydizzy.treefeller.core.detection.tree.TreeTree;
 import com.thizthizzydizzy.treefeller.core.event.EventListener;
 import com.thizthizzydizzy.treefeller.core.event.TreeFellerEvent;
 import java.util.ArrayList;
@@ -81,7 +83,9 @@ public class DebuggerContext{
                 continue;
             }
             if(object instanceof EventListener){
-                logs.add("Listener: "+object.getClass().getSimpleName());
+                String simpleName = object.getClass().getSimpleName();
+                if(simpleName.contains("$$Lambda"))simpleName = simpleName.substring(0, simpleName.indexOf("$$Lambda")+8);
+                logs.add("Listener: "+simpleName);
                 continue;
             }
             if(object instanceof Throwable){
@@ -95,6 +99,16 @@ public class DebuggerContext{
                     }
                     t = t.getCause();
                     first = false;
+                }
+                continue;
+            }
+            
+            if(object instanceof TreeTree){
+                TreeTree tree = (TreeTree)object;
+                for(IPlayerConnector player : players){
+                    for(TreeNode node : tree.nodeMap.values()){
+                        player.debugDisplayTreeNode(node);
+                    }
                 }
                 continue;
             }

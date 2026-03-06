@@ -28,6 +28,11 @@ public class TreeFellerDetection{
             if(i>0&&TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.ROOTS, 0)==0)
                 return false; // No trunk, and no roots. This is not a tree.
             if(TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.TRUNK, 0)>0){
+                context.info("Rebasing around trunk node. ("+detected.nodeMap.size()+" total nodes)");
+                if(detected.nodeMap.size()==1&&detected.root==detected.nodeMap.values().stream().findAny().orElse(null)){
+                    context.info("Tree only has current root. Node type: "+detected.root.type.toString());
+                }
+                context.info("Rebasing around trunk node. ("+detected.nodeMap.size()+" total nodes)");
                 detected.rebase(detected.findAnyNode(n -> n.type==TreeNodeType.TRUNK));
                 break;
             }
@@ -37,6 +42,8 @@ public class TreeFellerDetection{
         int additional = scanTrunk(context, world, detected, tree, 0, criteria);
         if(additional==-1)return false;
         totalTrunks+=additional;
+        
+        context.info(detected);
         
 //        detection.disconnected_trunk_distance; // next step! use leaves as connectors
         return true;
