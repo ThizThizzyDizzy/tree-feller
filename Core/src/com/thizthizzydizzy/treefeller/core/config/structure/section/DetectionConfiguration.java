@@ -21,8 +21,8 @@ public class DetectionConfiguration{
     public DecorationConfiguration[] decorations;
 
     public static class BlockDataRules{
-        @ConfigComment("When scanning tree trunks, avoid connecting parallel adjacent tree trunks")
-        public boolean ignore_parallel_trunk_pillars = true;
+        @ConfigComment("When scanning tree trunks, avoid connecting parallel adjacent tree trunks. This may cause issues with 2x2 trees or trees with branches.")
+        public boolean ignore_parallel_trunk_pillars = false;
 
         @ConfigComment("Use leaf block data (distance) to speed up leaf detection")
         public boolean use_leaf_distance = true;

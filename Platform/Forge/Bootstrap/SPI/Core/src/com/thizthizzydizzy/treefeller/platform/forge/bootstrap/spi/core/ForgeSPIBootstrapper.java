@@ -60,7 +60,7 @@ public class ForgeSPIBootstrapper implements IModLocator{
             throw new RuntimeException("Could not fetch minecraft version!");
         System.out.println("Identified Minecraft version as "+version);
 
-        String bootstrapperName = VersionMatcher.byMinecraftVersionAscending((String)null)
+        String bootstrapperName = VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending((String)null)
             .atVersion("1.14.4", "v1_14_4.ForgeSPIBootstrapperV1_14_4")
             .atVersion("1.15.2", "v1_15_2.ForgeSPIBootstrapperV1_15_2")
             .atVersion("1.17.1", "v1_17_1.ForgeSPIBootstrapperV1_17_1")
@@ -81,14 +81,14 @@ public class ForgeSPIBootstrapper implements IModLocator{
 
         bootstrapper.initArguments(initArguments);
 
-        String platformName = VersionMatcher.byMinecraftVersionAscending((String)null)
+        String platformName = VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending((String)null)
             .atVersion("1.14.4", "TreeFellerPlatformForgeVersionV1_21_5.jar")
             .atVersion("1.21.6", "TreeFellerPlatformForgeVersionV1_21_11.jar")
             .match(version);
 
         System.out.println("Selected Forge Platform: "+platformName);
 
-        boolean shouldCopyCore = VersionMatcher.byMinecraftVersionAscending(false)
+        boolean shouldCopyCore = VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending(false)
             .atVersion("1.14.4", true)
             .atVersion("1.17", false)
             .match(version);

@@ -2,6 +2,23 @@ package com.thizthizzydizzy.treefeller.platform.utility.version;
 import java.util.ArrayList;
 import java.util.HashMap;
 public class VersionMatcher<T>{
+    public static class VersionMatcherBuilder{
+        private final VersionType type;
+        private VersionMatcherBuilder(VersionType type){
+            this.type = type;
+        }
+        public <T> VersionMatcher<T> ascending(T oldVersionDefault){
+            VersionMatcher<T> matcher = new VersionMatcher<>(type, InterpolationMode.ASCENDING);
+            return matcher.atVersion(null, oldVersionDefault);
+        }
+        public <T> VersionMatcher<T> descending(T newVersionDefault){
+            VersionMatcher<T> matcher = new VersionMatcher<>(type, InterpolationMode.DESCENDING);
+            return matcher.atVersion(null, newVersionDefault);
+        }
+        public <T> VersionMatcher<T> exact(){
+            return new VersionMatcher<>(type, InterpolationMode.EXACT);
+        }
+    }
     private final VersionType versionType;
     private final InterpolationMode interpolationMode;
     private final HashMap<String, T> values = new HashMap();
@@ -9,9 +26,8 @@ public class VersionMatcher<T>{
         this.versionType = versionType;
         this.interpolationMode = mode;
     }
-    public static <T> VersionMatcher<T> byMinecraftVersionAscending(T oldVersionDefault){
-        VersionMatcher<T> matcher = new VersionMatcher<>(VersionType.MINECRAFT, InterpolationMode.ASCENDING);
-        return matcher.atVersion(null, oldVersionDefault);
+    public static VersionMatcherBuilder by(VersionType type){
+        return new VersionMatcherBuilder(type);
     }
     public VersionMatcher<T> atVersion(String version, T value){
         values.put(version, value);
@@ -56,12 +72,12 @@ public class VersionMatcher<T>{
         }
         throw new RuntimeException("No match found for version: "+version+" ("+interpolationMode.toString()+")");
     }
-    private static enum InterpolationMode{
+    public static enum InterpolationMode{
         ASCENDING,
         DESCENDING,
         EXACT
     }
-    private static enum VersionType{
+    public static enum VersionType{
         MINECRAFT{
             @Override
             int sort(String version1, String version2){

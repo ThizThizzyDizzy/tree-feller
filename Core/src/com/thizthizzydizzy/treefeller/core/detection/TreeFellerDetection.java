@@ -74,7 +74,6 @@ public class TreeFellerDetection{
             }
         }
         
-        //TODO block data filtering
         //TODO decorations
         
         context.info("End of detection");

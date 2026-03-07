@@ -36,12 +36,10 @@ public class BukkitWorldConnector implements IWorldConnector{
     }
     @Override
     public BlockAxis getBlockAxis(long pos){
-        return null; //TODO calculate block axis for pillar blocks prior to bukkit having API for that
+        return BukkitConnector.blockData.getBlockAxis(world.getBlockAt(BlockPos.getX(pos), BlockPos.getY(pos), BlockPos.getZ(pos)));
     }
     @Override
     public int getLeafDistance(long pos){
-        // doesn't exist before 1.13
-        //TODO return actual values in 1.13
-        return -1;
+        return BukkitConnector.blockData.getLeafDistance(world.getBlockAt(BlockPos.getX(pos), BlockPos.getY(pos), BlockPos.getZ(pos)));
     }
 }
