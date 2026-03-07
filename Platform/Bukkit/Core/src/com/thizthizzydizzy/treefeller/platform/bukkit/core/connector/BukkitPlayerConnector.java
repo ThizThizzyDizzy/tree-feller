@@ -68,12 +68,15 @@ public class BukkitPlayerConnector implements IPlayerConnector{
                 break;
             case TRUNK:
                 m = Material.GOLD_BLOCK;
+                if(node.sectionId>0)m = Material.GOLD_ORE;
                 break;
             case LEAVES:
                 m = Material.IRON_BLOCK;
+                if(node.sectionId>0)m = Material.IRON_ORE;
                 break;
             case DECORATION:
                 m = Material.DIAMOND_BLOCK;
+                if(node.sectionId>0)m = Material.DIAMOND_ORE;
                 break;
             case NONE:
                 m = Material.STONE;

@@ -9,7 +9,7 @@ public class TreeNode{
     public int sectionId;
     public int distance;
     public TreeNode(long pos, TreeNode parent){
-        this(pos, parent, parent.sectionId);
+        this(pos, parent, parent==null?0:parent.sectionId);
     }
     public TreeNode(long pos, TreeNode parent, int sectionId){
         this.pos = pos;

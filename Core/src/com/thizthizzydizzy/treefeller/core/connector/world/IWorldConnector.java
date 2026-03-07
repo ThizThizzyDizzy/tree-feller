@@ -6,4 +6,6 @@ public interface IWorldConnector{
     public String getDimension();
     public String getBiome(long pos);
     public boolean matches(long pos, IBlockDefinition block);
+    public BlockAxis getBlockAxis(long pos);
+    public int getLeafDistance(long pos);
 }
