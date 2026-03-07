@@ -4,8 +4,8 @@ import java.lang.reflect.Field;
 public class TreeFellerConfiguration{
     public DebugConfiguration debug = new DebugConfiguration();
     public GlobalConfiguration global = new GlobalConfiguration();
-    public ToolConfiguration[] tools;
-    public TreeConfiguration[] trees;
+    public ToolConfiguration[] tools = new ToolConfiguration[0];
+    public TreeConfiguration[] trees = new TreeConfiguration[0];
     public MessagesConfiguration messages = new MessagesConfiguration();
 
     public TreeFellerConfiguration(){

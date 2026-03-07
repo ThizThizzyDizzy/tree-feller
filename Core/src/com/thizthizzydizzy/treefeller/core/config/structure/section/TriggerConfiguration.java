@@ -1,15 +1,17 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
 public class TriggerConfiguration{
     // PLAYER REQUIREMENTS
     
     @ConfigComment("Whether TreeFeller should be toggled on by default (per-player toggle)")
-    public boolean default_enabled = true;
+    @ConfigGlobalDefaultBoolean(true)
+    public Boolean default_enabled;
 
     @ConfigComment("Minimum time, in ticks, between felling trees. (per player)")
-    public int cooldown;
+    public Integer cooldown;
     
     @ConfigComment("Permissions required to fell trees")
     public DualList<String> permissions;
@@ -24,19 +26,24 @@ public class TriggerConfiguration{
     public Range health;
 
     @ConfigComment("Allow felling trees in adventure mode")
-    public boolean adventure_mode = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean adventure_mode;
 
     @ConfigComment("Allow felling trees in survival mode")
-    public boolean survival_mode = true;
+    @ConfigGlobalDefaultBoolean(true)
+    public Boolean survival_mode;
 
     @ConfigComment("Allow felling trees in creative mode")
-    public boolean creative_mode = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean creative_mode;
 
     @ConfigComment("Allow felling trees while sneaking")
-    public boolean with_sneaking = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean with_sneaking;
 
     @ConfigComment("Allow felling trees while not sneaking")
-    public boolean without_sneaking = true;
+    @ConfigGlobalDefaultBoolean(true)
+    public Boolean without_sneaking;
 
     // WORLD REQUIREMENTS
     

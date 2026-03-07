@@ -19,7 +19,7 @@ public class MessagesConfiguration{
     public SingleMessageConfiguration unknown_command = new SingleMessageConfiguration();
     public SingleMessageConfiguration no_permission = new SingleMessageConfiguration();
     public SingleMessageConfiguration command_usage = new SingleMessageConfiguration();
-    
+
     public MessageConfiguration required_logs = new MessageConfiguration();
     public MessageConfiguration required_leaves = new MessageConfiguration();
     public MessageConfiguration max_logs = new MessageConfiguration();

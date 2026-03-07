@@ -10,10 +10,10 @@ import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinit
 public class ToolConfiguration{
     @ConfigComment("The item to match for this tool")
     public IItemDefinition item;
-    
+
     @ConfigComment("The indicies of trees that this tool may cut down")
     public DualList<Integer> trees;
-    
+
     public TriggerConfiguration trigger;
     public CriteriaConfiguration criteria;
     public CuttingConfiguration cutting;

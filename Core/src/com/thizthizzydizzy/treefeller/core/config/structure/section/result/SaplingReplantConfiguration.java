@@ -1,21 +1,28 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section.result;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultInteger;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 public class SaplingReplantConfiguration{
-    public boolean enable = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean enable;
     
     @ConfigComment("Use saplings dropped from the tree leaves to replant trees")
-    public boolean use_tree_saplings = true;
+    @ConfigGlobalDefaultBoolean(true)
+    public Boolean use_tree_saplings;
     
     @ConfigComment("Use saplings from the player inventory to replant trees")
-    public boolean use_inventory_saplings = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean use_inventory_saplings;
     
     @ConfigComment("Spawn saplings to replant if not enough are available")
-    public boolean spawn_saplings = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean spawn_saplings;
     
     @ConfigComment("The maximum time, in game ticks, to wait for saplings before giving up")
-    public int sapling_timeout = 50;
+    @ConfigGlobalDefaultInteger(50)
+    public Integer sapling_timeout;
     
     @ConfigComment("The blocks that saplings may be planted on")
-    public IBlockDefinition[] grasses = new IBlockDefinition[1];
+    public IBlockDefinition[] grasses;
 }

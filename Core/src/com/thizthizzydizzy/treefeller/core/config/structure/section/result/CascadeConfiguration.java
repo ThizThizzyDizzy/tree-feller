@@ -1,11 +1,16 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section.result;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultInteger;
 public class CascadeConfiguration{
-    public boolean enable = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean enable;
 
-    @ConfigComment("The maximum number of trees that may be felling at oncefrom a single cascade")
-    public int parallel_cascade_limit = 1;
+    @ConfigComment("The maximum number of trees that may be felling at once from a single cascade")
+    @ConfigGlobalDefaultInteger(1)
+    public Integer parallel_cascade_limit;
 
     @ConfigComment("The maximum number of cascade checks that may happen in a single tick")
-    public int cascade_check_limit = 64;
+    @ConfigGlobalDefaultInteger(64)
+    public Integer cascade_check_limit;
 }

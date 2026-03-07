@@ -1,15 +1,21 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section.breaking;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultFloat;
 public class FellBehavior{
     @ConfigComment("Attempt to lay the tree down naturally")
-    public boolean natural = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean natural;
     
     @ConfigComment("Fall as falling block entities, rather than breaking in-place")
-    public boolean fall_as_entities = false;
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean fall_as_entities;
     
     @ConfigComment("The damage falling blocks should deal, per block fallen")
-    public float fall_damage_amount = 0;
+    @ConfigGlobalDefaultFloat(0)
+    public Float fall_damage_amount;
     
     @ConfigComment("The maximum damage falling blocks can deal")
-    public float fall_damage_maximum = 40;
+    @ConfigGlobalDefaultFloat(40)
+    public Float fall_damage_maximum;
 }
