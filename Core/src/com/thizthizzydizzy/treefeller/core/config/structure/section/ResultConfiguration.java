@@ -1,8 +1,8 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultFloat;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultNewInstance;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFloat;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultNewInstance;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.result.CascadeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.result.SaplingReplantConfiguration;

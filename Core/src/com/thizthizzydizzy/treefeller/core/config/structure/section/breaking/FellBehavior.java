@@ -1,7 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section.breaking;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultFloat;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFloat;
 public class FellBehavior{
     @ConfigComment("Attempt to lay the tree down naturally")
     @ConfigGlobalDefaultBoolean(false)

@@ -7,7 +7,10 @@ public class BukkitBlockDefinition implements IBlockDefinition{
     public BukkitBlockDefinition(){
     }
     public BukkitBlockDefinition(String str){
-        material = Material.matchMaterial(str);
+        this(Material.matchMaterial(str));
+    }
+    public BukkitBlockDefinition(Material material){
+        this.material = material;
     }
     @Override
     public Object asSimplified(){

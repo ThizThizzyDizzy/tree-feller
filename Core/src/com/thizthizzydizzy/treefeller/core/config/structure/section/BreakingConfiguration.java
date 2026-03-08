@@ -1,10 +1,10 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultFallDirection;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultFloat;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultInteger;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultNewInstance;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFallDirection;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFloat;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultInteger;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultNewInstance;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.breaking.FallDirection;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.breaking.FellBehavior;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;

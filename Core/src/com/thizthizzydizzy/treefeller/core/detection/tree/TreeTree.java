@@ -77,7 +77,7 @@ public class TreeTree{
         if(root==newRoot)return;
         newRoot.parent = null;
         newRoot.distance = 1;
-        newRoot.children.clear();
+        if(newRoot.children!=null)newRoot.children.clear();
         nodeMap.clear();
         sections.clear();
         registerNode(root = newRoot);

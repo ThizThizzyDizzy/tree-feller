@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.detection.tree;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 public class TreeNode{
@@ -8,6 +9,7 @@ public class TreeNode{
     public List<TreeNode> children = null;
     public int sectionId;
     public int distance;
+    public DecorationConfiguration decoration;
     public TreeNode(long pos, TreeNode parent){
         this(pos, parent, parent==null?0:parent.sectionId);
     }

@@ -3,6 +3,8 @@ import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.general.SimpleDirection;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
@@ -84,6 +86,12 @@ public class BukkitConnector implements TreeFellerConnector{
         }
         config.tools = tools.toArray(ToolConfiguration[]::new);
         config.trees = trees.toArray(TreeConfiguration[]::new);
+        config.global.detection.decorations = new DecorationConfiguration[]{
+            new DecorationConfiguration(SimpleDirection.UP, false, new BukkitBlockDefinition(Material.SNOW)),
+            new DecorationConfiguration(SimpleDirection.SIDE_AND_DOWN, true, new BukkitBlockDefinition(Material.VINE)),
+            new DecorationConfiguration(SimpleDirection.SIDE, false, new BukkitBlockDefinition(Material.COCOA))
+        };
+        
     }
     @Override
     public Collection<IPlayerConnector> getAdminPlayers(){

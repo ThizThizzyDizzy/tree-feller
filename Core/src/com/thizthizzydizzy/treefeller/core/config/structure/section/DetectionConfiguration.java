@@ -1,8 +1,8 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultInteger;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultNewInstance;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultInteger;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultNewInstance;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 public class DetectionConfiguration{
     @ConfigComment("The maximum distance to check for a tree trunk when breaking roots")

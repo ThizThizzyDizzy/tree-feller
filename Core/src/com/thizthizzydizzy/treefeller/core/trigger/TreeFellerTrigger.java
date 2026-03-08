@@ -10,13 +10,15 @@ import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
 import com.thizthizzydizzy.treefeller.core.detection.TreeFellerDetection;
+import com.thizthizzydizzy.treefeller.core.detection.tree.TreeTree;
 import com.thizthizzydizzy.treefeller.core.player.PlayerSettings;
 import java.util.ArrayList;
 public class TreeFellerTrigger{
     public static void trigger(IPlayerConnector player, IWorldConnector world, long pos){
         DebuggerContext context = TreeFellerDebugger.begin("Trigger", player, world, pos);
         PlayerSettings playerSettings = PlayerSettings.get(player);
-        if(!context.checkTrue("Is Toggled On",playerSettings.isToggledOn()))return;
+        if(!context.checkTrue("Is Toggled On", playerSettings.isToggledOn()))
+            return;
 
         if(!context.checkTrue("Global Trigger", checkTrigger(context, player, world, pos, TreeFellerCore.config.global.trigger)))
             return;
@@ -27,21 +29,27 @@ public class TreeFellerTrigger{
         ArrayList<ToolConfiguration> validTools = new ArrayList();
         for(ToolConfiguration tool : TreeFellerCore.config.tools){
             context.info(tool);
-            if(!context.checkTrue("Tool Trigger", checkTrigger(context, player, world, pos, tool.trigger)))continue;
-            if(context.checkTrue("Tool matches", item.matches(tool.item)))validTools.add(tool);
+            if(!context.checkTrue("Tool Trigger", checkTrigger(context, player, world, pos, tool.trigger)))
+                continue;
+            if(context.checkTrue("Tool matches", item.matches(tool.item)))
+                validTools.add(tool);
         }
-        
+
         context.info(validTools.size()+"/"+TreeFellerCore.config.tools.length+" tools");
         context.info(TreeFellerCore.config.trees.length+" trees");
 
         // check every tool/tree combination
         for(TreeConfiguration tree : TreeFellerCore.config.trees){
             context.info(tree);
-            if(!context.checkTrue("Tree Trigger", checkTrigger(context, player, world, pos, tree.trigger)))continue;
+            if(!context.checkTrue("Tree Trigger", checkTrigger(context, player, world, pos, tree.trigger)))
+                continue;
             for(ToolConfiguration tool : validTools){
-                if(TreeFellerDetection.detect(player, world, tree, tool, pos, item)){
-                    return;
-                }
+                TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item);
+                if(detected==null)continue;
+                //TODO criteria, `return` if not met
+                //TODO cutting
+                //TODO breaking
+                //TODO result
             }
         }
     }
@@ -59,24 +67,28 @@ public class TreeFellerTrigger{
 
         // == PLAYER CHECKS ==
         if(player!=null){
-            if(context.checkFalse("On Cooldown", PlayerSettings.get(player).isOnCooldown(config)))return false;
+            if(context.checkFalse("On Cooldown", PlayerSettings.get(player).isOnCooldown(config)))
+                return false;
             if(config.permissions!=null&&!context.checkTrue("Permissions", config.permissions.applyMulti(player::hasPermission)))
                 return false;
             if(config.food!=null&&!context.checkTrue("Food", config.food.matches(player.getFoodLevel())));
             if(config.saturation!=null&&!context.checkTrue("Saturation", config.saturation.matches(player.getSaturationLevel())));
             if(config.health!=null&&!context.checkTrue("Health", config.health.matches(player.getHealth())));
-            
+
             PlayerGameMode gameMode = player.getGameMode();
             context.info(gameMode);
             switch(gameMode){
                 case ADVENTURE:
-                    if(!context.checkTrue("Enabled in adventure mode", config.adventure_mode))return false;
+                    if(!context.checkTrue("Enabled in adventure mode", config.adventure_mode))
+                        return false;
                     break;
                 case SURVIVAL:
-                    if(!context.checkTrue("Enabled in survival mode", config.survival_mode))return false;
+                    if(!context.checkTrue("Enabled in survival mode", config.survival_mode))
+                        return false;
                     break;
                 case CREATIVE:
-                    if(!context.checkTrue("Enabled in creative mode", config.creative_mode))return false;
+                    if(!context.checkTrue("Enabled in creative mode", config.creative_mode))
+                        return false;
                     break;
                 case SPECTATOR:
                 case UNKNOWN:
@@ -85,9 +97,11 @@ public class TreeFellerTrigger{
             }
             context.info("Is Sneaking: "+player.isSneaking());
             if(player.isSneaking()){
-                if(!context.checkTrue("Enabled when sneaking", config.with_sneaking))return false;
+                if(!context.checkTrue("Enabled when sneaking", config.with_sneaking))
+                    return false;
             }else{
-                if(!context.checkTrue("Enabled without sneaking", config.without_sneaking))return false;
+                if(!context.checkTrue("Enabled without sneaking", config.without_sneaking))
+                    return false;
             }
         }
         return true;

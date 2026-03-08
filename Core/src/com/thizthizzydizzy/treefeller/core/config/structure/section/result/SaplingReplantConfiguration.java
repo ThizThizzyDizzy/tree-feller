@@ -1,7 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section.result;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultInteger;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultInteger;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 public class SaplingReplantConfiguration{
     @ConfigGlobalDefaultBoolean(false)

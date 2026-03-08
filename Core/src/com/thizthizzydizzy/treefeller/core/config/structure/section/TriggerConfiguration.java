@@ -1,6 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
 public class TriggerConfiguration{

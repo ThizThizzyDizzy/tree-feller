@@ -1,10 +1,10 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultBoolean;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultInteger;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultInteger;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.BlockFilter;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
-import com.thizthizzydizzy.treefeller.core.config.ConfigGlobalDefaultValue;
+import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultValue;
 public class CriteriaConfiguration{
     @ConfigComment("The minimum number of total trunk blocks required")
     @ConfigGlobalDefaultInteger(4)

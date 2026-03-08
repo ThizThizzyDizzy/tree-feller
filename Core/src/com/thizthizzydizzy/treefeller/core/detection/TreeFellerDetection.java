@@ -16,11 +16,11 @@ import com.thizthizzydizzy.treefeller.core.detection.tree.TreeScanner;
 import com.thizthizzydizzy.treefeller.core.detection.tree.TreeTree;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 public class TreeFellerDetection{
-    public static boolean detect(IPlayerConnector player, IWorldConnector world, TreeConfiguration tree, ToolConfiguration tool, long pos, IItemConnector item){
+    public static TreeTree detect(IPlayerConnector player, IWorldConnector world, TreeConfiguration tree, ToolConfiguration tool, long pos, IItemConnector item){
         DebuggerContext context = TreeFellerDebugger.begin("Detect", player, world, tree, tool, pos, item);
         TreeTree detected = new TreeTree(pos);
         DetectionConfiguration detection = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.detection, tree.detection);
-        
+
         // only use for short-circuiting. Full criteria checking is the job of TreeFellerCriteria
         CriteriaConfiguration criteria = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.criteria, tree.criteria);
 
@@ -28,7 +28,7 @@ public class TreeFellerDetection{
         // Find trunk (roots scan)
         for(int i = 0; i<=detection.root_distance; i++){
             if(i>0&&TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.ROOTS, 0, null)==0)
-                return false; // No trunk, and no roots. This is not a tree.
+                return null; // No trunk, and no roots. This is not a tree.
             if(TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.TRUNK, 0, null)>0){
                 if(detected.nodeMap.size()==1&&detected.root==detected.nodeMap.values().stream().findAny().orElse(null)){
                     context.info("Tree only has current root. Node type: "+detected.root.type.toString());
@@ -38,19 +38,16 @@ public class TreeFellerDetection{
                 break;
             }
         }
-        
-        int totalTrunks = 1; // (include root block)
-        int additional = scanTrunk(context, world, detected, tree, 0, criteria);
-        if(additional==-1)return false;
-        totalTrunks+=additional;
-        
+
+        if(scanTrunk(context, world, detected, tree, 0, criteria)==-1)
+            return null;
+
         context.info("Leaf Range: "+detection.leaf_detect_range);
         context.info("Disconnected Trunk Distance: "+detection.disconnected_trunk_distance);
         // Leaves/trunk connectors scan
         for(int i = 0; i<detection.leaf_detect_range; i++){
             //leaf scan
-            int leafCount = TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.LEAVES, TreeNodeType.LEAVES, -1, null);
-            if(leafCount==0){
+            if(TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.LEAVES, TreeNodeType.LEAVES, -1, null)==0){
                 // no more leaves to find
                 context.info("Leaf scan complete.");
                 break;
@@ -70,26 +67,31 @@ public class TreeFellerDetection{
                         i = -1; // restart leaf scan to detect this section's leaves
                     }
                 }
-                
+
             }
         }
-        
-        //TODO decorations
-        
+
+        int additionalDecorations;
+        do{
+            additionalDecorations = 0;
+
+            additionalDecorations += TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.DECORATION, TreeNodeType.DECORATION, -1, null);
+        }while(additionalDecorations>0);
+
         context.info("End of detection");
         context.info(detected);
-        return true;
+        return detected;
     }
     private static int scanTrunk(DebuggerContext context, IWorldConnector world, TreeTree detected, TreeConfiguration tree, int sectionId, CriteriaConfiguration criteria){
         int total = 0;
         int stepCount;
         while((stepCount = TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.TRUNK, TreeNodeType.TRUNK, sectionId, null))>0){
-            total+=stepCount;
+            total += stepCount;
             if(total>criteria.max_trunk){
                 // short-circuit with the tree size limit to prevent endless scanning
                 context.fail("Scan short-circuit on tree size limit! ("+total+">"+criteria.max_trunk);
                 return -1;
-            } 
+            }
         }
         return total;
     }

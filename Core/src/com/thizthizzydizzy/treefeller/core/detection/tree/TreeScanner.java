@@ -3,6 +3,7 @@ import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
@@ -44,13 +45,11 @@ public class TreeScanner{
                 throw new AssertionError("Invalid TreeNodeType for scan: "+type.name());
         }
 
-        if(blocks==null)return 0; // There's none, so you aren't going to find any.
+        if(blocks==null&&type!=TreeNodeType.DECORATION)return 0; // There's none, so you aren't going to find any.
+        if(type==TreeNodeType.DECORATION&&(config.decorations==null||config.decorations.length==0))
+            return 0; // no decorations are defined, so you aren't going to find any
 
-        // special handling to ensure connected-trunk scans are based on leaves
-        TreeNodeType baseType = type;
-        if(mode==ScanMode.LEAVES&&type==TreeNodeType.TRUNK)
-            baseType = TreeNodeType.LEAVES;
-
+        TreeNodeType baseType = TreeNodeType.valueOf(mode.name());
         int currentDepth = tree.getScanDepth(baseType, sectionId);
         context.info("BASE TYPE:", baseType);
         context.info("Current Depth: "+currentDepth);
@@ -87,21 +86,27 @@ public class TreeScanner{
         return count;
     }
     private static int scanNeighbors(IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, DetectionConfiguration config, ScanMode mode, TreeNodeType type, Consumer<TreeNode> nodeHandler){
+        boolean isDecorationColumn = mode==ScanMode.DECORATION&&type==node.type&&node.type==TreeNodeType.DECORATION;
+        if(isDecorationColumn&&!node.decoration.column)return 0;
+
         int x = BlockPos.getX(node.pos);
         int y = BlockPos.getY(node.pos);
         int z = BlockPos.getZ(node.pos);
 
         boolean includeDirectNeighbors = true;
-        boolean includeEdgeNeighbors = mode!=ScanMode.LEAVES||config.diagonal_leaves;
-        boolean includeCornerNeighbors = mode!=ScanMode.LEAVES||config.diagonal_leaves;
+        boolean includeEdgeNeighbors = mode!=ScanMode.DECORATION&&(mode!=ScanMode.LEAVES||config.diagonal_leaves);
+        boolean includeCornerNeighbors = mode!=ScanMode.DECORATION&&(mode!=ScanMode.LEAVES||config.diagonal_leaves);
         int len = includeDirectNeighbors?NEIGHBORS_DIRECT_X.length:0;
         if(includeEdgeNeighbors)len += NEIGHBORS_EDGE_X.length;
         if(includeCornerNeighbors)len += NEIGHBORS_CORNER_X.length;
+
+        if(isDecorationColumn)len = 2;
 
         long[] neighbors = new long[len];
         int idx = 0;
 
         for(int i = 0; i<NEIGHBORS_DIRECT_X.length; i++){
+            if(isDecorationColumn&&NEIGHBORS_DIRECT_Y[i]==0)continue;
             neighbors[idx++] = BlockPos.toPos(x+NEIGHBORS_DIRECT_X[i], y+NEIGHBORS_DIRECT_Y[i], z+NEIGHBORS_DIRECT_Z[i]);
         }
         if(includeEdgeNeighbors){
@@ -176,6 +181,35 @@ public class TreeScanner{
                         if(d1<7&&d2<=d1)continue NEIGHBORS;
                     }while(false);
                 }
+            }
+            if(mode==ScanMode.DECORATION){
+                for(DecorationConfiguration decoration : config.decorations){
+                    if(!isDecorationColumn){
+                        int yDiff = BlockPos.getY(pos)-y;
+                        switch(decoration.direction){
+                            case UP:
+                                if(yDiff!=1)continue;
+                                break;
+                            case DOWN:
+                                if(yDiff!=-1)continue;
+                                break;
+                            case SIDE:
+                                if(yDiff!=0)continue;
+                                break;
+                            case SIDE_AND_DOWN:
+                                if(yDiff==1)continue;
+                                break;
+                        }
+                    }
+                    if(scanNode(world, tree, new TreeNode(pos, node), decoration.blocks, type, (n) -> {
+                        n.decoration = decoration;
+                        if(nodeHandler==null)tree.addNode(n);
+                    })){
+                        count++;
+                        break;
+                    }
+                }
+                continue;
             }
             if(scanNode(world, tree, new TreeNode(pos, node), blocks, type, nodeHandler))
                 count++;
