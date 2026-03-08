@@ -4,6 +4,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.SimpleDirection;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
@@ -78,9 +79,21 @@ public class BukkitConnector implements TreeFellerConnector{
                 tree.trunk = new IBlockDefinition[]{
                     new BukkitBlockDefinition(name)
                 };
-                tree.leaves = new IBlockDefinition[]{
-                    new BukkitBlockDefinition(name.replace("_log", "_leaves"))
-                };
+                Material rootsMaterial = Material.matchMaterial(name.replace("_log", "_roots"));
+                if(rootsMaterial!=null){
+                    tree.roots = new IBlockDefinition[]{
+                        new BukkitBlockDefinition(rootsMaterial)
+                    };
+                }
+                ArrayList<IBlockDefinition> leaves = new ArrayList<>();
+                leaves.add(new BukkitBlockDefinition(name.replace("_log", "_leaves")));
+                if(rootsMaterial!=null)leaves.add(new BukkitBlockDefinition(rootsMaterial));
+                if(rootsMaterial!=null){
+                    if(tree.detection==null)tree.detection = new DetectionConfiguration();
+                    tree.detection.max_leaf_distance_from_top = 4096; 
+                    tree.detection.leaf_detect_range = config.global.detection.root_distance; // ensure detect range includes roots (mangrove)
+                }
+                tree.leaves = leaves.toArray(IBlockDefinition[]::new);
                 trees.add(tree);
             }
         }

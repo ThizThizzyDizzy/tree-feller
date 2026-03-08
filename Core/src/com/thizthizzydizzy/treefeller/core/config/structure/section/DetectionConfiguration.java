@@ -6,8 +6,8 @@ import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefa
 import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 public class DetectionConfiguration{
     @ConfigComment("The maximum distance to check for a tree trunk when breaking roots")
-    @ConfigGlobalDefaultInteger(6)
-    public Integer root_distance = 6;
+    @ConfigGlobalDefaultInteger(16)
+    public Integer root_distance;
 
     @ConfigComment("The maximum distance between disconnected trunk sections, connected by leaves")
     @ConfigGlobalDefaultInteger(0)
