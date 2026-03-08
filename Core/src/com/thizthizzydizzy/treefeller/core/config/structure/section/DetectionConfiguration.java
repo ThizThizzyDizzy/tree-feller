@@ -12,6 +12,9 @@ public class DetectionConfiguration{
     @ConfigComment("The maximum distance between disconnected trunk sections, connected by leaves")
     @ConfigGlobalDefaultInteger(0)
     public Integer disconnected_trunk_distance;
+    
+    @ConfigComment("The maximum vertical distance between the topmost trunk block and where leaves may detected from connected trunks. This does not affect leaves detected from other leaves.")
+    public Integer max_leaf_distance_from_top;
 
     @ConfigComment("The maximum distance from the trunk that leaves will be searched for")
     @ConfigGlobalDefaultInteger(6)

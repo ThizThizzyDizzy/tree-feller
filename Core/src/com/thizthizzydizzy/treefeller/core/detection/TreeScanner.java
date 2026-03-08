@@ -66,8 +66,15 @@ public class TreeScanner{
                     context.info("Scanned root node: "+pass);
                     return pass?1:0;
                 case LEAVES:
-                    lastLayer = tree.getNodes(TreeNodeType.TRUNK, -1, -1);
+                    ReferenceArrayList<TreeNode> trunks = tree.getNodes(TreeNodeType.TRUNK, -1, -1);
+                    if(!trunks.isEmpty()&&config.max_leaf_distance_from_top!=null){
+                        int highestTrunkY = trunks.stream().mapToInt((n)->BlockPos.getY(n.pos)).max().getAsInt();
+                        lastLayer = new ReferenceArrayList<>();
+                        lastLayer.addAll(trunks.stream().filter(n -> BlockPos.getY(n.pos)>=highestTrunkY-config.max_leaf_distance_from_top).toList());
+                    }else
+                        lastLayer = trunks;
                     break;
+
                 case EXTENDED_LEAVES:
                     lastLayer = tree.getNodes(TreeNodeType.LEAVES, -1, -1);
                     break;
@@ -244,7 +251,7 @@ public class TreeScanner{
         public final TreeNodeType baseType;
         private ScanMode(TreeNodeType baseType){
             this.baseType = baseType;
-            
+
         }
     }
 }
