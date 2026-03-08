@@ -1,24 +1,28 @@
-package com.thizthizzydizzy.treefeller.core.detection.tree;
+package com.thizthizzydizzy.treefeller.core.detection;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.EnumMap;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 public class TreeTree{
     public TreeNode root;
     public final Long2ObjectOpenHashMap<TreeNode> nodeMap = new Long2ObjectOpenHashMap<>();
     private final Int2ObjectOpenHashMap<EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>>> sections = new Int2ObjectOpenHashMap<>();
-    public TreeTree(long rootPos){
+    private final boolean secondary;
+    public TreeTree(long rootPos, boolean secondary){
         root = new TreeNode(rootPos, null);
+        this.secondary = secondary;
     }
-    public void addNode(TreeNode node){
+    void addNode(TreeNode node){
         registerNode(node);
         if(node.parent!=null){
             node.parent.addChild(node);
         }
     }
     private void registerNode(TreeNode node){
+        node.secondary = secondary;
         if(nodeMap.containsKey(node.pos))
             throw new IllegalStateException("Tried to register the same node twice! "+BlockPos.getX(node.pos)+" "+BlockPos.getY(node.pos)+" "+BlockPos.getZ(node.pos));
         nodeMap.put(node.pos, node);
@@ -33,10 +37,23 @@ public class TreeTree{
             distanceIndex.add(node);
         }
     }
+    private void unregisterNode(TreeNode node){
+        if(!nodeMap.containsKey(node.pos))throw new IllegalStateException("Tried to unregister a node that is not registered! "+BlockPos.getX(node.pos)+" "+BlockPos.getY(node.pos)+" "+BlockPos.getZ(node.pos));
+        nodeMap.remove(node.pos);
+        if(node.type!=null){
+            EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> typeMap = sections.get(node.sectionId);
+            if(typeMap==null)return;
+            ReferenceArrayList<ReferenceArrayList<TreeNode>> distanceIndexes = typeMap.get(node.type);
+            if(distanceIndexes==null)return;
+            ReferenceArrayList<TreeNode> distanceIndex = node.distance<distanceIndexes.size()?distanceIndexes.get(node.distance):null;
+            if(distanceIndex==null)return;
+            distanceIndex.remove(node);
+        }
+    }
     public TreeNode findAnyNode(Predicate<TreeNode> filter){
         return nodeMap.values().stream().filter(filter).findAny().orElse(null);
     }
-    public int getMinimumScanDepth(TreeNodeType type){
+    int getMinimumScanDepth(TreeNodeType type){
         int minDepth = -1;
         for(int id : sections.keySet()){
             int sectionDepth = getScanDepth(type, id);
@@ -44,7 +61,7 @@ public class TreeTree{
         }
         return minDepth;
     }
-    public int getScanDepth(TreeNodeType type, int sectionId){
+    int getScanDepth(TreeNodeType type, int sectionId){
         if(sectionId==-1)return getMinimumScanDepth(type);
         EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> section = sections.computeIfAbsent(sectionId, (s) -> new EnumMap<>(TreeNodeType.class));
         ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.computeIfAbsent(type, (t) -> new ReferenceArrayList<>());
@@ -56,7 +73,7 @@ public class TreeTree{
         }
         return sectionDepth;
     }
-    public ReferenceArrayList<TreeNode> getNodes(TreeNodeType type, int sectionId, int depth){
+    ReferenceArrayList<TreeNode> getNodes(TreeNodeType type, int sectionId, int depth){
         ReferenceArrayList<TreeNode> allNodes = new ReferenceArrayList<>();
         for(int sid : sections.keySet()){
             if(sectionId==-1||sid==sectionId){
@@ -92,5 +109,23 @@ public class TreeTree{
         int maxId = 0;
         for(int i : sections.keySet())if(i>maxId)maxId = i;
         return maxId+1;
+    }
+    public int trim(TreeNode node){
+        if(!nodeMap.containsKey(node.pos))return 0;
+        reclassify(node, n->{
+            n.type = TreeNodeType.NONE;
+        });
+        int n = 1;
+        if(node.children!=null){
+            for(TreeNode child : node.children){
+                n+=trim(child);
+            }
+        }
+        return n;
+    }
+    public void reclassify(TreeNode node, Consumer<TreeNode> mutator){
+        unregisterNode(node);
+        mutator.accept(node);
+        registerNode(node);
     }
 }

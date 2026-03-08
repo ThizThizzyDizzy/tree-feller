@@ -10,18 +10,26 @@ import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
 import com.thizthizzydizzy.treefeller.core.detection.TreeFellerDetection;
-import com.thizthizzydizzy.treefeller.core.detection.tree.TreeTree;
+import com.thizthizzydizzy.treefeller.core.detection.TreeTree;
 import com.thizthizzydizzy.treefeller.core.player.PlayerSettings;
 import java.util.ArrayList;
 public class TreeFellerTrigger{
     public static void trigger(IPlayerConnector player, IWorldConnector world, long pos){
+        TreeTree detected = detect(player, world, pos, false);
+        if(detected==null)return;
+        //TODO criteria
+        //TODO cutting
+        //TODO breaking
+        //TODO result
+    }
+    public static TreeTree detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary){
         DebuggerContext context = TreeFellerDebugger.begin("Trigger", player, world, pos);
         PlayerSettings playerSettings = PlayerSettings.get(player);
         if(!context.checkTrue("Is Toggled On", playerSettings.isToggledOn()))
-            return;
+            return null;
 
         if(!context.checkTrue("Global Trigger", checkTrigger(context, player, world, pos, TreeFellerCore.config.global.trigger)))
-            return;
+            return null;
 
         IItemConnector item = player.getTool();
         context.info(item);
@@ -44,14 +52,12 @@ public class TreeFellerTrigger{
             if(!context.checkTrue("Tree Trigger", checkTrigger(context, player, world, pos, tree.trigger)))
                 continue;
             for(ToolConfiguration tool : validTools){
-                TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item);
+                TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item, secondary);
                 if(detected==null)continue;
-                //TODO criteria, `return` if not met
-                //TODO cutting
-                //TODO breaking
-                //TODO result
+                return detected;
             }
         }
+        return null;
     }
     private static boolean checkTrigger(DebuggerContext context, IPlayerConnector player, IWorldConnector world, long pos, TriggerConfiguration config){
         if(config==null)return true;

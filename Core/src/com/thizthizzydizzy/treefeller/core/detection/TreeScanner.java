@@ -1,4 +1,4 @@
-package com.thizthizzydizzy.treefeller.core.detection.tree;
+package com.thizthizzydizzy.treefeller.core.detection;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
@@ -11,6 +11,7 @@ import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 public class TreeScanner{
     private static final byte[] NEIGHBORS_DIRECT_X = {1, -1, 0, 0, 0, 0};
     private static final byte[] NEIGHBORS_DIRECT_Y = {0, 0, 1, -1, 0, 0};
@@ -23,7 +24,7 @@ public class TreeScanner{
     private static final byte[] NEIGHBORS_CORNER_X = {1, 1, 1, 1, -1, -1, -1, -1};
     private static final byte[] NEIGHBORS_CORNER_Y = {1, 1, -1, -1, 1, 1, -1, -1};
     private static final byte[] NEIGHBORS_CORNER_Z = {1, -1, 1, -1, 1, -1, 1, -1};
-    public static int step(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeConfiguration treeConfig, ScanMode mode, TreeNodeType type, int sectionId, Consumer<TreeNode> nodeHandler){
+    public static int step(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeConfiguration treeConfig, ScanMode mode, TreeNodeType type, int sectionId, Consumer<TreeNode> nodeHandler, Predicate<Long> posFilter){
         context.info("Step (S:"+sectionId+")", mode, type);
         DetectionConfiguration config = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.detection, treeConfig.detection);
 
@@ -36,6 +37,7 @@ public class TreeScanner{
                 blocks = treeConfig.trunk;
                 break;
             case LEAVES:
+            case EXTENDED_LEAVES:
                 blocks = treeConfig.leaves;
                 break;
             case DECORATION:
@@ -49,7 +51,7 @@ public class TreeScanner{
         if(type==TreeNodeType.DECORATION&&(config.decorations==null||config.decorations.length==0))
             return 0; // no decorations are defined, so you aren't going to find any
 
-        TreeNodeType baseType = TreeNodeType.valueOf(mode.name());
+        TreeNodeType baseType = mode.baseType;
         int currentDepth = tree.getScanDepth(baseType, sectionId);
         context.info("BASE TYPE:", baseType);
         context.info("Current Depth: "+currentDepth);
@@ -66,6 +68,9 @@ public class TreeScanner{
                 case LEAVES:
                     lastLayer = tree.getNodes(TreeNodeType.TRUNK, -1, -1);
                     break;
+                case EXTENDED_LEAVES:
+                    lastLayer = tree.getNodes(TreeNodeType.LEAVES, -1, -1);
+                    break;
                 case DECORATION:
                     lastLayer = new ReferenceArrayList<>();
                     lastLayer.addAll(tree.getNodes(TreeNodeType.TRUNK, -1, -1));
@@ -80,12 +85,12 @@ public class TreeScanner{
         context.info("Last layer: "+lastLayer.size()+" nodes");
         int count = 0;
         for(TreeNode node : lastLayer){
-            count += scanNeighbors(world, tree, node, blocks, config, mode, type, nodeHandler);
+            count += scanNeighbors(world, tree, node, blocks, config, mode, type, nodeHandler, posFilter);
         }
         context.info("Scanned "+count+" blocks");
         return count;
     }
-    private static int scanNeighbors(IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, DetectionConfiguration config, ScanMode mode, TreeNodeType type, Consumer<TreeNode> nodeHandler){
+    private static int scanNeighbors(IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, DetectionConfiguration config, ScanMode mode, TreeNodeType type, Consumer<TreeNode> nodeHandler, Predicate<Long> posFilter){
         boolean isDecorationColumn = mode==ScanMode.DECORATION&&type==node.type&&node.type==TreeNodeType.DECORATION;
         if(isDecorationColumn&&!node.decoration.column)return 0;
 
@@ -94,8 +99,8 @@ public class TreeScanner{
         int z = BlockPos.getZ(node.pos);
 
         boolean includeDirectNeighbors = true;
-        boolean includeEdgeNeighbors = mode!=ScanMode.DECORATION&&(mode!=ScanMode.LEAVES||config.diagonal_leaves);
-        boolean includeCornerNeighbors = mode!=ScanMode.DECORATION&&(mode!=ScanMode.LEAVES||config.diagonal_leaves);
+        boolean includeEdgeNeighbors = mode!=ScanMode.DECORATION&&((mode!=ScanMode.LEAVES&&mode!=ScanMode.EXTENDED_LEAVES)||config.diagonal_leaves);
+        boolean includeCornerNeighbors = mode!=ScanMode.DECORATION&&((mode!=ScanMode.LEAVES&&mode!=ScanMode.EXTENDED_LEAVES)||config.diagonal_leaves);
         int len = includeDirectNeighbors?NEIGHBORS_DIRECT_X.length:0;
         if(includeEdgeNeighbors)len += NEIGHBORS_EDGE_X.length;
         if(includeCornerNeighbors)len += NEIGHBORS_CORNER_X.length;
@@ -125,6 +130,7 @@ public class TreeScanner{
         for(int i = 0; i<neighbors.length; i++){
             long pos = neighbors[i];
             if(tree.contains(pos))continue; // already scanned that one
+            if(posFilter!=null&&!posFilter.test(pos))continue;
             if(mode==ScanMode.TRUNK){
                 if(config.block_data_rules.ignore_parallel_trunk_pillars){
                     do{
@@ -230,9 +236,15 @@ public class TreeScanner{
         return true;
     }
     public enum ScanMode{
-        ROOTS,
-        TRUNK,
-        LEAVES,
-        DECORATION
+        ROOTS(TreeNodeType.ROOTS),
+        TRUNK(TreeNodeType.TRUNK),
+        LEAVES(TreeNodeType.LEAVES),
+        EXTENDED_LEAVES(TreeNodeType.EXTENDED_LEAVES),
+        DECORATION(TreeNodeType.DECORATION);
+        public final TreeNodeType baseType;
+        private ScanMode(TreeNodeType baseType){
+            this.baseType = baseType;
+            
+        }
     }
 }

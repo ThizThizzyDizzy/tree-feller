@@ -3,7 +3,7 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
-import com.thizthizzydizzy.treefeller.core.detection.tree.TreeNode;
+import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -67,20 +67,26 @@ public class BukkitPlayerConnector implements IPlayerConnector{
                 m = Material.COAL_BLOCK;
                 break;
             case TRUNK:
-                m = Material.GOLD_BLOCK;
-                if(node.sectionId>0)m = Material.GOLD_ORE;
+                m = node.secondary?Material.REDSTONE_BLOCK:Material.GOLD_BLOCK;
+                if(!node.secondary&&node.sectionId>0)m = Material.GOLD_ORE;
                 break;
             case LEAVES:
-                m = Material.IRON_BLOCK;
-                if(node.sectionId>0)m = Material.IRON_ORE;
+                m = node.secondary?Material.STONE:Material.IRON_BLOCK;
+                if(node.extendedDistance>0)m = Material.EMERALD_BLOCK;
+                if(!node.secondary&&node.sectionId>0){
+                    m = Material.IRON_ORE;
+                    if(node.extendedDistance>0)m = Material.EMERALD_ORE;
+                }
+                break;
+            case EXTENDED_LEAVES:
+                m = Material.OBSIDIAN;
                 break;
             case DECORATION:
                 m = Material.DIAMOND_BLOCK;
-                if(node.sectionId>0)m = Material.DIAMOND_ORE;
+                if(!node.secondary&&node.sectionId>0)m = Material.DIAMOND_ORE;
                 break;
             case NONE:
-                m = Material.STONE;
-                break;
+                return;
         }
         player.sendBlockChange(new Location(player.getWorld(), BlockPos.getX(node.pos), BlockPos.getY(node.pos), BlockPos.getZ(node.pos)), m, (byte)0);
     }

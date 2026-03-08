@@ -1,6 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.connector.player;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
-import com.thizthizzydizzy.treefeller.core.detection.tree.TreeNode;
+import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 public interface IPlayerConnector{
     public boolean hasPermission(String permission);
     public float getFoodLevel();

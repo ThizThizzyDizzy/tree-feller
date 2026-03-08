@@ -24,6 +24,10 @@ public class DetectionConfiguration{
     @ConfigComment("Special detection rules for block data / metadata")
     @ConfigGlobalDefaultNewInstance
     public BlockDataRules block_data_rules;
+    
+    @ConfigComment("Perform secondary tree scans to verify leaf/root ownership and improve edge case handling. (In some cases, this may significantly increase the performance cost for a comparitively small benefit)")
+    @ConfigGlobalDefaultBoolean(true)
+    public Boolean secondary_tree_verification;
 
     @ConfigComment("Decorations that should be considered part of a tree")
     public DecorationConfiguration[] decorations;

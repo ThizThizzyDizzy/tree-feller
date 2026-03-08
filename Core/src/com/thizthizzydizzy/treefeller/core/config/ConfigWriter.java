@@ -41,7 +41,7 @@ public class ConfigWriter{
                 writeIndent(sb, indent);
                 if(value==null)sb.append("#");
                 sb.append(field.getName());
-                sb.append(isNestedObject(value)?" ":" = ");
+                sb.append(" = ");
                 if(value!=null)writeValue(sb, value, indent);
                 sb.append("\n");
                 if(comment!=null)sb.append("\n");
@@ -52,7 +52,6 @@ public class ConfigWriter{
     }
     private static void writeValue(StringBuilder sb, Object value, int indent){
         if(value!=null&&ISpecialConfigObject.class.isAssignableFrom(value.getClass())){
-            sb.append(" = ");
             value = ((ISpecialConfigObject)value).asSimplified();
         }
         if(value==null){
@@ -141,16 +140,5 @@ public class ConfigWriter{
             .replace("\n", "\\n")
             .replace("\r", "\\r")
             .replace("\t", "\\t");
-    }
-    private static boolean isNestedObject(Object value){
-        if(value==null)return false;
-        if(value instanceof String)return false;
-        if(value instanceof Number)return false;
-        if(value instanceof Boolean)return false;
-        if(value.getClass().isEnum())return false;
-        if(value.getClass().isArray())return false;
-        if(value instanceof List)return false;
-        if(value instanceof Map)return true;
-        return true;
     }
 }
