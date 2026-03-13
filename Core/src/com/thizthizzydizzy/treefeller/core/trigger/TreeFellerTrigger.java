@@ -7,22 +7,26 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.criteria.TreeFellerCriteria;
 import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
+import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeFellerDetection;
 import com.thizthizzydizzy.treefeller.core.detection.TreeTree;
 import com.thizthizzydizzy.treefeller.core.player.PlayerSettings;
 import java.util.ArrayList;
 public class TreeFellerTrigger{
     public static void trigger(IPlayerConnector player, IWorldConnector world, long pos){
-        TreeTree detected = detect(player, world, pos, false);
+        DetectionResult detected = detect(player, world, pos, false);
         if(detected==null)return;
-        //TODO criteria
+        if(!TreeFellerCriteria.check(world, detected.detected, TreeFellerCore.config.global.criteria))return;
+        if(!TreeFellerCriteria.check(world, detected.detected, detected.tree.criteria))return;
+        if(!TreeFellerCriteria.check(world, detected.detected, detected.tool.criteria))return;
         //TODO cutting
         //TODO breaking
         //TODO result
     }
-    public static TreeTree detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary){
+    public static DetectionResult detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary){
         DebuggerContext context = TreeFellerDebugger.begin("Trigger", player, world, pos);
         PlayerSettings playerSettings = PlayerSettings.get(player);
         if(!context.checkTrue("Is Toggled On", playerSettings.isToggledOn()))
@@ -54,7 +58,7 @@ public class TreeFellerTrigger{
             for(ToolConfiguration tool : validTools){
                 TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item, secondary);
                 if(detected==null)continue;
-                return detected;
+                return new DetectionResult(detected, tree, tool);
             }
         }
         return null;

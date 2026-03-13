@@ -38,7 +38,8 @@ public class TreeTree{
         }
     }
     private void unregisterNode(TreeNode node){
-        if(!nodeMap.containsKey(node.pos))throw new IllegalStateException("Tried to unregister a node that is not registered! "+BlockPos.getX(node.pos)+" "+BlockPos.getY(node.pos)+" "+BlockPos.getZ(node.pos));
+        if(!nodeMap.containsKey(node.pos))
+            throw new IllegalStateException("Tried to unregister a node that is not registered! "+BlockPos.getX(node.pos)+" "+BlockPos.getY(node.pos)+" "+BlockPos.getZ(node.pos));
         nodeMap.remove(node.pos);
         if(node.type!=null){
             EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> typeMap = sections.get(node.sectionId);
@@ -73,7 +74,7 @@ public class TreeTree{
         }
         return sectionDepth;
     }
-    ReferenceArrayList<TreeNode> getNodes(TreeNodeType type, int sectionId, int depth){
+    public ReferenceArrayList<TreeNode> getNodes(TreeNodeType type, int sectionId, int depth){
         ReferenceArrayList<TreeNode> allNodes = new ReferenceArrayList<>();
         for(int sid : sections.keySet()){
             if(sectionId==-1||sid==sectionId){
@@ -112,13 +113,13 @@ public class TreeTree{
     }
     public int trim(TreeNode node){
         if(!nodeMap.containsKey(node.pos))return 0;
-        reclassify(node, n->{
+        reclassify(node, n -> {
             n.type = TreeNodeType.NONE;
         });
         int n = 1;
         if(node.children!=null){
             for(TreeNode child : node.children){
-                n+=trim(child);
+                n += trim(child);
             }
         }
         return n;
@@ -127,5 +128,16 @@ public class TreeTree{
         unregisterNode(node);
         mutator.accept(node);
         registerNode(node);
+    }
+    public int count(TreeNodeType type){
+        int count = 0;
+        for(int sid : sections.keySet()){
+            EnumMap<TreeNodeType, ReferenceArrayList<ReferenceArrayList<TreeNode>>> section = sections.get(sid);
+            ReferenceArrayList<ReferenceArrayList<TreeNode>> depthMap = section.computeIfAbsent(type, (t) -> new ReferenceArrayList<>());
+            for(int d = 0; d<depthMap.size(); d++){
+                count += depthMap.get(d).size();
+            }
+        }
+        return count;
     }
 }

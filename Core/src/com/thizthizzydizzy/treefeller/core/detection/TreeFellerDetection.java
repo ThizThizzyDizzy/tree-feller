@@ -98,9 +98,9 @@ public class TreeFellerDetection{
                             if(detected.contains(node.pos)||additionalTrees.stream().anyMatch(t -> t.contains(node.pos)))
                                 continue;
                             context.info("Begin secondary tree scan", node.pos);
-                            TreeTree additionalTree = TreeFellerTrigger.detect(player, world, node.pos, true);
-                            if(additionalTree!=null)
-                                additionalTrees.add(additionalTree);
+                            DetectionResult additional = TreeFellerTrigger.detect(player, world, node.pos, true);
+                            if(additional!=null)
+                                additionalTrees.add(additional.detected);
                         }
                     }
 
@@ -169,9 +169,9 @@ public class TreeFellerDetection{
         int stepCount;
         while((stepCount = TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.TRUNK, TreeNodeType.TRUNK, sectionId, null, null))>0){
             total += stepCount;
-            if(total>criteria.max_trunk){
+            if(total>criteria.required_trunk.max){
                 // short-circuit with the tree size limit to prevent endless scanning
-                context.fail("Scan short-circuit on tree size limit! ("+total+">"+criteria.max_trunk);
+                context.fail("Scan short-circuit on tree size limit! ("+total+">"+criteria.required_trunk.max);
                 return -1;
             }
         }

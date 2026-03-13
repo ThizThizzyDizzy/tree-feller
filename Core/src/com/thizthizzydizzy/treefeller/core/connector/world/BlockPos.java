@@ -23,4 +23,10 @@ public class BlockPos{
     public static int getZ(long pos){
         return (int)((pos<<(64-Z_BITS))>>(64-Z_BITS));
     }
+    public static long getRelative(long pos, int dx, int dy, int dz){
+        int x = getX(pos);
+        int y = getY(pos);
+        int z = getZ(pos);
+        return toPos(x+dx, y+dy, z+dz);
+    }
 }
