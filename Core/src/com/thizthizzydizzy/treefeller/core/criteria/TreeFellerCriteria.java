@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.criteria;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CriteriaConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
@@ -6,6 +7,7 @@ import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
+import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNodeType;
 import com.thizthizzydizzy.treefeller.core.detection.TreeTree;
@@ -236,6 +238,12 @@ public class TreeFellerCriteria{
             float value = vertical/(float)horizontal;
             if(!context.checkTrue("Trunk Vertical Ratio", config.trunk_vertical_ratio.matches(value)));
         }
+        return true;
+    }
+    public static boolean check(IWorldConnector world, DetectionResult detected){
+        if(!check(world, detected.detected, TreeFellerCore.config.global.criteria))return false;
+        if(!check(world, detected.detected, detected.tree.criteria))return false;
+        if(!check(world, detected.detected, detected.tool.criteria))return false;
         return true;
     }
 }

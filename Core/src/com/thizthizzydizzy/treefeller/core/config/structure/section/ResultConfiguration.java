@@ -17,30 +17,6 @@ public class ResultConfiguration{
     @ConfigComment("Blocks that can be overridden if a falling block lands on them")
     public IBlockDefinition[] overrideable_blocks;
     
-    @ConfigComment("Reduce damage taken for tools with Unbreaking")
-    @ConfigGlobalDefaultBoolean(true)
-    public Boolean respect_unbreaking;
-    
-    @ConfigComment("Deal no damage to unbreakable tools")
-    @ConfigGlobalDefaultBoolean(true)
-    public Boolean respect_unbreakable;
-    
-    @ConfigComment("Damage dealt to the tool per block in the tree trunk")
-    @ConfigGlobalDefaultFloat(1)
-    public Float trunk_damage_mult;
-    
-    @ConfigComment("Damage dealt to the tool per block in the tree leaves")
-    @ConfigGlobalDefaultFloat(0)
-    public Float leaves_damage_mult;
-    
-    @ConfigComment("Damage dealt to the tool per block in the tree decorations")
-    @ConfigGlobalDefaultFloat(0)
-    public Float decorations_damage_mult;
-    
-    @ConfigComment("Consume stacked tools one at a time. (The entire stack will be treated as one tool)\nWARNING: Using stacked tools is not recommended!")
-    @ConfigGlobalDefaultBoolean(false)
-    public Boolean stacked_tools;
-    
     @ConfigComment("Apply the tool's Fortune to drops from the trunk")
     @ConfigGlobalDefaultBoolean(true)
     public Boolean trunk_fortune;
@@ -50,7 +26,7 @@ public class ResultConfiguration{
     public Boolean leaves_fortune;
     
     @ConfigComment("Apply the tool's Fortune to drops from the decorations")
-    @ConfigGlobalDefaultBoolean(false)
+    @ConfigGlobalDefaultBoolean(true)
     public Boolean decoration_fortune;
     
     @ConfigComment("Apply the tool's Silk Touch to drops from the trunk")
@@ -62,7 +38,7 @@ public class ResultConfiguration{
     public Boolean leaves_silk_touch;
     
     @ConfigComment("Apply the tool's Silk Touch to drops from the decorations")
-    @ConfigGlobalDefaultBoolean(false)
+    @ConfigGlobalDefaultBoolean(true)
     public Boolean decoration_silk_touch;
     
     @ConfigComment("Rotate falling pillar blocks (axis=x/y/z) as they fall")

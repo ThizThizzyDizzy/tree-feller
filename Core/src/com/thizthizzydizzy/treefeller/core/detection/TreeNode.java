@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.core.detection;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 public class TreeNode{
     public TreeNodeType type = TreeNodeType.NONE;
     public final long pos;
@@ -33,5 +34,11 @@ public class TreeNode{
     }
     public void removeChild(TreeNode child){
         if(children!=null)children.remove(child);
+    }
+    void walk(Predicate<TreeNode> visit){
+        if(!visit.test(this))return;
+        for(TreeNode child : children){
+            child.walk(visit);
+        }
     }
 }

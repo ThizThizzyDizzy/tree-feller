@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.core.config.structure.section;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
+import com.thizthizzydizzy.treefeller.core.config.structure.general.IntegerRange;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
 public class TriggerConfiguration{
     // PLAYER REQUIREMENTS
@@ -48,10 +49,10 @@ public class TriggerConfiguration{
     // WORLD REQUIREMENTS
     
     @ConfigComment("The time of day when tree felling is allowed, in ticks (0-24000)")
-    public Range day_time;
+    public IntegerRange day_time;
 
     @ConfigComment("The moon phases where tree felling is allowed, (0-7, where 0 is a full moon, and 7 is a waxing gibbous)")
-    public Range moon_phase;
+    public IntegerRange moon_phase;
 
     @ConfigComment("Dimensions where tree felling is allowed")
     public DualList<String> dimensions;

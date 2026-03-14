@@ -140,4 +140,7 @@ public class TreeTree{
         }
         return count;
     }
+    public void walk(Predicate<TreeNode> visit){
+        root.walk(visit);
+    }
 }

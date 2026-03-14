@@ -3,6 +3,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinit
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItemDefinition;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 public class BukkitItemConnector implements IItemConnector{
     private final ItemStack stack;
@@ -22,5 +23,25 @@ public class BukkitItemConnector implements IItemConnector{
     @Override
     public Object getItemId(){
         return stack.getType().toString();
+    }
+    @Override
+    public int getMaxDurability(){
+        return stack.getType().getMaxDurability();
+    }
+    @Override
+    public int getCurrentDurability(){
+        return stack.getType().getMaxDurability()-stack.getDurability();
+    }
+    @Override
+    public int getCount(){
+        return stack.getAmount();
+    }
+    @Override
+    public int getUnbreakingLevel(){
+        return stack.getEnchantmentLevel(Enchantment.DURABILITY);
+    }
+    @Override
+    public boolean isUnbreakable(){
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

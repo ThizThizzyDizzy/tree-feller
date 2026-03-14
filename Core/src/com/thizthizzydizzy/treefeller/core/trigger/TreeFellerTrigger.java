@@ -8,6 +8,7 @@ import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.criteria.TreeFellerCriteria;
+import com.thizthizzydizzy.treefeller.core.cutting.TreeFellerCutting;
 import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
 import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
@@ -19,12 +20,8 @@ public class TreeFellerTrigger{
     public static void trigger(IPlayerConnector player, IWorldConnector world, long pos){
         DetectionResult detected = detect(player, world, pos, false);
         if(detected==null)return;
-        if(!TreeFellerCriteria.check(world, detected.detected, TreeFellerCore.config.global.criteria))return;
-        if(!TreeFellerCriteria.check(world, detected.detected, detected.tree.criteria))return;
-        if(!TreeFellerCriteria.check(world, detected.detected, detected.tool.criteria))return;
-        //TODO cutting
-        //TODO breaking
-        //TODO result
+        if(!TreeFellerCriteria.check(world, detected))return;
+        TreeFellerCutting.cut(world, player, detected);
     }
     public static DetectionResult detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary){
         DebuggerContext context = TreeFellerDebugger.begin("Trigger", player, world, pos);

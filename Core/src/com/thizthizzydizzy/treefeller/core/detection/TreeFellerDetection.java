@@ -3,7 +3,6 @@ import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
-import com.thizthizzydizzy.treefeller.core.config.structure.section.CriteriaConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
@@ -17,10 +16,13 @@ public class TreeFellerDetection{
     public static TreeTree detect(IPlayerConnector player, IWorldConnector world, TreeConfiguration tree, ToolConfiguration tool, long pos, IItemConnector item, boolean secondary){
         DebuggerContext context = TreeFellerDebugger.begin("Detect", player, world, tree, tool, pos, item);
         TreeTree detected = new TreeTree(pos, secondary);
-        DetectionConfiguration detection = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.detection, tree.detection);
+        DetectionConfiguration detection = TreeFellerConfiguration.getCombinedDetectionConfiguration(tree);
 
         // only use for short-circuiting. Full criteria checking is the job of TreeFellerCriteria
-        CriteriaConfiguration criteria = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.criteria, tree.criteria);
+        int trunkScanLimit = 0;
+        if(TreeFellerCore.config.global.criteria.required_trunk!=null&&TreeFellerCore.config.global.criteria.required_trunk.max!=null)trunkScanLimit = Math.max(trunkScanLimit, TreeFellerCore.config.global.criteria.required_trunk.max);
+        if(tree.criteria!=null&&tree.criteria.required_trunk!=null&&tree.criteria.required_trunk.max!=null)trunkScanLimit = Math.max(trunkScanLimit, tree.criteria.required_trunk.max);
+        if(tool.criteria!=null&&tool.criteria.required_trunk!=null&&tool.criteria.required_trunk.max!=null)trunkScanLimit = Math.max(trunkScanLimit, tool.criteria.required_trunk.max);
 
         context.info("Root Distance: "+detection.root_distance);
         // Find trunk (roots scan)
@@ -37,7 +39,7 @@ public class TreeFellerDetection{
             }
         }
 
-        if(scanTrunk(context, world, detected, tree, 0, criteria)==-1)
+        if(scanTrunk(context, world, detected, tree, 0, trunkScanLimit)==-1)
             return null;
 
         context.info("Leaf Range: "+detection.leaf_detect_range);
@@ -61,7 +63,7 @@ public class TreeFellerDetection{
                         node.sectionId = detected.nextSectionId();
                         detected.addNode(node);
                         context.info("Sanning new trunk section: "+node.sectionId);
-                        scanTrunk(context, world, detected, tree, node.sectionId, criteria);
+                        scanTrunk(context, world, detected, tree, node.sectionId, trunkScanLimit);
                         i = -1; // restart leaf scan to detect this section's leaves
                     }
                 }
@@ -75,7 +77,7 @@ public class TreeFellerDetection{
                 // find additional possibly conflicting trees
                 int extendedLeafScanRange = 0;
                 for(TreeConfiguration tc : TreeFellerCore.config.trees){
-                    DetectionConfiguration det = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.detection, tc.detection);
+                    DetectionConfiguration det = TreeFellerConfiguration.getCombinedDetectionConfiguration(tc);
                     extendedLeafScanRange = Math.max(extendedLeafScanRange, det.leaf_detect_range);
                 }
 
@@ -164,14 +166,14 @@ public class TreeFellerDetection{
         context.info(detected);
         return detected;
     }
-    private static int scanTrunk(DebuggerContext context, IWorldConnector world, TreeTree detected, TreeConfiguration tree, int sectionId, CriteriaConfiguration criteria){
+    private static int scanTrunk(DebuggerContext context, IWorldConnector world, TreeTree detected, TreeConfiguration tree, int sectionId, int trunkScanLimit){
         int total = 0;
         int stepCount;
         while((stepCount = TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.TRUNK, TreeNodeType.TRUNK, sectionId, null, null))>0){
             total += stepCount;
-            if(total>criteria.required_trunk.max){
+            if(total>trunkScanLimit){
                 // short-circuit with the tree size limit to prevent endless scanning
-                context.fail("Scan short-circuit on tree size limit! ("+total+">"+criteria.required_trunk.max);
+                context.fail("Scan short-circuit on tree size limit! ("+total+">"+trunkScanLimit);
                 return -1;
             }
         }

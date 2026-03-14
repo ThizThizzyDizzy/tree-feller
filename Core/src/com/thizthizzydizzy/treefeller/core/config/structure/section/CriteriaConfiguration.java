@@ -4,15 +4,16 @@ import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefa
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultInteger;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultValue;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.BlockFilter;
+import com.thizthizzydizzy.treefeller.core.config.structure.general.IntegerRange;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
 public class CriteriaConfiguration{
     @ConfigComment("The number of total trunk blocks required")
     @ConfigGlobalDefaultValue("4-256")
-    public Range required_trunk;
+    public IntegerRange required_trunk;
     
     @ConfigComment("The number of total leaves required")
     @ConfigGlobalDefaultValue("10+")
-    public Range required_leaves;
+    public IntegerRange required_leaves;
 
     @ConfigComment("The maximum distance from the base of the trunk that a tree may be cut")
     @ConfigGlobalDefaultInteger(5)

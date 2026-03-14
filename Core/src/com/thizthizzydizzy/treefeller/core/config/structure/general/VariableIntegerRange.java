@@ -1,6 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.general;
-public class VariableRange{
-    public Range value;
+public class VariableIntegerRange{
+    public IntegerRange value;
     public Range percent;
     
     public boolean matches(float min, float max, float val){

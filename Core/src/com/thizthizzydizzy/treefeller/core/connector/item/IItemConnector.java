@@ -3,4 +3,9 @@ import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinit
 public interface IItemConnector{
     public boolean matches(IItemDefinition definition);
     public Object getItemId();
+    public int getMaxDurability();
+    public int getCurrentDurability();
+    public int getCount();
+    public int getUnbreakingLevel();
+    public boolean isUnbreakable();
 }

@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller.core.detection;
-import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
@@ -26,7 +25,7 @@ public class TreeScanner{
     private static final byte[] NEIGHBORS_CORNER_Z = {1, -1, 1, -1, 1, -1, 1, -1};
     public static int step(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeConfiguration treeConfig, ScanMode mode, TreeNodeType type, int sectionId, Consumer<TreeNode> nodeHandler, Predicate<Long> posFilter){
         context.info("Step (S:"+sectionId+")", mode, type);
-        DetectionConfiguration config = TreeFellerConfiguration.overlay(TreeFellerCore.config.global.detection, treeConfig.detection);
+        DetectionConfiguration config = TreeFellerConfiguration.getCombinedDetectionConfiguration(treeConfig);
 
         IBlockDefinition[] blocks;
         switch(type){
