@@ -236,7 +236,6 @@ public class TreeFellerCriteria{
             float value = vertical/(float)horizontal;
             if(!context.checkTrue("Trunk Vertical Ratio", config.trunk_vertical_ratio.matches(value)));
         }
-
-        //TODO tool criteria
+        return true;
     }
 }

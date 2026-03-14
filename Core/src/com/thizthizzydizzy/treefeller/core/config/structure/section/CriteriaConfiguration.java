@@ -6,9 +6,6 @@ import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefa
 import com.thizthizzydizzy.treefeller.core.config.structure.general.BlockFilter;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.Range;
 public class CriteriaConfiguration{
-    
-    // TREE CRITERIA
-    
     @ConfigComment("The number of total trunk blocks required")
     @ConfigGlobalDefaultValue("4-256")
     public Range required_trunk;
@@ -44,15 +41,4 @@ public class CriteriaConfiguration{
     @ConfigComment("This range constrains the ratio of vertical logs to horizontal logs in a tree. (This includes all pillar-type blocks, i.e. axis=x/y/z)")
     @ConfigGlobalDefaultValue("0.5+")
     public Range trunk_vertical_ratio;
-    
-    // TOOL CRITERIA
-    
-    @ConfigComment("Allow a tool to fully cut down a tree, even with insufficient durability")
-    @ConfigGlobalDefaultBoolean(true)
-    public Boolean allow_partial_tool;
-    
-    @ConfigComment("Prevent felling a tree if doing so would break the tool")
-    @ConfigGlobalDefaultBoolean(false)
-    public Boolean prevent_breakage;
-
 }
