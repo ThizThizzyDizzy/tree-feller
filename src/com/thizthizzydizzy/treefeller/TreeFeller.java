@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
@@ -48,6 +49,8 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.permissions.Permission;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -1322,6 +1325,34 @@ public class TreeFeller extends JavaPlugin{
     public void dropExpOrb(World world, Location location, int xp){
         ExperienceOrb orb = (ExperienceOrb) world.spawnEntity(location, EntityType.EXPERIENCE_ORB);
         orb.setExperience(orb.getExperience()+xp);
+    }
+    public void giveExpMending(Player player, int xp){
+        PlayerInventory inventory = player.getInventory();
+        ItemStack[] equipment = new ItemStack[]{inventory.getItemInMainHand(), inventory.getItemInOffHand(), inventory.getBoots(), inventory.getLeggings(), inventory.getChestplate(), inventory.getHelmet()};
+        HashMap<ItemStack, Integer> repaired = new HashMap<>();
+        Random random = new Random();
+        while(xp>0){
+            ArrayList<ItemStack> mendables = new ArrayList<>(6);
+            for(ItemStack stack : equipment){
+                if(stack==null||stack.getType()==Material.AIR||!stack.containsEnchantment(Enchantment.MENDING))
+                    continue;
+                ItemMeta meta = stack.getItemMeta();
+                if(!(meta instanceof Damageable))continue;
+                if(((Damageable)meta).getDamage()-repaired.getOrDefault(stack, 0)>0)
+                    mendables.add(stack);
+            }
+            if(mendables.isEmpty())break;
+            ItemStack stack = mendables.get(random.nextInt(mendables.size()));
+            int repair = Math.min(xp*2, ((Damageable)stack.getItemMeta()).getDamage()-repaired.getOrDefault(stack, 0));
+            repaired.put(stack, repaired.getOrDefault(stack, 0)+repair);
+            xp -= repair/2;
+        }
+        for(Map.Entry<ItemStack, Integer> entry : repaired.entrySet()){
+            Damageable meta = (Damageable)entry.getKey().getItemMeta();
+            meta.setDamage(meta.getDamage()-entry.getValue());
+            entry.getKey().setItemMeta((ItemMeta)meta);
+        }
+        if(xp>0)player.giveExp(xp);
     }
     public static Tree detect(Block clickedBlock, Player player){
         ArrayList<Material> allLogs = new ArrayList<>();

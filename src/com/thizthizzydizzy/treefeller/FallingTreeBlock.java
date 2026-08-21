@@ -73,7 +73,7 @@ public class FallingTreeBlock{
                     }
                     for(ItemStack stack : player.getInventory().addItem(drop.stack).values())plugin.dropItem(detectedTree, player, event.getBlock().getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
                 }
-                player.giveExp(xp[0]);
+                plugin.giveExpMending(player, xp[0]);
             }
             plugin.fallingBlocks.remove(this);
             if(event.isCancelled())return;
