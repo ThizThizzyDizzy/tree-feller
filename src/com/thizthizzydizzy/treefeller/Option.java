@@ -2584,6 +2584,10 @@ public abstract class Option<E>{
             return "global-effects";
         }
         @Override
+        public String getSaveName(){
+            return "effects";
+        }
+        @Override
         public String getDesc(boolean ingame){
             return "Global effects are applied every time a tree is felled, regardless of tree type or tool\n" +
                 "use ALL for all effects"+(ingame?"":("\n" +
@@ -4765,6 +4769,12 @@ public abstract class Option<E>{
      */
     public String getGlobalName(){
         return name.replace(" ", "-").toLowerCase();
+    }
+    /**
+     * @return the name used when saving this option for a specific tool or tree
+     */
+    public String getSaveName(){
+        return getGlobalName();
     }
     /**
      * @return the name inthisformat

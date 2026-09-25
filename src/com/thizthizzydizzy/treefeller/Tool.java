@@ -19,7 +19,7 @@ public class Tool{
     public String writeToConfig(){
         String str = "{type: "+material.name();
         for(Option o : Option.options){
-            if(o.getValue(this)!=null)str+=", "+o.getGlobalName()+": "+o.writeToConfig(this);
+            if(o.getValue(this)!=null)str+=", "+o.getSaveName()+": "+o.writeToConfig(this);
         }
         return str+"}";
     }
