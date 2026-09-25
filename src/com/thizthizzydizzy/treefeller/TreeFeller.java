@@ -970,6 +970,16 @@ public class TreeFeller extends JavaPlugin{
         TreeFellerCompat.reload();
     }
     private void breakBlock(DetectedTree detectedTree, boolean dropItems, Tree tree, Tool tool, ItemStack axe, Block block, Block origin, int lowest, Player player, long seed, boolean isLeaves){
+        if(Option.SEND_BLOCK_BREAK_EVENTS.get(tool, tree)&&player!=null&&block!=origin){
+            BlockBreakEvent event = new BlockBreakEvent(block, player);
+            sentBlockBreakEvents.add(event);
+            try{
+                Bukkit.getPluginManager().callEvent(event);
+            }finally{
+                sentBlockBreakEvents.remove(event);
+            }
+            if(event.isCancelled())return;
+        }
         ArrayList<Material> overridables = new ArrayList<>(Option.OVERRIDABLES.get(tool, tree));
         ArrayList<Effect> effects = new ArrayList<>();
         Effect.EffectLocation type = Effect.EffectLocation.DECORATION;//TODO use a special enum for this?
@@ -1075,6 +1085,7 @@ public class TreeFeller extends JavaPlugin{
         }
     }
     public boolean cascading = false;
+    public final HashSet<BlockBreakEvent> sentBlockBreakEvents = new HashSet<>();
     public ArrayList<FancyItemStack> tryCascade(Block block, Player player, ItemStack axe, boolean dropItems){
         cascading = true;
         ArrayList<FancyItemStack> ret = fellTree(block, player, axe, dropItems);

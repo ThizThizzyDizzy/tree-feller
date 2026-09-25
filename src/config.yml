@@ -1,5 +1,5 @@
 # Tree Feller by ThizThizzyDizzy
-# Version 1.31.0
+# Version 1.32.0
 
 
 # If set to false, the tree feller will not list all its settings in the console on startup
@@ -438,6 +438,12 @@ parallel-cascade-limit: 1
 
 # How many cascade checks can happen in the same tick? (Much less performance impact, but will help performance when cutting down big trees)
 cascade-check-limit: 64
+
+# If enabled, a BlockBreakEvent will be fired for every block broken by TreeFeller.
+# This may help with compatibility with unsupported plugins in some cases.
+# If enabled, it is recommended to also disable plugin compatibilities to avoid duplicated behavior.
+# WARNING: THIS MAY CAUSE BUGS OR UNEXPECTED BEHAVIOR.
+send-block-break-events: false
 
 # EXP will be provided to these professions when a tree is felled
 # EXP is provided per-block (a value of 1 means 1 EXP per block of trunk)

@@ -4725,6 +4725,16 @@ public abstract class Option<E>{
             return indicies.toString();
         }
     };//TODO make this a HashSet
+    public static OptionBoolean SEND_BLOCK_BREAK_EVENTS = new OptionBoolean("Send Block Break Events", true, false, false, false){
+        @Override
+        public String getDesc(boolean ingame){
+            return "If enabled, a BlockBreakEvent will be fired for every block broken by TreeFeller.\nThis may help with compatibility with unsupported plugins in some cases.\nIf enabled, it is recommended to also disable plugin compatibilities to avoid duplicated behavior.\nWARNING: THIS MAY CAUSE BUGS OR UNEXPECTED BEHAVIOR.";
+        }
+        @Override
+        public ItemBuilder getConfigurationDisplayItem(Boolean value){
+            return new ItemBuilder(Material.COMMAND_BLOCK);
+        }
+    };
     protected final String name;
     public final boolean global;
     public final boolean tool;
