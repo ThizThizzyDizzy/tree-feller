@@ -19,6 +19,10 @@ public class DebuggerContext{
         // collect all logs before printing, to allow the player (or log context) to not be the very first log item
         ArrayList<String> logs = new ArrayList();
         for(Object object : objects){
+            if(object==null){
+                logs.add("null");
+                continue;
+            }
             if(object==TreeFellerDebugger.ADMIN_BROADCAST){
                 players.addAll(TreeFellerCore.connector.getAdminPlayers());
                 logs.add("== DEBUGGER BROADCAST TO ALL ONLINE ADMINS ==");
@@ -63,15 +67,15 @@ public class DebuggerContext{
 
             if(object instanceof ToolConfiguration){
                 ToolConfiguration tool = (ToolConfiguration)object;
-                logs.add("Tool: "+Objects.toString(tool.item.asSimplified()));
+                logs.add("Tool: "+Objects.toString(tool.item==null?null:tool.item.asSimplified()));
                 continue;
             }
             if(object instanceof TreeConfiguration){
                 TreeConfiguration tree = (TreeConfiguration)object;
-                String[] trunks = new String[tree.trunk.length];
+                String[] trunks = new String[tree.trunk==null?0:tree.trunk.length];
                 for(int i = 0; i<trunks.length; i++)
                     trunks[i] = Objects.toString(tree.trunk[i].asSimplified());
-                String[] leaves = new String[tree.leaves.length];
+                String[] leaves = new String[tree.leaves==null?0:tree.leaves.length];
                 for(int i = 0; i<leaves.length; i++)
                     leaves[i] = Objects.toString(tree.leaves[i].asSimplified());
                 logs.add("Tree: "+String.join(", ", trunks)+" | "+String.join(", ", leaves));

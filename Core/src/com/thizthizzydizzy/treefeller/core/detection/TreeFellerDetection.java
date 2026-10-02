@@ -3,6 +3,7 @@ import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.CriteriaConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
@@ -19,10 +20,13 @@ public class TreeFellerDetection{
         DetectionConfiguration detection = TreeFellerConfiguration.getCombinedDetectionConfiguration(tree);
 
         // only use for short-circuiting. Full criteria checking is the job of TreeFellerCriteria
-        int trunkScanLimit = 0;
-        if(TreeFellerCore.config.global.criteria.required_trunk!=null&&TreeFellerCore.config.global.criteria.required_trunk.max!=null)trunkScanLimit = Math.max(trunkScanLimit, TreeFellerCore.config.global.criteria.required_trunk.max);
-        if(tree.criteria!=null&&tree.criteria.required_trunk!=null&&tree.criteria.required_trunk.max!=null)trunkScanLimit = Math.max(trunkScanLimit, tree.criteria.required_trunk.max);
-        if(tool.criteria!=null&&tool.criteria.required_trunk!=null&&tool.criteria.required_trunk.max!=null)trunkScanLimit = Math.max(trunkScanLimit, tool.criteria.required_trunk.max);
+        int trunkScanLimit = Integer.MAX_VALUE;
+        for(CriteriaConfiguration criteria :
+                new CriteriaConfiguration[]{TreeFellerCore.config.global.criteria, tree.criteria, tool.criteria}){
+            if(criteria!=null&&criteria.required_trunk!=null&&criteria.required_trunk.max!=null
+                    &&(criteria.required_trunk.min==null||criteria.required_trunk.min<=criteria.required_trunk.max))
+                trunkScanLimit = Math.min(trunkScanLimit, criteria.required_trunk.max);
+        }
 
         context.info("Root Distance: "+detection.root_distance);
         // Find trunk (roots scan)
@@ -39,6 +43,7 @@ public class TreeFellerDetection{
             }
         }
 
+        if(detected.findAnyNode(n -> n.type==TreeNodeType.TRUNK)==null)return null;
         if(scanTrunk(context, world, detected, tree, 0, trunkScanLimit)==-1)
             return null;
 
@@ -62,8 +67,8 @@ public class TreeFellerDetection{
                         if(detected.contains(node.pos))continue; // got nabbed by another section
                         node.sectionId = detected.nextSectionId();
                         detected.addNode(node);
-                        context.info("Sanning new trunk section: "+node.sectionId);
-                        scanTrunk(context, world, detected, tree, node.sectionId, trunkScanLimit);
+                        context.info("Scanning new trunk section: "+node.sectionId);
+                        if(scanTrunk(context, world, detected, tree, node.sectionId, trunkScanLimit)==-1)return null;
                         i = -1; // restart leaf scan to detect this section's leaves
                     }
                 }
@@ -171,12 +176,12 @@ public class TreeFellerDetection{
         int stepCount;
         while((stepCount = TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.TRUNK, TreeNodeType.TRUNK, sectionId, null, null))>0){
             total += stepCount;
-            if(total>trunkScanLimit){
+            if(detected.count(TreeNodeType.TRUNK)>trunkScanLimit){
                 // short-circuit with the tree size limit to prevent endless scanning
-                context.fail("Scan short-circuit on tree size limit! ("+total+">"+trunkScanLimit);
+                context.fail("Scan short-circuit on tree size limit! ("+detected.count(TreeNodeType.TRUNK)+">"+trunkScanLimit);
                 return -1;
             }
         }
-        return total;
+        return detected.count(TreeNodeType.TRUNK)>trunkScanLimit?-1:total;
     }
 }

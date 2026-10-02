@@ -18,9 +18,15 @@ public class PlayerSettings{
     public boolean isToggledOn(){
         return toggleState;
     }
+    public void setToggledOn(boolean enabled){
+        toggleState = enabled;
+    }
+    public void startCooldown(TriggerConfiguration config){
+        if(config!=null&&config.cooldown!=null&&config.cooldown>0)cooldowns.put(config, System.currentTimeMillis());
+    }
     public boolean isOnCooldown(TriggerConfiguration config){
         Long cooldown = cooldowns.get(config);
         if(cooldown==null)return false;
-        return System.currentTimeMillis()-cooldown>config.cooldown;
+        return config.cooldown!=null&&config.cooldown>0&&System.currentTimeMillis()-cooldown<config.cooldown*50L;
     }
 }

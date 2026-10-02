@@ -6,6 +6,7 @@ import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigFactory;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigList;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigObject;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
+import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValueType;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -14,21 +15,25 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 public class ConfigReader{
     public static TreeFellerConfiguration readFromString(String str){
         TreeFellerConfiguration config = new TreeFellerConfiguration();
-        Config rawConfig = ConfigFactory.parseString(str);
+        Config rawConfig = ConfigFactory.parseString(str).resolve();
         try{
-            parseInto(rawConfig.root(), config);
+            parseInto(rawConfig.root(), config, TreeFellerConfiguration.class, "");
         }catch(Exception ex){
             // Exception handling varies by platform. Failing to parse the config is generally a critical error, and treefeller should not try to keep loading.
-            throw new RuntimeException(ex);
+            throw new IllegalArgumentException("Could not read Tree Feller configuration: "+ex.getMessage(), ex);
         }
         return config;
     }
@@ -36,37 +41,56 @@ public class ConfigReader{
         TreeFellerConfiguration config = new TreeFellerConfiguration();
         File file = path.toFile();
         if(!file.exists()){
-            file.getParentFile().mkdirs();
             try{
+                File parent = file.getAbsoluteFile().getParentFile();
+                if(parent!=null)Files.createDirectories(parent.toPath());
                 ConfigWriter.write(path, config);
             }catch(IOException ex){
                 throw new RuntimeException(ex);
             }
             return config;
         }
-        Config rawConfig = ConfigFactory.parseFile(file);
+        Config rawConfig = ConfigFactory.parseFile(file).resolve();
         try{
-            parseInto(rawConfig.root(), config);
+            parseInto(rawConfig.root(), config, TreeFellerConfiguration.class, "");
         }catch(Exception ex){
             // Exception handling varies by platform. Failing to parse the config is generally a critical error, and treefeller should not try to keep loading.
-            throw new RuntimeException(ex);
+            throw new IllegalArgumentException("Could not read Tree Feller configuration: "+ex.getMessage(), ex);
         }
         return config;
     }
-    private static void parseInto(ConfigObject config, Object object) throws Exception{
+    private static void parseInto(ConfigObject config, Object object, Type genericType, String path) throws Exception{
+        Set<String> matchedKeys = new HashSet<>();
         for(Field field : object.getClass().getFields()){
+            boolean assigned = false;
             for(String key : config.keySet()){
                 if(keyMatches(key, field.getName())){
-                    parseFieldInto(config.toConfig(), key, config.get(key), field, object);
+                    String fieldPath = path.isEmpty()?key:path+"."+key;
+                    if(assigned)throw new IllegalArgumentException("Duplicate configuration field: "+fieldPath);
+                    assigned = true;
+                    matchedKeys.add(key);
+                    parseFieldInto(config.toConfig(), key, config.get(key), field, object, genericType, fieldPath);
                 }
             }
         }
+        for(String key : config.keySet()){
+            if(!matchedKeys.contains(key))
+                throw new IllegalArgumentException("Unknown configuration key: "+(path.isEmpty()?key:path+"."+key));
+        }
     }
-    private static void parseFieldInto(Config rawConfig, String key, ConfigValue value, Field field, Object object) throws Exception{
-        Object parsedValue = parseConfigValue(rawConfig, key, value, field.getType(), field.getGenericType());
-        field.set(object, parsedValue);
+    private static void parseFieldInto(Config rawConfig, String key, ConfigValue value, Field field, Object object, Type genericType, String path) throws Exception{
+        try{
+            Type fieldType = resolveType(field.getGenericType(), genericType);
+            Object parsedValue = parseConfigValue(rawConfig, key, value, rawType(fieldType), fieldType, field.get(object), path);
+            if(parsedValue==null&&field.getType().isPrimitive())
+                throw new IllegalArgumentException("Cannot set a primitive field to null");
+            field.set(object, parsedValue);
+        }catch(Exception ex){
+            throw new IllegalArgumentException("Invalid configuration at "+path+": "+ex.getMessage(), ex);
+        }
     }
-    private static Object parseConfigValue(Config rawConfig, String key, ConfigValue value, Class<?> targetType, Type genericType) throws Exception{
+    private static Object parseConfigValue(Config rawConfig, String key, ConfigValue value, Class<?> targetType, Type genericType, Object existing, String path) throws Exception{
+        if(value.valueType()==ConfigValueType.NULL)return null;
         if(ISpecialConfigObject.class.isAssignableFrom(targetType)){
             targetType = TreeFellerCore.mapSpecialConfigObject(rawConfig, key, value, (Class<? extends ISpecialConfigObject>)targetType);
         }
@@ -78,37 +102,39 @@ public class ConfigReader{
                 if(Map.class.isAssignableFrom(targetType)){
                     if(genericType instanceof ParameterizedType){
                         ParameterizedType paramType = (ParameterizedType)genericType;
-                        Class<?> keyType = (Class<?>)paramType.getActualTypeArguments()[0];
-                        if(keyType!=String.class)
-                            throw new IllegalArgumentException("Invalid key type in Map! Expected String, found "+keyType.getName());
-                        Class<?> valueType = (Class<?>)paramType.getActualTypeArguments()[1];
+                        Type keyGenericType = paramType.getActualTypeArguments()[0];
+                        Class<?> keyType = rawType(keyGenericType);
                         Type valueGenericType = paramType.getActualTypeArguments()[1];
-                        Map<String, Object> result = new HashMap<>();
+                        Class<?> valueType = rawType(valueGenericType);
+                        Map<Object, Object> result = new LinkedHashMap<>();
                         ConfigObject mapObject = rawConfig.getObject(key);
                         for(String entryKey : mapObject.keySet()){
+                            ConfigValue keyValue = ConfigFactory.parseMap(java.util.Collections.singletonMap("v", entryKey)).getValue("v");
+                            Object parsedKey = parseConfigValue(keyValue.atPath("v"), "v", keyValue, keyType, keyGenericType, null, path+"[key]");
                             ConfigValue entryValue = mapObject.get(entryKey);
-                            Object parsedValue = parseConfigValue(rawConfig, key+"."+entryKey, entryValue, valueType, valueGenericType);
-                            result.put(entryKey, parsedValue);
+                            Object parsedValue = parseConfigValue(entryValue.atPath("v"), "v", entryValue, valueType, valueGenericType, null, path+"["+entryKey+"]");
+                            result.put(parsedKey, parsedValue);
                         }
                         return result;
                     }
                 }
                 if(targetType.isMemberClass()&&!Modifier.isStatic(targetType.getModifiers()))
                     throw new IllegalArgumentException("Cannot create an instance of a non-static inner class: "+targetType.getName());
-                Object instance = targetType.getDeclaredConstructor().newInstance();
-                parseInto(rawConfig.getObject(key), instance);
+                // Retain initialized defaults when only part of a section is supplied.
+                Object instance = existing!=null?existing:targetType.getDeclaredConstructor().newInstance();
+                parseInto(rawConfig.getObject(key), instance, genericType, path);
                 return instance;
             case LIST:
                 ConfigList configList = rawConfig.getList(key);
                 if(List.class.isAssignableFrom(targetType)){
                     if(genericType instanceof ParameterizedType){
                         ParameterizedType paramType = (ParameterizedType)genericType;
-                        Class<?> elementType = (Class<?>)paramType.getActualTypeArguments()[0];
+                        Class<?> elementType = rawType(paramType.getActualTypeArguments()[0]);
                         Type elementGenericType = paramType.getActualTypeArguments()[0];
                         List<Object> result = new ArrayList<>();
                         for(int i = 0; i<configList.size(); i++){
                             ConfigValue elementValue = configList.get(i);
-                            result.add(parseConfigValue(elementValue.atPath("v"), "v", elementValue, elementType, elementGenericType));
+                            result.add(parseConfigValue(elementValue.atPath("v"), "v", elementValue, elementType, elementGenericType, null, path+"["+i+"]"));
                         }
                         return result;
                     }
@@ -117,7 +143,7 @@ public class ConfigReader{
                     Object array = Array.newInstance(componentType, configList.size());
                     for(int i = 0; i<configList.size(); i++){
                         ConfigValue elementValue = configList.get(i);
-                        Array.set(array, i, parseConfigValue(elementValue.atPath("v"), "v", elementValue, componentType, componentType));
+                        Array.set(array, i, parseConfigValue(elementValue.atPath("v"), "v", elementValue, componentType, componentType, null, path+"["+i+"]"));
                     }
                     return array;
                 }
@@ -135,11 +161,16 @@ public class ConfigReader{
                 if(targetType==Long.class||targetType==long.class)
                     return rawConfig.getLong(key);
 
-                return tryBasicConstructors(targetType, rawConfig.getValue(key).unwrapped(), double.class, long.class, int.class);
+                // Numeric range shorthand must use the same validation as string shorthand.
+                try{
+                    return targetType.getConstructor(String.class).newInstance(value.unwrapped().toString());
+                }catch(NoSuchMethodException ex){
+                    return tryBasicConstructors(targetType, rawConfig.getDouble(key), double.class);
+                }
             case BOOLEAN:
                 if(targetType==Boolean.class||targetType==boolean.class)
                     return rawConfig.getBoolean(key);
-                return tryBasicConstructors(targetType, rawConfig.getBoolean(key), boolean.class);
+                break;
             case NULL:
                 return null;
         }
@@ -147,7 +178,7 @@ public class ConfigReader{
     }
     private static Object tryBasicConstructors(Class<?> targetType, Object val, Class<?>... argTypes) throws Exception{
         for(Class<?> argType : argTypes){
-            Constructor<?> constructor = Arrays.stream(targetType.getDeclaredConstructors())
+            Constructor<?> constructor = Arrays.stream(targetType.getConstructors())
                 .filter(c -> c.getParameterCount()==1&&(c.getParameterTypes()[0].isAssignableFrom(argType)
                 ||(argType==boolean.class&&c.getParameterTypes()[0]==Boolean.class)
                 ||(argType==int.class&&c.getParameterTypes()[0]==Integer.class)
@@ -157,6 +188,23 @@ public class ConfigReader{
             if(constructor!=null)return constructor.newInstance(val);
         }
         throw new IllegalArgumentException("Cannot parse "+targetType.toString()+" as any of "+Arrays.toString(argTypes)+", as it has no matching constructors!");
+    }
+    private static Class<?> rawType(Type type){
+        if(type instanceof Class)return (Class<?>)type;
+        if(type instanceof ParameterizedType)return (Class<?>)((ParameterizedType)type).getRawType();
+        throw new IllegalArgumentException("Unresolved configuration type: "+type);
+    }
+    private static Type resolveType(Type field, Type context){
+        if(field instanceof TypeVariable&&context instanceof ParameterizedType){
+            TypeVariable<?>[] variables = rawType(context).getTypeParameters();
+            Type[] arguments = ((ParameterizedType)context).getActualTypeArguments();
+            for(int i = 0; i<variables.length; i++)if(variables[i].equals(field))return arguments[i];
+        }
+        if(field instanceof java.lang.reflect.GenericArrayType){
+            Type component = resolveType(((java.lang.reflect.GenericArrayType)field).getGenericComponentType(), context);
+            return Array.newInstance(rawType(component), 0).getClass();
+        }
+        return field;
     }
     private static boolean keyMatches(String key, String name){
         key = key.replace('-', '_').replace(' ', '_').replace("_", "");

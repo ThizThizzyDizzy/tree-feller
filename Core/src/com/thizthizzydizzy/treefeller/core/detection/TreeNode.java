@@ -37,6 +37,7 @@ public class TreeNode{
     }
     void walk(Predicate<TreeNode> visit){
         if(!visit.test(this))return;
+        if(children==null)return;
         for(TreeNode child : children){
             child.walk(visit);
         }

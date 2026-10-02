@@ -14,6 +14,7 @@ import com.thizthizzydizzy.treefeller.core.detection.TreeTree;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 public class TreeFellerCriteria{
     public static boolean check(IWorldConnector world, TreeTree detected, CriteriaConfiguration config){
+        if(config==null)return true;
         DebuggerContext context = TreeFellerDebugger.begin("Criteria");
         if(config.required_trunk!=null){
             int trunks = detected.count(TreeNodeType.TRUNK);
@@ -26,6 +27,10 @@ public class TreeFellerCriteria{
                 return false;
         }
         ReferenceArrayList<TreeNode> trunks = detected.getNodes(TreeNodeType.TRUNK, -1, -1);
+        if(trunks.isEmpty()){
+            context.fail("No trunk");
+            return false;
+        }
         ReferenceArrayList<TreeNode> leaves = detected.getNodes(TreeNodeType.LEAVES, -1, -1);
         ReferenceArrayList<TreeNode> decorations = detected.getNodes(TreeNodeType.DECORATION, -1, -1);
         ReferenceArrayList<TreeNode> allBlocks = new ReferenceArrayList<>(trunks.size()+leaves.size()+decorations.size());
@@ -39,9 +44,9 @@ public class TreeFellerCriteria{
             if(!context.checkTrue("Cut Height", cutHeight<=config.max_height))
                 return false;
         }
-        if(config.require_cross_section!=null){
+        if(Boolean.TRUE.equals(config.require_cross_section)){
             if(trunks.stream().anyMatch((n) -> n.pos!=detected.root.pos&&BlockPos.getY(n.pos)==BlockPos.getY(detected.root.pos)))
-                context.fail("Cross Section");
+                return context.checkTrue("Cross Section", false);
         }
         if(config.trunk_filter!=null){
             if(config.trunk_filter.required!=null){
@@ -201,7 +206,7 @@ public class TreeFellerCriteria{
                 maxHorizontalLine = Math.max(maxHorizontalLine, line.size());
                 zAxis.removeAll(line);//don't need to recheck the same line many times. Maybe this will actually make it faster even with all the nonsense above
             }
-            if(!context.checkTrue("Horizontal Line", maxHorizontalLine<=config.trunk_max_horizontal_line));
+            if(!context.checkTrue("Horizontal Line", maxHorizontalLine<=config.trunk_max_horizontal_line))return false;
         }
         if(config.height_ratio!=null){
             int minX = Integer.MAX_VALUE;
@@ -221,8 +226,8 @@ public class TreeFellerCriteria{
                 maxY = Math.max(maxY, y);
                 maxZ = Math.max(maxZ, z);
             }
-            int width = Math.max(maxX-minX, maxZ-minZ);
-            int height = maxY-minY;
+            int width = Math.max(maxX-minX, maxZ-minZ)+1;
+            int height = maxY-minY+1;
             float value = height/(float)width;
             if(!context.checkTrue("Height Ratio", config.height_ratio.matches(value)))
                 return false;
@@ -236,7 +241,7 @@ public class TreeFellerCriteria{
                 else if(axis!=null)horizontal++;
             }
             float value = vertical/(float)horizontal;
-            if(!context.checkTrue("Trunk Vertical Ratio", config.trunk_vertical_ratio.matches(value)));
+            if(!context.checkTrue("Trunk Vertical Ratio", config.trunk_vertical_ratio.matches(value)))return false;
         }
         return true;
     }

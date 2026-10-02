@@ -20,7 +20,6 @@ public class TreeFellerTrigger{
     public static void trigger(IPlayerConnector player, IWorldConnector world, long pos){
         DetectionResult detected = detect(player, world, pos, false);
         if(detected==null)return;
-        if(!TreeFellerCriteria.check(world, detected))return;
         TreeFellerCutting.cut(world, player, detected);
     }
     public static DetectionResult detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary){
@@ -48,14 +47,18 @@ public class TreeFellerTrigger{
         context.info(TreeFellerCore.config.trees.length+" trees");
 
         // check every tool/tree combination
-        for(TreeConfiguration tree : TreeFellerCore.config.trees){
+        for(int treeIndex = 0; treeIndex<TreeFellerCore.config.trees.length; treeIndex++){
+            TreeConfiguration tree = TreeFellerCore.config.trees[treeIndex];
             context.info(tree);
             if(!context.checkTrue("Tree Trigger", checkTrigger(context, player, world, pos, tree.trigger)))
                 continue;
             for(ToolConfiguration tool : validTools){
+                if(tool.trees!=null&&!tool.trees.applySingle(treeIndex))continue;
                 TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item, secondary);
                 if(detected==null)continue;
-                return new DetectionResult(detected, tree, tool);
+                DetectionResult result = new DetectionResult(detected, tree, tool);
+                if(!secondary&&!TreeFellerCriteria.check(world, result))continue;
+                return result;
             }
         }
         return null;
@@ -78,23 +81,23 @@ public class TreeFellerTrigger{
                 return false;
             if(config.permissions!=null&&!context.checkTrue("Permissions", config.permissions.applyMulti(player::hasPermission)))
                 return false;
-            if(config.food!=null&&!context.checkTrue("Food", config.food.matches(player.getFoodLevel())));
-            if(config.saturation!=null&&!context.checkTrue("Saturation", config.saturation.matches(player.getSaturationLevel())));
-            if(config.health!=null&&!context.checkTrue("Health", config.health.matches(player.getHealth())));
+            if(config.food!=null&&!context.checkTrue("Food", config.food.matches(player.getFoodLevel())))return false;
+            if(config.saturation!=null&&!context.checkTrue("Saturation", config.saturation.matches(player.getSaturationLevel())))return false;
+            if(config.health!=null&&!context.checkTrue("Health", config.health.matches(player.getHealth())))return false;
 
             PlayerGameMode gameMode = player.getGameMode();
             context.info(gameMode);
             switch(gameMode){
                 case ADVENTURE:
-                    if(!context.checkTrue("Enabled in adventure mode", config.adventure_mode))
+                    if(!context.checkTrue("Enabled in adventure mode", !Boolean.FALSE.equals(config.adventure_mode)))
                         return false;
                     break;
                 case SURVIVAL:
-                    if(!context.checkTrue("Enabled in survival mode", config.survival_mode))
+                    if(!context.checkTrue("Enabled in survival mode", !Boolean.FALSE.equals(config.survival_mode)))
                         return false;
                     break;
                 case CREATIVE:
-                    if(!context.checkTrue("Enabled in creative mode", config.creative_mode))
+                    if(!context.checkTrue("Enabled in creative mode", !Boolean.FALSE.equals(config.creative_mode)))
                         return false;
                     break;
                 case SPECTATOR:
@@ -104,10 +107,10 @@ public class TreeFellerTrigger{
             }
             context.info("Is Sneaking: "+player.isSneaking());
             if(player.isSneaking()){
-                if(!context.checkTrue("Enabled when sneaking", config.with_sneaking))
+                if(!context.checkTrue("Enabled when sneaking", !Boolean.FALSE.equals(config.with_sneaking)))
                     return false;
             }else{
-                if(!context.checkTrue("Enabled without sneaking", config.without_sneaking))
+                if(!context.checkTrue("Enabled without sneaking", !Boolean.FALSE.equals(config.without_sneaking)))
                     return false;
             }
         }

@@ -22,26 +22,35 @@ public class BukkitItemConnector implements IItemConnector{
     }
     @Override
     public Object getItemId(){
-        return stack.getType().toString();
+        return stack==null?Material.AIR.toString():stack.getType().toString();
     }
     @Override
     public int getMaxDurability(){
-        return stack.getType().getMaxDurability();
+        return stack==null?0:stack.getType().getMaxDurability();
     }
     @Override
     public int getCurrentDurability(){
-        return stack.getType().getMaxDurability()-stack.getDurability();
+        return stack==null?0:Math.max(0, stack.getType().getMaxDurability()-stack.getDurability());
     }
     @Override
     public int getCount(){
-        return stack.getAmount();
+        return stack==null?0:stack.getAmount();
     }
     @Override
     public int getUnbreakingLevel(){
-        return stack.getEnchantmentLevel(Enchantment.DURABILITY);
+        return stack==null?0:stack.getEnchantmentLevel(Enchantment.DURABILITY);
     }
     @Override
     public boolean isUnbreakable(){
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(stack==null||!stack.hasItemMeta())return false;
+        // The shared Bukkit module compiles against 1.8; newer metadata APIs
+        // are discovered at runtime to keep older servers loadable.
+        try{
+            return (Boolean)org.bukkit.inventory.meta.ItemMeta.class.getMethod("isUnbreakable").invoke(stack.getItemMeta());
+        }catch(NoSuchMethodException ex){
+            return Boolean.TRUE.equals(stack.getItemMeta().serialize().get("unbreakable"));
+        }catch(ReflectiveOperationException ex){
+            throw new IllegalStateException("Could not read unbreakable item metadata", ex);
+        }
     }
 }

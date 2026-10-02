@@ -58,7 +58,7 @@ public class TreeFellerCutting{
             int[] found = new int[1];
             ArrayList<TreeNode> toTrim = new ArrayList<>();
             detected.detected.walk((node) -> {
-                if(node.type!=TreeNodeType.TRUNK)return false;
+                if(node.type!=TreeNodeType.TRUNK)return node.type==TreeNodeType.LEAVES;
                 found[0]++;
                 if(found[0]>limit){
                     toTrim.add(node);
@@ -80,7 +80,7 @@ public class TreeFellerCutting{
         if(item.getMaxDurability()==0)skipDurabilityChecks = true;
         if(player.getGameMode()==PlayerGameMode.CREATIVE)
             skipDurabilityChecks = true;
-        int durabilityCost;
+        int durabilityCost = 0;
         if(!skipDurabilityChecks){
             float durabilityCostF = 0;
             if(config.trunk_damage_mult!=null)
@@ -100,12 +100,13 @@ public class TreeFellerCutting{
             if(config.respect_unbreaking!=null&&config.respect_unbreaking){
                 int level = item.getUnbreakingLevel();
                 if(level>0){
-                    durabilityCost /= (level+1);
+                    durabilityCost = (int)Math.ceil(durabilityCost/(double)(level+1));
                 }
             }
             if(config.prevent_breakage!=null&&config.prevent_breakage)
                 durability--;
 
+            durability = Math.max(0, durability);
             if(durabilityCost>durability){
                 if(config.allow_partial_tool!=null&&config.allow_partial_tool){
                     context.info("Partial Tool");

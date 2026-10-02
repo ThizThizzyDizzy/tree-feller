@@ -110,7 +110,7 @@ public class ConfigWriter{
                 for(Map.Entry<?, ?> entry : map.entrySet()){
                     writeIndent(sb, indent+1);
                     sb.append('"');
-                    sb.append(escapeString(entry.getKey().toString()));
+                    sb.append(escapeString(mapKey(entry.getKey())));
                     sb.append("\" = ");
                     writeValue(sb, entry.getValue(), indent+1);
                     if(i<map.size()-1){
@@ -128,6 +128,11 @@ public class ConfigWriter{
             writeIndent(sb, indent);
             sb.append("}");
         }
+    }
+    private static String mapKey(Object key){
+        Object simplified = key instanceof ISpecialConfigObject?((ISpecialConfigObject)key).asSimplified():key;
+        if(!(simplified instanceof String))throw new IllegalArgumentException("Configuration map keys must simplify to strings: "+key);
+        return (String)simplified;
     }
     private static void writeIndent(StringBuilder sb, int indent){
         for(int i = 0; i<indent; i++){

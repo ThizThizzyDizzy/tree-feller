@@ -8,6 +8,7 @@ public class BukkitBlockDefinition implements IBlockDefinition{
     }
     public BukkitBlockDefinition(String str){
         this(Material.matchMaterial(str));
+        if(material==null)throw new IllegalArgumentException("Unknown block material: "+str);
     }
     public BukkitBlockDefinition(Material material){
         this.material = material;

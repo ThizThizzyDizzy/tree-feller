@@ -7,7 +7,7 @@ public class EnchantmentRange{
     public IntegerRange level = new IntegerRange(1, null);
     public boolean matches(ItemMeta item){
         int lvl = 0;
-        if(item.hasEnchant(enchantment))lvl = item.getEnchantLevel(enchantment);
+        if(item!=null&&item.hasEnchant(enchantment))lvl = item.getEnchantLevel(enchantment);
         return level.matches(lvl);
     }
 }

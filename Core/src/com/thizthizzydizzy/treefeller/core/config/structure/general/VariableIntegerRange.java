@@ -4,7 +4,7 @@ public class VariableIntegerRange{
     public Range percent;
     
     public boolean matches(float min, float max, float val){
-        float percnt = (val-min)/(max-min);
+        float percnt = max==min?(val==min?1:Float.NaN):(val-min)/(max-min);
         if(value!=null&&!value.matches(val))return false;
         if(percent!=null&&!percent.matches(percnt))return false;
         return true;
