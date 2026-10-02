@@ -88,6 +88,6 @@ public class BukkitPlayerConnector implements IPlayerConnector{
             case NONE:
                 return;
         }
-        player.sendBlockChange(new Location(player.getWorld(), BlockPos.getX(node.pos), BlockPos.getY(node.pos), BlockPos.getZ(node.pos)), m, (byte)0);
+        BukkitConnector.blockData.sendBlockChange(player, new Location(player.getWorld(), BlockPos.getX(node.pos), BlockPos.getY(node.pos), BlockPos.getZ(node.pos)), m);
     }
 }

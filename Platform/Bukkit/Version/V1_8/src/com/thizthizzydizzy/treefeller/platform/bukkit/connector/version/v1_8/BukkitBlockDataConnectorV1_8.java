@@ -1,9 +1,15 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.connector.version.v1_8;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitBlockDataConnector;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
+    @Override
+    public void sendBlockChange(Player player, Location location, Material material){
+        player.sendBlockChange(location, material, (byte)0);
+    }
     @Override
     public BlockAxis getBlockAxis(Block block){
         byte data = block.getData();

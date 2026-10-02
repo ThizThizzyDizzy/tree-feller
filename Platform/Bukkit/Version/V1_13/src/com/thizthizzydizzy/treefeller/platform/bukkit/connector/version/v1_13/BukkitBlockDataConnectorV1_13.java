@@ -1,11 +1,19 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.connector.version.v1_13;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitBlockDataConnector;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.block.data.type.Leaves;
+import org.bukkit.entity.Player;
 public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
+    @Override
+    public void sendBlockChange(Player player, Location location, Material material){
+        // The material/byte overload initializes expensive legacy conversion tables.
+        player.sendBlockChange(location, material.createBlockData());
+    }
     @Override
     public BlockAxis getBlockAxis(Block block){
         com.thizthizzydizzy.treefeller.platform.bukkit.connector.version.v1_13.BukkitBlockDataConnectorV1_13 c;
