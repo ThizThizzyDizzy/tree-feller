@@ -12,3 +12,4 @@ Libraries/embedded/*
 Libraries/embedded/utility scripts/*.jar
 Libraries/embedded/utility scripts/*.class
 .~*
+/test/mcautotester/local.env

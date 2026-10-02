@@ -6,6 +6,7 @@ import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConne
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitPlayerConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitWorldConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.event.BukkitEvents;
+import com.thizthizzydizzy.treefeller.core.test.TreeFellerTestSequences;
 import java.util.HashMap;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -16,6 +17,9 @@ public class TreeFellerBukkit extends JavaPlugin{
     public void onEnable(){
         TreeFellerCore.initialize(connector = new BukkitConnector(this));
         getServer().getPluginManager().registerEvents(new BukkitEvents(this), this);
+        if(getServer().getPluginManager().isPluginEnabled("mcautotester")){
+            TreeFellerTestSequences.register();
+        }
     }
     
     private final HashMap<Player, BukkitPlayerConnector> playerConnectors = new HashMap<>();
