@@ -5,6 +5,7 @@ import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItem
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 public class BukkitItemConnector implements IItemConnector{
     private final ItemStack stack;
     public BukkitItemConnector(ItemStack stack){
@@ -46,7 +47,7 @@ public class BukkitItemConnector implements IItemConnector{
         // The shared Bukkit module compiles against 1.8; newer metadata APIs
         // are discovered at runtime to keep older servers loadable.
         try{
-            return (Boolean)org.bukkit.inventory.meta.ItemMeta.class.getMethod("isUnbreakable").invoke(stack.getItemMeta());
+            return (Boolean)ItemMeta.class.getMethod("isUnbreakable").invoke(stack.getItemMeta());
         }catch(NoSuchMethodException ex){
             return Boolean.TRUE.equals(stack.getItemMeta().serialize().get("unbreakable"));
         }catch(ReflectiveOperationException ex){

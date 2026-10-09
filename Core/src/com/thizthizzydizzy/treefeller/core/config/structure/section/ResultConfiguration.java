@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
+import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitOption;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFloat;
@@ -15,14 +16,20 @@ public class ResultConfiguration{
     public SaplingReplantConfiguration sapling_replant;
     
     @ConfigComment("Blocks that can be overridden if a falling block lands on them")
+    @LegacyBukkitOption(value = "overridables",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public IBlockDefinition[] overrideable_blocks;
     
     @ConfigComment("Apply the tool's Fortune to drops from the trunk")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "log-fortune",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean trunk_fortune;
     
     @ConfigComment("Apply the tool's Fortune to drops from the leaves")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "leaf-fortune",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean leaves_fortune;
     
     @ConfigComment("Apply the tool's Fortune to drops from the decorations")
@@ -31,10 +38,14 @@ public class ResultConfiguration{
     
     @ConfigComment("Apply the tool's Silk Touch to drops from the trunk")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "log-silk-touch",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean trunk_silk_touch;
     
     @ConfigComment("Apply the tool's Silk Touch to drops from the leaves")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "leaf-silk-touch",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean leaves_silk_touch;
     
     @ConfigComment("Apply the tool's Silk Touch to drops from the decorations")
@@ -43,9 +54,14 @@ public class ResultConfiguration{
     
     @ConfigComment("Rotate falling pillar blocks (axis=x/y/z) as they fall")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "rotate-logs",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean rotate_logs;
     
     @ConfigComment("Convert block drops into other items when felling")
+    @LegacyBukkitOption(value = "drop-conversions",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.CONVERSIONS)
     public HashMap<IItemDefinition, IItemDefinition> drop_conversions;
 
     @ConfigComment("Place dropped items directly in the player inventory")
@@ -54,10 +70,14 @@ public class ResultConfiguration{
     
     @ConfigComment("Chance of trunk dropping items. Values higher than 1 will multiply drops")
     @ConfigGlobalDefaultFloat(1)
+    @LegacyBukkitOption(value = "log-drop-chance",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float trunk_drop_chance;
     
     @ConfigComment("Chance of leaves dropping items. Values higher than 1 will multiply drops")
     @ConfigGlobalDefaultFloat(1)
+    @LegacyBukkitOption(value = "leaf-drop-chance",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float leaves_drop_chance;
     
     @ConfigComment("Chance of decorations dropping items. Values higher than 1 will multiply drops")
@@ -65,18 +85,30 @@ public class ResultConfiguration{
     public Float decorations_drop_chance;
     
     @ConfigComment("Effects to apply to falling trees")
+    @LegacyBukkitOption(value = "effects",
+            scopes = {LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.EFFECTS)
+    @LegacyBukkitOption(value = "global-effects",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL},
+            conversion = LegacyBukkitOption.Conversion.EFFECTS)
     public EffectConfiguration[] effects;
     
     @ConfigComment("Base food consumed per tree felled")
     @ConfigGlobalDefaultFloat(0)
+    @LegacyBukkitOption(value = "consumed-food-base",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float consumed_food_base;
     
     @ConfigComment("Food consumed per trunk block felled")
     @ConfigGlobalDefaultFloat(0)
+    @LegacyBukkitOption(value = "consumed-food-logs",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float consumed_food_trunk;
     
     @ConfigComment("Food consumed per leaf block felled")
     @ConfigGlobalDefaultFloat(0)
+    @LegacyBukkitOption(value = "consumed-food-leaves",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float consumed_food_leaves;
     
     @ConfigComment("Food consumed per decoration block felled")
@@ -85,14 +117,20 @@ public class ResultConfiguration{
     
     @ConfigComment("Base health consumed per tree felled")
     @ConfigGlobalDefaultFloat(0)
+    @LegacyBukkitOption(value = "consumed-health-base",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float consumed_health_base;
     
     @ConfigComment("Health consumed per trunk block felled")
     @ConfigGlobalDefaultFloat(0)
+    @LegacyBukkitOption(value = "consumed-health-logs",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float consumed_health_trunk;
     
     @ConfigComment("Health consumed per leaf block felled")
     @ConfigGlobalDefaultFloat(0)
+    @LegacyBukkitOption(value = "consumed-health-leaves",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float consumed_health_leaves;
     
     @ConfigComment("Health consumed per decoration block felled")

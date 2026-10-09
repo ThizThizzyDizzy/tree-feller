@@ -16,7 +16,7 @@ public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
     }
     @Override
     public BlockAxis getBlockAxis(Block block){
-        com.thizthizzydizzy.treefeller.platform.bukkit.connector.version.v1_13.BukkitBlockDataConnectorV1_13 c;
+        BukkitBlockDataConnectorV1_13 c;
         BlockData data = block.getBlockData();
         if(data instanceof Orientable){
             Orientable orientable = (Orientable)data;

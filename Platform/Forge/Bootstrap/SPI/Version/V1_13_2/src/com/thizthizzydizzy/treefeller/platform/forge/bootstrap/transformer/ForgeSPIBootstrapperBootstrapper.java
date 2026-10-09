@@ -3,6 +3,7 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.IncompatibleEnvironmentException;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Iterator;
@@ -34,14 +35,14 @@ public class ForgeSPIBootstrapperBootstrapper implements ITransformationService{
             is1_13 = discovererClass.getDeclaredFields().length==0 && discovererClass.getDeclaredMethods().length == 3;
 
             // Find the transformers and locators lists
-            java.lang.reflect.Field transformersField = discovererClass.getDeclaredField("transformers");
+            Field transformersField = discovererClass.getDeclaredField("transformers");
             transformersField.setAccessible(true);
 
-            java.lang.reflect.Field locatorsField = discovererClass.getDeclaredField("locators");
+            Field locatorsField = discovererClass.getDeclaredField("locators");
             locatorsField.setAccessible(true);
 
-            java.util.List<java.nio.file.Path> transformers = (java.util.List<java.nio.file.Path>)transformersField.get(null);
-            java.util.List<java.nio.file.Path> locators = (java.util.List<java.nio.file.Path>)locatorsField.get(null);
+            List<Path> transformers = (List<Path>)transformersField.get(null);
+            List<Path> locators = (List<Path>)locatorsField.get(null);
 
             // Find this mod in the transformers list
             for(Iterator<Path> it = transformers.iterator(); it.hasNext();){

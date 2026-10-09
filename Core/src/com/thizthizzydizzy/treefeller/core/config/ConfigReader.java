@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -20,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -109,7 +111,7 @@ public class ConfigReader{
                         Map<Object, Object> result = new LinkedHashMap<>();
                         ConfigObject mapObject = rawConfig.getObject(key);
                         for(String entryKey : mapObject.keySet()){
-                            ConfigValue keyValue = ConfigFactory.parseMap(java.util.Collections.singletonMap("v", entryKey)).getValue("v");
+                            ConfigValue keyValue = ConfigFactory.parseMap(Collections.singletonMap("v", entryKey)).getValue("v");
                             Object parsedKey = parseConfigValue(keyValue.atPath("v"), "v", keyValue, keyType, keyGenericType, null, path+"[key]");
                             ConfigValue entryValue = mapObject.get(entryKey);
                             Object parsedValue = parseConfigValue(entryValue.atPath("v"), "v", entryValue, valueType, valueGenericType, null, path+"["+entryKey+"]");
@@ -200,8 +202,8 @@ public class ConfigReader{
             Type[] arguments = ((ParameterizedType)context).getActualTypeArguments();
             for(int i = 0; i<variables.length; i++)if(variables[i].equals(field))return arguments[i];
         }
-        if(field instanceof java.lang.reflect.GenericArrayType){
-            Type component = resolveType(((java.lang.reflect.GenericArrayType)field).getGenericComponentType(), context);
+        if(field instanceof GenericArrayType){
+            Type component = resolveType(((GenericArrayType)field).getGenericComponentType(), context);
             return Array.newInstance(rawType(component), 0).getClass();
         }
         return field;

@@ -6,6 +6,6 @@
 - Detection settings overlay tree values on globals, including nested block-data rules.
 - Cutting, breaking, and result settings combine tree/tool values first, then overlay that combination on globals. Tree/tool booleans use OR; numbers use max; nested objects merge recursively; arrays concatenate; map and other scalar conflicts favor the tool. Explicit tree/tool values can override global defaults. The effective configuration is a copy, so changing it cannot change a source configuration.
 - Conversion map keys are simplified block/item strings, including literal dots; values can use full definitions. Definitions that cannot simplify to strings cannot serve as map keys.
-- Unknown fields and parsing errors fail with a configuration path rather than being silently ignored. `config.conf` tracks the current schema; it is not a legacy config migration fixture.
+- Unknown fields and parsing errors fail with a configuration path rather than being silently ignored. `config.conf` tracks the current TreeFeller 2.0 schema. Legacy configuration input is handled by the legacy Bukkit config importer.
 
 Cooldown durations use ticks (50 ms per tick). `PlayerSettings.startCooldown` is available for the eventual successful-felling path; prechecks alone do not start a cooldown. Breaking and result execution are still future stages.

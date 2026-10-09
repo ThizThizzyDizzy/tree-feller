@@ -1,10 +1,15 @@
 package com.thizthizzydizzy.treefeller.core.config.structure;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
+import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.BreakingConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CuttingConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfiguration;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 public class TreeFellerConfiguration{
     public DebugConfiguration debug = new DebugConfiguration();
     public GlobalConfiguration global = new GlobalConfiguration();
@@ -32,19 +37,19 @@ public class TreeFellerConfiguration{
         if(base instanceof Number||base instanceof String||type.isEnum())return value;
         if(type.isArray()){
             if(!combine)return copy(value);
-            int first = java.lang.reflect.Array.getLength(base);
-            int second = java.lang.reflect.Array.getLength(value);
-            Object array = java.lang.reflect.Array.newInstance(type.getComponentType(), first+second);
-            for(int i = 0; i<first; i++)java.lang.reflect.Array.set(array, i, copy(java.lang.reflect.Array.get(base, i)));
-            for(int i = 0; i<second; i++)java.lang.reflect.Array.set(array, first+i, copy(java.lang.reflect.Array.get(value, i)));
+            int first = Array.getLength(base);
+            int second = Array.getLength(value);
+            Object array = Array.newInstance(type.getComponentType(), first+second);
+            for(int i = 0; i<first; i++)Array.set(array, i, copy(Array.get(base, i)));
+            for(int i = 0; i<second; i++)Array.set(array, first+i, copy(Array.get(value, i)));
             return array;
         }
-        if(base instanceof java.util.Map){
+        if(base instanceof Map){
             if(!combine)return copy(value);
-            java.util.Map<Object, Object> result = (java.util.Map<Object, Object>)copy(base);
-            for(java.util.Map.Entry<?, ?> entry : ((java.util.Map<?, ?>)value).entrySet()){
+            Map<Object, Object> result = (Map<Object, Object>)copy(base);
+            for(Map.Entry<?, ?> entry : ((Map<?, ?>)value).entrySet()){
                 // Platform definitions do not necessarily implement value equality.
-                result.keySet().removeIf(key -> java.util.Objects.equals(mapKey(key), mapKey(entry.getKey())));
+                result.keySet().removeIf(key -> Objects.equals(mapKey(key), mapKey(entry.getKey())));
                 result.put(copy(entry.getKey()), copy(entry.getValue()));
             }
             return result;
@@ -55,24 +60,24 @@ public class TreeFellerConfiguration{
         return result;
     }
     private static Object mapKey(Object key){
-        return key instanceof com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject
-                ?((com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject)key).asSimplified():key;
+        return key instanceof ISpecialConfigObject
+                ?((ISpecialConfigObject)key).asSimplified():key;
     }
     private static Object copy(Object value) throws Exception{
         if(value==null)return null;
         Class<?> type = value.getClass();
         if(value instanceof Number||value instanceof Boolean||value instanceof String||type.isEnum())return value;
         if(type.isArray()){
-            int length = java.lang.reflect.Array.getLength(value);
-            Object result = java.lang.reflect.Array.newInstance(type.getComponentType(), length);
-            for(int i = 0; i<length; i++)java.lang.reflect.Array.set(result, i, copy(java.lang.reflect.Array.get(value, i)));
+            int length = Array.getLength(value);
+            Object result = Array.newInstance(type.getComponentType(), length);
+            for(int i = 0; i<length; i++)Array.set(result, i, copy(Array.get(value, i)));
             return result;
         }
-        if(value instanceof java.util.Map){
-            java.util.Map<Object, Object> result = new java.util.LinkedHashMap<>();
-            for(java.util.Map.Entry<?, ?> entry : ((java.util.Map<?, ?>)value).entrySet()){
+        if(value instanceof Map){
+            Map<Object, Object> result = new LinkedHashMap<>();
+            for(Map.Entry<?, ?> entry : ((Map<?, ?>)value).entrySet()){
                 // Platform definitions do not necessarily implement value equality.
-                result.keySet().removeIf(key -> java.util.Objects.equals(mapKey(key), mapKey(entry.getKey())));
+                result.keySet().removeIf(key -> Objects.equals(mapKey(key), mapKey(entry.getKey())));
                 result.put(copy(entry.getKey()), copy(entry.getValue()));
             }
             return result;

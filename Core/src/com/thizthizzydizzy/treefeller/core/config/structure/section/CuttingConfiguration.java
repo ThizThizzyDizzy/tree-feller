@@ -1,4 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.config.structure.section;
+import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitOption;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFloat;
@@ -7,10 +8,14 @@ public class CuttingConfiguration{
     // Filters that decide which tree blocks are cut
     @ConfigComment("Leave the tree stump (any blocks below the one that was cut)")
     @ConfigGlobalDefaultBoolean(false)
+    @LegacyBukkitOption(value = "leave-stump",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean leave_stump;
 
     @ConfigComment("The maximum distance from the trunk that leaves will be broken")
     @ConfigGlobalDefaultInteger(6)
+    @LegacyBukkitOption(value = "leaf-break-range",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Integer leaf_break_range;
 
     @ConfigComment("The maximum number of trunk blocks that can be cut down at once. This will cause trees to be partially cut if exceeded.")
@@ -19,6 +24,8 @@ public class CuttingConfiguration{
     // Tool durability checks
     @ConfigComment("Damage dealt to the tool per block in the tree trunk")
     @ConfigGlobalDefaultFloat(1)
+    @LegacyBukkitOption(value = "damage-mult",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float trunk_damage_mult;
 
     @ConfigComment("Damage dealt to the tool per block in the tree leaves")
@@ -29,34 +36,50 @@ public class CuttingConfiguration{
 
     @ConfigComment("Reduce damage taken for tools with Unbreaking")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "respect-unbreaking",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean respect_unbreaking;
 
     @ConfigComment("Deal no damage to unbreakable tools")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "respect-unbreakable",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean respect_unbreakable;
 
     @ConfigComment("Consume stacked tools one at a time. (The entire stack will be treated as one tool)\nWARNING: Using stacked tools is not recommended!")
     @ConfigGlobalDefaultBoolean(false)
+    @LegacyBukkitOption(value = "stacked-tools",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL})
     public Boolean stacked_tools;
 
     @ConfigComment("Prevent felling a tree if doing so would break the tool")
     @ConfigGlobalDefaultBoolean(false)
+    @LegacyBukkitOption(value = "prevent-breakage",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean prevent_breakage;
 
     @ConfigComment("Allow trees to be partially cut down if the tool has insufficient durability")
     @ConfigGlobalDefaultBoolean(false)
+    @LegacyBukkitOption(value = "allow-partial",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean allow_partial;
 
     @ConfigComment("Allow a tool to fully cut down a tree, even with insufficient durability")
     @ConfigGlobalDefaultBoolean(true)
+    @LegacyBukkitOption(value = "allow-partial-tool",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean allow_partial_tool;
 
     // Behavior
     @ConfigComment("Cut down the tree with an animation, rather than all at once")
     @ConfigGlobalDefaultBoolean(false)
+    @LegacyBukkitOption(value = "cutting-animation",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean cutting_animation;
 
     @ConfigComment("Animation delay, in game ticks")
     @ConfigGlobalDefaultInteger(1)
+    @LegacyBukkitOption(value = "anim-delay",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Integer animation_delay;
 }

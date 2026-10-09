@@ -2,6 +2,7 @@ package com.thizthizzydizzy.treefeller.core.config;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,6 +54,11 @@ public class ConfigWriter{
     private static void writeValue(StringBuilder sb, Object value, int indent){
         if(value!=null&&ISpecialConfigObject.class.isAssignableFrom(value.getClass())){
             value = ((ISpecialConfigObject)value).asSimplified();
+            // An unspecified material is a wildcard definition (for example, imported v1 AIR).
+            if(value==null){
+                sb.append("{}");
+                return;
+            }
         }
         if(value==null){
             return;
@@ -65,13 +71,13 @@ public class ConfigWriter{
         }else if(value.getClass().isEnum()){
             sb.append(((Enum<?>)value).name());
         }else if(value.getClass().isArray()){
-            int length = java.lang.reflect.Array.getLength(value);
+            int length = Array.getLength(value);
             if(length==0){
                 sb.append("[]");
             }else{
                 sb.append("[\n");
                 for(int i = 0; i<length; i++){
-                    Object element = java.lang.reflect.Array.get(value, i);
+                    Object element = Array.get(value, i);
                     writeIndent(sb, indent+1);
                     writeValue(sb, element, indent+1);
                     if(i<length-1){

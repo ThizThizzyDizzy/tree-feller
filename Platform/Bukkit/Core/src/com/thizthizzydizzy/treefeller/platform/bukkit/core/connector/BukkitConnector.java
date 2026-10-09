@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
 import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
+import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
@@ -17,14 +18,23 @@ import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitBloc
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItemDefinition;
 import com.thizthizzydizzy.treefeller.platform.utility.version.VersionMatcher;
 import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 public class BukkitConnector implements TreeFellerConnector{
     private final TreeFellerBukkit treefeller;
@@ -53,7 +63,51 @@ public class BukkitConnector implements TreeFellerConnector{
     }
     @Override
     public TreeFellerConfiguration loadConfig(Function<Path, TreeFellerConfiguration> defaultLoader){
-        return defaultLoader.apply(new File(treefeller.getDataFolder(), "config.conf").toPath());
+        Path config = new File(treefeller.getDataFolder(), "config.conf").toPath();
+        Path legacy = new File(treefeller.getDataFolder(), "config.yml").toPath();
+        if(!Files.exists(config)&&Files.exists(legacy)){
+            try{
+                String yaml = new String(Files.readAllBytes(legacy), StandardCharsets.UTF_8);
+                YamlConfiguration parsed = new YamlConfiguration();
+                parsed.loadFromString(yaml);
+                LegacyBukkitConfigImporter.Result importResult =
+                        LegacyBukkitConfigImporter.importConfiguration(yamlValues(parsed), name -> {
+                            Material material=Material.matchMaterial(name);
+                            return material==null?null:material.name();
+                        });
+                for(String warning : importResult.warnings)
+                    treefeller.getLogger().warning("Legacy Bukkit configuration import: "+warning);
+                Path candidate = config.resolveSibling("config.imported.conf");
+                Path report = config.resolveSibling("config.import-report.md");
+                importResult.write(candidate, report);
+                throw new IllegalStateException("Legacy Bukkit configuration imported to "+candidate+". Review "+report
+                        +" for unmatched fields before placing the reviewed configuration at "+config);
+            }catch(IOException|InvalidConfigurationException ex){
+                throw new IllegalStateException("Could not import legacy Bukkit configuration; the original config.yml has been retained", ex);
+            }
+        }
+        return defaultLoader.apply(config);
+    }
+    private static Map<String, Object> yamlValues(ConfigurationSection section){
+        Map<String, Object> result = new LinkedHashMap<>();
+        for(String key : section.getKeys(false))result.put(key, yamlValue(section.get(key)));
+        return result;
+    }
+    private static Object yamlValue(Object value){
+        if(value instanceof ConfigurationSection)
+            return yamlValues((ConfigurationSection)value);
+        if(value instanceof Map){
+            Map<String, Object> result = new LinkedHashMap<>();
+            for(Map.Entry<?, ?> entry : ((Map<?, ?>)value).entrySet())
+                result.put(String.valueOf(entry.getKey()), yamlValue(entry.getValue()));
+            return result;
+        }
+        if(value instanceof List){
+            List<Object> result = new ArrayList<>();
+            for(Object entry : (List<?>)value)result.add(yamlValue(entry));
+            return result;
+        }
+        return value;
     }
     @Override
     public Class<? extends ISpecialConfigObject> mapBlockDefinitionClass(Config rawConfig, String key, ConfigValue value){
