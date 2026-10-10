@@ -8,7 +8,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionCon
 import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
-import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.SaplingConfiguration;
 public class TreeConfiguration{
     @ConfigComment("Blocks that can be used to trigger tree felling indirectly (tree felling will be triggered at the nearest connected trunk)")
     @LegacyBukkitOption(value = "roots",
@@ -26,14 +26,11 @@ public class TreeConfiguration{
             scopes = {LegacyBukkitOption.Scope.TREE})
     public int max_saplings = 1;
 
-    @ConfigComment("The sapling block to place for this tree")
+    @ConfigComment("Saplings for this tree: a material name, or a pair with block and item definitions")
     @LegacyBukkitOption(value = "sapling",
             scopes = {LegacyBukkitOption.Scope.TREE},
             conversion = LegacyBukkitOption.Conversion.SAPLING)
-    public IBlockDefinition sapling_block;
-
-    @ConfigComment("The sapling item to consume for this tree")
-    public IItemDefinition sapling_item;
+    public SaplingConfiguration[] saplings;
 
     @ConfigComment("The tree indicies that this tree can cascade into")
     @LegacyBukkitOption(value = "cascade-trees",

@@ -165,6 +165,8 @@ public final class LegacyBukkitConfigImporter{
         }
         for(Map.Entry<String,Object> entry:local.entrySet()){
             String name=entry.getKey(),at=path+"."+name;Object value=entry.getValue();
+            // V2 detection makes the legacy scan-distance setting redundant.
+            if(normalize(name).equals("scandistance"))continue;
             if(scope.equals("global")&&(name.equals("trees")||name.equals("tools")))continue;
             if(scope.equals("global")&&name.equals("effects")){checkEffectDefinitions(value,issues);continue;}
             if(scope.equals("global")&&message(name,value,root,translated,issues))continue;
@@ -186,20 +188,13 @@ public final class LegacyBukkitConfigImporter{
             if(!scope.equals("global")){
                 if(name.endsWith("fall-velocity"))issue(issues,at,"V1 adds global/tool/tree velocities; v2 numeric combination does not describe this sum. Candidate retains the scoped value.");
                 if(name.equals("log-drop-chance")||name.equals("leaf-drop-chance"))issue(issues,at,"V1 multiplies global/tool/tree drop chances; confirm scoped v2 combination. Candidate retains the scoped multiplier.");
-                if((field.target.startsWith("trigger.")||field.target.startsWith("criteria."))&&global.get(name)!=null&&!Objects.equals(global.get(name),value))
-                    issue(issues,at,"V1 suppresses this global requirement when a local requirement exists. The v2 schema does not specify that fallback; confirm before applying both requirements.");
             }
             try{
                 switch(field.kind){
                     case "boolean":value=booleanValue(value);break;
                     case "integer":value=integerValue(value,name.contains("durability")&&!name.contains("percent"));break;
                     case "float32":value=number(value).floatValue();break;
-                    case "float":
-                        Number number=number(value);
-                        // V1 Double settings cannot be exactly represented by a Float for arbitrary inputs.
-                        if(number instanceof Double&&Double.compare((double)number.floatValue(),number.doubleValue())!=0)
-                            issue(issues,at,"V2 uses Float; the candidate value is rounded and cannot preserve the original double precision.");
-                        value=number.floatValue();break;
+                    case "float":value=number(value).floatValue();break;
                     case "list":
                         value=name.equals("custom-model-data")?Collections.singletonList(integerValue(entry.getValue(),false)):
                                 name.equals("required-name")?Collections.singletonList(value.toString()):stringList(value);
@@ -226,11 +221,10 @@ public final class LegacyBukkitConfigImporter{
                         value=mode==1;break;
                     case "sapling":
                         List<Object> saplings=stringList(value);
-                        if(saplings.size()!=1)throw new IllegalArgumentException("V1 accepts multiple sapling materials; v2 has one sapling_block and one sapling_item");
                         saplings=resolveMaterials(saplings,materialResolver,at,issues);
                         if(saplings.isEmpty())continue;
-                        put(out,"sapling_block",saplings.get(0));put(out,"sapling_item",saplings.get(0));
-                        translated.add(at+" → sapling_block, sapling_item");continue;
+                        put(out,"saplings",saplings);
+                        translated.add(at+" → saplings");continue;
                     case "tree-selector":
                         value=treeSelectors(value,global);
                         if(scope.equals("tree")&&name.equals("cascade-trees")){
@@ -258,9 +252,11 @@ public final class LegacyBukkitConfigImporter{
                         }
                         value=decorationRules;break;
                     case "biomes":
-                        if(name.equals("biome-blacklist")){translated.add(at+" → biome list polarity (inactive without a local biome list)");continue;}
-                        Object biomeBlacklist=local.get("biome-blacklist");
-                        boolean blacklist=biomeBlacklist!=null&&booleanValue(biomeBlacklist);
+                    case "worlds":
+                        String filter=field.kind.equals("worlds")?"world":"biome";
+                        if(name.equals(filter+"-blacklist")){translated.add(at+" → "+filter+" list polarity (inactive without a local "+filter+" list)");continue;}
+                        Object blacklistValue=local.get(filter+"-blacklist");
+                        boolean blacklist=blacklistValue!=null&&booleanValue(blacklistValue);
                         put(out,field.target+"."+(blacklist?"blacklist":"whitelist"),stringList(value));
                         translated.add(at+" → "+field.target);continue;
                     default:break;
@@ -351,11 +347,6 @@ public final class LegacyBukkitConfigImporter{
                 effect.put("type",type);effect.putIfAbsent("chance",1);
                 if(type.equals("PARTICLE")){effect.putIfAbsent("count",1);}
                 if(type.equals("SOUND")){effect.putIfAbsent("volume",1);effect.putIfAbsent("pitch",1);}
-                for(String numeric:Arrays.asList("chance","x","y","z","dx","dy","dz","speed")){
-                    Object raw=effect.get(numeric);
-                    if(raw instanceof Number&&Double.compare(((Number)raw).doubleValue(),(double)((Number)raw).floatValue())!=0)
-                        issue(issues,at+"["+label+"]."+numeric,"V1 double cannot be represented exactly by the v2 Float field; original precision retained.");
-                }
                 for(String loc:locations){Map<String,Object> expanded=new LinkedHashMap<>(effect);expanded.put("location",loc);result.add(expanded);}
             }
             if(!found&&!reference.equals("ALL"))issue(issues,at,"Unknown effect reference "+reference+"; v1 selects no effect for this name.");

@@ -99,6 +99,12 @@ public class TriggerConfiguration{
     public IntegerRange moon_phase;
 
     @ConfigComment("Dimensions where tree felling is allowed")
+    @LegacyBukkitOption(value = "worlds",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.WORLDS)
+    @LegacyBukkitOption(value = "world-blacklist",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.WORLDS)
     public DualList<String> dimensions;
 
     @ConfigComment("Biomes where tree felling is allowed")

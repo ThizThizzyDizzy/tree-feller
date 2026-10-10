@@ -1,6 +1,9 @@
 package com.thizthizzydizzy.treefeller.core.config;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.SaplingConfiguration;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigFactory;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigList;
@@ -93,6 +96,17 @@ public class ConfigReader{
     }
     private static Object parseConfigValue(Config rawConfig, String key, ConfigValue value, Class<?> targetType, Type genericType, Object existing, String path) throws Exception{
         if(value.valueType()==ConfigValueType.NULL)return null;
+        if(targetType==SaplingConfiguration.class){
+            SaplingConfiguration sapling = new SaplingConfiguration();
+            if(value.valueType()==ConfigValueType.STRING){
+                sapling.block = (IBlockDefinition)parseConfigValue(rawConfig, key, value, IBlockDefinition.class, IBlockDefinition.class, null, path+".block");
+                sapling.item = (IItemDefinition)parseConfigValue(rawConfig, key, value, IItemDefinition.class, IItemDefinition.class, null, path+".item");
+            }else if(value.valueType()==ConfigValueType.OBJECT){
+                parseInto(rawConfig.getObject(key), sapling, targetType, path);
+            }else throw new IllegalArgumentException("Sapling must be a material name or a block/item pair");
+            if(sapling.block==null||sapling.item==null)throw new IllegalArgumentException("Sapling pair requires both block and item definitions");
+            return sapling;
+        }
         if(ISpecialConfigObject.class.isAssignableFrom(targetType)){
             targetType = TreeFellerCore.mapSpecialConfigObject(rawConfig, key, value, (Class<? extends ISpecialConfigObject>)targetType);
         }
