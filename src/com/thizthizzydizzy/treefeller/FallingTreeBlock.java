@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Axis;
 import org.bukkit.Material;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.Orientable;
 import org.bukkit.entity.FallingBlock;
@@ -115,6 +116,42 @@ public class FallingTreeBlock{
                 event.getBlock().setType(event.getTo());
                 event.getBlock().setBlockData(data);
             }
+        }
+    }
+
+    public void drop(TreeFeller plugin, EntityDropItemEvent event){
+        FallingBlock fallingBlock = (FallingBlock)event.getEntity();
+        Material to = fallingBlock.getBlockData().getMaterial();
+        Block block = event.getEntity().getLocation().getBlock();
+        int[] xp = new int[]{0};
+        if(!dropItems){
+            event.setCancelled(true);
+            plugin.fallingBlocks.remove(this);
+            return;
+        }
+        ArrayList<FancyItemStack> drops = plugin.getDrops(to, tool, tree, axe, block, xp, modifiers);
+        if(player!=null){
+            event.setCancelled(true);
+            for(FancyItemStack drop : drops){
+                if(drop.nbt!=null){
+                    plugin.dropItem(detectedTree, player, block.getWorld(), player.getLocation(), drop);
+                    continue;
+                }
+                for(ItemStack stack : player.getInventory().addItem(drop.stack).values()){
+                    plugin.dropItem(detectedTree, player, block.getWorld().dropItemNaturally(event.getEntity().getLocation(), stack));
+                }
+            }
+            plugin.giveExpMending(player, xp[0]);
+            plugin.fallingBlocks.remove(this);
+        }else if(doBreak){
+            event.setCancelled(true);
+            for(FancyItemStack drop : drops){
+                plugin.dropItem(detectedTree, player, block.getWorld(), event.getEntity().getLocation(), drop);
+            }
+            plugin.dropExp(block.getWorld(), event.getEntity().getLocation(), xp[0]);
+            plugin.fallingBlocks.remove(this);
+        }else{
+            plugin.fallingBlocks.remove(this);
         }
     }
 }
