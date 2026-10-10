@@ -1,13 +1,10 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
 import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
+import com.thizthizzydizzy.treefeller.core.config.DefaultConfigBuilder;
 import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter;
-import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
-import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
-import com.thizthizzydizzy.treefeller.core.config.structure.general.SimpleDirection;
-import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
-import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
@@ -119,46 +116,16 @@ public class BukkitConnector implements TreeFellerConnector{
     }
     @Override
     public void buildDefaultConfig(TreeFellerConfiguration config){
-        ArrayList<ToolConfiguration> tools = new ArrayList();
-        ArrayList<TreeConfiguration> trees = new ArrayList();
+        Map<String, IBlockDefinition> blocks = new LinkedHashMap<>();
+        Map<String, IItemDefinition> items = new LinkedHashMap<>();
         for(Material m : Material.values()){
             String name = m.toString().toLowerCase(Locale.ROOT);
-            if(name.endsWith("_axe")){
-                ToolConfiguration tool = new ToolConfiguration();
-                tool.item = new BukkitItemDefinition(name);
-                tools.add(tool);
-            }
-            if(name.endsWith("_log")&&!name.startsWith("stripped")){
-                TreeConfiguration tree = new TreeConfiguration();
-                tree.trunk = new IBlockDefinition[]{
-                    new BukkitBlockDefinition(name)
-                };
-                Material rootsMaterial = Material.matchMaterial(name.replace("_log", "_roots"));
-                if(rootsMaterial!=null){
-                    tree.roots = new IBlockDefinition[]{
-                        new BukkitBlockDefinition(rootsMaterial)
-                    };
-                }
-                ArrayList<IBlockDefinition> leaves = new ArrayList<>();
-                leaves.add(new BukkitBlockDefinition(name.replace("_log", "_leaves")));
-                if(rootsMaterial!=null)leaves.add(new BukkitBlockDefinition(rootsMaterial));
-                if(rootsMaterial!=null){
-                    if(tree.detection==null)tree.detection = new DetectionConfiguration();
-                    tree.detection.max_leaf_distance_from_top = 4096; 
-                    tree.detection.leaf_detect_range = config.global.detection.root_distance; // ensure detect range includes roots (mangrove)
-                }
-                tree.leaves = leaves.toArray(IBlockDefinition[]::new);
-                trees.add(tree);
-            }
+            if(m.isBlock())blocks.put(name, new BukkitBlockDefinition(m));
+            BukkitItemDefinition item = new BukkitItemDefinition();
+            item.material = m;
+            items.put(name, item);
         }
-        config.tools = tools.toArray(ToolConfiguration[]::new);
-        config.trees = trees.toArray(TreeConfiguration[]::new);
-        config.global.detection.decorations = new DecorationConfiguration[]{
-            new DecorationConfiguration(SimpleDirection.UP, false, new BukkitBlockDefinition(Material.SNOW)),
-            new DecorationConfiguration(SimpleDirection.SIDE_AND_DOWN, true, new BukkitBlockDefinition(Material.VINE)),
-            new DecorationConfiguration(SimpleDirection.SIDE, false, new BukkitBlockDefinition(Material.COCOA))
-        };
-        
+        DefaultConfigBuilder.build(config, blocks, items);
     }
     @Override
     public Collection<IPlayerConnector> getAdminPlayers(){
