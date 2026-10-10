@@ -11,6 +11,31 @@ public class BukkitItemConnector implements IItemConnector{
     public BukkitItemConnector(ItemStack stack){
         this.stack = stack;
     }
+    public ItemStack getStack(){
+        return stack;
+    }
+    @Override
+    public IItemConnector copyForDrops(boolean fortune, boolean silkTouch){
+        ItemStack copy = stack==null?new ItemStack(Material.AIR):stack.clone();
+        if(!fortune)copy.removeEnchantment(Enchantment.LOOT_BONUS_BLOCKS);
+        if(!silkTouch)copy.removeEnchantment(Enchantment.SILK_TOUCH);
+        return new BukkitItemConnector(copy);
+    }
+    @Override
+    public IItemConnector convert(IItemDefinition definition){
+        BukkitItemDefinition target = (BukkitItemDefinition)definition;
+        ItemStack copy = stack.clone();
+        if(target.material!=null)copy.setType(target.material);
+        return new BukkitItemConnector(copy);
+    }
+    @Override
+    public void setCount(int count){
+        if(stack!=null)stack.setAmount(count);
+    }
+    @Override
+    public void setDamage(int damage){
+        if(stack!=null)stack.setDurability((short)damage);
+    }
     @Override
     public boolean matches(IItemDefinition definition){
         if(definition==null)

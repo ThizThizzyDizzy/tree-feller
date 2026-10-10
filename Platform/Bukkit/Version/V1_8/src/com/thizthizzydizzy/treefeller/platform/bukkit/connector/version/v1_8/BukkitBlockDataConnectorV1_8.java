@@ -1,11 +1,17 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.connector.version.v1_8;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitBlockDataConnector;
+import java.util.Collection;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
+    @Override
+    public Collection<ItemStack> getDrops(Block block, ItemStack tool, Player player){
+        return block.getDrops(tool);
+    }
     @Override
     public void sendBlockChange(Player player, Location location, Material material){
         player.sendBlockChange(location, material, (byte)0);

@@ -4,13 +4,59 @@ import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 public class BukkitPlayerConnector implements IPlayerConnector{
     private final Player player;
     public BukkitPlayerConnector(Player player){
         this.player = player;
+    }
+    public Player getPlayer(){
+        return player;
+    }
+    @Override
+    public void setTool(IItemConnector item){
+        player.setItemInHand(((BukkitItemConnector)item).getStack());
+    }
+    @Override
+    public Collection<IItemConnector> giveItems(IItemConnector item){
+        List<IItemConnector> overflow = new ArrayList<>();
+        for(ItemStack stack : player.getInventory().addItem(((BukkitItemConnector)item).getStack()).values())
+            overflow.add(new BukkitItemConnector(stack));
+        return overflow;
+    }
+    @Override
+    public void setFoodLevel(int food){
+        player.setFoodLevel(food);
+    }
+    @Override
+    public void setSaturationLevel(float saturation){
+        player.setSaturation(saturation);
+    }
+    @Override
+    public float getExhaustion(){
+        return player.getExhaustion();
+    }
+    @Override
+    public void setExhaustion(float exhaustion){
+        player.setExhaustion(exhaustion);
+    }
+    @Override
+    public void setHealth(float health){
+        player.setHealth(health);
+    }
+    @Override
+    public float getMaxHealth(){
+        return (float)player.getMaxHealth();
+    }
+    @Override
+    public void damage(float damage){
+        player.damage(damage);
     }
     @Override
     public boolean hasPermission(String permission){

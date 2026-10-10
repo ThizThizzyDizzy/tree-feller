@@ -14,6 +14,7 @@ public class BukkitEvents implements Listener{
         this.plugin = plugin;
     }
 
+    // Felling observes the original event's cancellation without modifying it.
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event){
         if(event.getClass().getName().contains("Fake"))return;

@@ -1,4 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.cutting;
+import com.thizthizzydizzy.treefeller.core.breaking.BreakingResult;
+import com.thizthizzydizzy.treefeller.core.breaking.TreeFellerBreaking;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CuttingConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
@@ -11,10 +13,12 @@ import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
 import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNodeType;
+import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
 import java.util.ArrayList;
+import java.util.List;
 public class TreeFellerCutting{
-    public static void cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected){
-        DebuggerContext context = TreeFellerDebugger.begin("Cutting");
+    public static boolean cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected){
+        DebuggerContext context = TreeFellerDebugger.begin("Cutting", player, world);
         CuttingConfiguration config = TreeFellerConfiguration.getCombinedCuttingConfiguration(detected.tree, detected.tool);
 
         if(config.leave_stump!=null&&config.leave_stump){
@@ -73,57 +77,93 @@ public class TreeFellerCutting{
             context.info("Partial Trunk Limit "+limit+" - Trimmed "+totalTrimmed+" nodes from "+toTrim.size()+" branches");
         }
 
+        if(Boolean.TRUE.equals(config.cutting_animation)){
+            context.fail("Cutting animation is not implemented yet");
+            return false;
+        }
         IItemConnector item = player.getTool();
-        boolean skipDurabilityChecks = false;
-        if(config.respect_unbreakable!=null&&config.respect_unbreakable&&item.isUnbreakable())
-            skipDurabilityChecks = true;
-        if(item.getMaxDurability()==0)skipDurabilityChecks = true;
-        if(player.getGameMode()==PlayerGameMode.CREATIVE)
-            skipDurabilityChecks = true;
-        int durabilityCost = 0;
-        if(!skipDurabilityChecks){
-            float durabilityCostF = 0;
-            if(config.trunk_damage_mult!=null)
-                durabilityCostF += detected.detected.count(TreeNodeType.TRUNK)*config.trunk_damage_mult;
-            if(config.leaves_damage_mult!=null)
-                durabilityCostF += detected.detected.count(TreeNodeType.LEAVES)*config.leaves_damage_mult;
-            if(config.decorations_damage_mult!=null)
-                durabilityCostF += detected.detected.count(TreeNodeType.DECORATION)*config.decorations_damage_mult;
-
-            // round down, but ensure it is at least 1 if durability cost is positive
-            durabilityCost = (int)durabilityCostF;
-            if(durabilityCostF>0&&durabilityCost==0)durabilityCost = 1;
-
-            int durability = item.getCurrentDurability();
-            if(config.stacked_tools!=null&&config.stacked_tools)
-                durability += item.getMaxDurability()*(item.getCount()-1);
-            if(config.respect_unbreaking!=null&&config.respect_unbreaking){
-                int level = item.getUnbreakingLevel();
-                if(level>0){
-                    durabilityCost = (int)Math.ceil(durabilityCost/(double)(level+1));
+        boolean skipDamage = item.getMaxDurability()==0
+                ||player.getGameMode()==PlayerGameMode.CREATIVE
+                ||Boolean.TRUE.equals(config.respect_unbreakable)&&item.isUnbreakable();
+        long available = item.getCurrentDurability();
+        if(Boolean.TRUE.equals(config.stacked_tools))
+            available += (long)item.getMaxDurability()*Math.max(0, item.getCount()-1);
+        long budget = Math.max(0, available-(Boolean.TRUE.equals(config.prevent_breakage)?1:0));
+        int divisor = Boolean.TRUE.equals(config.respect_unbreaking)?Math.max(1, item.getUnbreakingLevel()+1):1;
+        List<TreeNode> nodes = selectedNodes(detected);
+        int cost = skipDamage?0:cost(nodes, config, divisor);
+        context.info("Selected blocks: "+nodes.size()+", durability cost: "+cost+", available: "+available+", budget: "+budget);
+        if(cost>budget){
+            if(Boolean.TRUE.equals(config.allow_partial_tool)&&!Boolean.TRUE.equals(config.prevent_breakage)){
+                cost = (int)Math.min(Integer.MAX_VALUE, available);
+                context.info("Partial tool: felling the full selection with remaining durability");
+            }else if(Boolean.TRUE.equals(config.allow_partial)){
+                double accumulated = 0;
+                for(TreeNode node : nodes){
+                    if(!isCuttable(node))continue; // An earlier branch may already have been trimmed.
+                    double next = accumulated+weight(node, config);
+                    if(roundedCost(next, divisor)>budget){
+                        int trimmed = detected.detected.trim(node);
+                        context.info("Durability limit: trimmed "+trimmed+" nodes", node.pos);
+                    }else accumulated = next;
                 }
-            }
-            if(config.prevent_breakage!=null&&config.prevent_breakage)
-                durability--;
-
-            durability = Math.max(0, durability);
-            if(durabilityCost>durability){
-                if(config.allow_partial_tool!=null&&config.allow_partial_tool){
-                    context.info("Partial Tool");
-                    durabilityCost = durability;
-                }else if(config.allow_partial!=null&&!config.allow_partial){
-                    context.fail("Partial");
-                    return;
-                }
+                nodes = selectedNodes(detected);
+                cost = cost(nodes, config, divisor);
+                context.info("Partial cut: "+nodes.size()+" blocks, durability cost: "+cost);
+            }else{
+                context.fail("Insufficient durability"+(Boolean.TRUE.equals(config.prevent_breakage)?" while preventing tool breakage":""));
+                return false;
             }
         }
-        
-        //TODO cutting_animation
-        //TODO animation_delay
-        
-        //TODO damage the tool
-
-        //TODO breaking
-        //TODO result
+        if(nodes.isEmpty()||nodes.stream().noneMatch(n -> n.type==TreeNodeType.TRUNK)){
+            context.fail("No trunk remains in the cut selection");
+            return false;
+        }
+        context.info("Final cut selection", detected.detected);
+        BreakingResult result = TreeFellerBreaking.breakTree(world, player, detected, nodes, item);
+        if(result==null)return false;
+        damageTool(item, player, cost, Boolean.TRUE.equals(config.stacked_tools), context);
+        TreeFellerResult.complete(world, player, detected, result);
+        context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
+        return true;
+    }
+    private static boolean isCuttable(TreeNode node){
+        return node.type==TreeNodeType.TRUNK||node.type==TreeNodeType.LEAVES||node.type==TreeNodeType.DECORATION;
+    }
+    private static List<TreeNode> selectedNodes(DetectionResult detected){
+        List<TreeNode> nodes = new ArrayList<>();
+        detected.detected.walk(node -> {
+            if(isCuttable(node))nodes.add(node);
+            return true;
+        });
+        return nodes;
+    }
+    private static double weight(TreeNode node, CuttingConfiguration config){
+        Float multiplier = node.type==TreeNodeType.TRUNK?config.trunk_damage_mult
+                :node.type==TreeNodeType.LEAVES?config.leaves_damage_mult:config.decorations_damage_mult;
+        return multiplier==null?0:Math.max(0, multiplier);
+    }
+    private static int roundedCost(double cost, int divisor){
+        if(cost<=0)return 0;
+        return (int)Math.min(Integer.MAX_VALUE, Math.ceil(Math.max(1, Math.floor(cost))/divisor));
+    }
+    private static int cost(List<TreeNode> nodes, CuttingConfiguration config, int divisor){
+        double total = 0;
+        for(TreeNode node : nodes)total += weight(node, config);
+        return roundedCost(total, divisor);
+    }
+    private static void damageTool(IItemConnector item, IPlayerConnector player, int cost, boolean stacked, DebuggerContext context){
+        if(cost<=0)return;
+        int remaining = item.getCurrentDurability();
+        int count = item.getCount();
+        while(cost>=remaining&&count>0){
+            cost -= remaining;
+            count = stacked?count-1:0;
+            remaining = item.getMaxDurability();
+            context.info("Consumed one tool");
+        }
+        item.setCount(count);
+        if(count>0)item.setDamage(item.getMaxDurability()-remaining+cost);
+        player.setTool(item);
     }
 }
