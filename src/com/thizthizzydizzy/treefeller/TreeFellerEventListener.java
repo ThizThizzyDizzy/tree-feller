@@ -8,6 +8,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 public class TreeFellerEventListener implements Listener{
@@ -41,6 +42,19 @@ public class TreeFellerEventListener implements Listener{
                 }
             }
             if(falling!=null)falling.land(plugin, event);
+        }
+    }
+    @EventHandler
+    public void onBlockDrop(EntityDropItemEvent event){
+        if(event.getEntityType()==EntityType.FALLING_BLOCK){
+            FallingTreeBlock falling = null;
+            for(FallingTreeBlock b : plugin.fallingBlocks){
+                if(b.entity.getUniqueId().equals(event.getEntity().getUniqueId())){
+                    falling = b;
+                    break;
+                }
+            }
+            if(falling!=null)falling.drop(plugin, event);
         }
     }
     @EventHandler
