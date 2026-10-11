@@ -4,6 +4,10 @@ import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 public interface ITestPlatform{
     ITestWorld world(String player);
     void preparePlayer(String player, boolean survival);
+    void setPlayerGameMode(String player, com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode mode);
+    void setPlayerSneaking(String player, boolean sneaking);
+    /** Equip an item using Minecraft's item definition syntax. */
+    void equipItem(String player, String definition);
     void setPlayerLevels(String player, int food, float health, float saturation);
     void prepareCamera(String player);
     /** Announce the current test in chat. */

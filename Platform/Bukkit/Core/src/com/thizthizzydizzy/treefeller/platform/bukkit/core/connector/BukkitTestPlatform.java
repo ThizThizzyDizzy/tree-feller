@@ -29,6 +29,23 @@ public final class BukkitTestPlatform implements ITestPlatform{
         player.setFallDistance(0);
     }
     @Override
+    public void setPlayerGameMode(String name, com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode mode){
+        player(name).setGameMode(GameMode.valueOf(mode.name()));
+    }
+    @Override
+    public void setPlayerSneaking(String name, boolean sneaking){
+        player(name).setSneaking(sneaking);
+    }
+    @Override
+    public void equipItem(String name, String definition){
+        try{
+            // The modern item parser is absent from the legacy Bukkit compile API.
+            ItemStack stack = (ItemStack)org.bukkit.inventory.ItemFactory.class
+                    .getMethod("createItemStack", String.class).invoke(Bukkit.getItemFactory(), definition);
+            player(name).setItemInHand(stack);
+        }catch(ReflectiveOperationException ex){throw new IllegalStateException("Could not parse test item: "+definition, ex);}
+    }
+    @Override
     public void setPlayerLevels(String name, int food, float health, float saturation){
         Player player = player(name);
         player.setFoodLevel(food);
