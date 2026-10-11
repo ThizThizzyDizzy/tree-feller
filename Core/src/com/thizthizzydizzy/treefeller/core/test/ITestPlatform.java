@@ -4,6 +4,7 @@ import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 public interface ITestPlatform{
     ITestWorld world(String player);
     void preparePlayer(String player, boolean survival);
+    void setPlayerLevels(String player, int food, float health, float saturation);
     void prepareCamera(String player);
     /** Announce the current test in chat. */
     void showTestStatus(String player, String message);

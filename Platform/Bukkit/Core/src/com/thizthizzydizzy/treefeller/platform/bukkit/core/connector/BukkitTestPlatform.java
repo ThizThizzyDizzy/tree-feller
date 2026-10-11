@@ -29,6 +29,14 @@ public final class BukkitTestPlatform implements ITestPlatform{
         player.setFallDistance(0);
     }
     @Override
+    public void setPlayerLevels(String name, int food, float health, float saturation){
+        Player player = player(name);
+        player.setFoodLevel(food);
+        player.setHealth(health);
+        player.setSaturation(saturation);
+        player.setExhaustion(0);
+    }
+    @Override
     public void prepareCamera(String name){
         preparePlayer(name, false);
         player(name).setFlying(true);
