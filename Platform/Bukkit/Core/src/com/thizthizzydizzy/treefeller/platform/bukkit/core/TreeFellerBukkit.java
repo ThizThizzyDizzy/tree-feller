@@ -18,7 +18,7 @@ public class TreeFellerBukkit extends JavaPlugin{
         TreeFellerCore.initialize(connector = new BukkitConnector(this));
         getServer().getPluginManager().registerEvents(new BukkitEvents(this), this);
         if(getServer().getPluginManager().isPluginEnabled("mcautotester")){
-            TreeFellerTestSequences.register();
+            TreeFellerTestSequences.register(new com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitTestPlatform());
         }
     }
     

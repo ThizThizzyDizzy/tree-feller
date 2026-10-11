@@ -7,6 +7,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public interface BukkitBlockDataConnector{
+    public boolean supportsTestMaterial(String material);
+    public void setTestBlock(Block block, String material, BlockAxis axis, int leafDistance);
+    public String testBlockState(Block block);
+    public boolean isTestMaterial(Block block, String material);
     public Collection<ItemStack> getDrops(Block block, ItemStack tool, Player player);
     public BlockAxis getBlockAxis(Block block);
     public int getLeafDistance(Block block);

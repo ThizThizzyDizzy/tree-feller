@@ -8,6 +8,39 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
+    private Material testMaterial(String name){
+        switch(name){
+            case "grass_block": return Material.GRASS;
+            case "oak_log": case "spruce_log": case "birch_log": case "jungle_log": return Material.LOG;
+            case "acacia_log": case "dark_oak_log": return Material.LOG_2;
+            case "oak_leaves": case "spruce_leaves": case "birch_leaves": case "jungle_leaves": return Material.LEAVES;
+            case "acacia_leaves": case "dark_oak_leaves": return Material.LEAVES_2;
+            default: return Material.matchMaterial(name);
+        }
+    }
+    private int species(String name){
+        if(name.startsWith("spruce_")||name.startsWith("dark_oak_"))return 1;
+        if(name.startsWith("birch_"))return 2;
+        if(name.startsWith("jungle_"))return 3;
+        return 0;
+    }
+    @Override public boolean supportsTestMaterial(String name){
+        Material material = testMaterial(name);
+        return material!=null&&material.isBlock();
+    }
+    @Override public void setTestBlock(Block block, String name, BlockAxis axis, int leafDistance){
+        Material material = testMaterial(name);
+        if(material==null)throw new IllegalArgumentException("Unavailable material: "+name);
+        int data = species(name);
+        if(axis==BlockAxis.X)data |= 4;
+        if(axis==BlockAxis.Z)data |= 8;
+        // Leave the non-decaying bit clear, as on naturally generated leaves.
+        block.setTypeIdAndData(material.getId(), (byte)data, false);
+    }
+    @Override public String testBlockState(Block block){return block.getType().name()+":"+block.getData();}
+    @Override public boolean isTestMaterial(Block block, String name){
+        return block.getType()==testMaterial(name)&&(block.getData()&3)==species(name);
+    }
     @Override
     public Collection<ItemStack> getDrops(Block block, ItemStack tool, Player player){
         return block.getDrops(tool);
