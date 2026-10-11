@@ -3,6 +3,7 @@ import com.thizthizzydizzy.mcautotester.mod.api.MCAutoTesterAPI;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
         com.thizthizzydizzy.treefeller.core.test.options.criteria.MaxHeightTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.trigger.CooldownTests.register(platform);
         MCAutoTesterAPI.register("treefeller-acacia", ctx -> {
             ctx.waitForJoin("testplayer");
             TestArena arena = TestArena.setup(ctx, platform, "testplayer");
