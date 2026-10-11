@@ -4,6 +4,60 @@ Reusable MCAutoTester fixtures live here in Core. Platform code implements only
 completion and sends failures back to the sequence thread. Do not call blocking
 MCAutoTester methods from inside that callback.
 
+Config option tests live under `options/<section>/<Option>Tests.java`. Each class
+builds an `OptionTestSuite` for a config path with the bare minimum named scenarios
+needed to cover each condition. There is no fixed test count: each case must prove
+something distinct. Verify allowed/refused outcomes and verify them again when
+testing a changed option value. Follow the test-design rules in
+the repository-root `AGENTS.md`: shared setup, quick actions, one chat label before
+each action, and one final camera check. Register the class in
+`TreeFellerTestSequences.register`. Keep assertions and scenario logic in Core;
+platform hooks only translate native operations.
+
+```java
+OptionTestSuite suite = new OptionTestSuite("criteria.max-height");
+suite.add("max-0-base", "global.criteria.max-height = 0", (ctx, platform) -> {
+    // Announce this case once in chat, cut through ctx.breakBlock, and assert the result.
+});
+suite.register(platform);
+```
+
+Each scenario starts with fresh platform defaults plus its HOCON config snippet,
+using the real config reader. The prior active config is restored even on failure;
+no config files are changed. Use `suite.lifecycle(prepare, finish, cleanup)` for
+a shared arena: prepare places all fixtures once, scenarios perform quick actions
+and assertions, cleanup removes temporary blocks (also on failure), and finish
+provides one final camera check. Without lifecycle hooks, scenarios arrange their
+own world/player state. Cleanup must be safe to call more than once.
+The suite waits for the client, logs scenario names/passes, and reports success
+only after every assertion passes. Scenarios must not call `ctx.success()`.
+
+Run an entire option or a single scenario:
+
+```sh
+./test/mcautotester/run.sh treefeller-option-criteria-max-height
+./test/mcautotester/run.sh treefeller-option-criteria-max-height-max-4-middle
+```
+
+`criteria.max-height` has four scenarios, using four eight-log spruce trees placed
+up front in one 32-block arena. Maximum 0 is tested at the base (0, allowed) and
+middle (4, refused). After changing the maximum to 4, the middle (4, allowed at the
+inclusive boundary) and top (7, refused) are tested. These pairs establish that
+the condition works and that it respects the changed setting. Refused cuts must
+remove only the manually mined log;
+allowed cuts must remove every log. Each scenario uses a separate intact tree.
+Immediately before each cut, `platform.showTestStatus` announces the setting,
+cut position/height, and expected outcome once in chat, then mines the log.
+Debug output remains unchanged. The action bar is left available for future tests.
+
+Cuts run consecutively without camera pauses. High cuts use temporary supports
+four blocks from the trunk, outside the canopy, only where there is no existing
+standing surface. All supports are removed and their removal checked before one
+final aerial camera view. Trees are spawned intact; the client mines any obstructing
+leaves normally while reaching the requested log in survival. The default runner includes this suite
+and the acacia fixture test. Other options are ready to add, not yet covered;
+new persistent tests still require user approval under `AGENTS.md`.
+
 After `ctx.waitForJoin("testplayer")`:
 
 ```java
@@ -12,11 +66,10 @@ TestTrees.Tree tree = TestTrees.specimen(TestTrees.Kind.BIRCH, 8);
 arena.spawn(tree, 0, 2);
 TestArena.onServer(ctx, () -> {
     platform.preparePlayer("testplayer", true);
+    platform.showTestStatus("testplayer", "Birch fixture: cutting height 1");
     return null;
 });
-ctx.waitTicks(40);
 ctx.breakBlock(0, arena.floorY+2, 2);
-ctx.waitTicks(60);
 arena.assertLogsRemoved(tree, 0, 2);
 ```
 

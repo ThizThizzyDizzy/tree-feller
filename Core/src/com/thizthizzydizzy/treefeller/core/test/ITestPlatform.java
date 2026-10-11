@@ -4,6 +4,9 @@ import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 public interface ITestPlatform{
     ITestWorld world(String player);
     void preparePlayer(String player, boolean survival);
+    void prepareCamera(String player);
+    /** Announce the current test in chat. */
+    void showTestStatus(String player, String message);
     interface ITestWorld{
         int maxHeight(); // Exclusive build ceiling; arenas deliberately use positive Y.
         boolean supports(String material);

@@ -55,19 +55,29 @@ public final class TestArena{
     }
     /** Preflights every material and coordinate before mutating any blocks. */
     public String spawn(TestTrees.Tree tree, int x, int z){
+        return spawnAll(tree, new int[][]{{x, z}});
+    }
+    /** Place all specimens together and fingerprint the arena once. Origins are X/Z pairs. */
+    public String spawnAll(TestTrees.Tree tree, int[][] origins){
         String fingerprint = onServer(ctx, () -> {
-            for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
-                long pos = entry.getKey();
-                int bx = x+BlockPos.getX(pos), by = floorY+1+BlockPos.getY(pos), bz = z+BlockPos.getZ(pos);
-                if(bx<minX||bx>=minX+size||bz<minZ||bz>=minZ+size||by<=floorY||by>=world.maxHeight())
-                    throw new IllegalArgumentException("Tree extends outside the arena");
-                if(!world.supports(entry.getValue().material))
-                    throw new IllegalArgumentException("This Minecraft version lacks "+entry.getValue().material+" for "+tree.kind);
+            for(int[] origin : origins){
+                int x = origin[0], z = origin[1];
+                for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
+                    long pos = entry.getKey();
+                    int bx = x+BlockPos.getX(pos), by = floorY+1+BlockPos.getY(pos), bz = z+BlockPos.getZ(pos);
+                    if(bx<minX||bx>=minX+size||bz<minZ||bz>=minZ+size||by<=floorY||by>=world.maxHeight())
+                        throw new IllegalArgumentException("Tree extends outside the arena");
+                    if(!world.supports(entry.getValue().material))
+                        throw new IllegalArgumentException("This Minecraft version lacks "+entry.getValue().material+" for "+tree.kind);
+                }
             }
-            for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
-                long pos = entry.getKey();
-                TestTrees.Block block = entry.getValue();
-                world.setBlock(x+BlockPos.getX(pos), floorY+1+BlockPos.getY(pos), z+BlockPos.getZ(pos), block.material, block.axis, block.leafDistance);
+            for(int[] origin : origins){
+                int x = origin[0], z = origin[1];
+                for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
+                    long pos = entry.getKey();
+                    TestTrees.Block block = entry.getValue();
+                    world.setBlock(x+BlockPos.getX(pos), floorY+1+BlockPos.getY(pos), z+BlockPos.getZ(pos), block.material, block.axis, block.leafDistance);
+                }
             }
             try{
                 MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -81,7 +91,7 @@ public final class TestArena{
                 return hash.toString();
             }catch(java.security.NoSuchAlgorithmException ex){throw new AssertionError(ex);}
         });
-        ctx.log(tree.kind+" fixture: "+tree.blocks.size()+" blocks; arena SHA-256 "+fingerprint);
+        ctx.log(tree.kind+" fixtures: "+origins.length+" trees, "+tree.blocks.size()+" blocks each; arena SHA-256 "+fingerprint);
         return fingerprint;
     }
     public void assertLogsRemoved(TestTrees.Tree tree, int x, int z){
@@ -92,6 +102,21 @@ public final class TestArena{
                 long pos = entry.getKey();
                 if(world.isMaterial(x+BlockPos.getX(pos), floorY+1+BlockPos.getY(pos), z+BlockPos.getZ(pos), block.material))
                     throw new AssertionError("Unfelled trunk/branch at relative "+BlockPos.getX(pos)+","+BlockPos.getY(pos)+","+BlockPos.getZ(pos));
+            }
+            return null;
+        });
+    }
+    /** A refused fell still lets Minecraft break the targeted log normally. */
+    public void assertOnlyLogRemoved(TestTrees.Tree tree, int x, int z, int cutX, int cutY, int cutZ){
+        onServer(ctx, () -> {
+            long cut = BlockPos.toPos(cutX, cutY, cutZ);
+            for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
+                if(entry.getValue().axis==null)continue;
+                long pos = entry.getKey();
+                int bx = x+BlockPos.getX(pos), by = floorY+1+BlockPos.getY(pos), bz = z+BlockPos.getZ(pos);
+                boolean correct = pos==cut?world.isMaterial(bx, by, bz, "air"):world.isMaterial(bx, by, bz, entry.getValue().material);
+                if(!correct)throw new AssertionError("Expected only the targeted log removed; unexpected log state at relative "
+                        +BlockPos.getX(pos)+","+BlockPos.getY(pos)+","+BlockPos.getZ(pos));
             }
             return null;
         });

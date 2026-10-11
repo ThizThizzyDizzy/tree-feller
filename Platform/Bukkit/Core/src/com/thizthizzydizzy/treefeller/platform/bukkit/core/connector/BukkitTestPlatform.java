@@ -28,6 +28,15 @@ public final class BukkitTestPlatform implements ITestPlatform{
         player.setFoodLevel(20);
         player.setFallDistance(0);
     }
+    @Override
+    public void prepareCamera(String name){
+        preparePlayer(name, false);
+        player(name).setFlying(true);
+    }
+    @Override
+    public void showTestStatus(String name, String message){
+        player(name).sendMessage("\u00a7e[TreeFeller test] \u00a7f"+message);
+    }
     private static final class TestWorld implements ITestWorld{
         private final World world;
         TestWorld(World world){this.world = world;}

@@ -9,7 +9,7 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-acacia
+    set -- treefeller-acacia treefeller-option-criteria-max-height
 fi
 
 ant -q -f "$project_dir/Builder/build.xml" -Dmkdist.disabled=true jar
