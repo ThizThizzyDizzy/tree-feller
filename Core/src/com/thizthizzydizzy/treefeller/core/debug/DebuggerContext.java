@@ -108,6 +108,7 @@ public class DebuggerContext{
             }
             
             if(object instanceof TreeTree){
+                if(TreeFellerCore.config==null||!TreeFellerCore.config.debug.block_changes)continue;
                 TreeTree tree = (TreeTree)object;
                 for(IPlayerConnector player : players){
                     for(TreeNode node : tree.nodeMap.values()){
@@ -136,6 +137,7 @@ public class DebuggerContext{
             TreeFellerCore.connector.log(line);
             return;
         }
+        if(TreeFellerCore.config==null||!TreeFellerCore.config.debug.chat)return;
         for(IPlayerConnector player : players){
             player.sendMessage(line);
         }
