@@ -34,6 +34,11 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 public class BukkitConnector implements TreeFellerConnector{
+    @Override
+    public void schedule(int delayTicks, Runnable action){
+        Bukkit.getScheduler().runTaskLater(treefeller, action, delayTicks);
+    }
+
     private final TreeFellerBukkit treefeller;
     public static BukkitBlockDataConnector blockData;
     static{

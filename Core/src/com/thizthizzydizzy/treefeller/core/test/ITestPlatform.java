@@ -8,7 +8,9 @@ public interface ITestPlatform{
     void setPlayerSneaking(String player, boolean sneaking);
     /** Equip an item using Minecraft's item definition syntax. */
     void equipItem(String player, String definition);
+    void setToolCount(String player, int count);
     void setPlayerLevels(String player, int food, float health, float saturation);
+    com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector tool(String player);
     void prepareCamera(String player);
     /** Announce the current test in chat. */
     void showTestStatus(String player, String message);

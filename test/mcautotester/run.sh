@@ -25,7 +25,21 @@ if (($# == 0)); then
         treefeller-option-trigger-adventure-mode treefeller-option-trigger-with-sneaking \
         treefeller-option-trigger-without-sneaking \
         treefeller-option-trigger-day-time treefeller-option-trigger-moon-phase \
-        treefeller-option-trigger-biomes treefeller-option-trigger-dimensions
+        treefeller-option-trigger-biomes treefeller-option-trigger-dimensions \
+        treefeller-option-cutting-leave-stump \
+        treefeller-option-cutting-leaf-break-range \
+        treefeller-option-cutting-partial-trunk-limit \
+        treefeller-option-cutting-trunk-damage-mult \
+        treefeller-option-cutting-leaves-damage-mult \
+        treefeller-option-cutting-decorations-damage-mult \
+        treefeller-option-cutting-respect-unbreaking \
+        treefeller-option-cutting-respect-unbreakable \
+        treefeller-option-cutting-stacked-tools \
+        treefeller-option-cutting-prevent-breakage \
+        treefeller-option-cutting-allow-partial \
+        treefeller-option-cutting-allow-partial-tool \
+        treefeller-option-cutting-cutting-animation \
+        treefeller-option-cutting-animation-delay
 fi
 
 ant -q -f "$project_dir/Builder/build.xml" -Dmkdist.disabled=true jar

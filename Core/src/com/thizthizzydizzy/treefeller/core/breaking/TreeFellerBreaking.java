@@ -19,6 +19,11 @@ import java.util.List;
 import java.util.Map;
 public class TreeFellerBreaking{
     public static BreakingResult breakTree(IWorldConnector world, IPlayerConnector player, DetectionResult detected, List<TreeNode> nodes, IItemConnector tool){
+        PreparedBreak prepared = prepare(world, player, detected, nodes, tool);
+        return prepared==null?null:prepared.apply(nodes);
+    }
+    /** Validate and capture every drop before an animation changes blocks or damages the tool. */
+    public static PreparedBreak prepare(IWorldConnector world, IPlayerConnector player, DetectionResult detected, List<TreeNode> nodes, IItemConnector tool){
         DebuggerContext context = TreeFellerDebugger.begin("Breaking", player, world);
         BreakingConfiguration config = TreeFellerConfiguration.getCombinedBreakingConfiguration(detected.tree, detected.tool);
         ResultConfiguration resultConfig = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
@@ -45,16 +50,35 @@ public class TreeFellerBreaking{
             if(!conversions.containsKey(node.pos))
                 drops.put(node.pos, TreeFellerResult.collectDrops(world, player, node, tool, resultConfig));
         }
-        for(TreeNode node : nodes){
-            if(conversions.containsKey(node.pos)){
-                world.setBlock(node.pos, conversions.get(node.pos));
-                context.info("Converted "+node.type, node.pos, conversions.get(node.pos));
-            }else{
-                world.removeBlock(node.pos);
-                context.info("Broke "+node.type, node.pos);
-            }
+        return new PreparedBreak(world, context, conversions, drops);
+    }
+    public static final class PreparedBreak{
+        private final IWorldConnector world;
+        private final DebuggerContext context;
+        private final Map<Long, IBlockDefinition> conversions;
+        private final Map<Long, List<IItemConnector>> drops;
+        private PreparedBreak(IWorldConnector world, DebuggerContext context, Map<Long, IBlockDefinition> conversions, Map<Long, List<IItemConnector>> drops){
+            this.world = world;
+            this.context = context;
+            this.conversions = conversions;
+            this.drops = drops;
         }
-        context.pass("Processed "+nodes.size()+" blocks, including "+conversions.size()+" conversions");
-        return new BreakingResult(new ArrayList<>(nodes), drops);
+        public BreakingResult apply(List<TreeNode> nodes){
+            Map<Long, List<IItemConnector>> selectedDrops = new LinkedHashMap<>();
+            int converted = 0;
+            for(TreeNode node : nodes){
+                if(conversions.containsKey(node.pos)){
+                    converted++;
+                    world.setBlock(node.pos, conversions.get(node.pos));
+                    context.info("Converted "+node.type, node.pos, conversions.get(node.pos));
+                }else{
+                    world.removeBlock(node.pos);
+                    selectedDrops.put(node.pos, drops.get(node.pos));
+                    context.info("Broke "+node.type, node.pos);
+                }
+            }
+            context.pass("Processed "+nodes.size()+" blocks, including "+converted+" conversions");
+            return new BreakingResult(new ArrayList<>(nodes), selectedDrops);
+        }
     }
 }

@@ -130,6 +130,6 @@ public final class TestArena{
         });
         try{return result.get(60, TimeUnit.SECONDS);}
         catch(InterruptedException ex){Thread.currentThread().interrupt(); throw new IllegalStateException(ex);}
-        catch(Exception ex){throw new IllegalStateException("Test platform operation failed", ex);}
+        catch(Exception ex){throw new IllegalStateException("Test platform operation failed: "+(ex.getCause()==null?ex:ex.getCause()), ex);}
     }
 }

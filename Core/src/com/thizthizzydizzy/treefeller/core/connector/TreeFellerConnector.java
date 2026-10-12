@@ -9,6 +9,8 @@ import java.util.Collection;
 import java.util.function.Function;
 public interface TreeFellerConnector{
     public void log(String text);
+    /** Execute on the server thread after the given number of game ticks. */
+    public void schedule(int delayTicks, Runnable action);
     public TreeFellerConfiguration loadConfig(Function<Path, TreeFellerConfiguration> defaultLoader);
     public Class<? extends ISpecialConfigObject> mapBlockDefinitionClass(Config rawConfig, String key, ConfigValue value);
     public Class<? extends ISpecialConfigObject> mapItemDefinitionClass(Config rawConfig, String key, ConfigValue value);

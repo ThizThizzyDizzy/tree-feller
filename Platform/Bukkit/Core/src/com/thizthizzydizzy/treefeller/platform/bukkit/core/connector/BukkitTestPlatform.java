@@ -46,12 +46,22 @@ public final class BukkitTestPlatform implements ITestPlatform{
         }catch(ReflectiveOperationException ex){throw new IllegalStateException("Could not parse test item: "+definition, ex);}
     }
     @Override
+    public void setToolCount(String name, int count){
+        ItemStack stack = player(name).getItemInHand();
+        stack.setAmount(count);
+        player(name).setItemInHand(stack);
+    }
+    @Override
     public void setPlayerLevels(String name, int food, float health, float saturation){
         Player player = player(name);
         player.setFoodLevel(food);
         player.setHealth(health);
         player.setSaturation(saturation);
         player.setExhaustion(0);
+    }
+    @Override
+    public com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector tool(String name){
+        return new BukkitItemConnector(player(name).getItemInHand());
     }
     @Override
     public void prepareCamera(String name){

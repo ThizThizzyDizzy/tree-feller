@@ -1,4 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.cutting;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.breaking.BreakingResult;
 import com.thizthizzydizzy.treefeller.core.breaking.TreeFellerBreaking;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
@@ -16,6 +19,8 @@ import com.thizthizzydizzy.treefeller.core.detection.TreeNodeType;
 import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 public class TreeFellerCutting{
     public static boolean cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected){
         DebuggerContext context = TreeFellerDebugger.begin("Cutting", player, world);
@@ -77,10 +82,6 @@ public class TreeFellerCutting{
             context.info("Partial Trunk Limit "+limit+" - Trimmed "+totalTrimmed+" nodes from "+toTrim.size()+" branches");
         }
 
-        if(Boolean.TRUE.equals(config.cutting_animation)){
-            context.fail("Cutting animation is not implemented yet");
-            return false;
-        }
         IItemConnector item = player.getTool();
         boolean skipDamage = item.getMaxDurability()==0
                 ||player.getGameMode()==PlayerGameMode.CREATIVE
@@ -120,12 +121,42 @@ public class TreeFellerCutting{
             return false;
         }
         context.info("Final cut selection", detected.detected);
-        BreakingResult result = TreeFellerBreaking.breakTree(world, player, detected, nodes, item);
-        if(result==null)return false;
+        TreeFellerBreaking.PreparedBreak prepared = TreeFellerBreaking.prepare(world, player, detected, nodes, item);
+        if(prepared==null)return false;
         damageTool(item, player, cost, Boolean.TRUE.equals(config.stacked_tools), context);
-        TreeFellerResult.complete(world, player, detected, result);
-        context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
+        if(Boolean.TRUE.equals(config.cutting_animation)&&(config.animation_delay==null||config.animation_delay>0)){
+            Map<Integer, List<TreeNode>> layers = new TreeMap<>();
+            for(TreeNode node : nodes){
+                TreeNode trunk = node;
+                while(trunk.parent!=null&&trunk.type!=TreeNodeType.TRUNK)trunk = trunk.parent;
+                layers.computeIfAbsent(trunk.distance, ignored -> new ArrayList<>()).add(node);
+            }
+            int delay = config.animation_delay==null?1:Math.max(1, config.animation_delay);
+            List<List<TreeNode>> orderedLayers = new ArrayList<>(layers.values());
+            // Break the initiating layer during the original event, avoiding a second vanilla
+            // drop and durability charge for the player's target block.
+            BreakingResult total = prepared.apply(orderedLayers.get(0));
+            ResultConfiguration resultConfig = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
+            if(orderedLayers.size()>1)animate(world, player, detected, prepared, orderedLayers, 1, delay,
+                    total, resultConfig, TreeFellerCore.config.global.trigger);
+            else TreeFellerResult.complete(world, player, detected, total, resultConfig, TreeFellerCore.config.global.trigger);
+            context.pass("Scheduled "+layers.size()+" cutting layers; charged "+cost+" durability");
+        }else{
+            BreakingResult result = prepared.apply(nodes);
+            TreeFellerResult.complete(world, player, detected, result);
+            context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
+        }
         return true;
+    }
+    private static void animate(IWorldConnector world, IPlayerConnector player, DetectionResult detected,
+            TreeFellerBreaking.PreparedBreak prepared, List<List<TreeNode>> layers, int index, int delay, BreakingResult total, ResultConfiguration resultConfig, TriggerConfiguration globalTrigger){
+        TreeFellerCore.connector.schedule(delay, () -> {
+            BreakingResult result = prepared.apply(layers.get(index));
+            total.nodes.addAll(result.nodes);
+            total.drops.putAll(result.drops);
+            if(index+1<layers.size())animate(world, player, detected, prepared, layers, index+1, delay, total, resultConfig, globalTrigger);
+            else TreeFellerResult.complete(world, player, detected, total, resultConfig, globalTrigger);
+        });
     }
     private static boolean isCuttable(TreeNode node){
         return node.type==TreeNodeType.TRUNK||node.type==TreeNodeType.LEAVES||node.type==TreeNodeType.DECORATION;

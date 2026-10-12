@@ -47,8 +47,13 @@ public class TreeFellerResult{
         return drops;
     }
     public static void complete(IWorldConnector world, IPlayerConnector player, DetectionResult detected, BreakingResult result){
+        complete(world, player, detected, result, TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool),
+                TreeFellerCore.config.global.trigger);
+    }
+    /** The caller can retain the initiating settings while an animation is in progress. */
+    public static void complete(IWorldConnector world, IPlayerConnector player, DetectionResult detected, BreakingResult result,
+            ResultConfiguration config, com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration globalTrigger){
         DebuggerContext context = TreeFellerDebugger.begin("Result", player, world);
-        ResultConfiguration config = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
         int items = 0;
         for(Map.Entry<Long, List<IItemConnector>> entry : result.drops.entrySet()){
             for(IItemConnector item : entry.getValue()){
@@ -76,7 +81,7 @@ public class TreeFellerResult{
             context.info("Food cost: "+food+", health cost: "+health);
         }
         PlayerSettings settings = PlayerSettings.get(player);
-        settings.startCooldown(TreeFellerCore.config.global.trigger);
+        settings.startCooldown(globalTrigger);
         settings.startCooldown(detected.tree.trigger);
         settings.startCooldown(detected.tool.trigger);
         context.pass("Produced "+items+" items; started configured cooldowns");

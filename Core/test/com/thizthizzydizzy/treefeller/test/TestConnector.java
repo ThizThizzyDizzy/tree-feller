@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 public class TestConnector implements TreeFellerConnector{
+    @Override public void schedule(int delayTicks, Runnable action){}
     @Override
     public void log(String text){
         System.out.println(text);
