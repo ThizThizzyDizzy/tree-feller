@@ -6,6 +6,7 @@ import com.thizthizzydizzy.treefeller.core.config.ConfigReader;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 /** One config option, with independently selectable end-to-end scenarios. */
 public final class OptionTestSuite{
     public static final String PLAYER = "testplayer";
@@ -18,6 +19,9 @@ public final class OptionTestSuite{
         name = "treefeller-option-"+optionPath.replace('.', '-');
     }
     public OptionTestSuite add(String name, String config, Test test){
+        return add(name, () -> config, test);
+    }
+    public OptionTestSuite add(String name, Supplier<String> config, Test test){
         if(scenarios.containsKey(name))throw new IllegalArgumentException("Duplicate scenario: "+name);
         scenarios.put(name, new Scenario(config, test));
         return this;
@@ -58,7 +62,7 @@ public final class OptionTestSuite{
     private void run(TestContext ctx, ITestPlatform platform, String scenarioName, Scenario scenario){
         ctx.log(name+" / "+scenarioName);
         TreeFellerConfiguration previous = TestArena.onServer(ctx, () -> {
-            TreeFellerConfiguration fresh = ConfigReader.readFromString(scenario.config);
+            TreeFellerConfiguration fresh = ConfigReader.readFromString(scenario.config.get());
             TreeFellerConfiguration old = TreeFellerCore.config;
             TreeFellerCore.config = fresh;
             return old;
@@ -75,8 +79,8 @@ public final class OptionTestSuite{
         void run(TestContext ctx, ITestPlatform platform);
     }
     private static final class Scenario{
-        final String config;
+        final Supplier<String> config;
         final Test test;
-        Scenario(String config, Test test){this.config = config; this.test = test;}
+        Scenario(Supplier<String> config, Test test){this.config = config; this.test = test;}
     }
 }

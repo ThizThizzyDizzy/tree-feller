@@ -13,7 +13,9 @@ if (($# == 0)); then
         treefeller-option-trigger-food treefeller-option-trigger-health treefeller-option-trigger-saturation \
         treefeller-option-trigger-creative-mode treefeller-option-trigger-survival-mode \
         treefeller-option-trigger-adventure-mode treefeller-option-trigger-with-sneaking \
-        treefeller-option-trigger-without-sneaking
+        treefeller-option-trigger-without-sneaking \
+        treefeller-option-trigger-day-time treefeller-option-trigger-moon-phase \
+        treefeller-option-trigger-biomes treefeller-option-trigger-dimensions
 fi
 
 ant -q -f "$project_dir/Builder/build.xml" -Dmkdist.disabled=true jar

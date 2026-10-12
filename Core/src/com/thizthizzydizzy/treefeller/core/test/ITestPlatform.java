@@ -20,5 +20,12 @@ public interface ITestPlatform{
         boolean isMaterial(int x, int y, int z, String material);
         void loadChunk(int x, int z);
         void daylight();
+        long fullTime();
+        void setFullTime(long ticks);
+        boolean daylightCycle();
+        void setDaylightCycle(boolean enabled);
+        String dimension();
+        String biome(int x, int z);
+        void setBiome(int x, int z, String biome);
     }
 }

@@ -75,6 +75,13 @@ public final class BukkitTestPlatform implements ITestPlatform{
             return BukkitConnector.blockData.isTestMaterial(world.getBlockAt(x, y, z), material);
         }
         @Override public void loadChunk(int x, int z){world.loadChunk(x, z);}
+        @Override public long fullTime(){return world.getFullTime();}
+        @Override public void setFullTime(long ticks){world.setFullTime(ticks);}
+        @Override public boolean daylightCycle(){return Boolean.parseBoolean(world.getGameRuleValue("doDaylightCycle"));}
+        @Override public void setDaylightCycle(boolean enabled){world.setGameRuleValue("doDaylightCycle", Boolean.toString(enabled));}
+        @Override public String dimension(){return world.getName();}
+        @Override public String biome(int x, int z){return world.getBiome(x, z).name();}
+        @Override public void setBiome(int x, int z, String biome){world.setBiome(x, z, org.bukkit.block.Biome.valueOf(biome));}
         @Override public void daylight(){world.setTime(6000); world.setStorm(false); world.setThundering(false);}
     }
 }

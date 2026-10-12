@@ -7,6 +7,7 @@ public class TreeFellerTestSequences{
         com.thizthizzydizzy.treefeller.core.test.options.trigger.RequiredLevelTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.trigger.GameModeTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.trigger.SneakingTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.trigger.WorldRequirementTests.register(platform);
         MCAutoTesterAPI.register("treefeller-acacia", ctx -> {
             ctx.waitForJoin("testplayer");
             TestArena arena = TestArena.setup(ctx, platform, "testplayer");
