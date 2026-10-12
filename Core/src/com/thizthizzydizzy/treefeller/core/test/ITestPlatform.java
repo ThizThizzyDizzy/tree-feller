@@ -20,6 +20,7 @@ public interface ITestPlatform{
         void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance);
         String blockState(int x, int y, int z);
         boolean isMaterial(int x, int y, int z, String material);
+        int droppedItemCount(String material, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
         void loadChunk(int x, int z);
         void daylight();
         long fullTime();

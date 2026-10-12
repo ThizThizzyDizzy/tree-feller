@@ -53,6 +53,11 @@ public class TreeFellerResult{
     /** The caller can retain the initiating settings while an animation is in progress. */
     public static void complete(IWorldConnector world, IPlayerConnector player, DetectionResult detected, BreakingResult result,
             ResultConfiguration config, com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration globalTrigger){
+        complete(world, player, detected, result, config, globalTrigger, true);
+    }
+    /** Each batch delivers its own drops and block costs; per-fell effects belong to the first batch. */
+    public static void complete(IWorldConnector world, IPlayerConnector player, DetectionResult detected, BreakingResult result,
+            ResultConfiguration config, com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration globalTrigger, boolean first){
         DebuggerContext context = TreeFellerDebugger.begin("Result", player, world);
         int items = 0;
         for(Map.Entry<Long, List<IItemConnector>> entry : result.drops.entrySet()){
@@ -71,20 +76,22 @@ public class TreeFellerResult{
                 else if(node.type==TreeNodeType.LEAVES)leaves++;
                 else if(node.type==TreeNodeType.DECORATION)decorations++;
             }
-            float food = value(config.consumed_food_base)+trunks*value(config.consumed_food_trunk)
+            float food = (first?value(config.consumed_food_base):0)+trunks*value(config.consumed_food_trunk)
                     +leaves*value(config.consumed_food_leaves)+decorations*value(config.consumed_food_decoration);
-            float health = value(config.consumed_health_base)+trunks*value(config.consumed_health_trunk)
+            float health = (first?value(config.consumed_health_base):0)+trunks*value(config.consumed_health_trunk)
                     +leaves*value(config.consumed_health_leaves)+decorations*value(config.consumed_health_decoration);
             consumeFood(player, food);
             if(health>0)player.damage(health);
             else if(health<0)player.setHealth(Math.min(player.getMaxHealth(), player.getHealth()-health));
             context.info("Food cost: "+food+", health cost: "+health);
         }
-        PlayerSettings settings = PlayerSettings.get(player);
-        settings.startCooldown(globalTrigger);
-        settings.startCooldown(detected.tree.trigger);
-        settings.startCooldown(detected.tool.trigger);
-        context.pass("Produced "+items+" items; started configured cooldowns");
+        if(first){
+            PlayerSettings settings = PlayerSettings.get(player);
+            settings.startCooldown(globalTrigger);
+            settings.startCooldown(detected.tree.trigger);
+            settings.startCooldown(detected.tool.trigger);
+        }
+        context.pass("Produced "+items+" items"+(first?"; started configured cooldowns":""));
     }
     private static float value(Float value){
         return value==null?0:value;

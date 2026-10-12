@@ -34,18 +34,14 @@ final class CuttingTestSuite{
                         +" | "+name+" | cut ("+x+","+(arena.floorY+1+cutHeight)+",2), height="+cutHeight);
                 return null;
             });
-            ctx.breakBlock(x, arena.floorY+1+cutHeight, 2);
             if(delay>0){
-                // Verify the next layer stays intact before the delay and breaks after it.
-                assertMaterial(ctx, x, 7, "spruce_log", true);
-                assertMaterial(ctx, x+1, 0, "glowstone", false);
-                ctx.waitTicks(delay/2);
-                assertMaterial(ctx, x, 1, "spruce_log", true);
-                ctx.waitTicks(delay/2+2);
-                assertMaterial(ctx, x, 1, "spruce_log", false);
-                assertMaterial(ctx, x, 7, "spruce_log", true);
-                ctx.waitTicks(delay*6);
-            }
+                AnimationObservation observation = new AnimationObservation(x, delay);
+                TestArena.onServer(ctx, () -> {observation.poll(); return null;});
+                try{
+                    ctx.breakBlock(x, arena.floorY+1+cutHeight, 2);
+                    observation.await();
+                }finally{observation.active = false;}
+            }else ctx.breakBlock(x, arena.floorY+1+cutHeight, 2);
             if(remainingLogs==-1)arena.assertOnlyLogRemoved(tree, x, 2, 0, cutHeight, 0);
             else TestArena.onServer(ctx, () -> {
                 int remaining = 0;
@@ -93,6 +89,43 @@ final class CuttingTestSuite{
     }
     int leaves(){return (int)tree.blocks.values().stream().filter(b -> b.axis==null).count();}
     void register(ITestPlatform platform){suite.register(platform);}
+    /** Observe server ticks so client/network latency cannot consume the short animation delay. */
+    private final class AnimationObservation{
+        final int x, delay;
+        final java.util.concurrent.CompletableFuture<Void> finished = new java.util.concurrent.CompletableFuture<>();
+        volatile boolean active = true;
+        long firstTick = -1, secondTick = -1;
+        int initialDrops = -1;
+        AnimationObservation(int x, int delay){this.x = x; this.delay = delay;}
+        void poll(){
+            if(!active)return;
+            try{
+                if(initialDrops<0)initialDrops = arena.world.droppedItemCount("spruce_log", x-3, arena.floorY, -1, x+3, arena.floorY+12, 5);
+                int cutLogs = 0;
+                for(int y = 0; y<8; y++)if(!arena.world.isMaterial(x, arena.floorY+1+y, 2, "spruce_log"))cutLogs++;
+                if(cutLogs>0){
+                    int drops = arena.world.droppedItemCount("spruce_log", x-3, arena.floorY, -1, x+3, arena.floorY+12, 5)-initialDrops;
+                    if(drops!=cutLogs)throw new AssertionError("Expected drops for "+cutLogs+" cut logs, got "+drops);
+                    if(firstTick<0)firstTick = arena.world.fullTime();
+                    if(cutLogs>=2&&secondTick<0)secondTick = arena.world.fullTime();
+                    if(cutLogs==8){
+                        long elapsed = secondTick-firstTick;
+                        // Events and scheduled observations can straddle one server tick.
+                        if(elapsed<delay-1||elapsed>delay+1)
+                            throw new AssertionError("Expected layer delay "+delay+" ticks, observed "+elapsed);
+                        finished.complete(null);
+                        active = false;
+                        return;
+                    }
+                }
+                com.thizthizzydizzy.treefeller.core.TreeFellerCore.connector.schedule(1, this::poll);
+            }catch(Throwable ex){active = false; finished.completeExceptionally(ex);}
+        }
+        void await(){
+            try{finished.get(10, java.util.concurrent.TimeUnit.SECONDS);}
+            catch(Exception ex){throw new IllegalStateException("Animation observation failed: "+(ex.getCause()==null?ex:ex.getCause()), ex);}
+        }
+    }
     private void assertMaterial(TestContext ctx, int x, int y, String material, boolean present){
         TestArena.onServer(ctx, () -> {
             if(arena.world.isMaterial(x, arena.floorY+1+y, 2, material)!=present)

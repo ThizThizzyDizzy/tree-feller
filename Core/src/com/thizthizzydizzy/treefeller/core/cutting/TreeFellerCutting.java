@@ -135,11 +135,11 @@ public class TreeFellerCutting{
             List<List<TreeNode>> orderedLayers = new ArrayList<>(layers.values());
             // Break the initiating layer during the original event, avoiding a second vanilla
             // drop and durability charge for the player's target block.
-            BreakingResult total = prepared.apply(orderedLayers.get(0));
+            BreakingResult first = prepared.apply(orderedLayers.get(0));
             ResultConfiguration resultConfig = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
+            TreeFellerResult.complete(world, player, detected, first, resultConfig, TreeFellerCore.config.global.trigger);
             if(orderedLayers.size()>1)animate(world, player, detected, prepared, orderedLayers, 1, delay,
-                    total, resultConfig, TreeFellerCore.config.global.trigger);
-            else TreeFellerResult.complete(world, player, detected, total, resultConfig, TreeFellerCore.config.global.trigger);
+                    resultConfig, TreeFellerCore.config.global.trigger);
             context.pass("Scheduled "+layers.size()+" cutting layers; charged "+cost+" durability");
         }else{
             BreakingResult result = prepared.apply(nodes);
@@ -149,13 +149,11 @@ public class TreeFellerCutting{
         return true;
     }
     private static void animate(IWorldConnector world, IPlayerConnector player, DetectionResult detected,
-            TreeFellerBreaking.PreparedBreak prepared, List<List<TreeNode>> layers, int index, int delay, BreakingResult total, ResultConfiguration resultConfig, TriggerConfiguration globalTrigger){
+            TreeFellerBreaking.PreparedBreak prepared, List<List<TreeNode>> layers, int index, int delay, ResultConfiguration resultConfig, TriggerConfiguration globalTrigger){
         TreeFellerCore.connector.schedule(delay, () -> {
             BreakingResult result = prepared.apply(layers.get(index));
-            total.nodes.addAll(result.nodes);
-            total.drops.putAll(result.drops);
-            if(index+1<layers.size())animate(world, player, detected, prepared, layers, index+1, delay, total, resultConfig, globalTrigger);
-            else TreeFellerResult.complete(world, player, detected, total, resultConfig, globalTrigger);
+            TreeFellerResult.complete(world, player, detected, result, resultConfig, globalTrigger, false);
+            if(index+1<layers.size())animate(world, player, detected, prepared, layers, index+1, delay, resultConfig, globalTrigger);
         });
     }
     private static boolean isCuttable(TreeNode node){

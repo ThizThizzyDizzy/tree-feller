@@ -84,6 +84,19 @@ public final class BukkitTestPlatform implements ITestPlatform{
         @Override public boolean isMaterial(int x, int y, int z, String material){
             return BukkitConnector.blockData.isTestMaterial(world.getBlockAt(x, y, z), material);
         }
+        @Override public int droppedItemCount(String material, int minX, int minY, int minZ, int maxX, int maxY, int maxZ){
+            int count = 0;
+            for(org.bukkit.entity.Entity entity : world.getEntities()){
+                org.bukkit.Location location = entity.getLocation();
+                if(location.getX()<minX||location.getX()>maxX||location.getY()<minY||location.getY()>maxY
+                        ||location.getZ()<minZ||location.getZ()>maxZ)continue;
+                if(entity instanceof org.bukkit.entity.Item){
+                    ItemStack stack = ((org.bukkit.entity.Item)entity).getItemStack();
+                    if(stack.getType()==Material.valueOf(material.toUpperCase(java.util.Locale.ROOT)))count += stack.getAmount();
+                }
+            }
+            return count;
+        }
         @Override public void loadChunk(int x, int z){world.loadChunk(x, z);}
         @Override public long fullTime(){return world.getFullTime();}
         @Override public void setFullTime(long ticks){world.setFullTime(ticks);}

@@ -22,7 +22,7 @@ public class TreeFellerBreaking{
         PreparedBreak prepared = prepare(world, player, detected, nodes, tool);
         return prepared==null?null:prepared.apply(nodes);
     }
-    /** Validate and capture every drop before an animation changes blocks or damages the tool. */
+    /** Validate the selection and retain the original tool and settings for delayed batches. */
     public static PreparedBreak prepare(IWorldConnector world, IPlayerConnector player, DetectionResult detected, List<TreeNode> nodes, IItemConnector tool){
         DebuggerContext context = TreeFellerDebugger.begin("Breaking", player, world);
         BreakingConfiguration config = TreeFellerConfiguration.getCombinedBreakingConfiguration(detected.tree, detected.tool);
@@ -44,27 +44,28 @@ public class TreeFellerBreaking{
                 }
             }
         }
-        Map<Long, List<IItemConnector>> drops = new LinkedHashMap<>();
-        // Capture drops while blocks and tool metadata still exist, before removal or tool damage.
-        for(TreeNode node : nodes){
-            if(!conversions.containsKey(node.pos))
-                drops.put(node.pos, TreeFellerResult.collectDrops(world, player, node, tool, resultConfig));
-        }
-        return new PreparedBreak(world, context, conversions, drops);
+        return new PreparedBreak(world, player, tool.copyForDrops(true, true), resultConfig, context, conversions);
     }
     public static final class PreparedBreak{
         private final IWorldConnector world;
         private final DebuggerContext context;
         private final Map<Long, IBlockDefinition> conversions;
-        private final Map<Long, List<IItemConnector>> drops;
-        private PreparedBreak(IWorldConnector world, DebuggerContext context, Map<Long, IBlockDefinition> conversions, Map<Long, List<IItemConnector>> drops){
+        private final IPlayerConnector player;
+        private final IItemConnector tool;
+        private final ResultConfiguration resultConfig;
+        private PreparedBreak(IWorldConnector world, IPlayerConnector player, IItemConnector tool, ResultConfiguration resultConfig, DebuggerContext context, Map<Long, IBlockDefinition> conversions){
             this.world = world;
             this.context = context;
             this.conversions = conversions;
-            this.drops = drops;
+            this.player = player;
+            this.tool = tool;
+            this.resultConfig = resultConfig;
         }
         public BreakingResult apply(List<TreeNode> nodes){
             Map<Long, List<IItemConnector>> selectedDrops = new LinkedHashMap<>();
+            // Capture this batch's drops before any of its blocks or decorations are removed.
+            for(TreeNode node : nodes)if(!conversions.containsKey(node.pos))
+                selectedDrops.put(node.pos, TreeFellerResult.collectDrops(world, player, node, tool, resultConfig));
             int converted = 0;
             for(TreeNode node : nodes){
                 if(conversions.containsKey(node.pos)){
@@ -73,7 +74,6 @@ public class TreeFellerBreaking{
                     context.info("Converted "+node.type, node.pos, conversions.get(node.pos));
                 }else{
                     world.removeBlock(node.pos);
-                    selectedDrops.put(node.pos, drops.get(node.pos));
                     context.info("Broke "+node.type, node.pos);
                 }
             }

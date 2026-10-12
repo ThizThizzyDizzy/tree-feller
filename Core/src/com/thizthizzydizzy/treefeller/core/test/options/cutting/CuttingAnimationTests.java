@@ -6,7 +6,7 @@ public final class CuttingAnimationTests{
         CuttingTestSuite tests = new CuttingTestSuite("cutting-animation");
         tests
                 .add("false", "global.cutting.cutting-animation = false", "iron_axe", 0, 0, 8, 1)
-                .add("true", "global.cutting.cutting-animation = true\nglobal.cutting.animation-delay = 20", "iron_axe", 0, 0, 8, 1, null, 20)
+                .add("true", "global.cutting.cutting-animation = true\nglobal.cutting.animation-delay = 5", "iron_axe", 0, 0, 8, 1, null, 5)
                 .register(platform);
     }
 }
