@@ -39,7 +39,17 @@ if (($# == 0)); then
         treefeller-option-cutting-allow-partial \
         treefeller-option-cutting-allow-partial-tool \
         treefeller-option-cutting-cutting-animation \
-        treefeller-option-cutting-animation-delay
+        treefeller-option-cutting-animation-delay \
+        treefeller-option-result-trunk-fortune treefeller-option-result-leaves-fortune \
+        treefeller-option-result-decoration-fortune treefeller-option-result-trunk-silk-touch \
+        treefeller-option-result-leaves-silk-touch treefeller-option-result-decoration-silk-touch \
+        treefeller-option-result-trunk-drop-chance treefeller-option-result-leaves-drop-chance \
+        treefeller-option-result-decorations-drop-chance treefeller-option-result-drop-conversions \
+        treefeller-option-result-drop-to-inventory \
+        treefeller-option-result-consumed-food-base treefeller-option-result-consumed-food-trunk \
+        treefeller-option-result-consumed-food-leaves treefeller-option-result-consumed-food-decoration \
+        treefeller-option-result-consumed-health-base treefeller-option-result-consumed-health-trunk \
+        treefeller-option-result-consumed-health-leaves treefeller-option-result-consumed-health-decoration
 fi
 
 ant -q -f "$project_dir/Builder/build.xml" -Dmkdist.disabled=true jar

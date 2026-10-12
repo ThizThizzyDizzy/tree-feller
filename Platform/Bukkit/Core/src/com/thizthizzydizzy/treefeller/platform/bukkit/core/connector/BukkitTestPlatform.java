@@ -64,6 +64,22 @@ public final class BukkitTestPlatform implements ITestPlatform{
         return new BukkitItemConnector(player(name).getItemInHand());
     }
     @Override
+    public com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector playerState(String name){
+        return new BukkitPlayerConnector(player(name));
+    }
+    @Override
+    public int inventoryItemCount(String name, String material){
+        int count = 0;
+        Material type = Material.valueOf(material.toUpperCase(java.util.Locale.ROOT));
+        for(ItemStack stack : player(name).getInventory().getContents())
+            if(stack!=null&&stack.getType()==type)count += stack.getAmount();
+        return count;
+    }
+    @Override
+    public void setInventoryItem(String name, int slot, String material, int count){
+        player(name).getInventory().setItem(slot, new ItemStack(Material.valueOf(material.toUpperCase(java.util.Locale.ROOT)), count));
+    }
+    @Override
     public void prepareCamera(String name){
         preparePlayer(name, false);
         player(name).setFlying(true);
@@ -96,6 +112,13 @@ public final class BukkitTestPlatform implements ITestPlatform{
                 }
             }
             return count;
+        }
+        @Override public void removeDroppedItems(int minX, int minY, int minZ, int maxX, int maxY, int maxZ){
+            for(org.bukkit.entity.Entity entity : world.getEntities()){
+                org.bukkit.Location location = entity.getLocation();
+                if(entity instanceof org.bukkit.entity.Item&&location.getX()>=minX&&location.getX()<=maxX
+                        &&location.getY()>=minY&&location.getY()<=maxY&&location.getZ()>=minZ&&location.getZ()<=maxZ)entity.remove();
+            }
         }
         @Override public void loadChunk(int x, int z){world.loadChunk(x, z);}
         @Override public long fullTime(){return world.getFullTime();}

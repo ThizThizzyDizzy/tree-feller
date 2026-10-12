@@ -1,6 +1,11 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.result.EnchantmentTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.DropChanceTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.DropConversionsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.DropToInventoryTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.ConsumedResourceTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.cutting.LeaveStumpTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.cutting.LeafBreakRangeTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.cutting.PartialTrunkLimitTests.register(platform);
