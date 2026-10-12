@@ -101,12 +101,12 @@ an `ITestPlatform` and pass it to `TreeFellerTestSequences.register`.
 `spawn` returns and logs a SHA-256 of actual block states throughout the arena,
 including air and the floor. Equal hashes on the same server version demonstrate
 identical inputs. `assertLogsRemoved` checks every trunk and branch block after
-felling. The existing acacia sequence uses both helpers.
+felling.
 
 Run two consecutive sequences and record both with:
 
 ```sh
-./test/mcautotester/run.sh treefeller-acacia treefeller-acacia
+./test/mcautotester/run.sh treefeller-option-criteria-max-height treefeller-option-criteria-max-height
 ```
 
 Criteria coverage includes every field in `CriteriaConfiguration`. Range bounds

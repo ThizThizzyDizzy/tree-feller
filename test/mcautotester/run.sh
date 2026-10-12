@@ -9,7 +9,7 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-acacia treefeller-option-criteria-max-height \
+    set -- treefeller-option-criteria-max-height \
         treefeller-option-criteria-required-trunk-min treefeller-option-criteria-required-trunk-max \
         treefeller-option-criteria-required-leaves-min treefeller-option-criteria-required-leaves-max \
         treefeller-option-criteria-require-cross-section \
