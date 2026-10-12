@@ -9,7 +9,17 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-acacia treefeller-option-criteria-max-height treefeller-option-trigger-cooldown \
+    set -- treefeller-acacia treefeller-option-criteria-max-height \
+        treefeller-option-criteria-required-trunk-min treefeller-option-criteria-required-trunk-max \
+        treefeller-option-criteria-required-leaves-min treefeller-option-criteria-required-leaves-max \
+        treefeller-option-criteria-require-cross-section \
+        treefeller-option-criteria-trunk-filter-required treefeller-option-criteria-trunk-filter-blacklist \
+        treefeller-option-criteria-leaf-filter-required treefeller-option-criteria-leaf-filter-blacklist \
+        treefeller-option-criteria-decoration-filter-required treefeller-option-criteria-decoration-filter-blacklist \
+        treefeller-option-criteria-trunk-max-horizontal-line \
+        treefeller-option-criteria-height-ratio-min treefeller-option-criteria-height-ratio-max \
+        treefeller-option-criteria-trunk-vertical-ratio-min treefeller-option-criteria-trunk-vertical-ratio-max \
+        treefeller-option-trigger-cooldown \
         treefeller-option-trigger-food treefeller-option-trigger-health treefeller-option-trigger-saturation \
         treefeller-option-trigger-creative-mode treefeller-option-trigger-survival-mode \
         treefeller-option-trigger-adventure-mode treefeller-option-trigger-with-sneaking \

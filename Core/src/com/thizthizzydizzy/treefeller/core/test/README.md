@@ -55,7 +55,7 @@ four blocks from the trunk, outside the canopy, only where there is no existing
 standing surface. All supports are removed and their removal checked before one
 final aerial camera view. Trees are spawned intact; the client mines any obstructing
 leaves normally while reaching the requested log in survival. The default runner includes this suite
-and the acacia fixture test. Other options are ready to add, not yet covered;
+and all criteria and trigger option suites;
 new persistent tests still require user approval under `AGENTS.md`.
 
 After `ctx.waitForJoin("testplayer")`:
@@ -108,3 +108,15 @@ Run two consecutive sequences and record both with:
 ```sh
 ./test/mcautotester/run.sh treefeller-acacia treefeller-acacia
 ```
+
+Criteria coverage includes every field in `CriteriaConfiguration`. Range bounds
+(`required-trunk`, `required-leaves`, `height-ratio`, `trunk-vertical-ratio`) have
+separate `-min` and `-max` sequences that isolate the bound, accept equality, and
+refuse an outside value. Each trunk/leaf/decoration filter has separate
+`-required` and `-blacklist` sequences for present and absent materials.
+Decorations use two explicitly detectable materials next to intact trunks.
+`require-cross-section` covers disabled felling, a single-log section, and
+consecutive cuts through a 2x2 section, verifying all remaining logs after each
+refusal and felling on the final cut. `trunk-max-horizontal-line` checks limits
+one and two against narrow, 2x2, and branched trees. Each option and named case
+is independently selectable using its `treefeller-option-criteria-...` name.
