@@ -96,7 +96,10 @@ public class TreeFellerBreaking{
                 if(plan.conversion!=null)continue;
                 if(plan.entity){
                     int delay=config.fall_delay==null?0:Math.max(0,config.fall_delay);
-                    if(delay==0)spawn(plan);else TreeFellerCore.connector.schedule(delay,() -> spawn(plan));
+                    spawn(plan,delay>0);
+                    if(delay>0)TreeFellerCore.connector.schedule(delay,() -> {
+                        if(!plan.done){plan.held=false;plan.handle.release(plan.velocity);}
+                    });
                 }else if(plan.natural||plan.landing==Landing.PLACE){naturalPending.add(plan);}
                 else if(plan.landing==Landing.INVENTORY)TreeFellerResult.deliverDrops(world,player,plan.node.pos,plan.drops,true);
                 else immediate.put(plan.node.pos,plan.drops);
@@ -148,10 +151,14 @@ public class TreeFellerBreaking{
             else if(dz>=dy&&dz>=dx){if(axis==BlockAxis.Y)axis=BlockAxis.Z;else if(axis==BlockAxis.Z)axis=BlockAxis.X;}
             return plan.data.withAxis(axis);
         }
-        private void spawn(BlockPlan plan){
+        private void spawn(BlockPlan plan,boolean held){
             plan.peak=BlockPos.getY(plan.node.pos)+.5;
-            plan.handle=world.spawnFallingBlock(plan.node.pos,plan.data,plan.velocity,
+            plan.handle=world.spawnFallingBlock(plan.node.pos,plan.data,held?new FallVector(0,0,0):plan.velocity,
                     (target,fallDistance) -> impact(plan,target,fallDistance),target -> finish(plan,target,true,0));
+            if(held){
+                plan.held=true;
+                plan.handle.hold(new FallVector(BlockPos.getX(plan.node.pos)+.5,BlockPos.getY(plan.node.pos),BlockPos.getZ(plan.node.pos)+.5));
+            }
             watch(plan,0);
         }
         private void impact(BlockPlan plan,long target,float fallDistance){
@@ -168,10 +175,20 @@ public class TreeFellerBreaking{
                 if(plan.done)return;
                 FallVector p=plan.handle.position();
                 plan.peak=Math.max(plan.peak,p.y);
-                if(!plan.handle.alive()||ticks>=1200||p.y<world.minHeight()){
+                if(!plan.handle.alive()||(!plan.held&&ticks>=1200)||p.y<world.minHeight()){
                     long target=BlockPos.toPos((int)Math.floor(p.x),Math.max(world.minHeight(),(int)Math.floor(p.y)),(int)Math.floor(p.z));
                     finish(plan,target,true,0);
-                }else watch(plan,ticks+1);
+                }else{
+                    if(plan.held)plan.handle.keepAlive();
+                    watch(plan,plan.held?0:ticks+1);
+                }
+            });
+        }
+        private void watchLanding(BlockPlan plan){
+            TreeFellerCore.connector.schedule(1,() -> {
+                if(!naturalLandings.containsKey(plan))return;
+                plan.handle.keepAlive();
+                watchLanding(plan);
             });
         }
         private void finish(BlockPlan plan,long target,boolean failed,float distance){
@@ -182,12 +199,21 @@ public class TreeFellerBreaking{
                 float maximum=plan.behavior.fall_damage_maximum==null?40:Math.max(0,plan.behavior.fall_damage_maximum);
                 float damage=Math.min(maximum,(float)Math.max(0,Math.ceil(distance-1))*amount);
                 if(!failed&&damage>0)plan.handle.damageOverlappingEntities(damage);
-                plan.handle.remove();
             }
             if(plan.natural&&plan.entity&&plan.landing==Landing.PLACE){
                 naturalEntities--;
-                if(!failed&&!creative)naturalLandings.put(plan,target);
-                else if(!creative)TreeFellerResult.deliverDrops(world,player,target,plan.drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                if(!failed&&!creative){
+                    // Vanilla discards the impacting entity even when placement is cancelled.
+                    // Replace it in the same tick with a gravity-free visual until the batch places.
+                    plan.handle.remove();
+                    plan.handle=world.spawnFallingBlock(target,plan.data,new FallVector(0,0,0),(p,d) -> {},p -> {});
+                    plan.handle.hold(new FallVector(BlockPos.getX(target)+.5,BlockPos.getY(target),BlockPos.getZ(target)+.5));
+                    naturalLandings.put(plan,target);
+                    watchLanding(plan);
+                }else{
+                    if(plan.handle!=null)plan.handle.remove();
+                    if(!creative)TreeFellerResult.deliverDrops(world,player,target,plan.drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                }
                 if(naturalEntities==0){
                     // Landing the bottom of the tree early would obstruct the higher
                     // trajectories before they can clear the original trunk footprint.
@@ -198,12 +224,16 @@ public class TreeFellerBreaking{
                             destination=BlockPos.toPos(BlockPos.getX(destination),BlockPos.getY(destination)+1,BlockPos.getZ(destination));
                         if(replaceable(destination)){world.setBlock(destination,rotated(entry.getKey(),destination));placed.add(destination);}
                         else TreeFellerResult.deliverDrops(world,player,destination,entry.getKey().drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                        entry.getKey().handle.remove();
                     }
                     naturalLandings.clear();
                 }
                 return;
             }
-            if(plan.entity&&creative)return; // V1's entity falls disappear in creative mode.
+            if(plan.entity&&creative){
+                if(plan.handle!=null)plan.handle.remove();
+                return; // V1's entity falls disappear in creative mode.
+            }
             if(!failed&&plan.landing==Landing.PLACE&&replaceable(target)){
                 world.setBlock(target,rotated(plan,target));
                 context.info("Landed "+plan.node.type,target);
@@ -212,6 +242,7 @@ public class TreeFellerBreaking{
                 TreeFellerResult.deliverDrops(world,player,target,plan.drops,inventory);
                 context.info("Delivered landing drops for "+plan.node.type,target);
             }
+            if(plan.handle!=null)plan.handle.remove();
         }
     }
     private static final class BlockPlan{
@@ -225,7 +256,7 @@ public class TreeFellerBreaking{
         final List<IItemConnector> drops;
         FallingBlockHandle handle;
         double peak;
-        boolean done;
+        boolean done,held;
         BlockPlan(TreeNode node,BlockSnapshot data,IBlockDefinition conversion,FellBehavior behavior,boolean natural,boolean entity,Landing landing,FallVector velocity,List<IItemConnector> drops){
             this.node=node;this.data=data;this.conversion=conversion;this.behavior=behavior;this.natural=natural;this.entity=entity;this.landing=landing;this.velocity=velocity;this.drops=drops;
         }

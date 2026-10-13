@@ -76,7 +76,7 @@ public class BreakingConfiguration{
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Float random_fall_velocity;
     
-    @ConfigComment("Extra delay, in ticks, between breaking a block and spawning falling block entities.\n(This should be left at 0 unless you have issues with blocks colliding with an in-progress cutting animation)")
+    @ConfigComment("Extra delay, in ticks, before falling block entities start moving. Entities remain visible at their source during the delay.\n(This should be left at 0 unless you have issues with blocks colliding with an in-progress cutting animation)")
     @ConfigGlobalDefaultInteger(0)
     @LegacyBukkitOption(value = "fall-delay",
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})

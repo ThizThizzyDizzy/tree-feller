@@ -26,6 +26,20 @@ public final class BukkitFallingBlock implements FallingBlockHandle{
     @Override public boolean alive(){return entity.isValid()&&!entity.isDead();}
     @Override public FallVector position(){Location p=entity.getLocation();return new FallVector(p.getX(),p.getY(),p.getZ());}
     @Override public FallVector velocity(){org.bukkit.util.Vector v=entity.getVelocity();return new FallVector(v.getX(),v.getY(),v.getZ());}
+    private void gravity(boolean enabled){
+        try{Entity.class.getMethod("setGravity",boolean.class).invoke(entity,enabled);}
+        catch(ReflectiveOperationException ex){throw new IllegalStateException("Cannot control falling block gravity",ex);}
+    }
+    @Override public void hold(FallVector position){
+        gravity(false);
+        entity.setVelocity(new org.bukkit.util.Vector(0,0,0));
+        entity.teleport(new Location(entity.getWorld(),position.x,position.y,position.z));
+    }
+    @Override public void release(FallVector velocity){
+        gravity(true);
+        entity.setVelocity(new org.bukkit.util.Vector(velocity.x,velocity.y,velocity.z));
+    }
+    @Override public void keepAlive(){entity.setTicksLived(1);}
     @Override public void remove(){tracked.remove(entity.getUniqueId());entity.remove();}
     @Override public void damageOverlappingEntities(float amount){
         for(Entity target : entity.getNearbyEntities(0,0,0))if(target instanceof LivingEntity)((LivingEntity)target).damage(amount,entity);
