@@ -1,6 +1,14 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.FellBehaviorTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.FallMotionTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.FallDamageTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.FallDelayTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.BlockConversionsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.PlacementTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.breaking.LandingLifecycleTests.register(platform);
+
         com.thizthizzydizzy.treefeller.core.test.options.result.EnchantmentTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.DropChanceTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.DropConversionsTests.register(platform);

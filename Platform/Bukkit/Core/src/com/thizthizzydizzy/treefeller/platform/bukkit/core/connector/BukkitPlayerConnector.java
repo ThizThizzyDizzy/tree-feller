@@ -16,6 +16,11 @@ public class BukkitPlayerConnector implements IPlayerConnector{
     public BukkitPlayerConnector(Player player){
         this.player = player;
     }
+    @Override
+    public com.thizthizzydizzy.treefeller.core.breaking.FallVector position(){
+        Location l=player.getLocation();
+        return new com.thizthizzydizzy.treefeller.core.breaking.FallVector(l.getX(),l.getY(),l.getZ());
+    }
     public Player getPlayer(){
         return player;
     }

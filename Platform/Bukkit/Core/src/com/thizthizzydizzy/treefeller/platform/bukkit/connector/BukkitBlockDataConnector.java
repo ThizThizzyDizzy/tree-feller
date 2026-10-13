@@ -7,6 +7,10 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public interface BukkitBlockDataConnector{
+    com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(Block block);
+    void place(Block block, com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data);
+    org.bukkit.entity.FallingBlock spawn(Location location, com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data);
+    boolean passable(Block block);
     public boolean supportsTestMaterial(String material);
     public void setTestBlock(Block block, String material, BlockAxis axis, int leafDistance);
     public String testBlockState(Block block);

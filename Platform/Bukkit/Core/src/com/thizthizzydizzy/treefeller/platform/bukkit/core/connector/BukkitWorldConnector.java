@@ -15,6 +15,27 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 public class BukkitWorldConnector implements IWorldConnector{
     private final World world;
+    @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(long pos){return BukkitConnector.blockData.snapshot(block(pos));}
+    @Override public void setBlock(long pos,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){BukkitConnector.blockData.place(block(pos),data);}
+    @Override public boolean isAir(long pos){return block(pos).getType().name().endsWith("AIR");}
+    @Override public boolean isPassable(long pos){return BukkitConnector.blockData.passable(block(pos));}
+    @Override public int minHeight(){
+        try{return (Integer)World.class.getMethod("getMinHeight").invoke(world);}
+        catch(NoSuchMethodException ex){return 0;}
+        catch(ReflectiveOperationException ex){throw new IllegalStateException(ex);}
+    }
+    @Override public int maxHeight(){return world.getMaxHeight();}
+    @Override public com.thizthizzydizzy.treefeller.core.connector.world.FallingBlockHandle spawnFallingBlock(long pos,
+            com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data,
+            com.thizthizzydizzy.treefeller.core.breaking.FallVector velocity,
+            java.util.function.BiConsumer<Long,Float> impact,java.util.function.LongConsumer failed){
+        org.bukkit.entity.FallingBlock entity=BukkitConnector.blockData.spawn(
+                block(pos).getLocation().add(.5,.5,.5),data);
+        entity.setDropItem(false);
+        entity.setVelocity(new org.bukkit.util.Vector(velocity.x,velocity.y,velocity.z));
+        return new BukkitFallingBlock(entity,impact,failed);
+    }
+
     public BukkitWorldConnector(World world){
         this.world = world;
     }

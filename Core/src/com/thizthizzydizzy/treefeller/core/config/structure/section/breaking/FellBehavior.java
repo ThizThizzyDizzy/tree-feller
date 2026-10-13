@@ -3,6 +3,9 @@ import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultBoolean;
 import com.thizthizzydizzy.treefeller.core.config.globaldefault.ConfigGlobalDefaultFloat;
 public class FellBehavior{
+    @ConfigComment("Final action: PLACE, BREAK, or INVENTORY. Unspecified: ordinary blocks break; natural/entity falls place. INVENTORY also applies to in-place breaking.")
+    public Landing landing;
+
     @ConfigComment("Attempt to lay the tree down naturally")
     @ConfigGlobalDefaultBoolean(false)
     public Boolean natural;

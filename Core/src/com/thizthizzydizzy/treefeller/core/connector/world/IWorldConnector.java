@@ -4,6 +4,16 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import java.util.Collection;
 public interface IWorldConnector{
+    BlockSnapshot snapshot(long pos);
+    void setBlock(long pos, BlockSnapshot data);
+    boolean isAir(long pos);
+    boolean isPassable(long pos);
+    int minHeight();
+    int maxHeight();
+    FallingBlockHandle spawnFallingBlock(long pos, BlockSnapshot data,
+            com.thizthizzydizzy.treefeller.core.breaking.FallVector velocity,
+            java.util.function.BiConsumer<Long, Float> impact, java.util.function.LongConsumer failed);
+
     public Collection<IItemConnector> getDrops(long pos, IItemConnector tool, IPlayerConnector player);
     public void removeBlock(long pos);
     public void setBlock(long pos, IBlockDefinition definition);

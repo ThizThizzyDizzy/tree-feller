@@ -11,6 +11,28 @@ import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
+    private static final class Snapshot implements com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot{
+        final BlockData data;
+        Snapshot(BlockData data){this.data=data.clone();}
+        @Override public BlockAxis axis(){return data instanceof Orientable?BlockAxis.valueOf(((Orientable)data).getAxis().name()):null;}
+        @Override public Snapshot withAxis(BlockAxis axis){
+            BlockData copy=data.clone();
+            if(axis!=null&&copy instanceof Orientable)((Orientable)copy).setAxis(org.bukkit.Axis.valueOf(axis.name()));
+            return new Snapshot(copy);
+        }
+    }
+    @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(Block block){return new Snapshot(block.getBlockData());}
+    @Override public void place(Block block,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){block.setBlockData(((Snapshot)data).data,false);}
+    @Override public org.bukkit.entity.FallingBlock spawn(Location location,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){
+        org.bukkit.entity.FallingBlock entity=location.getWorld().spawnFallingBlock(location,((Snapshot)data).data);
+        entity.setHurtEntities(false); // Core applies the configured damage once on impact.
+        return entity;
+    }
+    @Override public boolean passable(Block block){if(block.getType().name().equals("POWDER_SNOW"))return false;
+        try{return (Boolean)Block.class.getMethod("isPassable").invoke(block);}
+        catch(NoSuchMethodException ex){return !block.getType().isSolid();}
+        catch(ReflectiveOperationException ex){throw new IllegalStateException(ex);}}
+
     @Override
     public boolean supportsTestMaterial(String name){
         Material material = Material.matchMaterial(name);

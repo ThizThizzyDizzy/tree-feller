@@ -17,7 +17,22 @@ public interface ITestPlatform{
     void prepareCamera(String player);
     /** Announce the current test in chat. */
     void showTestStatus(String player, String message);
+    final class FallingObservation{
+        public final double x,y,z,vx,vy,vz;
+        public final String material;
+        public FallingObservation(double x,double y,double z,double vx,double vy,double vz,String material){
+            this.x=x;this.y=y;this.z=z;this.vx=vx;this.vy=vy;this.vz=vz;this.material=material;
+        }
+    }
+    interface TestTarget{
+        float health();
+        void remove();
+    }
     interface ITestWorld{
+        java.util.List<FallingObservation> fallingBlocks();
+        void removeFallingBlocks();
+        TestTarget spawnTarget(double x,double y,double z);
+
         int maxHeight(); // Exclusive build ceiling; arenas deliberately use positive Y.
         boolean supports(String material);
         void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance);

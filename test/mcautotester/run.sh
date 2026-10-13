@@ -49,7 +49,18 @@ if (($# == 0)); then
         treefeller-option-result-consumed-food-base treefeller-option-result-consumed-food-trunk \
         treefeller-option-result-consumed-food-leaves treefeller-option-result-consumed-food-decoration \
         treefeller-option-result-consumed-health-base treefeller-option-result-consumed-health-trunk \
-        treefeller-option-result-consumed-health-leaves treefeller-option-result-consumed-health-decoration
+        treefeller-option-result-consumed-health-leaves treefeller-option-result-consumed-health-decoration \
+        treefeller-option-breaking-trunk-behavior treefeller-option-breaking-leaves-behavior \
+        treefeller-option-breaking-decoration-behavior \
+        treefeller-option-breaking-fall-direction treefeller-option-breaking-fall-direction-yaw \
+        treefeller-option-breaking-fall-cardinal \
+        treefeller-option-breaking-directional-fall-velocity treefeller-option-breaking-vertical-fall-velocity \
+        treefeller-option-breaking-explosive-fall-velocity treefeller-option-breaking-random-fall-velocity \
+        treefeller-option-breaking-trunk-behavior-fall-damage-amount treefeller-option-breaking-trunk-behavior-fall-damage-maximum \
+        treefeller-option-breaking-leaves-behavior-fall-damage-amount treefeller-option-breaking-leaves-behavior-fall-damage-maximum \
+        treefeller-option-breaking-decoration-behavior-fall-damage-amount treefeller-option-breaking-decoration-behavior-fall-damage-maximum \
+        treefeller-option-breaking-fall-delay treefeller-option-breaking-block-conversions \
+        treefeller-option-breaking-landing treefeller-option-breaking-landing-in-place treefeller-option-result-rotate-logs treefeller-option-result-overrideable-blocks
 fi
 
 ant -q -f "$project_dir/Builder/build.xml" -Dmkdist.disabled=true jar

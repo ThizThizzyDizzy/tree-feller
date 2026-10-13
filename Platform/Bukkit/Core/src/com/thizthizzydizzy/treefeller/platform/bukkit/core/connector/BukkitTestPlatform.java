@@ -91,6 +91,31 @@ public final class BukkitTestPlatform implements ITestPlatform{
     private static final class TestWorld implements ITestWorld{
         private final World world;
         TestWorld(World world){this.world = world;}
+        @Override public java.util.List<FallingObservation> fallingBlocks(){
+            java.util.List<FallingObservation> result=new java.util.ArrayList<>();
+            for(org.bukkit.entity.Entity entity : world.getEntities())if(entity instanceof org.bukkit.entity.FallingBlock){
+                org.bukkit.Location p=entity.getLocation();org.bukkit.util.Vector v=entity.getVelocity();
+                result.add(new FallingObservation(p.getX(),p.getY(),p.getZ(),v.getX(),v.getY(),v.getZ(),
+                        ((org.bukkit.entity.FallingBlock)entity).getMaterial().name().toLowerCase(java.util.Locale.ROOT)));
+            }
+            return result;
+        }
+        @Override public void removeFallingBlocks(){
+            for(org.bukkit.entity.Entity entity : world.getEntities())if(entity instanceof org.bukkit.entity.FallingBlock){
+                BukkitFallingBlock tracked=BukkitFallingBlock.get(entity);
+                if(tracked==null)entity.remove();else tracked.remove();
+            }
+        }
+        @Override public TestTarget spawnTarget(double x,double y,double z){
+            org.bukkit.entity.LivingEntity target=(org.bukkit.entity.LivingEntity)world.spawnEntity(new org.bukkit.Location(world,x,y,z),org.bukkit.entity.EntityType.VILLAGER);
+            try{org.bukkit.entity.LivingEntity.class.getMethod("setAI",boolean.class).invoke(target,false);}
+            catch(ReflectiveOperationException ex){throw new IllegalStateException(ex);}
+            target.setHealth(20);
+            return new TestTarget(){
+                @Override public float health(){return (float)target.getHealth();}
+                @Override public void remove(){target.remove();}
+            };
+        }
         @Override public int maxHeight(){return world.getMaxHeight();}
         @Override public boolean supports(String material){return BukkitConnector.blockData.supportsTestMaterial(material);}
         @Override public void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance){

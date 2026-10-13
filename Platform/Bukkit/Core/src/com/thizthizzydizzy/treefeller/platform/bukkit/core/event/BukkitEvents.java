@@ -14,6 +14,31 @@ public class BukkitEvents implements Listener{
         this.plugin = plugin;
     }
 
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onFallingBlock(org.bukkit.event.entity.EntityChangeBlockEvent event){
+        com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitFallingBlock falling=
+                com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitFallingBlock.get(event.getEntity());
+        if(falling==null||event.getTo()==org.bukkit.Material.AIR)return;
+        boolean refused=event.isCancelled();
+        event.setCancelled(true);
+        Block block=event.getBlock();
+        if(refused)falling.failed();else falling.impact(BlockPos.toPos(block.getX(),block.getY(),block.getZ()));
+    }
+    /** EntityDropItemEvent is absent from the old Bukkit compile API. */
+    public void registerFallingDrops(){
+        try{
+            Class<? extends org.bukkit.event.Event> type=Class.forName("org.bukkit.event.entity.EntityDropItemEvent").asSubclass(org.bukkit.event.Event.class);
+            plugin.getServer().getPluginManager().registerEvent(type,this,EventPriority.HIGHEST,(listener,event) -> {
+                try{
+                    org.bukkit.entity.Entity entity=(org.bukkit.entity.Entity)type.getMethod("getEntity").invoke(event);
+                    com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitFallingBlock falling=
+                            com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitFallingBlock.get(entity);
+                    if(falling!=null){((org.bukkit.event.Cancellable)event).setCancelled(true);falling.failed();}
+                }catch(ReflectiveOperationException ex){throw new org.bukkit.event.EventException(ex);}
+            },plugin);
+        }catch(ClassNotFoundException ex){/* Legacy entity removal is observed through the Core lifecycle. */}
+    }
+
     // Felling observes the original event's cancellation without modifying it.
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event){

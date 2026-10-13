@@ -285,14 +285,8 @@ public final class LegacyBukkitConfigImporter{
         String mode=value.toString().trim().toUpperCase(Locale.ROOT).replace('-','_');
         List<String> valid=Arrays.asList("BREAK","INVENTORY","NATURAL","FALL","FALL_HURT","FALL_BREAK","FALL_HURT_BREAK","FALL_INVENTORY","FALL_HURT_INVENTORY","FALL_NATURAL","FALL_NATURAL_HURT","FALL_NATURAL_BREAK","FALL_NATURAL_HURT_BREAK","FALL_NATURAL_INVENTORY","FALL_NATURAL_HURT_INVENTORY");
         if(!valid.contains(mode))throw new IllegalArgumentException("Unknown fell behavior, retained without guessing");
-        if(mode.contains("BREAK")&&!mode.equals("BREAK"))throw new IllegalArgumentException("V2 FellBehavior has no break-on-landing switch");
-        String otherKey=target.contains("trunk")?"leaf-behavior":"log-behavior";
-        String otherMode=String.valueOf(fallback(local,global,otherKey,"BREAK")).trim().toUpperCase(Locale.ROOT).replace('-','_');
-        if(mode.contains("INVENTORY")||otherMode.contains("INVENTORY")){
-            if(mode.equals("INVENTORY")&&otherMode.equals("INVENTORY")){
-                put(out,"result.drop_to_inventory",true);mode="BREAK";
-            }else throw new IllegalArgumentException("V1 has separate log/leaf inventory and landing behavior; v2 has a shared drop_to_inventory flag without a landing-action switch");
-        }else put(out,"result.drop_to_inventory",false);
+        String landing=mode.contains("INVENTORY")?"INVENTORY":mode.equals("BREAK")||mode.endsWith("BREAK")?"BREAK":"PLACE";
+        put(out,target+".landing",landing);
         put(out,target+".natural",mode.contains("NATURAL"));put(out,target+".fall_as_entities",mode.startsWith("FALL"));
         boolean hurt=mode.contains("HURT");
         put(out,target+".fall_damage_amount",hurt?number(fallback(local,global,"fall-hurt-amount",2)).floatValue():0f);
@@ -310,7 +304,11 @@ public final class LegacyBukkitConfigImporter{
         for(int i=0;i<compass.length;i++)if(dir.equals(compass[i])){
             put(out,"breaking.fall_direction","FIXED");put(out,"breaking.fall_direction_yaw",i*45);return;
         }
-        throw new IllegalArgumentException("V1 "+dir+" is relative to the player-to-cut-block vector; v2 RELATIVE does not specify which player vector it uses");
+        String[] relative={"AWAY","RIGHT","TOWARD","LEFT"};
+        for(int i=0;i<relative.length;i++)if(dir.equals(relative[i])){
+            put(out,"breaking.fall_direction","RELATIVE");put(out,"breaking.fall_direction_yaw",i*90);return;
+        }
+        throw new IllegalArgumentException("Unknown fall direction: "+dir);
     }
     /** Check all templates, including ones no selector currently uses. */
     private static void checkEffectDefinitions(Object value,List<String> issues){

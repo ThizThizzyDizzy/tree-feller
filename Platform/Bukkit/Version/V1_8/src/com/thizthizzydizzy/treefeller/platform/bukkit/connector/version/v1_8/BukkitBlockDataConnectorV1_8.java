@@ -8,6 +8,29 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
+    private static final class Snapshot implements com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot{
+        final Material material;
+        final byte data;
+        final BlockAxis axis;
+        Snapshot(Material material,byte data,BlockAxis axis){this.material=material;this.data=data;this.axis=axis;}
+        @Override public BlockAxis axis(){return axis;}
+        @Override public Snapshot withAxis(BlockAxis axis){
+            if(this.axis==null||axis==null)return this;
+            int value=data;
+            if(material==Material.QUARTZ_BLOCK)value=axis==BlockAxis.Y?2:axis==BlockAxis.X?3:4;
+            else value=(data&3)|(axis==BlockAxis.X?4:axis==BlockAxis.Z?8:0);
+            return new Snapshot(material,(byte)value,axis);
+        }
+    }
+    @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(Block block){return new Snapshot(block.getType(),block.getData(),getBlockAxis(block));}
+    @Override public void place(Block block,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){
+        Snapshot s=(Snapshot)data;block.setTypeIdAndData(s.material.getId(),s.data,false);
+    }
+    @Override public org.bukkit.entity.FallingBlock spawn(Location location,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){
+        Snapshot s=(Snapshot)data;return location.getWorld().spawnFallingBlock(location,s.material,s.data);
+    }
+    @Override public boolean passable(Block block){return !block.getType().isSolid();}
+
     private Material testMaterial(String name){
         switch(name){
             case "grass_block": return Material.GRASS;

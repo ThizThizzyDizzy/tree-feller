@@ -3,6 +3,8 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import java.util.Collection;
 public interface IPlayerConnector{
+    com.thizthizzydizzy.treefeller.core.breaking.FallVector position();
+
     public void setTool(IItemConnector item);
     /** Returns items that did not fit in the inventory. */
     public Collection<IItemConnector> giveItems(IItemConnector item);

@@ -19,6 +19,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 public class TreeFellerResult{
+    /** Shared immediate/impact delivery; overflow remains at the delivery location. */
+    public static void deliverDrops(IWorldConnector world, IPlayerConnector player, long pos, List<IItemConnector> drops, boolean inventory){
+        for(IItemConnector item : drops){
+            if(inventory)for(IItemConnector overflow : player.giveItems(item))world.dropItem(pos,overflow);
+            else world.dropItem(pos,item);
+        }
+    }
     public static List<IItemConnector> collectDrops(IWorldConnector world, IPlayerConnector player, TreeNode node, IItemConnector tool, ResultConfiguration config){
         List<IItemConnector> drops = new ArrayList<>();
         if(player.getGameMode()==PlayerGameMode.CREATIVE)return drops;
