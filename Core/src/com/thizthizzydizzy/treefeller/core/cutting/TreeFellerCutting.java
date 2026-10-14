@@ -17,13 +17,19 @@ import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNodeType;
 import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
+import com.thizthizzydizzy.treefeller.core.result.TreeFellerCascade;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 public class TreeFellerCutting{
     public static boolean cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected){
+        return cut(world, player, detected, null);
+    }
+    public static boolean cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected,
+            TreeFellerCascade.Chain chain){
         DebuggerContext context = TreeFellerDebugger.begin("Cutting", player, world);
+        List<Long> sourceTrunks = detected.detected.getNodes(TreeNodeType.TRUNK, -1, -1).stream().map(node -> node.pos).toList();
         CuttingConfiguration config = TreeFellerConfiguration.getCombinedCuttingConfiguration(detected.tree, detected.tool);
 
         if(config.leave_stump!=null&&config.leave_stump){
@@ -123,37 +129,51 @@ public class TreeFellerCutting{
         context.info("Final cut selection", detected.detected);
         TreeFellerBreaking.PreparedBreak prepared = TreeFellerBreaking.prepare(world, player, detected, nodes, item);
         if(prepared==null)return false;
-        damageTool(item, player, cost, Boolean.TRUE.equals(config.stacked_tools), context);
-        if(Boolean.TRUE.equals(config.cutting_animation)&&(config.animation_delay==null||config.animation_delay>0)){
-            Map<Integer, List<TreeNode>> layers = new TreeMap<>();
-            for(TreeNode node : nodes){
-                TreeNode trunk = node;
-                while(trunk.parent!=null&&trunk.type!=TreeNodeType.TRUNK)trunk = trunk.parent;
-                layers.computeIfAbsent(trunk.distance, ignored -> new ArrayList<>()).add(node);
+        Runnable cascadeComplete = TreeFellerCascade.enqueue(world, player, detected, nodes, sourceTrunks, chain);
+        boolean animationScheduled = false;
+        try{
+            damageTool(item, player, cost, Boolean.TRUE.equals(config.stacked_tools), context);
+            if(Boolean.TRUE.equals(config.cutting_animation)&&(config.animation_delay==null||config.animation_delay>0)){
+                Map<Integer, List<TreeNode>> layers = new TreeMap<>();
+                for(TreeNode node : nodes){
+                    TreeNode trunk = node;
+                    while(trunk.parent!=null&&trunk.type!=TreeNodeType.TRUNK)trunk = trunk.parent;
+                    layers.computeIfAbsent(trunk.distance, ignored -> new ArrayList<>()).add(node);
+                }
+                int delay = config.animation_delay==null?1:Math.max(1, config.animation_delay);
+                List<List<TreeNode>> orderedLayers = new ArrayList<>(layers.values());
+                // Break the initiating layer during the original event, avoiding a second vanilla
+                // drop and durability charge for the player's target block.
+                BreakingResult first = prepared.apply(orderedLayers.get(0));
+                ResultConfiguration resultConfig = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
+                TreeFellerResult.complete(world, player, detected, first, resultConfig, TreeFellerCore.config.global.trigger);
+                if(orderedLayers.size()>1)animate(world, player, detected, prepared, orderedLayers, 1, delay,
+                        resultConfig, TreeFellerCore.config.global.trigger, cascadeComplete);
+                else cascadeComplete.run();
+                animationScheduled = orderedLayers.size()>1;
+                context.pass("Scheduled "+layers.size()+" cutting layers; charged "+cost+" durability");
+            }else{
+                BreakingResult result = prepared.apply(nodes);
+                TreeFellerResult.complete(world, player, detected, result);
+                cascadeComplete.run();
+                context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
             }
-            int delay = config.animation_delay==null?1:Math.max(1, config.animation_delay);
-            List<List<TreeNode>> orderedLayers = new ArrayList<>(layers.values());
-            // Break the initiating layer during the original event, avoiding a second vanilla
-            // drop and durability charge for the player's target block.
-            BreakingResult first = prepared.apply(orderedLayers.get(0));
-            ResultConfiguration resultConfig = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
-            TreeFellerResult.complete(world, player, detected, first, resultConfig, TreeFellerCore.config.global.trigger);
-            if(orderedLayers.size()>1)animate(world, player, detected, prepared, orderedLayers, 1, delay,
-                    resultConfig, TreeFellerCore.config.global.trigger);
-            context.pass("Scheduled "+layers.size()+" cutting layers; charged "+cost+" durability");
-        }else{
-            BreakingResult result = prepared.apply(nodes);
-            TreeFellerResult.complete(world, player, detected, result);
-            context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
+            return true;
+        }finally{
+            if(!animationScheduled)cascadeComplete.run();
         }
-        return true;
     }
     private static void animate(IWorldConnector world, IPlayerConnector player, DetectionResult detected,
-            TreeFellerBreaking.PreparedBreak prepared, List<List<TreeNode>> layers, int index, int delay, ResultConfiguration resultConfig, TriggerConfiguration globalTrigger){
+            TreeFellerBreaking.PreparedBreak prepared, List<List<TreeNode>> layers, int index, int delay, ResultConfiguration resultConfig, TriggerConfiguration globalTrigger, Runnable cascadeComplete){
         TreeFellerCore.connector.schedule(delay, () -> {
-            BreakingResult result = prepared.apply(layers.get(index));
-            TreeFellerResult.complete(world, player, detected, result, resultConfig, globalTrigger, false);
-            if(index+1<layers.size())animate(world, player, detected, prepared, layers, index+1, delay, resultConfig, globalTrigger);
+            boolean continued = false;
+            try{
+                BreakingResult result = prepared.apply(layers.get(index));
+                TreeFellerResult.complete(world, player, detected, result, resultConfig, globalTrigger, false);
+                if(index+1<layers.size())animate(world, player, detected, prepared, layers, index+1, delay, resultConfig, globalTrigger, cascadeComplete);
+                else cascadeComplete.run();
+                continued = index+1<layers.size();
+            }finally{if(!continued)cascadeComplete.run();}
         });
     }
     private static boolean isCuttable(TreeNode node){

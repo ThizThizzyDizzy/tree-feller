@@ -14,6 +14,9 @@ import com.thizthizzydizzy.treefeller.core.detection.TreeTree;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 public class TreeFellerCriteria{
     public static boolean check(IWorldConnector world, TreeTree detected, CriteriaConfiguration config){
+        return check(world, detected, config, false);
+    }
+    private static boolean check(IWorldConnector world, TreeTree detected, CriteriaConfiguration config, boolean cascading){
         if(config==null)return true;
         DebuggerContext context = TreeFellerDebugger.begin("Criteria");
         if(config.required_trunk!=null){
@@ -37,7 +40,7 @@ public class TreeFellerCriteria{
         allBlocks.addAll(trunks);
         allBlocks.addAll(leaves);
         allBlocks.addAll(decorations);
-        if(config.max_height!=null){
+        if(config.max_height!=null&&!cascading){
             int lowestTrunkY = trunks.stream().mapToInt((n) -> BlockPos.getY(n.pos)).min().getAsInt();
             int cutY = BlockPos.getY(detected.root.pos);
             int cutHeight = cutY-lowestTrunkY;
@@ -246,9 +249,12 @@ public class TreeFellerCriteria{
         return true;
     }
     public static boolean check(IWorldConnector world, DetectionResult detected){
-        if(!check(world, detected.detected, TreeFellerCore.config.global.criteria))return false;
-        if(!check(world, detected.detected, detected.tree.criteria))return false;
-        if(!check(world, detected.detected, detected.tool.criteria))return false;
+        return check(world, detected, false);
+    }
+    public static boolean check(IWorldConnector world, DetectionResult detected, boolean cascading){
+        if(!check(world, detected.detected, TreeFellerCore.config.global.criteria, cascading))return false;
+        if(!check(world, detected.detected, detected.tree.criteria, cascading))return false;
+        if(!check(world, detected.detected, detected.tool.criteria, cascading))return false;
         return true;
     }
 }

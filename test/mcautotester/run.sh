@@ -9,7 +9,11 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-option-trigger-default-enabled \
+    set -- treefeller-option-result-cascade-enable \
+        treefeller-option-result-cascade-parallel-cascade-limit \
+        treefeller-option-result-cascade-cascade-check-limit \
+        treefeller-option-trees-cascade-trees \
+        treefeller-option-trigger-default-enabled \
         treefeller-option-trigger-permissions \
         treefeller-option-detection-root-distance \
         treefeller-option-detection-disconnected-trunk-distance \

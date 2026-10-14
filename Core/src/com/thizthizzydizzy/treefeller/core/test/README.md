@@ -136,3 +136,14 @@ Sapling priority cases use seven connected, intact spruce columns with heights
 saplings available, exact-position assertions require saplings beneath the
 10-log and 9-log columns and air at every shorter column's base. Both cases
 also assert complete tree removal and the exact unconsumed inventory count.
+
+Cascading has individual suites for `result.cascade.enable`,
+`result.cascade.parallel-cascade-limit`, `result.cascade.cascade-check-limit`,
+and `trees.cascade-trees`. Shared intact forests verify disabled/enabled behavior,
+disconnected crowns, multi-hop same-species chains, normal criteria refusal,
+tool overrides, and default/empty/explicit species selectors. Tick observations
+check limits one and two for immediate felling and simultaneous animated cuts,
+and check budgets one and 64. Cascades bypass cutting height as in v1, while
+retaining the normal trigger, criteria, cutting, breaking, and result pipeline.
+The concurrency budget includes the initiating animated cut until its final layer
+finishes. Limits below one use one, matching the minimum allowed by v1's UI.

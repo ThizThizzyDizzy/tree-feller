@@ -23,6 +23,11 @@ public class TreeFellerTrigger{
         TreeFellerCutting.cut(world, player, detected);
     }
     public static DetectionResult detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary){
+        return detect(player, world, pos, secondary, null, false);
+    }
+    /** Cascade selection is explicit; secondary verification still examines all trees. */
+    public static DetectionResult detect(IPlayerConnector player, IWorldConnector world, long pos, boolean secondary,
+            java.util.Collection<TreeConfiguration> allowedTrees, boolean cascading){
         DebuggerContext context = TreeFellerDebugger.begin("Trigger", player, world, pos);
         PlayerSettings playerSettings = PlayerSettings.get(player);
         if(!context.checkTrue("Is Toggled On", playerSettings.isToggledOn()))
@@ -49,6 +54,7 @@ public class TreeFellerTrigger{
         // check every tool/tree combination
         for(int treeIndex = 0; treeIndex<TreeFellerCore.config.trees.length; treeIndex++){
             TreeConfiguration tree = TreeFellerCore.config.trees[treeIndex];
+            if(allowedTrees!=null&&!allowedTrees.contains(tree))continue;
             context.info(tree);
             if(!context.checkTrue("Tree Trigger", checkTrigger(context, player, world, pos, tree.trigger)))
                 continue;
@@ -57,7 +63,7 @@ public class TreeFellerTrigger{
                 TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item, secondary);
                 if(detected==null)continue;
                 DetectionResult result = new DetectionResult(detected, tree, tool);
-                if(!secondary&&!TreeFellerCriteria.check(world, result))continue;
+                if(!secondary&&!TreeFellerCriteria.check(world, result, cascading))continue;
                 return result;
             }
         }

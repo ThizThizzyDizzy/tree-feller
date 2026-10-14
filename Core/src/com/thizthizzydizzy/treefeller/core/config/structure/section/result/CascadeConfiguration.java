@@ -9,7 +9,7 @@ public class CascadeConfiguration{
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean enable;
 
-    @ConfigComment("The maximum number of trees that may be felling at once from a single cascade")
+    @ConfigComment("The maximum number of trees felled per tick, or simultaneously animated cuts")
     @ConfigGlobalDefaultInteger(1)
     @LegacyBukkitOption(value = "parallel-cascade-limit",
             scopes = {LegacyBukkitOption.Scope.GLOBAL})

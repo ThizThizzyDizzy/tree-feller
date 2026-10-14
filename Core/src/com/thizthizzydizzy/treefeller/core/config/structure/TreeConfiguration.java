@@ -32,7 +32,7 @@ public class TreeConfiguration{
             conversion = LegacyBukkitOption.Conversion.SAPLING)
     public SaplingConfiguration[] saplings;
 
-    @ConfigComment("The tree indicies that this tree can cascade into")
+    @ConfigComment("The zero-based tree indices this tree can cascade into; unset selects this tree definition, and an empty list disables targets")
     @LegacyBukkitOption(value = "cascade-trees",
             scopes = {LegacyBukkitOption.Scope.TREE},
             conversion = LegacyBukkitOption.Conversion.TREE_SELECTOR)
