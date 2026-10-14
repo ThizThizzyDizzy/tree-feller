@@ -1,6 +1,15 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.result.SaplingEnableTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.UseTreeSaplingsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.UseInventorySaplingsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.SpawnSaplingsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.SaplingTimeoutTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.SaplingGrassesTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.TreeSaplingsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.result.MaxSaplingsTests.register(platform);
+
         com.thizthizzydizzy.treefeller.core.test.options.trigger.DefaultEnabledTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.trigger.PermissionsTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.detection.RootDistanceTests.register(platform);

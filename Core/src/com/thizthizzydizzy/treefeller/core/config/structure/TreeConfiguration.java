@@ -21,7 +21,7 @@ public class TreeConfiguration{
     @ConfigComment("The blocks to search for in the tree leaves")
     public IBlockDefinition[] leaves;
 
-    @ConfigComment("The maximum number of saplings that may be planted for this tree")
+    @ConfigComment("The maximum number of saplings that may be planted for this tree; zero disables replanting")
     @LegacyBukkitOption(value = "max-saplings",
             scopes = {LegacyBukkitOption.Scope.TREE})
     public int max_saplings = 1;

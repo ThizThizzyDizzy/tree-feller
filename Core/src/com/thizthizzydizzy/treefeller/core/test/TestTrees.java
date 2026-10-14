@@ -117,6 +117,19 @@ public final class TestTrees{
         }
         return b.finish();
     }
+    /** Intact spruce crowns sharing a connected trunk base; each column is {x, z, height}. */
+    public static Tree spruceCluster(int[]... columns){
+        Builder b=new Builder(Kind.SPRUCE);
+        for(int[] column : columns){
+            int height=column[2];
+            if(height<4||height>32)throw new IllegalArgumentException("Trunk height must be 4..32");
+            for(int y=2;y<=height;y++)
+                b.disk(column[0],y,column[1],y==height?0:Math.min(2,1+(height-y)/3));
+        }
+        // Place all columns after the crowns so overlapping foliage cannot replace logs.
+        for(int[] column : columns)for(int y=0;y<column[2];y++)b.log(column[0],y,column[1],BlockAxis.Y);
+        return b.finish();
+    }
     private static final class Builder{
         final Kind kind;
         final Map<Long, Block> blocks = new LinkedHashMap<>();

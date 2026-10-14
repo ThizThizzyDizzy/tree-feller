@@ -5,6 +5,10 @@ import java.util.Collection;
 public interface IPlayerConnector{
     com.thizthizzydizzy.treefeller.core.breaking.FallVector position();
 
+    int inventorySize();
+    IItemConnector inventoryItem(int slot);
+    void setInventoryItem(int slot, IItemConnector item);
+
     public void setTool(IItemConnector item);
     /** Returns items that did not fit in the inventory. */
     public Collection<IItemConnector> giveItems(IItemConnector item);

@@ -120,3 +120,19 @@ consecutive cuts through a 2x2 section, verifying all remaining logs after each
 refusal and felling on the final cut. `trunk-max-horizontal-line` checks limits
 one and two against narrow, 2x2, and branched trees. Each option and named case
 is independently selectable using its `treefeller-option-criteria-...` name.
+
+Sapling replant coverage has separate suites for `result.sapling-replant.enable`,
+`use-tree-saplings`, `use-inventory-saplings`, `spawn-saplings`, `sapling-timeout`,
+and `grasses`, plus `trees.saplings` and `trees.max-saplings`. Intact spruce
+specimens share one setup per suite. Silk-touch leaf drops converted to saplings
+provide deterministic tree sources; assertions count both planted blocks and
+unconsumed items. Cases also cover animation, delayed falling-leaf drops,
+blocked planting sites, retained stumps, default species, and block/item pairs.
+Timeout cases observe server ticks and supply inventory items before and after
+the deadline at two configured values. Each suite ends with one camera view.
+
+Sapling priority cases use seven connected, intact spruce columns with heights
+5, 7, 4, 10, 6, 9, and 8. With either `max-saplings = 2` or only two inventory
+saplings available, exact-position assertions require saplings beneath the
+10-log and 9-log columns and air at every shorter column's base. Both cases
+also assert complete tree removal and the exact unconsumed inventory count.

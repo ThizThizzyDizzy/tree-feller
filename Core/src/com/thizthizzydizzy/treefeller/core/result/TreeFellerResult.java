@@ -22,6 +22,7 @@ public class TreeFellerResult{
     /** Shared immediate/impact delivery; overflow remains at the delivery location. */
     public static void deliverDrops(IWorldConnector world, IPlayerConnector player, long pos, List<IItemConnector> drops, boolean inventory){
         for(IItemConnector item : drops){
+            if(item.getCount()<=0)continue;
             if(inventory)for(IItemConnector overflow : player.giveItems(item))world.dropItem(pos,overflow);
             else world.dropItem(pos,item);
         }
@@ -69,6 +70,7 @@ public class TreeFellerResult{
         int items = 0;
         for(Map.Entry<Long, List<IItemConnector>> entry : result.drops.entrySet()){
             for(IItemConnector item : entry.getValue()){
+                if(item.getCount()<=0)continue;
                 items += item.getCount();
                 context.info("Drop: "+item.getItemId()+" x"+item.getCount(), entry.getKey());
                 if(Boolean.TRUE.equals(config.drop_to_inventory)){

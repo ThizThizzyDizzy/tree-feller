@@ -21,6 +21,17 @@ public class BukkitPlayerConnector implements IPlayerConnector{
         Location l=player.getLocation();
         return new com.thizthizzydizzy.treefeller.core.breaking.FallVector(l.getX(),l.getY(),l.getZ());
     }
+    @Override
+    public int inventorySize(){return player.getInventory().getSize();}
+    @Override
+    public IItemConnector inventoryItem(int slot){
+        ItemStack stack=player.getInventory().getItem(slot);
+        return stack==null?null:new BukkitItemConnector(stack.clone());
+    }
+    @Override
+    public void setInventoryItem(int slot,IItemConnector item){
+        player.getInventory().setItem(slot,item.getCount()==0?null:((BukkitItemConnector)item).getStack());
+    }
     public Player getPlayer(){
         return player;
     }

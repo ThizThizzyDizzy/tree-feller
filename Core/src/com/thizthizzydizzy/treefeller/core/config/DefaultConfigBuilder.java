@@ -7,6 +7,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionCon
 import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.SaplingConfiguration;
 import java.util.ArrayList;
 import java.util.Map;
 public class DefaultConfigBuilder{
@@ -50,9 +51,20 @@ public class DefaultConfigBuilder{
                 tree.detection.max_leaf_distance_from_top = 4096;
                 tree.detection.leaf_detect_range = config.global.detection.root_distance;
             }
+            String saplingName=wood.equals("mangrove")?"mangrove_propagule":wood+"_sapling";
+            if(blocks.containsKey(saplingName)&&items.containsKey(saplingName)){
+                SaplingConfiguration sapling=new SaplingConfiguration();
+                sapling.block=blocks.get(saplingName);
+                sapling.item=items.get(saplingName);
+                tree.saplings=new SaplingConfiguration[]{sapling};
+            }
+            if(wood.equals("spruce")||wood.equals("jungle")||wood.equals("dark_oak")||wood.equals("pale_oak"))tree.max_saplings=4;
             tree.leaves = leaves.toArray(IBlockDefinition[]::new);
             trees.add(tree);
         }
+        ArrayList<IBlockDefinition> grasses=new ArrayList<>();
+        for(String soil : new String[]{"dirt","grass_block","podzol"})if(blocks.containsKey(soil))grasses.add(blocks.get(soil));
+        config.global.result.sapling_replant.grasses=grasses.toArray(IBlockDefinition[]::new);
         config.tools = tools.toArray(ToolConfiguration[]::new);
         config.trees = trees.toArray(TreeConfiguration[]::new);
         config.global.detection.decorations = new DecorationConfiguration[]{

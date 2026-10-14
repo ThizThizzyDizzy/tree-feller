@@ -16,13 +16,13 @@ public class SaplingReplantConfiguration{
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean use_tree_saplings;
     
-    @ConfigComment("Use saplings from the player inventory to replant trees")
+    @ConfigComment("Use saplings from the player inventory to replant trees when tree drops have not filled the planting sites")
     @ConfigGlobalDefaultBoolean(false)
     @LegacyBukkitOption(value = "use-inventory-saplings",
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Boolean use_inventory_saplings;
     
-    @ConfigComment("Spawn saplings to replant if not enough are available")
+    @ConfigComment("Spawn saplings at the timeout to replant if not enough are available")
     @ConfigGlobalDefaultBoolean(false)
     @LegacyBukkitOption(value = "spawn-saplings",
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},

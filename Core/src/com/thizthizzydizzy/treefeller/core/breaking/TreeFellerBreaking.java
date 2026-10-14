@@ -14,6 +14,7 @@ import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
 import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
 import com.thizthizzydizzy.treefeller.core.detection.*;
 import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
+import com.thizthizzydizzy.treefeller.core.result.SaplingReplant;
 import java.util.*;
 /** Core owns removal, motion plans, placement, and exactly-once deferred outcomes. */
 public class TreeFellerBreaking{
@@ -42,6 +43,7 @@ public class TreeFellerBreaking{
         private final DebuggerContext context;
         private final Map<Long, BlockPlan> plans=new LinkedHashMap<>();
         private final List<BlockPlan> naturalPending=new ArrayList<>();
+        private final SaplingReplant replant;
         private final long origin;
         private final int lowest;
         private final FallVector direction;
@@ -74,6 +76,10 @@ public class TreeFellerBreaking{
                 plans.put(node.pos,new BlockPlan(node,world.snapshot(node.pos),conversion,behavior,natural,entity,landing,velocity,
                         conversion==null?TreeFellerResult.collectDrops(world,player,node,dropTool,resultConfig):Collections.emptyList()));
             }
+            List<TreeNode> replantNodes=new ArrayList<>();
+            for(BlockPlan plan : plans.values())if(plan.conversion==null)replantNodes.add(plan.node);
+            replant=new SaplingReplant(world,player,detected.tree,replantNodes,resultConfig.sapling_replant);
+            for(BlockPlan plan : plans.values())if(plan.natural||plan.landing==Landing.PLACE)replant.hold(plan.node.pos);
         }
         public BreakingResult apply(List<TreeNode> nodes){
             Map<Long,List<IItemConnector>> immediate=new LinkedHashMap<>();
@@ -101,8 +107,11 @@ public class TreeFellerBreaking{
                         if(!plan.done){plan.held=false;plan.handle.release(plan.velocity);}
                     });
                 }else if(plan.natural||plan.landing==Landing.PLACE){naturalPending.add(plan);}
-                else if(plan.landing==Landing.INVENTORY)TreeFellerResult.deliverDrops(world,player,plan.node.pos,plan.drops,true);
-                else immediate.put(plan.node.pos,plan.drops);
+                else if(plan.landing==Landing.INVENTORY)replant.deliver(plan.node.pos,plan.drops,true);
+                else{
+                    replant.offer(plan.node.pos,plan.drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                    immediate.put(plan.node.pos,plan.drops);
+                }
             }
             // Lay out only after all selected sources are removed, including animated layers.
             if(remaining==0){
@@ -114,6 +123,7 @@ public class TreeFellerBreaking{
                     for(BlockPlan plan : settled)finish(plan,plan.natural?naturalTarget(plan):plan.node.pos,false,0);
                 });
             }
+            replant.start();
             context.pass("Processed "+nodes.size()+" blocks");
             return new BreakingResult(new ArrayList<>(nodes),immediate);
         }
@@ -194,6 +204,7 @@ public class TreeFellerBreaking{
         private void finish(BlockPlan plan,long target,boolean failed,float distance){
             if(plan.done)return;
             plan.done=true;
+            if(!(plan.natural&&plan.entity&&plan.landing==Landing.PLACE))replant.release(plan.node.pos);
             if(plan.handle!=null){
                 float amount=Math.max(0,FallPhysics.value(plan.behavior.fall_damage_amount));
                 float maximum=plan.behavior.fall_damage_maximum==null?40:Math.max(0,plan.behavior.fall_damage_maximum);
@@ -212,7 +223,8 @@ public class TreeFellerBreaking{
                     watchLanding(plan);
                 }else{
                     if(plan.handle!=null)plan.handle.remove();
-                    if(!creative)TreeFellerResult.deliverDrops(world,player,target,plan.drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                    replant.release(plan.node.pos);
+                    if(!creative)replant.deliver(target,plan.drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
                 }
                 if(naturalEntities==0){
                     // Landing the bottom of the tree early would obstruct the higher
@@ -223,7 +235,8 @@ public class TreeFellerBreaking{
                         while(placed.contains(destination)&&BlockPos.getY(destination)+1<world.maxHeight())
                             destination=BlockPos.toPos(BlockPos.getX(destination),BlockPos.getY(destination)+1,BlockPos.getZ(destination));
                         if(replaceable(destination)){world.setBlock(destination,rotated(entry.getKey(),destination));placed.add(destination);}
-                        else TreeFellerResult.deliverDrops(world,player,destination,entry.getKey().drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                        else replant.deliver(destination,entry.getKey().drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                        replant.release(entry.getKey().node.pos);
                         entry.getKey().handle.remove();
                     }
                     naturalLandings.clear();
@@ -239,7 +252,7 @@ public class TreeFellerBreaking{
                 context.info("Landed "+plan.node.type,target);
             }else{
                 boolean inventory=plan.landing==Landing.INVENTORY||Boolean.TRUE.equals(resultConfig.drop_to_inventory);
-                TreeFellerResult.deliverDrops(world,player,target,plan.drops,inventory);
+                replant.deliver(target,plan.drops,inventory);
                 context.info("Delivered landing drops for "+plan.node.type,target);
             }
             if(plan.handle!=null)plan.handle.remove();

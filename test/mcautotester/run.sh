@@ -59,6 +59,13 @@ if (($# == 0)); then
         treefeller-option-result-trunk-drop-chance treefeller-option-result-leaves-drop-chance \
         treefeller-option-result-decorations-drop-chance treefeller-option-result-drop-conversions \
         treefeller-option-result-drop-to-inventory \
+        treefeller-option-result-sapling-replant-enable \
+        treefeller-option-result-sapling-replant-use-tree-saplings \
+        treefeller-option-result-sapling-replant-use-inventory-saplings \
+        treefeller-option-result-sapling-replant-spawn-saplings \
+        treefeller-option-result-sapling-replant-sapling-timeout \
+        treefeller-option-result-sapling-replant-grasses \
+        treefeller-option-trees-saplings treefeller-option-trees-max-saplings \
         treefeller-option-result-consumed-food-base treefeller-option-result-consumed-food-trunk \
         treefeller-option-result-consumed-food-leaves treefeller-option-result-consumed-food-decoration \
         treefeller-option-result-consumed-health-base treefeller-option-result-consumed-health-trunk \
