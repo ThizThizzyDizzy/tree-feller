@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.result.EffectsTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.CascadeTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.SaplingEnableTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.UseTreeSaplingsTests.register(platform);

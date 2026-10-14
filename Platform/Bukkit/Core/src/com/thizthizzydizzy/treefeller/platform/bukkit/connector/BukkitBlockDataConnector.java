@@ -7,6 +7,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public interface BukkitBlockDataConnector{
+    java.util.function.Consumer<Location> prepareParticle(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration effect);
     com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(Block block);
     void place(Block block, com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data);
     org.bukkit.entity.FallingBlock spawn(Location location, com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data);

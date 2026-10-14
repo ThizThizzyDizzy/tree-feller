@@ -15,6 +15,11 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 public class BukkitWorldConnector implements IWorldConnector{
     private final World world;
+    @Override public java.util.function.LongConsumer prepareEffect(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration effect){
+        java.util.function.Consumer<org.bukkit.Location> playback=BukkitEffectPlayback.prepare(effect);
+        return pos -> playback.accept(block(pos).getLocation().add(.5,.5,.5));
+    }
+    @Override public String material(long pos){return block(pos).getType().name();}
     @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(long pos){return BukkitConnector.blockData.snapshot(block(pos));}
     @Override public void setBlock(long pos,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){BukkitConnector.blockData.place(block(pos),data);}
     @Override public boolean isAir(long pos){return block(pos).getType().name().endsWith("AIR");}

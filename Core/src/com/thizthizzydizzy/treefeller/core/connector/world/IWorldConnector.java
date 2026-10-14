@@ -4,6 +4,9 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import java.util.Collection;
 public interface IWorldConnector{
+    /** Resolve native effect data before any tool or tree is changed. */
+    java.util.function.LongConsumer prepareEffect(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration effect);
+    String material(long pos);
     BlockSnapshot snapshot(long pos);
     void setBlock(long pos, BlockSnapshot data);
     boolean isAir(long pos);

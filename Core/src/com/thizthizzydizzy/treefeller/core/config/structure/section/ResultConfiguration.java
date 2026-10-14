@@ -84,7 +84,7 @@ public class ResultConfiguration{
     @ConfigGlobalDefaultFloat(1)
     public Float decorations_drop_chance;
     
-    @ConfigComment("Effects to apply to falling trees")
+    @ConfigComment("Effects at selected tree blocks or the cut block; each entry requires type and location. See docs/effects.md")
     @LegacyBukkitOption(value = "effects",
             scopes = {LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
             conversion = LegacyBukkitOption.Conversion.EFFECTS)

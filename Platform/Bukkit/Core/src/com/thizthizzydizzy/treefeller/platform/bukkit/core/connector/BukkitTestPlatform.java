@@ -14,6 +14,7 @@ public final class BukkitTestPlatform implements ITestPlatform{
         if(player==null)throw new IllegalArgumentException("Test player is offline: "+name);
         return player;
     }
+    @Override public EffectCapture captureEffects(String name){return new BukkitEffectCapture(player(name));}
     @Override
     public ITestWorld world(String player){
         return new TestWorld(player(player).getWorld());
@@ -122,6 +123,12 @@ public final class BukkitTestPlatform implements ITestPlatform{
                 @Override public float health(){return (float)target.getHealth();}
                 @Override public void remove(){target.remove();}
             };
+        }
+        @Override public int fireCount(int minX,int minY,int minZ,int maxX,int maxY,int maxZ){
+            int count=0;
+            for(int x=minX;x<=maxX;x++)for(int y=minY;y<=maxY;y++)for(int z=minZ;z<=maxZ;z++)
+                if(world.getBlockAt(x,y,z).getType()==Material.FIRE)count++;
+            return count;
         }
         @Override public int maxHeight(){return world.getMaxHeight();}
         @Override public boolean supports(String material){return BukkitConnector.blockData.supportsTestMaterial(material);}

@@ -333,9 +333,10 @@ public final class LegacyBukkitConfigImporter{
                 Map<String,Object> effect=copyMap((Map<?,?>)declaration);
                 if(!reference.equals("ALL")&&!reference.toString().equalsIgnoreCase(String.valueOf(effect.get("name"))))continue;
                 found=true;
-                if(effect.containsKey("filter")){issue(issues,at+"["+effect.get("name")+"]","V2 EffectConfiguration has no material filter.");continue;}
+                if(effect.containsKey("filter"))effect.put("filter",new ArrayList<>(flatten(effect.get("filter"))));
+                if(effect.containsKey("tags"))effect.put("tags",new ArrayList<>(flatten(effect.get("tags"))));
                 String label=String.valueOf(effect.remove("name"));
-                Set<String> allowed=new HashSet<>(Arrays.asList("chance","location","type","particle","x","y","z","dx","dy","dz","speed","count","r","g","b","size","item","block","sound","volume","pitch","power","fire","permanent","tags"));
+                Set<String> allowed=new HashSet<>(Arrays.asList("filter","chance","location","type","particle","x","y","z","dx","dy","dz","speed","count","r","g","b","size","item","block","sound","volume","pitch","power","fire","permanent","tags"));
                 for(String key:new ArrayList<>(effect.keySet()))if(!allowed.contains(key)){
                     issue(issues,at+"["+label+"]."+key,"No v2 effect field; original retained.");effect.remove(key);
                 }

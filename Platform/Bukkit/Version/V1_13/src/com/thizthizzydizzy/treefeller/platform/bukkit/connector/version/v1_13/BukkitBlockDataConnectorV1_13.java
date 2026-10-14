@@ -11,6 +11,60 @@ import org.bukkit.block.data.type.Leaves;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
+    @Override public java.util.function.Consumer<Location> prepareParticle(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration e){
+        String name=e.particle.toUpperCase(java.util.Locale.ROOT);
+        org.bukkit.Particle particle;
+        try{particle=org.bukkit.Particle.valueOf(name);}
+        catch(IllegalArgumentException ex){
+            // Bukkit renamed these particles in 1.20.5; keep v1 configurations usable.
+            switch(name){
+                case "REDSTONE": name="DUST"; break;
+                case "ITEM_CRACK": name="ITEM"; break;
+                case "BLOCK_CRACK": case "BLOCK_DUST": name="BLOCK"; break;
+                case "EXPLOSION_NORMAL": name="POOF"; break;
+                case "EXPLOSION_LARGE": name="EXPLOSION"; break;
+                case "EXPLOSION_HUGE": name="EXPLOSION_EMITTER"; break;
+                case "SMOKE_NORMAL": name="SMOKE"; break;
+                case "SMOKE_LARGE": name="LARGE_SMOKE"; break;
+                case "FIREWORKS_SPARK": name="FIREWORK"; break;
+                case "WATER_BUBBLE": name="BUBBLE"; break;
+                case "WATER_SPLASH": name="SPLASH"; break;
+                case "WATER_WAKE": name="FISHING"; break;
+                case "VILLAGER_HAPPY": name="HAPPY_VILLAGER"; break;
+                case "VILLAGER_ANGRY": name="ANGRY_VILLAGER"; break;
+                case "ENCHANTMENT_TABLE": name="ENCHANT"; break;
+                case "CRIT_MAGIC": name="ENCHANTED_HIT"; break;
+                case "SPELL": name="EFFECT"; break;
+                case "SPELL_INSTANT": name="INSTANT_EFFECT"; break;
+                case "SPELL_WITCH": name="WITCH"; break;
+                case "TOWN_AURA": name="MYCELIUM"; break;
+                case "SNOWBALL": case "SNOW_SHOVEL": name="ITEM_SNOWBALL"; break;
+                case "SLIME": name="ITEM_SLIME"; break;
+                case "DRIP_WATER": name="DRIPPING_WATER"; break;
+                case "DRIP_LAVA": name="DRIPPING_LAVA"; break;
+                case "WATER_DROP": name="RAIN"; break;
+                default: throw ex;
+            }
+            particle=org.bukkit.Particle.valueOf(name);
+        }
+        Object extra=null;
+        Class<?> data=particle.getDataType();
+        if(data==org.bukkit.Particle.DustOptions.class){
+            if(e.size<=0)throw new IllegalArgumentException("Dust size must be positive");
+            extra=new org.bukkit.Particle.DustOptions(org.bukkit.Color.fromRGB((int)e.r,(int)e.g,(int)e.b),e.size);
+        }else if(data==ItemStack.class){
+            if(e.item==null)throw new IllegalArgumentException("Particle item is required");
+            Material material=Material.matchMaterial(e.item);
+            if(material==null||material==Material.AIR)throw new IllegalArgumentException("Invalid particle item: "+e.item);
+            extra=new ItemStack(material);
+        }else if(data==BlockData.class){
+            if(e.block==null)throw new IllegalArgumentException("Particle block is required");
+            extra=org.bukkit.Bukkit.createBlockData(e.block.toLowerCase(java.util.Locale.ROOT));
+        }else if(data!=Void.class)throw new IllegalArgumentException("Unsupported particle data: "+particle);
+        final org.bukkit.Particle selected=particle;
+        final Object payload=extra;
+        return location -> location.getWorld().spawnParticle(selected,location.clone().add(e.x,e.y,e.z),e.count,e.dx,e.dy,e.dz,e.speed,payload);
+    }
     private static final class Snapshot implements com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot{
         final BlockData data;
         Snapshot(BlockData data){this.data=data.clone();}

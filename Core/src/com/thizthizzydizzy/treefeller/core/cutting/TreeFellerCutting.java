@@ -132,7 +132,8 @@ public class TreeFellerCutting{
         Runnable cascadeComplete = TreeFellerCascade.enqueue(world, player, detected, nodes, sourceTrunks, chain);
         boolean animationScheduled = false;
         try{
-            damageTool(item, player, cost, Boolean.TRUE.equals(config.stacked_tools), context);
+            int brokenTools = damageTool(item, player, cost, Boolean.TRUE.equals(config.stacked_tools), context);
+            if(brokenTools>0)prepared.toolEffects(true);
             if(Boolean.TRUE.equals(config.cutting_animation)&&(config.animation_delay==null||config.animation_delay>0)){
                 Map<Integer, List<TreeNode>> layers = new TreeMap<>();
                 for(TreeNode node : nodes){
@@ -145,6 +146,7 @@ public class TreeFellerCutting{
                 // Break the initiating layer during the original event, avoiding a second vanilla
                 // drop and durability charge for the player's target block.
                 BreakingResult first = prepared.apply(orderedLayers.get(0));
+                prepared.toolEffects(false);
                 ResultConfiguration resultConfig = TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool);
                 TreeFellerResult.complete(world, player, detected, first, resultConfig, TreeFellerCore.config.global.trigger);
                 if(orderedLayers.size()>1)animate(world, player, detected, prepared, orderedLayers, 1, delay,
@@ -154,6 +156,7 @@ public class TreeFellerCutting{
                 context.pass("Scheduled "+layers.size()+" cutting layers; charged "+cost+" durability");
             }else{
                 BreakingResult result = prepared.apply(nodes);
+                prepared.toolEffects(false);
                 TreeFellerResult.complete(world, player, detected, result);
                 cascadeComplete.run();
                 context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
@@ -201,18 +204,21 @@ public class TreeFellerCutting{
         for(TreeNode node : nodes)total += weight(node, config);
         return roundedCost(total, divisor);
     }
-    private static void damageTool(IItemConnector item, IPlayerConnector player, int cost, boolean stacked, DebuggerContext context){
-        if(cost<=0)return;
+    private static int damageTool(IItemConnector item, IPlayerConnector player, int cost, boolean stacked, DebuggerContext context){
+        if(cost<=0)return 0;
+        int broken = 0;
         int remaining = item.getCurrentDurability();
         int count = item.getCount();
         while(cost>=remaining&&count>0){
             cost -= remaining;
             count = stacked?count-1:0;
             remaining = item.getMaxDurability();
+            broken++;
             context.info("Consumed one tool");
         }
         item.setCount(count);
         if(count>0)item.setDamage(item.getMaxDurability()-remaining+cost);
         player.setTool(item);
+        return broken;
     }
 }

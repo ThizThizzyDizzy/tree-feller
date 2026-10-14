@@ -8,6 +8,32 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
+    @Override public java.util.function.Consumer<Location> prepareParticle(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration e){
+        try{
+            String version=org.bukkit.Bukkit.getServer().getClass().getPackage().getName();
+            version=version.substring(version.lastIndexOf('.')+1);
+            String nms="net.minecraft.server."+version+".";
+            Class particleClass=Class.forName(nms+"EnumParticle");
+            Object particle=Enum.valueOf(particleClass,e.particle.toUpperCase(java.util.Locale.ROOT));
+            java.lang.reflect.Constructor<?> constructor=Class.forName(nms+"PacketPlayOutWorldParticles").getConstructor(
+                    particleClass,boolean.class,float.class,float.class,float.class,float.class,float.class,float.class,float.class,int.class,int[].class);
+            int[] data=new int[0];
+            if(e.particle.equalsIgnoreCase("ITEM_CRACK"))data=new int[]{Material.matchMaterial(e.item).getId(),0};
+            if(e.particle.equalsIgnoreCase("BLOCK_CRACK")||e.particle.equalsIgnoreCase("BLOCK_DUST"))data=new int[]{Material.matchMaterial(e.block).getId()};
+            final int[] payload=data;
+            return location -> {
+                try{
+                    Object packet=constructor.newInstance(particle,false,(float)(location.getX()+e.x),(float)(location.getY()+e.y),(float)(location.getZ()+e.z),
+                            e.dx,e.dy,e.dz,e.speed,e.count,payload);
+                    for(Player player : location.getWorld().getPlayers()){
+                        Object handle=player.getClass().getMethod("getHandle").invoke(player);
+                        Object connection=handle.getClass().getField("playerConnection").get(handle);
+                        connection.getClass().getMethod("sendPacket",Class.forName(nms+"Packet")).invoke(connection,packet);
+                    }
+                }catch(ReflectiveOperationException ex){throw new IllegalStateException(ex);}
+            };
+        }catch(ReflectiveOperationException ex){throw new IllegalArgumentException("Could not prepare legacy particle",ex);}
+    }
     private static final class Snapshot implements com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot{
         final Material material;
         final byte data;

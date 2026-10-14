@@ -32,8 +32,13 @@ public class TreeFellerBreaking{
                     ||(b.fall_damage_maximum!=null&&!Float.isFinite(b.fall_damage_maximum)))){
                 context.fail("Non-finite fall damage configuration");return null;
             }
-        return new PreparedBreak(world,player,detected,nodes,tool,config,
-                TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree,detected.tool),context);
+        try{
+            return new PreparedBreak(world,player,detected,nodes,tool,config,
+                    TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree,detected.tool),context);
+        }catch(IllegalArgumentException ex){
+            context.fail("Invalid breaking/result configuration: "+ex.getMessage());
+            return null;
+        }
     }
     public static final class PreparedBreak{
         private final IWorldConnector world;
@@ -45,6 +50,7 @@ public class TreeFellerBreaking{
         private final List<BlockPlan> naturalPending=new ArrayList<>();
         private final SaplingReplant replant;
         private final long origin;
+        private final com.thizthizzydizzy.treefeller.core.result.TreeFellerEffects effects;
         private final int lowest;
         private final FallVector direction;
         private final boolean creative;
@@ -55,6 +61,7 @@ public class TreeFellerBreaking{
                 BreakingConfiguration config,ResultConfiguration resultConfig,DebuggerContext context){
             this.world=world;this.player=player;this.config=config;this.resultConfig=resultConfig;this.context=context;
             origin=detected.detected.root.pos;
+            effects=new com.thizthizzydizzy.treefeller.core.result.TreeFellerEffects(world,origin,nodes,tool,resultConfig.effects);
             lowest=nodes.stream().filter(n -> n.type==TreeNodeType.TRUNK).mapToInt(n -> BlockPos.getY(n.pos)).min().orElse(BlockPos.getY(origin));
             remaining=nodes.size();
             creative=player.getGameMode()==PlayerGameMode.CREATIVE;
@@ -81,6 +88,7 @@ public class TreeFellerBreaking{
             replant=new SaplingReplant(world,player,detected.tree,replantNodes,resultConfig.sapling_replant);
             for(BlockPlan plan : plans.values())if(plan.natural||plan.landing==Landing.PLACE)replant.hold(plan.node.pos);
         }
+        public void toolEffects(boolean broken){effects.tool(broken);}
         public BreakingResult apply(List<TreeNode> nodes){
             Map<Long,List<IItemConnector>> immediate=new LinkedHashMap<>();
             List<BlockPlan> selected=new ArrayList<>();
@@ -99,6 +107,7 @@ public class TreeFellerBreaking{
                 remaining--;
             }
             for(BlockPlan plan : selected){
+                effects.block(plan.node.pos);
                 if(plan.conversion!=null)continue;
                 if(plan.entity){
                     int delay=config.fall_delay==null?0:Math.max(0,config.fall_delay);

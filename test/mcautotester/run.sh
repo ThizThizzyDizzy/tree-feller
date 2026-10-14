@@ -9,7 +9,34 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-option-result-cascade-enable \
+    set -- treefeller-option-result-effects \
+        treefeller-option-result-effects-chance \
+        treefeller-option-result-effects-location \
+        treefeller-option-result-effects-type \
+        treefeller-option-result-effects-filter \
+        treefeller-option-result-effects-particle \
+        treefeller-option-result-effects-x \
+        treefeller-option-result-effects-y \
+        treefeller-option-result-effects-z \
+        treefeller-option-result-effects-dx \
+        treefeller-option-result-effects-dy \
+        treefeller-option-result-effects-dz \
+        treefeller-option-result-effects-speed \
+        treefeller-option-result-effects-count \
+        treefeller-option-result-effects-r \
+        treefeller-option-result-effects-g \
+        treefeller-option-result-effects-b \
+        treefeller-option-result-effects-size \
+        treefeller-option-result-effects-item \
+        treefeller-option-result-effects-block \
+        treefeller-option-result-effects-sound \
+        treefeller-option-result-effects-volume \
+        treefeller-option-result-effects-pitch \
+        treefeller-option-result-effects-power \
+        treefeller-option-result-effects-fire \
+        treefeller-option-result-effects-permanent \
+        treefeller-option-result-effects-tags \
+        treefeller-option-result-cascade-enable \
         treefeller-option-result-cascade-parallel-cascade-limit \
         treefeller-option-result-cascade-cascade-check-limit \
         treefeller-option-trees-cascade-trees \
