@@ -2,12 +2,12 @@ package com.thizthizzydizzy.treefeller.platform.bukkit.core.definition;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.VariableIntegerRange;
-import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.ItemDefinition;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-public class BukkitItemDefinition implements IItemDefinition{
+public class BukkitItemDefinition extends ItemDefinition{
     @ConfigComment("An item ID or item tag")
     public Material material;
 
@@ -16,8 +16,6 @@ public class BukkitItemDefinition implements IItemDefinition{
     public DualList<String> custom_name;
 
     public DualList<String> lore;
-
-    public DualList<Integer> custom_model_data;
 
     public DualList<ItemFlag> attributes;
 
@@ -52,7 +50,19 @@ public class BukkitItemDefinition implements IItemDefinition{
             return false;
         if(enchantments!=null&&!enchantments.applyMulti(range -> range.matches(meta)))
             return false;
-        //TODO custom model data (1.14+)
+        if(custom_model_data!=null&&!matchesCustomModelData(customModelData(meta)))return false;
         return true;
+    }
+    private static Integer customModelData(ItemMeta meta){
+        if(meta==null)return null;
+        // The shared module compiles against Bukkit 1.8, before this API existed.
+        try{
+            if(!(Boolean)ItemMeta.class.getMethod("hasCustomModelData").invoke(meta))return null;
+            return (Integer)ItemMeta.class.getMethod("getCustomModelData").invoke(meta);
+        }catch(NoSuchMethodException ex){
+            return null;
+        }catch(ReflectiveOperationException ex){
+            throw new IllegalStateException("Could not read custom model data", ex);
+        }
     }
 }

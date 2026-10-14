@@ -9,7 +9,8 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-option-result-effects \
+    set -- treefeller-option-item-custom-model-data \
+        treefeller-option-result-effects \
         treefeller-option-result-effects-chance \
         treefeller-option-result-effects-location \
         treefeller-option-result-effects-type \
