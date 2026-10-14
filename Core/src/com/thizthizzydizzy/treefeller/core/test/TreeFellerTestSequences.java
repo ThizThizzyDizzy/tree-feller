@@ -1,6 +1,18 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.trigger.DefaultEnabledTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.trigger.PermissionsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.RootDistanceTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.DisconnectedTrunkDistanceTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.MaxLeafDistanceFromTopTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.LeafDetectRangeTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.DiagonalLeavesTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.SecondaryTreeVerificationTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.ParallelTrunkPillarsTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.LeafDistanceTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.DecorationTests.register(platform);
+
         com.thizthizzydizzy.treefeller.core.test.options.breaking.FellBehaviorTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.breaking.FallMotionTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.breaking.FallDamageTests.register(platform);

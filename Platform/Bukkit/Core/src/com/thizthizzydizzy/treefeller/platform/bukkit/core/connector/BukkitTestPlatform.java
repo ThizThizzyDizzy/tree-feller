@@ -37,6 +37,13 @@ public final class BukkitTestPlatform implements ITestPlatform{
         player(name).setSneaking(sneaking);
     }
     @Override
+    public Runnable permissions(String name, java.util.Map<String, Boolean> values){
+        org.bukkit.permissions.PermissionAttachment attachment = player(name).addAttachment(
+                org.bukkit.plugin.java.JavaPlugin.getPlugin(com.thizthizzydizzy.treefeller.platform.bukkit.core.TreeFellerBukkit.class));
+        values.forEach(attachment::setPermission);
+        return attachment::remove;
+    }
+    @Override
     public void equipItem(String name, String definition){
         try{
             // The modern item parser is absent from the legacy Bukkit compile API.
@@ -65,7 +72,7 @@ public final class BukkitTestPlatform implements ITestPlatform{
     }
     @Override
     public com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector playerState(String name){
-        return new BukkitPlayerConnector(player(name));
+        return org.bukkit.plugin.java.JavaPlugin.getPlugin(com.thizthizzydizzy.treefeller.platform.bukkit.core.TreeFellerBukkit.class).getPlayerConnector(player(name));
     }
     @Override
     public int inventoryItemCount(String name, String material){

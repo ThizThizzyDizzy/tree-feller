@@ -9,7 +9,20 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-option-criteria-max-height \
+    set -- treefeller-option-trigger-default-enabled \
+        treefeller-option-trigger-permissions \
+        treefeller-option-detection-root-distance \
+        treefeller-option-detection-disconnected-trunk-distance \
+        treefeller-option-detection-max-leaf-distance-from-top \
+        treefeller-option-detection-leaf-detect-range \
+        treefeller-option-detection-diagonal-leaves \
+        treefeller-option-detection-secondary-tree-verification \
+        treefeller-option-detection-block-data-rules-ignore-parallel-trunk-pillars \
+        treefeller-option-detection-block-data-rules-use-leaf-distance \
+        treefeller-option-detection-decorations-blocks \
+        treefeller-option-detection-decorations-direction \
+        treefeller-option-detection-decorations-column \
+        treefeller-option-criteria-max-height \
         treefeller-option-criteria-required-trunk-min treefeller-option-criteria-required-trunk-max \
         treefeller-option-criteria-required-leaves-min treefeller-option-criteria-required-leaves-max \
         treefeller-option-criteria-require-cross-section \

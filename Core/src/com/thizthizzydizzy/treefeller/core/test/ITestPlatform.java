@@ -6,6 +6,8 @@ public interface ITestPlatform{
     void preparePlayer(String player, boolean survival);
     void setPlayerGameMode(String player, com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode mode);
     void setPlayerSneaking(String player, boolean sneaking);
+    /** Install explicit permission values; the returned hook removes the attachment. */
+    Runnable permissions(String player, java.util.Map<String, Boolean> values);
     /** Equip an item using Minecraft's item definition syntax. */
     void equipItem(String player, String definition);
     void setToolCount(String player, int count);
