@@ -24,6 +24,14 @@ public class TreeFellerBukkit extends JavaPlugin{
         }
     }
     
+    @Override
+    public void onDisable(){com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger.clearAll();}
+    @Override
+    public boolean onCommand(org.bukkit.command.CommandSender sender,org.bukkit.command.Command command,String label,String[] args){
+        if(!(sender instanceof Player)){sender.sendMessage("This debug command requires a player.");return true;}
+        if(!sender.hasPermission("treefeller.debug")){sender.sendMessage("You need treefeller.debug.");return true;}
+        return com.thizthizzydizzy.treefeller.core.debug.DebugCommands.execute(getPlayerConnector((Player)sender),args);
+    }
     private final HashMap<Player, BukkitPlayerConnector> playerConnectors = new HashMap<>();
     public IPlayerConnector getPlayerConnector(Player player){
         if(player==null)return null;

@@ -39,6 +39,14 @@ public class BukkitEvents implements Listener{
         }catch(ClassNotFoundException ex){/* Legacy entity removal is observed through the Core lifecycle. */}
     }
 
+    @EventHandler
+    public void onQuit(org.bukkit.event.player.PlayerQuitEvent event){
+        com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger.clear(plugin.getPlayerConnector(event.getPlayer()));
+    }
+    @EventHandler
+    public void onWorldChange(org.bukkit.event.player.PlayerChangedWorldEvent event){
+        com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger.clear(plugin.getPlayerConnector(event.getPlayer()));
+    }
     // Felling observes the original event's cancellation without modifying it.
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event){

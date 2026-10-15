@@ -7,7 +7,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefini
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
-import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -52,51 +52,57 @@ public class TreeScanner{
 
         TreeNodeType baseType = mode.baseType;
         int currentDepth = tree.getScanDepth(baseType, sectionId);
-        context.info("BASE TYPE:", baseType);
-        context.info("Current Depth: "+currentDepth);
-        ReferenceArrayList<TreeNode> lastLayer;
-        if(currentDepth==0){
-            // Special initial-scan rules
-            switch(mode){
-                case ROOTS:
-                case TRUNK:
-                    // scan root node
-                    boolean pass = scanNode(world, tree, tree.root, blocks, type, nodeHandler);
-                    context.info("Scanned root node: "+pass);
-                    return pass?1:0;
-                case LEAVES:
-                    ReferenceArrayList<TreeNode> trunks = tree.getNodes(TreeNodeType.TRUNK, -1, -1);
-                    if(!trunks.isEmpty()&&config.max_leaf_distance_from_top!=null){
-                        int highestTrunkY = trunks.stream().mapToInt((n)->BlockPos.getY(n.pos)).max().getAsInt();
+        try(DebuggerContext.LayerScope ignored=context.layer(mode+" / "+type+", depth="+currentDepth+", section="+sectionId)){
+            context.info("BASE TYPE:", baseType);
+            context.info("Current Depth: "+currentDepth);
+            ReferenceArrayList<TreeNode> lastLayer;
+            if(currentDepth==0){
+                // Special initial-scan rules
+                switch(mode){
+                    case ROOTS:
+                    case TRUNK:
+                        // scan root node
+                        boolean pass = scanNode(context, world, tree, tree.root, blocks, type, nodeHandler);
+                        context.info("Scanned root node: "+pass);
+                        context.snapshot(tree,DebugLevel.SUMMARY,null);
+                        return pass?1:0;
+                    case LEAVES:
+                        ReferenceArrayList<TreeNode> trunks = tree.getNodes(TreeNodeType.TRUNK, -1, -1);
+                        if(!trunks.isEmpty()&&config.max_leaf_distance_from_top!=null){
+                            int highestTrunkY = trunks.stream().mapToInt((n)->BlockPos.getY(n.pos)).max().getAsInt();
+                            lastLayer = new ReferenceArrayList<>();
+                            lastLayer.addAll(trunks.stream().filter(n -> BlockPos.getY(n.pos)>=highestTrunkY-config.max_leaf_distance_from_top).toList());
+                            context.info("Leaf scan starts within "+config.max_leaf_distance_from_top+" blocks of highest trunk Y="+highestTrunkY);
+                            for(TreeNode trunk : trunks)if(!lastLayer.contains(trunk))context.decision(DebugLevel.TRACE,trunk.pos,OverlayMark.REJECTED,"Too low to seed leaf scan");
+                        }else
+                            lastLayer = trunks;
+                        break;
+
+                    case EXTENDED_LEAVES:
+                        lastLayer = tree.getNodes(TreeNodeType.LEAVES, -1, -1);
+                        break;
+                    case DECORATION:
                         lastLayer = new ReferenceArrayList<>();
-                        lastLayer.addAll(trunks.stream().filter(n -> BlockPos.getY(n.pos)>=highestTrunkY-config.max_leaf_distance_from_top).toList());
-                    }else
-                        lastLayer = trunks;
-                    break;
+                        lastLayer.addAll(tree.getNodes(TreeNodeType.TRUNK, -1, -1));
+                        lastLayer.addAll(tree.getNodes(TreeNodeType.LEAVES, -1, -1));
+                        break;
+                    default:
+                        throw new AssertionError("Unknown scan mode: "+mode.toString());
+                }
+            }else
+                lastLayer = tree.getNodes(baseType, sectionId, currentDepth);
 
-                case EXTENDED_LEAVES:
-                    lastLayer = tree.getNodes(TreeNodeType.LEAVES, -1, -1);
-                    break;
-                case DECORATION:
-                    lastLayer = new ReferenceArrayList<>();
-                    lastLayer.addAll(tree.getNodes(TreeNodeType.TRUNK, -1, -1));
-                    lastLayer.addAll(tree.getNodes(TreeNodeType.LEAVES, -1, -1));
-                    break;
-                default:
-                    throw new AssertionError("Unknown scan mode: "+mode.toString());
+            context.info("Last layer: "+lastLayer.size()+" nodes");
+            int count = 0;
+            for(TreeNode node : lastLayer){
+                count += scanNeighbors(context, world, tree, node, blocks, config, mode, type, nodeHandler, posFilter);
             }
-        }else
-            lastLayer = tree.getNodes(baseType, sectionId, currentDepth);
-
-        context.info("Last layer: "+lastLayer.size()+" nodes");
-        int count = 0;
-        for(TreeNode node : lastLayer){
-            count += scanNeighbors(world, tree, node, blocks, config, mode, type, nodeHandler, posFilter);
+            context.summary("Found "+count+" "+type+" blocks in scan layer "+currentDepth+", section="+sectionId);
+            context.snapshot(tree,DebugLevel.SUMMARY,null);
+            return count;
         }
-        context.info("Scanned "+count+" blocks");
-        return count;
     }
-    private static int scanNeighbors(IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, DetectionConfiguration config, ScanMode mode, TreeNodeType type, Consumer<TreeNode> nodeHandler, Predicate<Long> posFilter){
+    private static int scanNeighbors(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, DetectionConfiguration config, ScanMode mode, TreeNodeType type, Consumer<TreeNode> nodeHandler, Predicate<Long> posFilter){
         boolean isDecorationColumn = mode==ScanMode.DECORATION&&type==node.type&&node.type==TreeNodeType.DECORATION;
         if(isDecorationColumn&&!node.decoration.column)return 0;
 
@@ -135,8 +141,8 @@ public class TreeScanner{
         NEIGHBORS:
         for(int i = 0; i<neighbors.length; i++){
             long pos = neighbors[i];
-            if(tree.contains(pos))continue; // already scanned that one
-            if(posFilter!=null&&!posFilter.test(pos))continue;
+            if(tree.contains(pos)){context.trace("Already detected "+DebuggerContext.position(pos));continue;} // already scanned that one
+            if(posFilter!=null&&!posFilter.test(pos)){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"outside scan bounds");continue;}
             if(mode==ScanMode.TRUNK){
                 if(config.block_data_rules.ignore_parallel_trunk_pillars){
                     do{
@@ -150,9 +156,9 @@ public class TreeScanner{
                         int nz = BlockPos.getZ(pos);
 
                         // Early reject if they are at the same axis position (direct parallel neighbor)
-                        if(axis==BlockAxis.X&&x==nx)continue NEIGHBORS;
-                        if(axis==BlockAxis.Y&&y==ny)continue NEIGHBORS;
-                        if(axis==BlockAxis.Z&&z==nz)continue NEIGHBORS;
+                        if(axis==BlockAxis.X&&x==nx){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel X trunk");continue NEIGHBORS;}
+                        if(axis==BlockAxis.Y&&y==ny){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel Y trunk");continue NEIGHBORS;}
+                        if(axis==BlockAxis.Z&&z==nz){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel Z trunk");continue NEIGHBORS;}
 
                         // Pass if they are aligned on the same axis
                         if(axis==BlockAxis.X&&y==ny&&z==nz)break;
@@ -175,8 +181,9 @@ public class TreeScanner{
                                     }
                                 }
                             }
-                            if(itIsATrunkBlock&&world.getBlockAxis(extraPos)==axis)
-                                continue NEIGHBORS;
+                            if(itIsATrunkBlock&&world.getBlockAxis(extraPos)==axis){
+                                context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"diagonal parallel trunk");continue NEIGHBORS;
+                            }
                         }
                     }while(false);
                 }
@@ -190,7 +197,7 @@ public class TreeScanner{
                         int d2 = world.getLeafDistance(pos);
                         if(d2==-1)break;
                         // Reject if first block distance is <7 unless second block is greater
-                        if(d1<7&&d2<=d1)continue NEIGHBORS;
+                        if(d1<7&&d2<=d1){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"leaf distance does not increase: "+d1+" -> "+d2);continue NEIGHBORS;}
                     }while(false);
                 }
             }
@@ -200,20 +207,20 @@ public class TreeScanner{
                         int yDiff = BlockPos.getY(pos)-y;
                         switch(decoration.direction){
                             case UP:
-                                if(yDiff!=1)continue;
+                                if(yDiff!=1){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Outside decoration direction "+decoration.direction);continue;}
                                 break;
                             case DOWN:
-                                if(yDiff!=-1)continue;
+                                if(yDiff!=-1){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Outside decoration direction "+decoration.direction);continue;}
                                 break;
                             case SIDE:
-                                if(yDiff!=0)continue;
+                                if(yDiff!=0){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Outside decoration direction "+decoration.direction);continue;}
                                 break;
                             case SIDE_AND_DOWN:
-                                if(yDiff==1)continue;
+                                if(yDiff==1){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Outside decoration direction "+decoration.direction);continue;}
                                 break;
                         }
                     }
-                    if(scanNode(world, tree, new TreeNode(pos, node), decoration.blocks, type, (n) -> {
+                    if(scanNode(context, world, tree, new TreeNode(pos, node), decoration.blocks, type, (n) -> {
                         n.decoration = decoration;
                         if(nodeHandler==null)tree.addNode(n);
                     })){
@@ -223,12 +230,13 @@ public class TreeScanner{
                 }
                 continue;
             }
-            if(scanNode(world, tree, new TreeNode(pos, node), blocks, type, nodeHandler))
+            if(scanNode(context, world, tree, new TreeNode(pos, node), blocks, type, nodeHandler))
                 count++;
         }
         return count;
     }
-    private static boolean scanNode(IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, TreeNodeType type, Consumer<TreeNode> nodeHandler){
+    private static boolean scanNode(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, TreeNodeType type, Consumer<TreeNode> nodeHandler){
+        context.mark(DebugLevel.TRACE,node.pos,OverlayMark.CANDIDATE);
         boolean isMatch = false;
         for(IBlockDefinition block : blocks){
             if(isMatch |= world.matches(node.pos, block)){
@@ -236,9 +244,14 @@ public class TreeScanner{
                 break;
             }
         }
-        if(!isMatch)return false;
+        if(!isMatch){
+            if(context.enabled(DebugLevel.TRACE))context.trace(DebuggerContext.position(node.pos)+": material did not match "+type+"; actual="+world.material(node.pos)+", expected="+DebuggerContext.describe(blocks));
+            context.mark(DebugLevel.TRACE,node.pos,OverlayMark.REJECTED);
+            return false;
+        }
         if(nodeHandler==null)nodeHandler = tree::addNode;
         nodeHandler.accept(node);
+        context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.ACCEPTED,"detected "+type+", section="+node.sectionId+", distance="+node.distance+", secondary="+node.secondary);
         return true;
     }
     public enum ScanMode{

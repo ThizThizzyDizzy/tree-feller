@@ -10,8 +10,7 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.*;
-import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
-import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.core.detection.*;
 import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
 import com.thizthizzydizzy.treefeller.core.result.SaplingReplant;
@@ -24,7 +23,10 @@ public class TreeFellerBreaking{
     }
     public static PreparedBreak prepare(IWorldConnector world, IPlayerConnector player, DetectionResult detected, List<TreeNode> nodes, IItemConnector tool){
         DebuggerContext context=TreeFellerDebugger.begin("Breaking",player,world);
+        context.at(detected.detected.root.pos);
         BreakingConfiguration config=TreeFellerConfiguration.getCombinedBreakingConfiguration(detected.tree,detected.tool);
+        context.values("Breaking settings",config);
+        context.summary("Preparing "+nodes.size()+" blocks");
         for(Float v : new Float[]{config.fall_direction_yaw,config.directional_fall_velocity,config.vertical_fall_velocity,config.explosive_fall_velocity,config.random_fall_velocity})
             if(v!=null&&!Float.isFinite(v)){context.fail("Non-finite fall configuration");return null;}
         for(FellBehavior b : new FellBehavior[]{config.trunk_behavior,config.leaves_behavior,config.decoration_behavior})
@@ -61,12 +63,13 @@ public class TreeFellerBreaking{
                 BreakingConfiguration config,ResultConfiguration resultConfig,DebuggerContext context){
             this.world=world;this.player=player;this.config=config;this.resultConfig=resultConfig;this.context=context;
             origin=detected.detected.root.pos;
-            effects=new com.thizthizzydizzy.treefeller.core.result.TreeFellerEffects(world,origin,nodes,tool,resultConfig.effects);
+            effects=new com.thizthizzydizzy.treefeller.core.result.TreeFellerEffects(world,player,origin,nodes,tool,resultConfig.effects);
             lowest=nodes.stream().filter(n -> n.type==TreeNodeType.TRUNK).mapToInt(n -> BlockPos.getY(n.pos)).min().orElse(BlockPos.getY(origin));
             remaining=nodes.size();
             creative=player.getGameMode()==PlayerGameMode.CREATIVE;
             Random random=new Random();
             direction=FallPhysics.direction(config,origin,player.position(),random);
+            context.values("Fall direction",direction);
             IItemConnector dropTool=tool.copyForDrops(true,true);
             // Capture every source before delayed layers, foliage physics, or conversions alter it.
             for(TreeNode node : nodes){
@@ -80,6 +83,8 @@ public class TreeFellerBreaking{
                 FallVector velocity=natural?FallPhysics.naturalVelocity(node.pos,lowest,direction,FallPhysics.value(config.vertical_fall_velocity))
                         :FallPhysics.velocity(config,node.pos,origin,direction,random);
                 if(conversion==null&&natural&&entity&&landing==Landing.PLACE)naturalEntities++;
+                if(context.active(DebugLevel.DETAIL))context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.SELECTED,"behavior: natural="+natural+", entity="+entity+", landing="+landing
+                        +", conversion="+DebuggerContext.describe(conversion)+", velocity="+DebuggerContext.describe(velocity));
                 plans.put(node.pos,new BlockPlan(node,world.snapshot(node.pos),conversion,behavior,natural,entity,landing,velocity,
                         conversion==null?TreeFellerResult.collectDrops(world,player,node,dropTool,resultConfig):Collections.emptyList()));
             }
@@ -101,9 +106,9 @@ public class TreeFellerBreaking{
                     // Vanilla completes the initiating break after MONITOR listeners.
                     TreeFellerCore.connector.schedule(1,() -> {
                         world.setBlock(node.pos,plan.conversion);
-                        context.info("Converted "+node.type,node.pos,plan.conversion);
+                        context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.CONVERTED,"Converted "+node.type+" to "+DebuggerContext.describe(plan.conversion));
                     });
-                }else context.info("Removed "+node.type,node.pos);
+                }else context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.REMOVED,"Removed "+node.type);
                 remaining--;
             }
             for(BlockPlan plan : selected){
@@ -133,7 +138,8 @@ public class TreeFellerBreaking{
                 });
             }
             replant.start();
-            context.pass("Processed "+nodes.size()+" blocks");
+            context.user("Processed "+nodes.size()+" blocks");
+            for(BlockPlan plan : selected)context.mark(DebugLevel.USER,plan.node.pos,plan.conversion==null?OverlayMark.REMOVED:OverlayMark.CONVERTED);
             return new BreakingResult(new ArrayList<>(nodes),immediate);
         }
         private boolean replaceable(long pos){
@@ -150,7 +156,7 @@ public class TreeFellerBreaking{
             for(double distance=.1;distance<=height+.00001;distance+=.1){
                 long candidate=BlockPos.toPos((int)Math.floor(BlockPos.getX(plan.node.pos)+.5+direction.x*distance),BlockPos.getY(plan.node.pos),
                         (int)Math.floor(BlockPos.getZ(plan.node.pos)+.5+direction.z*distance));
-                if(!replaceable(candidate))break;
+                if(!replaceable(candidate)){context.decision(DebugLevel.DETAIL,candidate,OverlayMark.REJECTED,"Natural fall stopped at obstacle");break;}
                 target=candidate;
             }
             while(BlockPos.getY(target)>world.minHeight()){
@@ -171,6 +177,7 @@ public class TreeFellerBreaking{
             return plan.data.withAxis(axis);
         }
         private void spawn(BlockPlan plan,boolean held){
+            context.decision(DebugLevel.DETAIL,plan.node.pos,OverlayMark.CANDIDATE,"Spawn falling block, held="+held+", velocity="+DebuggerContext.describe(plan.velocity));
             plan.peak=BlockPos.getY(plan.node.pos)+.5;
             plan.handle=world.spawnFallingBlock(plan.node.pos,plan.data,held?new FallVector(0,0,0):plan.velocity,
                     (target,fallDistance) -> impact(plan,target,fallDistance),target -> finish(plan,target,true,0));
@@ -194,6 +201,8 @@ public class TreeFellerBreaking{
                 if(plan.done)return;
                 FallVector p=plan.handle.position();
                 plan.peak=Math.max(plan.peak,p.y);
+                if(context.enabled(DebugLevel.TRACE))context.trace("Falling "+DebuggerContext.position(plan.node.pos)+": tick="+ticks+", position="+DebuggerContext.describe(p)+", velocity="+DebuggerContext.describe(plan.handle.velocity()));
+                context.mark(DebugLevel.TRACE,BlockPos.toPos((int)Math.floor(p.x),(int)Math.floor(p.y),(int)Math.floor(p.z)),OverlayMark.CANDIDATE);
                 if(!plan.handle.alive()||(!plan.held&&ticks>=1200)||p.y<world.minHeight()){
                     long target=BlockPos.toPos((int)Math.floor(p.x),Math.max(world.minHeight(),(int)Math.floor(p.y)),(int)Math.floor(p.z));
                     finish(plan,target,true,0);
@@ -213,12 +222,13 @@ public class TreeFellerBreaking{
         private void finish(BlockPlan plan,long target,boolean failed,float distance){
             if(plan.done)return;
             plan.done=true;
+            context.decision(DebugLevel.DETAIL,target,OverlayMark.LANDING,"Landing from "+DebuggerContext.position(plan.node.pos)+", failed="+failed+", distance="+distance+", mode="+plan.landing);
             if(!(plan.natural&&plan.entity&&plan.landing==Landing.PLACE))replant.release(plan.node.pos);
             if(plan.handle!=null){
                 float amount=Math.max(0,FallPhysics.value(plan.behavior.fall_damage_amount));
                 float maximum=plan.behavior.fall_damage_maximum==null?40:Math.max(0,plan.behavior.fall_damage_maximum);
                 float damage=Math.min(maximum,(float)Math.max(0,Math.ceil(distance-1))*amount);
-                if(!failed&&damage>0)plan.handle.damageOverlappingEntities(damage);
+                if(!failed&&damage>0){context.info("Fall damage="+damage+", maximum="+maximum);plan.handle.damageOverlappingEntities(damage);}
             }
             if(plan.natural&&plan.entity&&plan.landing==Landing.PLACE){
                 naturalEntities--;
@@ -243,7 +253,7 @@ public class TreeFellerBreaking{
                         long destination=entry.getValue();
                         while(placed.contains(destination)&&BlockPos.getY(destination)+1<world.maxHeight())
                             destination=BlockPos.toPos(BlockPos.getX(destination),BlockPos.getY(destination)+1,BlockPos.getZ(destination));
-                        if(replaceable(destination)){world.setBlock(destination,rotated(entry.getKey(),destination));placed.add(destination);}
+                        if(replaceable(destination)){world.setBlock(destination,rotated(entry.getKey(),destination));placed.add(destination);context.decision(DebugLevel.USER,destination,OverlayMark.LANDING,"Natural falling block placed");}
                         else replant.deliver(destination,entry.getKey().drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
                         replant.release(entry.getKey().node.pos);
                         entry.getKey().handle.remove();
@@ -258,11 +268,11 @@ public class TreeFellerBreaking{
             }
             if(!failed&&plan.landing==Landing.PLACE&&replaceable(target)){
                 world.setBlock(target,rotated(plan,target));
-                context.info("Landed "+plan.node.type,target);
+                context.decision(DebugLevel.USER,target,OverlayMark.LANDING,"Landed "+plan.node.type);
             }else{
                 boolean inventory=plan.landing==Landing.INVENTORY||Boolean.TRUE.equals(resultConfig.drop_to_inventory);
                 replant.deliver(target,plan.drops,inventory);
-                context.info("Delivered landing drops for "+plan.node.type,target);
+                context.decision(DebugLevel.USER,target,OverlayMark.DROP,"Delivered landing drops for "+plan.node.type+"; inventory="+inventory+", stacks="+plan.drops.size());
             }
             if(plan.handle!=null)plan.handle.remove();
         }

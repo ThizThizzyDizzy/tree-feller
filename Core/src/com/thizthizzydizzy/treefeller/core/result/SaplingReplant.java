@@ -7,9 +7,11 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.*;
 import com.thizthizzydizzy.treefeller.core.detection.*;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import java.util.*;
 /** One bounded replant lifecycle per accepted cut, shared by animated and landing drops. */
 public final class SaplingReplant{
+    private final DebuggerContext context;
     private final IWorldConnector world;
     private final IPlayerConnector player;
     private final SaplingReplantConfiguration config;
@@ -21,14 +23,18 @@ public final class SaplingReplant{
     private int age;
     public SaplingReplant(IWorldConnector world, IPlayerConnector player, TreeConfiguration tree,
             List<TreeNode> nodes, SaplingReplantConfiguration config){
+        context=TreeFellerDebugger.begin(DebugPhase.REPLANT,player,world);
+        context.values("Replant settings",config);
         this.world=world;this.player=player;this.config=config;this.saplings=tree.saplings;
-        if(config==null||!Boolean.TRUE.equals(config.enable)||saplings==null||saplings.length==0||tree.max_saplings<=0)return;
+        if(config==null||!Boolean.TRUE.equals(config.enable)||saplings==null||saplings.length==0||tree.max_saplings<=0){context.summary("Replanting disabled or no saplings/sites allowed");return;}
         Set<Long> trunks=new HashSet<>();
         for(TreeNode node : nodes)if(node.type==TreeNodeType.TRUNK)trunks.add(node.pos);
-        for(long pos : trunks)if(soil(pos))sites.add(pos);
+        for(long pos : trunks){if(soil(pos)){sites.add(pos);context.decision(DebugLevel.DETAIL,pos,OverlayMark.CANDIDATE,"Replant soil accepted");}else context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"No permitted soil for sapling");}
         // V1 keeps the tallest continuous trunk columns when the cap is exceeded.
         sites.sort(Comparator.<Long>comparingInt(pos -> height(pos,trunks)).reversed().thenComparingLong(Long::longValue));
-        while(sites.size()>tree.max_saplings)sites.remove(sites.size()-1);
+        while(sites.size()>tree.max_saplings){long pos=sites.remove(sites.size()-1);context.decision(DebugLevel.DETAIL,pos,OverlayMark.REJECTED,"Excluded by max saplings="+tree.max_saplings);}
+        context.user("Replanting: "+sites.size()+" eligible sites");
+        for(long pos : sites)context.mark(DebugLevel.USER,pos,OverlayMark.REPLANT);
     }
     private int height(long pos, Set<Long> trunks){
         int height=0;
@@ -65,6 +71,7 @@ public final class SaplingReplant{
                 IItemConnector unit=item.copyForDrops(true,true);
                 unit.setCount(1);
                 reserved.add(new Reserved(pos,unit,sapling,inventory));
+                context.decision(DebugLevel.DETAIL,pos,OverlayMark.DROP,"Reserved tree sapling "+unit.getItemId());
             }
             item.setCount(item.getCount()-count);
         }
@@ -78,14 +85,15 @@ public final class SaplingReplant{
         int timeout=config.sapling_timeout==null?50:Math.max(0,config.sapling_timeout);
         for(Iterator<Long> it=sites.iterator();it.hasNext();){
             long pos=it.next();
-            if(settling.contains(pos))continue;
+            if(settling.contains(pos)){context.trace("Waiting for landing at "+DebuggerContext.position(pos));continue;}
             boolean alreadyPlanted=false;
             for(SaplingConfiguration sapling : saplings)if(world.matches(pos,sapling.block)){alreadyPlanted=true;break;}
             if(alreadyPlanted){it.remove();continue;}
-            if(!world.isAir(pos)||!soil(pos))continue;
+            if(!world.isAir(pos)||!soil(pos)){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Planting blocked or soil changed, age="+age);continue;}
             if(!reserved.isEmpty()){
                 Reserved next=reserved.remove(0);
                 world.setBlock(pos,next.sapling.block);
+                context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Planted reserved tree sapling");
                 it.remove();
                 continue;
             }
@@ -97,6 +105,7 @@ public final class SaplingReplant{
                     SaplingConfiguration sapling=matching(item);
                     if(sapling==null)continue;
                     world.setBlock(pos,sapling.block);
+                    context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Planted inventory sapling from slot "+slot);
                     item.setCount(item.getCount()-1);
                     player.setInventoryItem(slot,item);
                     planted=true;
@@ -105,12 +114,14 @@ public final class SaplingReplant{
             }
             if(!planted&&age>=timeout&&Boolean.TRUE.equals(config.spawn_saplings)){
                 world.setBlock(pos,saplings[0].block);
+                context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Spawned fallback sapling at timeout "+timeout);
                 planted=true;
             }
             if(planted)it.remove();
         }
         if(sites.isEmpty()||age>=timeout){
             expired=true;
+            context.user("Replanting finished: "+sites.size()+" unfilled sites; "+reserved.size()+" reserved items returned");
             for(Reserved next : reserved)TreeFellerResult.deliverDrops(world,player,next.pos,Collections.singletonList(next.item),next.inventory);
             reserved.clear();
             sites.clear();

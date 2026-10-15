@@ -3,7 +3,6 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
-import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -122,34 +121,47 @@ public class BukkitPlayerConnector implements IPlayerConnector{
         return player.getName();
     }
     @Override
-    public void debugDisplayTreeNode(TreeNode node){
-        Material m = Material.BEDROCK;
-        switch(node.type){
-            case ROOTS:
-                m = Material.COAL_BLOCK;
-                break;
-            case TRUNK:
-                m = node.secondary?Material.REDSTONE_BLOCK:Material.GOLD_BLOCK;
-                if(!node.secondary&&node.sectionId>0)m = Material.GOLD_ORE;
-                break;
-            case LEAVES:
-                m = node.secondary?Material.STONE:Material.IRON_BLOCK;
-                if(node.extendedDistance>0)m = Material.EMERALD_BLOCK;
-                if(!node.secondary&&node.sectionId>0){
-                    m = Material.IRON_ORE;
-                    if(node.extendedDistance>0)m = Material.EMERALD_ORE;
-                }
-                break;
-            case EXTENDED_LEAVES:
-                m = Material.OBSIDIAN;
-                break;
-            case DECORATION:
-                m = Material.DIAMOND_BLOCK;
-                if(!node.secondary&&node.sectionId>0)m = Material.DIAMOND_ORE;
-                break;
-            case NONE:
-                return;
+    public void debugOverlay(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world,long pos,
+            com.thizthizzydizzy.treefeller.core.debug.OverlayMark mark,String material){
+        org.bukkit.World target=((BukkitWorldConnector)world).getWorld();
+        if(player.getWorld()!=target)return;
+        Material selected;
+        switch(mark){
+            case ROOT: selected=Material.COAL_BLOCK;break;
+            case TRUNK: selected=Material.GOLD_BLOCK;break;
+            case SECONDARY_TRUNK: selected=Material.REDSTONE_BLOCK;break;
+            case SECTION_TRUNK: selected=Material.GOLD_ORE;break;
+            case LEAVES: selected=Material.IRON_BLOCK;break;
+            case SECONDARY_LEAVES: selected=Material.STONE;break;
+            case SECTION_LEAVES: selected=Material.IRON_ORE;break;
+            case OWNED_LEAVES: selected=Material.EMERALD_BLOCK;break;
+            case SECTION_OWNED_LEAVES: selected=Material.EMERALD_ORE;break;
+            case EXTENDED_LEAVES: selected=Material.OBSIDIAN;break;
+            case DECORATION: selected=Material.DIAMOND_BLOCK;break;
+            case SECTION_DECORATION: selected=Material.DIAMOND_ORE;break;
+            case CANDIDATE: selected=Material.GLASS;break;
+            case REJECTED: selected=Material.matchMaterial("RED_STAINED_GLASS");if(selected==null)selected=Material.GLASS;break;
+            case ACCEPTED: case SELECTED: selected=Material.EMERALD_BLOCK;break;
+            case RETAINED: selected=Material.COAL_BLOCK;break;
+            case REMOVED: selected=Material.AIR;break;
+            case CONVERTED: selected=Material.LAPIS_BLOCK;break;
+            case LANDING: selected=Material.GOLD_BLOCK;break;
+            case DROP: selected=Material.LAPIS_ORE;break;
+            case REPLANT: selected=Material.EMERALD_ORE;break;
+            case EFFECT: selected=Material.GLOWSTONE;break;
+            case CASCADE: selected=Material.DIAMOND_BLOCK;break;
+            default: throw new IllegalArgumentException("Unknown marker "+mark);
         }
-        BukkitConnector.blockData.sendBlockChange(player, new Location(player.getWorld(), BlockPos.getX(node.pos), BlockPos.getY(node.pos), BlockPos.getZ(node.pos)), m);
+        if(material!=null){
+            Material custom=Material.matchMaterial(material.replace("minecraft:","").toUpperCase(java.util.Locale.ROOT));
+            if(custom!=null&&custom.isBlock())selected=custom;
+        }
+        BukkitConnector.blockData.sendBlockChange(player,new Location(target,BlockPos.getX(pos),BlockPos.getY(pos),BlockPos.getZ(pos)),selected);
+    }
+    @Override
+    public void debugRestore(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world,long pos){
+        org.bukkit.World target=((BukkitWorldConnector)world).getWorld();
+        if(player.getWorld()!=target)return;
+        BukkitConnector.blockData.restoreBlockChange(player,new Location(target,BlockPos.getX(pos),BlockPos.getY(pos),BlockPos.getZ(pos)));
     }
 }

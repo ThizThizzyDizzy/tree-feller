@@ -8,8 +8,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionCon
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
-import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
-import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.core.trigger.TreeFellerTrigger;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.List;
@@ -19,6 +18,7 @@ public class TreeFellerDetection{
         TreeTree detected = new TreeTree(pos, secondary);
         DetectionConfiguration detection = TreeFellerConfiguration.getCombinedDetectionConfiguration(tree);
 
+        context.values("Detection settings",detection);
         // only use for short-circuiting. Full criteria checking is the job of TreeFellerCriteria
         int trunkScanLimit = Integer.MAX_VALUE;
         for(CriteriaConfiguration criteria :
@@ -31,8 +31,9 @@ public class TreeFellerDetection{
         context.info("Root Distance: "+detection.root_distance);
         // Find trunk (roots scan)
         for(int i = 0; i<=detection.root_distance; i++){
-            if(i>0&&TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.ROOTS, 0, null, null)==0)
-                return null; // No trunk, and no roots. This is not a tree.
+            if(i>0&&TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.ROOTS, 0, null, null)==0){
+                context.summary("No connected roots or trunk found");return null;
+            } // No trunk, and no roots. This is not a tree.
             if(TreeScanner.step(context, world, detected, tree, TreeScanner.ScanMode.ROOTS, TreeNodeType.TRUNK, 0, null, null)>0){
                 if(detected.nodeMap.size()==1&&detected.root==detected.nodeMap.values().stream().findAny().orElse(null)){
                     context.info("Tree only has current root. Node type: "+detected.root.type.toString());
@@ -43,7 +44,7 @@ public class TreeFellerDetection{
             }
         }
 
-        if(detected.findAnyNode(n -> n.type==TreeNodeType.TRUNK)==null)return null;
+        if(detected.findAnyNode(n -> n.type==TreeNodeType.TRUNK)==null){context.summary("No trunk found within root distance "+detection.root_distance);return null;}
         if(scanTrunk(context, world, detected, tree, 0, trunkScanLimit)==-1)
             return null;
 
@@ -125,6 +126,7 @@ public class TreeFellerDetection{
                                         // this node does not belong to this tree. trim it and all children.
                                         context.info("Trimming externally owned extended leaves", node.pos);
                                         int trimmed = detected.trim(node);
+                                        context.mark(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED);
                                         context.info("Trimmed "+trimmed+" nodes");
                                         continue POTENTIAL;
                                     }
@@ -149,6 +151,7 @@ public class TreeFellerDetection{
                                         // this node does not belong to this tree. trim it and all children.
                                         context.info("Trimming externally owned leaves", node.pos);
                                         int trimmed = detected.trim(node);
+                                        context.mark(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED);
                                         context.info("Trimmed "+trimmed+" nodes");
                                         continue POTENTIAL;
                                     }
@@ -167,7 +170,7 @@ public class TreeFellerDetection{
             }while(additionalDecorations>0);
         }
 
-        context.info("End of detection");
+        context.user("Found tree: "+detected.count(TreeNodeType.TRUNK)+" logs, "+detected.count(TreeNodeType.LEAVES)+" leaves, "+detected.count(TreeNodeType.DECORATION)+" decorations");
         context.info(detected);
         return detected;
     }

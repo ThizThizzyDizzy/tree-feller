@@ -4,3 +4,12 @@ api-version: 1.13
 name: treefeller
 softdepend: [mcautotester]
 folia-supported: true
+
+commands:
+  treefeller:
+    description: TreeFeller debug trace controls
+    usage: /treefeller debug <next [event|layer|phase|all|count]|clear|status>
+permissions:
+  treefeller.debug:
+    description: Control your TreeFeller debug trace
+    default: op

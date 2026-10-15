@@ -113,6 +113,10 @@ public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
         return block.getDrops(tool);
     }
     @Override
+    public void restoreBlockChange(Player player, Location location){
+        player.sendBlockChange(location, location.getBlock().getBlockData());
+    }
+    @Override
     public void sendBlockChange(Player player, Location location, Material material){
         // The material/byte overload initializes expensive legacy conversion tables.
         player.sendBlockChange(location, material.createBlockData());

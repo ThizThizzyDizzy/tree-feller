@@ -95,6 +95,10 @@ public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
         return block.getDrops(tool);
     }
     @Override
+    public void restoreBlockChange(Player player, Location location){
+        player.sendBlockChange(location, location.getBlock().getType(), location.getBlock().getData());
+    }
+    @Override
     public void sendBlockChange(Player player, Location location, Material material){
         player.sendBlockChange(location, material, (byte)0);
     }

@@ -19,5 +19,6 @@ public interface BukkitBlockDataConnector{
     public Collection<ItemStack> getDrops(Block block, ItemStack tool, Player player);
     public BlockAxis getBlockAxis(Block block);
     public int getLeafDistance(Block block);
+    public void restoreBlockChange(Player player, Location location);
     public void sendBlockChange(Player player, Location location, Material material);
 }

@@ -11,8 +11,7 @@ import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
-import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
-import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNodeType;
@@ -29,9 +28,11 @@ public class TreeFellerCutting{
     public static boolean cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected,
             TreeFellerCascade.Chain chain){
         DebuggerContext context = TreeFellerDebugger.begin("Cutting", player, world);
+        context.at(detected.detected.root.pos);
         List<Long> sourceTrunks = detected.detected.getNodes(TreeNodeType.TRUNK, -1, -1).stream().map(node -> node.pos).toList();
         CuttingConfiguration config = TreeFellerConfiguration.getCombinedCuttingConfiguration(detected.tree, detected.tool);
 
+        context.values("Cutting settings",config);
         if(config.leave_stump!=null&&config.leave_stump){
             int rootY = BlockPos.getY(detected.detected.root.pos);
             ArrayList<TreeNode> toTrim = new ArrayList<>();
@@ -47,9 +48,11 @@ public class TreeFellerCutting{
             });
             int totalTrimmed = 0;
             for(TreeNode node : toTrim){
+                context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED,"Retain branch: leave stump below cut height");
                 totalTrimmed += detected.detected.trim(node);
             }
             context.info("Leave Stump - Trimmed "+totalTrimmed+" nodes from "+toTrim.size()+" branches");
+            context.snapshot(detected.detected,DebugLevel.SUMMARY,OverlayMark.SELECTED);
         }
         if(config.leaf_break_range!=null){
             ArrayList<TreeNode> toTrim = new ArrayList<>();
@@ -64,9 +67,11 @@ public class TreeFellerCutting{
             });
             int totalTrimmed = 0;
             for(TreeNode node : toTrim){
+                context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED,"Retain branch: leaf distance exceeds break range");
                 totalTrimmed += detected.detected.trim(node);
             }
             context.info("Leaf Break Range "+config.leaf_break_range+" - Trimmed "+totalTrimmed+" nodes from "+toTrim.size()+" branches");
+            context.snapshot(detected.detected,DebugLevel.SUMMARY,OverlayMark.SELECTED);
         }
         if(config.partial_trunk_limit!=null){
             int limit = config.partial_trunk_limit;
@@ -83,9 +88,11 @@ public class TreeFellerCutting{
             });
             int totalTrimmed = 0;
             for(TreeNode node : toTrim){
+                context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED,"Retain branch: partial trunk limit exceeded");
                 totalTrimmed += detected.detected.trim(node);
             }
             context.info("Partial Trunk Limit "+limit+" - Trimmed "+totalTrimmed+" nodes from "+toTrim.size()+" branches");
+            context.snapshot(detected.detected,DebugLevel.SUMMARY,OverlayMark.SELECTED);
         }
 
         IItemConnector item = player.getTool();
@@ -97,6 +104,7 @@ public class TreeFellerCutting{
             available += (long)item.getMaxDurability()*Math.max(0, item.getCount()-1);
         long budget = Math.max(0, available-(Boolean.TRUE.equals(config.prevent_breakage)?1:0));
         int divisor = Boolean.TRUE.equals(config.respect_unbreaking)?Math.max(1, item.getUnbreakingLevel()+1):1;
+        context.info("Tool damage exempt="+skipDamage+", unbreaking divisor="+divisor+", stacked tools="+config.stacked_tools+", prevent breakage="+config.prevent_breakage);
         List<TreeNode> nodes = selectedNodes(detected);
         int cost = skipDamage?0:cost(nodes, config, divisor);
         context.info("Selected blocks: "+nodes.size()+", durability cost: "+cost+", available: "+available+", budget: "+budget);
@@ -109,6 +117,7 @@ public class TreeFellerCutting{
                 for(TreeNode node : nodes){
                     if(!isCuttable(node))continue; // An earlier branch may already have been trimmed.
                     double next = accumulated+weight(node, config);
+                    context.trace("Durability at "+DebuggerContext.position(node.pos)+": weight="+weight(node,config)+", cumulative="+next+", rounded="+roundedCost(next,divisor)+", budget="+budget);
                     if(roundedCost(next, divisor)>budget){
                         int trimmed = detected.detected.trim(node);
                         context.info("Durability limit: trimmed "+trimmed+" nodes", node.pos);
@@ -126,7 +135,8 @@ public class TreeFellerCutting{
             context.fail("No trunk remains in the cut selection");
             return false;
         }
-        context.info("Final cut selection", detected.detected);
+        context.user("Cutting "+nodes.size()+" blocks; tool durability cost "+cost);
+        context.snapshot(detected.detected,DebugLevel.USER,OverlayMark.SELECTED);
         TreeFellerBreaking.PreparedBreak prepared = TreeFellerBreaking.prepare(world, player, detected, nodes, item);
         if(prepared==null)return false;
         Runnable cascadeComplete = TreeFellerCascade.enqueue(world, player, detected, nodes, sourceTrunks, chain);
@@ -153,13 +163,13 @@ public class TreeFellerCutting{
                         resultConfig, TreeFellerCore.config.global.trigger, cascadeComplete);
                 else cascadeComplete.run();
                 animationScheduled = orderedLayers.size()>1;
-                context.pass("Scheduled "+layers.size()+" cutting layers; charged "+cost+" durability");
+                context.user("Felling in "+layers.size()+" layers, "+delay+" ticks apart; charged "+cost+" durability");
             }else{
                 BreakingResult result = prepared.apply(nodes);
                 prepared.toolEffects(false);
                 TreeFellerResult.complete(world, player, detected, result);
                 cascadeComplete.run();
-                context.pass("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
+                context.user("Felled "+result.nodes.size()+" blocks; charged "+cost+" durability");
             }
             return true;
         }finally{
@@ -171,6 +181,7 @@ public class TreeFellerCutting{
         TreeFellerCore.connector.schedule(delay, () -> {
             boolean continued = false;
             try{
+                TreeFellerDebugger.begin(DebugPhase.CUTTING,player,world).summary("Animation layer "+(index+1)+"/"+layers.size()+", "+layers.get(index).size()+" blocks");
                 BreakingResult result = prepared.apply(layers.get(index));
                 TreeFellerResult.complete(world, player, detected, result, resultConfig, globalTrigger, false);
                 if(index+1<layers.size())animate(world, player, detected, prepared, layers, index+1, delay, resultConfig, globalTrigger, cascadeComplete);

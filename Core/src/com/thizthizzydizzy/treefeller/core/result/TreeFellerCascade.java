@@ -8,6 +8,7 @@ import com.thizthizzydizzy.treefeller.core.connector.world.*;
 import com.thizthizzydizzy.treefeller.core.cutting.TreeFellerCutting;
 import com.thizthizzydizzy.treefeller.core.detection.*;
 import com.thizthizzydizzy.treefeller.core.trigger.TreeFellerTrigger;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import java.util.*;
 /** Server-thread cascade work. No platform state or mutable global "cascading" flag. */
 public final class TreeFellerCascade{
@@ -22,6 +23,8 @@ public final class TreeFellerCascade{
     /** Capture external leaf boundaries before the selected blocks disappear. */
     public static Runnable enqueue(IWorldConnector world, IPlayerConnector player, DetectionResult detected,
             List<TreeNode> nodes, Collection<Long> sourceTrunks, Chain chain){
+        DebuggerContext context=TreeFellerDebugger.begin(DebugPhase.CASCADE,player,world);
+        context.values("Cascade settings",TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree,detected.tool).cascade);
         if(chain==null)chain = new Chain();
         chain.claimed.addAll(sourceTrunks);
         for(TreeNode node : nodes)chain.claimed.add(node.pos);
@@ -37,14 +40,16 @@ public final class TreeFellerCascade{
                 if(remaining<=0)active.remove(owner);else active.put(owner, remaining);
             }
         };
-        if(!enabled)return complete;
+        if(!enabled){context.summary("Cascade disabled");return complete;}
+        context.user("Searching for connected trees");
+        context.mark(DebugLevel.USER,detected.detected.root.pos,OverlayMark.CASCADE);
         List<TreeConfiguration> targets = new ArrayList<>();
         if(detected.tree.cascade_trees==null)targets.add(detected.tree);
         else for(int index : detected.tree.cascade_trees){
             if(index>=0&&index<TreeFellerCore.config.trees.length&&!targets.contains(TreeFellerCore.config.trees[index]))
                 targets.add(TreeFellerCore.config.trees[index]);
         }
-        if(targets.isEmpty())return complete;
+        if(targets.isEmpty()){context.summary("No cascade target species");return complete;}
         Set<Long> boundaries = new LinkedHashSet<>();
         for(TreeNode node : nodes)for(int[] dir : DIRECT){
             long pos = BlockPos.getRelative(node.pos, dir[0], dir[1], dir[2]);
@@ -52,8 +57,9 @@ public final class TreeFellerCascade{
         }
         for(long pos : boundaries){
             // Air/decorations cannot connect trees. Queue only intact external leaves.
-            if(targets.stream().anyMatch(tree -> matches(world, pos, tree.leaves)))
-                pending.add(new Search(world, player, targets, pos, chain));
+            if(targets.stream().anyMatch(tree -> matches(world, pos, tree.leaves))){
+                pending.add(new Search(world, player, targets, pos, chain));context.decision(DebugLevel.DETAIL,pos,OverlayMark.CASCADE,"Queued external leaf boundary");
+            }else context.trace("No cascade leaves at "+DebuggerContext.position(pos));
         }
         schedule();
         return complete;
@@ -73,10 +79,12 @@ public final class TreeFellerCascade{
             if(search.config!=TreeFellerCore.config){pending.remove();continue;}
             if(search.candidates==null){search.scan();checks++;}
             if(search.candidates.isEmpty()){pending.remove();continue;}
+            search.context.summary("Cascade budgets: checks="+checks+"/"+checkLimit+", felled="+felled+"/"+fellLimit+", active="+active.getOrDefault(TreeFellerCore.config,0));
             long pos = search.candidates.remove();
             if(search.chain.claimed.contains(pos))continue;
             DetectionResult detected = TreeFellerTrigger.detect(search.player, search.world, pos, false, search.targets, true);
-            if(detected!=null&&TreeFellerCutting.cut(search.world, search.player, detected, search.chain))felled++;
+            if(detected!=null&&TreeFellerCutting.cut(search.world, search.player, detected, search.chain)){felled++;search.context.decision(DebugLevel.USER,pos,OverlayMark.CASCADE,"Felled connected tree");}
+            else search.context.decision(DebugLevel.DETAIL,pos,OverlayMark.REJECTED,"Cascade tree detection or cutting refused");
         }
         schedule();
     }
@@ -85,6 +93,7 @@ public final class TreeFellerCascade{
         return false;
     }
     private static final class Search{
+        final DebuggerContext context;
         final IWorldConnector world;
         final IPlayerConnector player;
         final TreeFellerConfiguration config = TreeFellerCore.config;
@@ -93,6 +102,7 @@ public final class TreeFellerCascade{
         final Chain chain;
         ArrayDeque<Long> candidates;
         Search(IWorldConnector world, IPlayerConnector player, List<TreeConfiguration> targets, long start, Chain chain){
+            context=TreeFellerDebugger.begin(DebugPhase.CASCADE,player,world);
             this.world=world;this.player=player;this.targets=targets;this.start=start;this.chain=chain;
         }
         void scan(){
@@ -105,6 +115,7 @@ public final class TreeFellerCascade{
                 leaves.add(start);depths.put(start,0);
                 while(!leaves.isEmpty()){
                     long leaf = leaves.remove();
+                    context.decision(DebugLevel.TRACE,leaf,OverlayMark.CANDIDATE,"Cascade search depth="+depths.get(leaf));
                     int depth = depths.get(leaf);
                     for(int[] dir : DIRECT){
                         long pos = BlockPos.getRelative(leaf,dir[0],dir[1],dir[2]);
@@ -125,6 +136,8 @@ public final class TreeFellerCascade{
                 }
             }
             candidates = new ArrayDeque<>(trunks);
+            context.summary("Cascade found "+trunks.size()+" trunk candidates");
+            for(long pos : trunks)context.mark(DebugLevel.DETAIL,pos,OverlayMark.CASCADE);
         }
     }
 }

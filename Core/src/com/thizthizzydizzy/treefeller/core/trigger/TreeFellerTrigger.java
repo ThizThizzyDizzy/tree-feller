@@ -9,8 +9,7 @@ import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.criteria.TreeFellerCriteria;
 import com.thizthizzydizzy.treefeller.core.cutting.TreeFellerCutting;
-import com.thizthizzydizzy.treefeller.core.debug.DebuggerContext;
-import com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger;
+import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeFellerDetection;
 import com.thizthizzydizzy.treefeller.core.detection.TreeTree;
@@ -36,6 +35,7 @@ public class TreeFellerTrigger{
         if(!context.checkTrue("Global Trigger", checkTrigger(context, player, world, pos, TreeFellerCore.config.global.trigger)))
             return null;
 
+        context.mark(DebugLevel.USER,pos,OverlayMark.CANDIDATE);
         IItemConnector item = player.getTool();
         context.info(item);
 
@@ -44,7 +44,7 @@ public class TreeFellerTrigger{
             context.info(tool);
             if(!context.checkTrue("Tool Trigger", checkTrigger(context, player, world, pos, tool.trigger)))
                 continue;
-            if(context.checkTrue("Tool matches", item.matches(tool.item)))
+            if(context.match("Tool matches", item.matches(tool.item)))
                 validTools.add(tool);
         }
 
@@ -63,22 +63,27 @@ public class TreeFellerTrigger{
                 TreeTree detected = TreeFellerDetection.detect(player, world, tree, tool, pos, item, secondary);
                 if(detected==null)continue;
                 DetectionResult result = new DetectionResult(detected, tree, tool);
-                if(!secondary&&!TreeFellerCriteria.check(world, result, cascading))continue;
+                if(!secondary&&!TreeFellerCriteria.check(world, result, cascading,player))continue;
+                context.user("Tree and tool matched");
+                context.mark(DebugLevel.USER,pos,OverlayMark.ACCEPTED);
                 return result;
             }
         }
+        context.user(validTools.isEmpty()?"This item does not match any configured tool and its trigger requirements":"No eligible tree matched this block and tool");
+        context.mark(DebugLevel.USER,pos,OverlayMark.REJECTED);
         return null;
     }
     private static boolean checkTrigger(DebuggerContext context, IPlayerConnector player, IWorldConnector world, long pos, TriggerConfiguration config){
         if(config==null)return true;
+        context.values("Trigger settings",config);
         // == WORLD CHECKS ==
-        if(config.day_time!=null&&!context.checkTrue("Time of Day", config.day_time.matches(world.getDayTime())))
+        if(config.day_time!=null&&!context.check("Time of Day",world.getDayTime(),config.day_time,config.day_time.matches(world.getDayTime())))
             return false;
-        if(config.moon_phase!=null&&!context.checkTrue("Moon Phase", config.moon_phase.matches(world.getMoonPhase())))
+        if(config.moon_phase!=null&&!context.check("Moon Phase",world.getMoonPhase(),config.moon_phase,config.moon_phase.matches(world.getMoonPhase())))
             return false;
-        if(config.dimensions!=null&&!context.checkTrue("Dimensions", config.dimensions.applySingle(world.getDimension())))
+        if(config.dimensions!=null&&!context.check("Dimensions",world.getDimension(),config.dimensions,config.dimensions.applySingle(world.getDimension())))
             return false;
-        if(config.biomes!=null&&!context.checkTrue("Biomes", config.biomes.applySingle(world.getBiome(pos))))
+        if(config.biomes!=null&&!context.check("Biomes",world.getBiome(pos),config.biomes,config.biomes.applySingle(world.getBiome(pos))))
             return false;
 
         // == PLAYER CHECKS ==
@@ -87,9 +92,9 @@ public class TreeFellerTrigger{
                 return false;
             if(config.permissions!=null&&!context.checkTrue("Permissions", config.permissions.applyMulti(player::hasPermission)))
                 return false;
-            if(config.food!=null&&!context.checkTrue("Food", config.food.matches(player.getFoodLevel())))return false;
-            if(config.saturation!=null&&!context.checkTrue("Saturation", config.saturation.matches(player.getSaturationLevel())))return false;
-            if(config.health!=null&&!context.checkTrue("Health", config.health.matches(player.getHealth())))return false;
+            if(config.food!=null&&!context.check("Food",player.getFoodLevel(),config.food,config.food.matches(player.getFoodLevel())))return false;
+            if(config.saturation!=null&&!context.check("Saturation",player.getSaturationLevel(),config.saturation,config.saturation.matches(player.getSaturationLevel())))return false;
+            if(config.health!=null&&!context.check("Health",player.getHealth(),config.health,config.health.matches(player.getHealth())))return false;
 
             PlayerGameMode gameMode = player.getGameMode();
             context.info(gameMode);

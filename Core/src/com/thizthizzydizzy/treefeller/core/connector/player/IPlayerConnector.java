@@ -1,6 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.connector.player;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
-import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import java.util.Collection;
 public interface IPlayerConnector{
     com.thizthizzydizzy.treefeller.core.breaking.FallVector position();
@@ -28,5 +27,9 @@ public interface IPlayerConnector{
     public IItemConnector getTool();
     public void sendMessage(String message);
     public String getPlayerName();
-    public void debugDisplayTreeNode(TreeNode node);
+    /** Draw a semantic client-only world marker; material is an optional platform hint. */
+    public void debugOverlay(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world, long pos,
+            com.thizthizzydizzy.treefeller.core.debug.OverlayMark mark, String material);
+    /** Restore the current real world state at a displayed position. */
+    public void debugRestore(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world, long pos);
 }

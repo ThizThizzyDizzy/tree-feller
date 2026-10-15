@@ -15,6 +15,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
 public class BukkitWorldConnector implements IWorldConnector{
     private final World world;
+    public World getWorld(){return world;}
     @Override public java.util.function.LongConsumer prepareEffect(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration effect){
         java.util.function.Consumer<org.bukkit.Location> playback=BukkitEffectPlayback.prepare(effect);
         return pos -> playback.accept(block(pos).getLocation().add(.5,.5,.5));

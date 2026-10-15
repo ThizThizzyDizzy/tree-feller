@@ -3,6 +3,8 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.result.*;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.detection.*;
+import com.thizthizzydizzy.treefeller.core.debug.*;
+import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.LongConsumer;
@@ -11,19 +13,28 @@ public final class TreeFellerEffects{
     private final List<Entry> effects = new ArrayList<>();
     private final Map<Long, List<Entry>> blocks = new HashMap<>();
     private final long origin;
-    public TreeFellerEffects(IWorldConnector world, long origin, List<TreeNode> nodes, IItemConnector tool, EffectConfiguration[] configured){
+    private final DebuggerContext context;
+    public TreeFellerEffects(IWorldConnector world,IPlayerConnector player, long origin, List<TreeNode> nodes, IItemConnector tool, EffectConfiguration[] configured){
         this.origin = origin;
-        if(configured==null)return;
+        context=TreeFellerDebugger.begin(DebugPhase.EFFECTS,player,world);
+        context.values("Effects",configured);
+        if(configured==null){context.summary("No configured effects");return;}
+        context.user("Configured "+configured.length+" effects");
+        context.mark(DebugLevel.USER,origin,OverlayMark.EFFECT);
         for(EffectConfiguration effect : configured){
             if(effect==null||effect.type==null||effect.location==null)
                 throw new IllegalArgumentException("Effects require a type and location");
             validate(effect);
             Entry entry = new Entry(effect, world.prepareEffect(effect));
             if(matches(effect,String.valueOf(tool.getItemId())))effects.add(entry);
+            else context.trace("Tool effect filter rejected "+tool.getItemId());
             for(TreeNode node : nodes){
                 EffectLocation location = node.type==TreeNodeType.TRUNK?EffectLocation.TRUNK
                         :node.type==TreeNodeType.LEAVES?EffectLocation.LEAVES:EffectLocation.DECORATION;
-                if(effect.location==location&&matches(effect,world.material(node.pos)))blocks.computeIfAbsent(node.pos, ignored -> new ArrayList<>()).add(entry);
+                if(effect.location==location){
+                    if(matches(effect,world.material(node.pos))){blocks.computeIfAbsent(node.pos, ignored -> new ArrayList<>()).add(entry);context.mark(DebugLevel.DETAIL,node.pos,OverlayMark.SELECTED);}
+                    else context.decision(DebugLevel.TRACE,node.pos,OverlayMark.REJECTED,"Effect material filter rejected "+world.material(node.pos));
+                }
             }
         }
     }
@@ -51,10 +62,15 @@ public final class TreeFellerEffects{
         if(e.tags==null)throw new IllegalArgumentException("Marker tags must be a list");
         for(String tag : e.tags)if(tag==null||tag.isEmpty())throw new IllegalArgumentException("Marker tags must not be empty");
     }
-    private static final class Entry{
+    private final class Entry{
         final EffectConfiguration config;
         final LongConsumer playback;
         Entry(EffectConfiguration config, LongConsumer playback){this.config=config;this.playback=playback;}
-        void play(long pos){if(ThreadLocalRandom.current().nextDouble()<config.chance)playback.accept(pos);}
+        void play(long pos){
+            double roll=ThreadLocalRandom.current().nextDouble();
+            context.trace("Effect "+config.type+" at "+DebuggerContext.position(pos)+": roll="+roll+", chance="+config.chance);
+            if(roll<config.chance){playback.accept(pos);context.decision(DebugLevel.DETAIL,pos,OverlayMark.EFFECT,"Played "+config.type+" at "+config.location);}
+            else context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Effect chance refused playback");
+        }
     }
 }
