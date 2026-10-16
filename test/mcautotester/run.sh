@@ -20,6 +20,7 @@ if (($# == 0)); then
         treefeller-option-item-lore \
         treefeller-option-item-attributes \
         treefeller-option-item-enchantments \
+        treefeller-option-tools-trees \
         treefeller-option-result-effects \
         treefeller-option-result-effects-chance \
         treefeller-option-result-effects-location \
