@@ -14,6 +14,12 @@ if (($# == 0)); then
         treefeller-option-debug-overlay-level \
         treefeller-option-debug-step-through \
         treefeller-option-item-custom-model-data \
+        treefeller-option-item-material \
+        treefeller-option-item-durability \
+        treefeller-option-item-custom-name \
+        treefeller-option-item-lore \
+        treefeller-option-item-attributes \
+        treefeller-option-item-enchantments \
         treefeller-option-result-effects \
         treefeller-option-result-effects-chance \
         treefeller-option-result-effects-location \

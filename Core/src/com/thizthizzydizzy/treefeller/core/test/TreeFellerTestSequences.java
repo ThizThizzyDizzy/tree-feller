@@ -4,6 +4,12 @@ public class TreeFellerTestSequences{
         com.thizthizzydizzy.treefeller.core.test.options.messages.MessageTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.debug.DebugVerbosityTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.item.CustomModelDataTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.item.MaterialTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.item.DurabilityTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.item.CustomNameTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.item.LoreTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.item.AttributesTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.item.EnchantmentTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.EffectsTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.CascadeTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.result.SaplingEnableTests.register(platform);

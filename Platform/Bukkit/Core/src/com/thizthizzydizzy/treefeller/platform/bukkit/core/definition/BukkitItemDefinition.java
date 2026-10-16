@@ -3,6 +3,8 @@ import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.VariableIntegerRange;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.ItemDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.EnchantmentRange;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -50,10 +52,15 @@ public class BukkitItemDefinition extends ItemDefinition{
             return false;
         if(attributes!=null&&!attributes.applyMulti(flag -> meta!=null&&meta.hasItemFlag(flag)))
             return false;
-        if(enchantments!=null&&!enchantments.applyMulti(range -> range.matches(meta)))
+        if(enchantments!=null&&!enchantments.applyMulti(range -> range.matches(name -> enchantmentLevel(meta, name))))
             return false;
         if(custom_model_data!=null&&!matchesCustomModelData(customModelData(meta)))return false;
         return true;
+    }
+    private static int enchantmentLevel(ItemMeta meta, String name){
+        Enchantment enchantment = name==null?null:Enchantment.getByName(name.toUpperCase(java.util.Locale.ROOT));
+        if(enchantment==null)throw new IllegalArgumentException("Unknown enchantment: "+name);
+        return meta==null?0:meta.getEnchantLevel(enchantment);
     }
     private static Integer customModelData(ItemMeta meta){
         if(meta==null)return null;
