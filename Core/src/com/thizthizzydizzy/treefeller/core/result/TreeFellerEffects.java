@@ -26,13 +26,15 @@ public final class TreeFellerEffects{
                 throw new IllegalArgumentException("Effects require a type and location");
             validate(effect);
             Entry entry = new Entry(effect, world.prepareEffect(effect));
-            if(matches(effect,String.valueOf(tool.getItemId())))effects.add(entry);
-            else context.trace("Tool effect filter rejected "+tool.getItemId());
+            if(effect.location==EffectLocation.TOOL||effect.location==EffectLocation.TOOL_BREAK){
+                if(matches(effect,definition -> tool.matches((com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition)definition)))effects.add(entry);
+                else context.trace("Tool effect filter rejected "+tool.getItemId());
+            }
             for(TreeNode node : nodes){
                 EffectLocation location = node.type==TreeNodeType.TRUNK?EffectLocation.TRUNK
                         :node.type==TreeNodeType.LEAVES?EffectLocation.LEAVES:EffectLocation.DECORATION;
                 if(effect.location==location){
-                    if(matches(effect,world.material(node.pos))){blocks.computeIfAbsent(node.pos, ignored -> new ArrayList<>()).add(entry);context.mark(DebugLevel.DETAIL,node.pos,OverlayMark.SELECTED);}
+                    if(matches(effect,definition -> world.matches(node.pos,(com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition)definition))){blocks.computeIfAbsent(node.pos, ignored -> new ArrayList<>()).add(entry);context.mark(DebugLevel.DETAIL,node.pos,OverlayMark.SELECTED);}
                     else context.decision(DebugLevel.TRACE,node.pos,OverlayMark.REJECTED,"Effect material filter rejected "+world.material(node.pos));
                 }
             }
@@ -45,17 +47,14 @@ public final class TreeFellerEffects{
     public void tool(boolean broken){
         for(Entry entry : effects)if(entry.config.location==(broken?EffectLocation.TOOL_BREAK:EffectLocation.TOOL))entry.play(origin);
     }
-    private static boolean matches(EffectConfiguration effect, String material){
+    private static boolean matches(EffectConfiguration effect,java.util.function.Predicate<com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject> matcher){
         if(effect.filter==null||effect.filter.length==0)return true;
-        for(String filter : effect.filter)if(normalize(filter).equals(normalize(material)))return true;
+        for(com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject filter:effect.filter)if(matcher.test(filter))return true;
         return false;
-    }
-    private static String normalize(String value){
-        return value.toLowerCase(Locale.ROOT).replace("minecraft:", "");
     }
     private static void validate(EffectConfiguration e){
         if(e.type==EffectType.PARTICLE&&(e.particle==null||e.particle.isEmpty()))throw new IllegalArgumentException("Particle name is required");
-        if(e.filter!=null)for(String material : e.filter)if(material==null||material.isEmpty())throw new IllegalArgumentException("Effect filter materials must not be empty");
+        if(e.filter!=null)for(com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject definition:e.filter)if(definition==null)throw new IllegalArgumentException("Effect filters must not be null");
         for(float value : new float[]{e.chance,e.x,e.y,e.z,e.dx,e.dy,e.dz,e.speed,e.r,e.g,e.b,e.size,e.volume,e.pitch,e.power})
             if(!Float.isFinite(value))throw new IllegalArgumentException("Effect values must be finite");
         if(e.count<0||e.power<0)throw new IllegalArgumentException("Particle count and explosion power must be nonnegative");

@@ -6,19 +6,20 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 /** Platform-independent item metadata requirements. */
-public abstract class ItemDefinition implements IItemDefinition{
+public abstract class ItemDefinition extends com.thizthizzydizzy.treefeller.core.nbt.NbtDefinition implements IItemDefinition{
     @ConfigComment("Allowed and refused integer custom model data values; absent data is distinct from zero")
     public DualList<Integer> custom_model_data;
 
     /** Platform identity field, such as a material or item identifier. */
     protected abstract String identityField();
+    protected abstract ItemDefinition copyIdentity();
     @Override
     public Map<String,IItemDefinition> requirements(){
         Map<String,IItemDefinition> result=new LinkedHashMap<>();
         try{
             Field identity=getClass().getField(identityField());
             for(Field field:getClass().getFields()){
-                if(Modifier.isStatic(field.getModifiers()))continue;
+                if(Modifier.isStatic(field.getModifiers())||field.getName().equals("nbt"))continue;
                 Object value=field.get(this);
                 if(value==null&&!field.equals(identity))continue;
                 for(Map.Entry<String,Object> projection:projections(value).entrySet()){
@@ -32,6 +33,7 @@ public abstract class ItemDefinition implements IItemDefinition{
             Map<String,IItemDefinition> ordered=new LinkedHashMap<>();
             ordered.put(identity.getName(),result.remove(identity.getName()));
             ordered.putAll(result);
+            if(nbt!=null){ItemDefinition requirement=copyIdentity();requirement.nbt=nbt;ordered.put("nbt",requirement);}
             return ordered;
         }catch(ReflectiveOperationException ex){throw new IllegalStateException("Could not inspect item requirements",ex);}
     }

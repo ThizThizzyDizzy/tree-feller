@@ -105,6 +105,8 @@ public class TreeFellerBreaking{
                 if(plan.conversion!=null){
                     // Vanilla completes the initiating break after MONITOR listeners.
                     TreeFellerCore.connector.schedule(1,() -> {
+                        // NBT-only conversions need the captured source data to merge into.
+                        world.setBlock(node.pos,plan.data);
                         world.setBlock(node.pos,plan.conversion);
                         context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.CONVERTED,"Converted "+node.type+" to "+DebuggerContext.describe(plan.conversion));
                     });

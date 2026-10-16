@@ -133,3 +133,42 @@ When you update the tree feller, make sure to add any missing configuration opti
 
 Discord
 https://discord.gg/dhcPSMt
+
+## NBT definitions
+
+Block and item definitions accept an `nbt` SNBT compound string. Only the listed tags must match; extra compound keys and list entries are allowed. Numeric tag types matter (`1b` differs from `1`). Arrays match exactly, and an empty list requires an empty list.
+
+```hocon
+tools = [{
+    item = {
+        material = IRON_AXE
+        nbt = "{\"minecraft:custom_data\":{treefeller:{enabled:1b}}}"
+    }
+}]
+```
+
+On Minecraft 1.20.5 and newer, item `nbt` describes the serialized `components` compound. Before 1.20.5 it describes the item's `tag` compound, for example `"{Unbreakable:1b}"`. Use the tag names and component formats of the server version being configured.
+
+Block `nbt` describes block entity data. Ordinary blocks have an empty compound; arbitrary metadata cannot be stored on blocks that have no block entity. Definitions work wherever blocks/items are matched, including tree materials, tool requirements, filters, and conversion sources.
+
+Conversions recursively merge `nbt` into the target's existing compound. Nested compounds retain unspecified fields; supplied lists, arrays, and scalar tags replace their previous values. Item conversion preserves the stack count and other existing item data. Block conversion protects the native block entity ID and coordinates. The definition's `material` controls material changes.
+
+Map keys can append SNBT directly to a material name. Targets can use structured definitions, including NBT without a material change:
+
+```hocon
+global.breaking.block-conversions = {
+    "chest{PublicBukkitValues:{\"treefeller:marked\":1b}}" = {
+        nbt = "{PublicBukkitValues:{\"treefeller:converted\":1b}}"
+    }
+}
+global.result.drop-conversions = {
+    "spruce_log{}" = {
+        material = DIAMOND
+        nbt = "{\"minecraft:custom_data\":{treefeller:{converted:1b}}}"
+    }
+}
+```
+
+Effect filters accept item definitions for `TOOL`/`TOOL_BREAK` locations and block definitions for other locations. Particle `item` values also accept item definitions, including NBT.
+
+The config writer also preserves structured conversion source definitions by encoding them as HOCON object strings in map keys.

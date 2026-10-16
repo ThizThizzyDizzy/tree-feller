@@ -79,6 +79,8 @@ public interface ITestPlatform{
         int fireCount(int minX,int minY,int minZ,int maxX,int maxY,int maxZ);
         TestTarget spawnTarget(double x,double y,double z);
 
+        com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector state();
+        int droppedItemCount(com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition definition,int minX,int minY,int minZ,int maxX,int maxY,int maxZ);
         int maxHeight(); // Exclusive build ceiling; arenas deliberately use positive Y.
         boolean supports(String material);
         void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance);

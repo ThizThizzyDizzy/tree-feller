@@ -8,7 +8,7 @@ public class BukkitBlockDefinition extends BlockDefinition{
     public BukkitBlockDefinition(){
     }
     public BukkitBlockDefinition(String str){
-        this(Material.matchMaterial(str));
+        material=Material.matchMaterial(readMaterial(str));
         if(material==null)throw new IllegalArgumentException("Unknown block material: "+str);
     }
     public BukkitBlockDefinition(Material material){
@@ -20,6 +20,7 @@ public class BukkitBlockDefinition extends BlockDefinition{
     }
     public boolean matches(Block block){
         if(material!=null&&material!=block.getType())return false;
-        return matchesPersistent(BukkitConnector.blockData.getPersistent(block));
+        return matchesPersistent(BukkitConnector.blockData.getPersistent(block))
+                &&(nbt==null||matchesNbt(BukkitConnector.nbt,BukkitConnector.nbt.block(block)));
     }
 }

@@ -86,6 +86,13 @@ public class ConfigReader{
     private static void parseFieldInto(Config rawConfig, String key, ConfigValue value, Field field, Object object, Type genericType, String path) throws Exception{
         try{
             Type fieldType = resolveType(field.getGenericType(), genericType);
+            if(object instanceof com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration&&field.getName().equals("filter")){
+                com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration effect=(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration)object;
+                com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectLocation location=rawConfig.hasPath("location")?rawConfig.getEnum(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectLocation.class,"location"):effect.location;
+                fieldType=location==com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectLocation.TOOL
+                        ||location==com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectLocation.TOOL_BREAK
+                        ?IItemDefinition[].class:IBlockDefinition[].class;
+            }
             Object parsedValue = parseConfigValue(rawConfig, key, value, rawType(fieldType), fieldType, field.get(object), path);
             if(parsedValue==null&&field.getType().isPrimitive())
                 throw new IllegalArgumentException("Cannot set a primitive field to null");
@@ -166,7 +173,13 @@ public class ConfigReader{
                 break;
             case STRING:
                 if(targetType==String.class)return rawConfig.getString(key);
-                return tryBasicConstructors(targetType, rawConfig.getString(key), String.class);
+                String shorthand=rawConfig.getString(key);
+                if(ISpecialConfigObject.class.isAssignableFrom(targetType)&&shorthand.trim().startsWith("{")){
+                    Config embedded=ConfigFactory.parseString("v="+shorthand);
+                    Class<?> definitionType=IBlockDefinition.class.isAssignableFrom(targetType)?IBlockDefinition.class:IItemDefinition.class;
+                    return parseConfigValue(embedded,"v",embedded.getValue("v"),definitionType,genericType,null,path);
+                }
+                return tryBasicConstructors(targetType, shorthand, String.class);
             case NUMBER:
                 if(targetType==Integer.class||targetType==int.class)
                     return rawConfig.getInt(key);

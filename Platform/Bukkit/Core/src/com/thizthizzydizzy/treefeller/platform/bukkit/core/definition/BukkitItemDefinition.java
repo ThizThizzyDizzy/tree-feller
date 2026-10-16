@@ -26,21 +26,23 @@ public class BukkitItemDefinition extends ItemDefinition{
     public BukkitItemDefinition(){
     }
     public BukkitItemDefinition(String str){
-        material = Material.matchMaterial(str);
+        material = Material.matchMaterial(readMaterial(str));
         if(material==null)throw new IllegalArgumentException("Unknown item material: "+str);
     }
     @Override
     public Object asSimplified(){
-        if(durability==null&&custom_name==null&&lore==null&&custom_model_data==null&&attributes==null&&enchantments==null)
+        if(nbt==null&&durability==null&&custom_name==null&&lore==null&&custom_model_data==null&&attributes==null&&enchantments==null)
             return material==null?null:material.toString();
         return this;
     }
     @Override
     protected String identityField(){return "material";}
+    @Override
+    protected ItemDefinition copyIdentity(){BukkitItemDefinition copy=new BukkitItemDefinition();copy.material=material;return copy;}
     public boolean matches(ItemStack stack){
         if(stack==null||stack.getType()==Material.AIR)
             return (material==null||material==Material.AIR)&&durability==null&&custom_name==null
-                    &&lore==null&&custom_model_data==null&&attributes==null&&enchantments==null;
+                    &&lore==null&&custom_model_data==null&&attributes==null&&enchantments==null&&nbt==null;
         if(material!=null&&material!=stack.getType())return false;
         if(durability!=null&&!durability.matches(0, stack.getType().getMaxDurability(), stack.getType().getMaxDurability()-stack.getDurability()))
             return false;
@@ -55,7 +57,9 @@ public class BukkitItemDefinition extends ItemDefinition{
         if(enchantments!=null&&!enchantments.applyMulti(range -> range.matches(name -> enchantmentLevel(meta, name))))
             return false;
         if(custom_model_data!=null&&!matchesCustomModelData(customModelData(meta)))return false;
-        return true;
+        return nbt==null||matchesItemNbt(com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector.nbt,
+                com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector.nbt.item(stack),
+                com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector.nbt.itemDataKey());
     }
     private static int enchantmentLevel(ItemMeta meta, String name){
         Enchantment enchantment = name==null?null:Enchantment.getByName(name.toUpperCase(java.util.Locale.ROOT));

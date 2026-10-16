@@ -11,7 +11,8 @@ import java.util.HashMap;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-public class TreeFellerBukkit extends JavaPlugin{
+public abstract class TreeFellerBukkit extends JavaPlugin{
+    public abstract com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitNbtConnector createNbtConnector(String version);
     public BukkitConnector connector;
     @Override
     public void onEnable(){

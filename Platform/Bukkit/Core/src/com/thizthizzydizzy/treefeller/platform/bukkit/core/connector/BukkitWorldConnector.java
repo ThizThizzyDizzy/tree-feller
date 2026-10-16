@@ -4,6 +4,7 @@ import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
+import com.thizthizzydizzy.treefeller.core.nbt.NbtBlockSnapshot;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitBlockDefinition;
 import java.util.ArrayList;
@@ -21,8 +22,12 @@ public class BukkitWorldConnector implements IWorldConnector{
         return pos -> playback.accept(block(pos).getLocation().add(.5,.5,.5));
     }
     @Override public String material(long pos){return block(pos).getType().name();}
-    @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(long pos){return BukkitConnector.blockData.snapshot(block(pos));}
-    @Override public void setBlock(long pos,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){BukkitConnector.blockData.place(block(pos),data);}
+    @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(long pos){return new NbtBlockSnapshot(BukkitConnector.blockData.snapshot(block(pos)),BukkitConnector.nbt.block(block(pos)));}
+    @Override public void setBlock(long pos,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){
+        NbtBlockSnapshot snapshot=data instanceof NbtBlockSnapshot?(NbtBlockSnapshot)data:null;
+        BukkitConnector.blockData.place(block(pos),snapshot==null?data:snapshot.state);
+        if(snapshot!=null&&snapshot.hasNbt())BukkitConnector.nbt.block(block(pos),snapshot.at(BukkitConnector.nbt.block(block(pos))));
+    }
     @Override public boolean isAir(long pos){return block(pos).getType().name().endsWith("AIR");}
     @Override public boolean isPassable(long pos){return BukkitConnector.blockData.passable(block(pos));}
     @Override public int minHeight(){
@@ -36,7 +41,7 @@ public class BukkitWorldConnector implements IWorldConnector{
             com.thizthizzydizzy.treefeller.core.breaking.FallVector velocity,
             java.util.function.BiConsumer<Long,Float> impact,java.util.function.LongConsumer failed){
         org.bukkit.entity.FallingBlock entity=BukkitConnector.blockData.spawn(
-                block(pos).getLocation().add(.5,.5,.5),data);
+                block(pos).getLocation().add(.5,.5,.5),data instanceof NbtBlockSnapshot?((NbtBlockSnapshot)data).state:data);
         entity.setDropItem(false);
         entity.setVelocity(new org.bukkit.util.Vector(velocity.x,velocity.y,velocity.z));
         return new BukkitFallingBlock(entity,impact,failed);
@@ -61,8 +66,10 @@ public class BukkitWorldConnector implements IWorldConnector{
     }
     @Override
     public void setBlock(long pos, IBlockDefinition definition){
-        Material material = ((BukkitBlockDefinition)definition).material;
-        if(material!=null)block(pos).setType(material, false);
+        BukkitBlockDefinition target=(BukkitBlockDefinition)definition;
+        Material material=target.material;
+        if(material!=null&&material!=block(pos).getType())block(pos).setType(material,false);
+        if(target.appliesNbt(BukkitConnector.nbt))BukkitConnector.nbt.block(block(pos),target.mergeBlockNbt(BukkitConnector.nbt,BukkitConnector.nbt.block(block(pos))));
     }
     @Override
     public void dropItem(long pos, IItemConnector item){

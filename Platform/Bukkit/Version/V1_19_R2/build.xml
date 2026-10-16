@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="TreeFellerPlatformBukkitVersionV1_19_R2" default="jar" basedir=".">
+    <path id="classpath">
+        <fileset dir="../../../../Libraries/Bukkit/1_19_R2" includes="*.jar"/>
+        <pathelement location="../../../../Core/dist/TreeFellerCore.jar"/>
+        <pathelement location="../../Core/dist/TreeFellerPlatformBukkitCore.jar"/>
+    </path>
+    <target name="jar">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src" destdir="build/classes" release="8" includeantruntime="false"><classpath refid="classpath"/></javac>
+        <mkdir dir="dist"/><jar destfile="dist/TreeFellerPlatformBukkitVersionV1_19_R2.jar" basedir="build/classes"/>
+    </target>
+    <target name="clean"><delete dir="build"/><delete dir="dist"/></target>
+</project>

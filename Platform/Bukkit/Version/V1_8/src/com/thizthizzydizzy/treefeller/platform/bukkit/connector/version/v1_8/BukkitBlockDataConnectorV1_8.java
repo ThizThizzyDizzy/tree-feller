@@ -18,7 +18,7 @@ public class BukkitBlockDataConnectorV1_8 implements BukkitBlockDataConnector{
             java.lang.reflect.Constructor<?> constructor=Class.forName(nms+"PacketPlayOutWorldParticles").getConstructor(
                     particleClass,boolean.class,float.class,float.class,float.class,float.class,float.class,float.class,float.class,int.class,int[].class);
             int[] data=new int[0];
-            if(e.particle.equalsIgnoreCase("ITEM_CRACK"))data=new int[]{Material.matchMaterial(e.item).getId(),0};
+            if(e.particle.equalsIgnoreCase("ITEM_CRACK"))data=new int[]{((com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItemDefinition)e.item).material.getId(),0};
             if(e.particle.equalsIgnoreCase("BLOCK_CRACK")||e.particle.equalsIgnoreCase("BLOCK_DUST"))data=new int[]{Material.matchMaterial(e.block).getId()};
             final int[] payload=data;
             return location -> {

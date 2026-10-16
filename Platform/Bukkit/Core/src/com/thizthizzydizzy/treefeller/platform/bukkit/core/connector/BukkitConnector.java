@@ -41,10 +41,13 @@ public class BukkitConnector implements TreeFellerConnector{
 
     private final TreeFellerBukkit treefeller;
     public static BukkitBlockDataConnector blockData;
+    public static com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitNbtConnector nbt;
     static{
         blockData = findConnector(BukkitBlockDataConnector.class, VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending("1_8")
             .atVersion("1.13", "1_13")
             .match(Bukkit.getBukkitVersion()));
+
+
     }
     private static <T> T findConnector(Class<T> clazz, String version){
         String packageName = clazz.getPackageName();
@@ -58,6 +61,17 @@ public class BukkitConnector implements TreeFellerConnector{
     
     public BukkitConnector(TreeFellerBukkit treefeller){
         this.treefeller = treefeller;
+        nbt=treefeller.createNbtConnector(
+                VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending("1_8")
+                .atVersion("1.13","1_13").atVersion("1.13.1","1_13_2")
+                .atVersion("1.16","1_16_1").atVersion("1.16.2","1_16_3").atVersion("1.16.4","1_16_5")
+                .atVersion("1.17","1_17_1").atVersion("1.18","1_18_R1").atVersion("1.18.2","1_18_R2")
+                .atVersion("1.19","1_19_R1").atVersion("1.19.3","1_19_R2").atVersion("1.19.4","1_19_R3")
+                .atVersion("1.20","1_20_R1").atVersion("1.20.2","1_20_R2").atVersion("1.20.3","1_20_R3").atVersion("1.20.5","1_20_R4")
+                .atVersion("1.21","1_21_R1").atVersion("1.21.2","1_21_R2").atVersion("1.21.4","1_21_R3")
+                .atVersion("1.21.5","1_21_R4").atVersion("1.21.6","1_21_R5").atVersion("1.21.9","1_21_R6")
+                .atVersion("1.21.11","1_21_R7").atVersion("26.1","26_R1")
+                .match(Bukkit.getBukkitVersion().split("-",2)[0]));
     }
     @Override
     public void log(String text){

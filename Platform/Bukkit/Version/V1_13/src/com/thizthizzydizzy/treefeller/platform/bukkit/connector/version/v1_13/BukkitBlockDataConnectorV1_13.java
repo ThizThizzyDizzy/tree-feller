@@ -54,9 +54,9 @@ public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
             extra=new org.bukkit.Particle.DustOptions(org.bukkit.Color.fromRGB((int)e.r,(int)e.g,(int)e.b),e.size);
         }else if(data==ItemStack.class){
             if(e.item==null)throw new IllegalArgumentException("Particle item is required");
-            Material material=Material.matchMaterial(e.item);
+            Material material=((com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItemDefinition)e.item).material;
             if(material==null||material==Material.AIR)throw new IllegalArgumentException("Invalid particle item: "+e.item);
-            extra=new ItemStack(material);
+            extra=((com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitItemConnector)new com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitItemConnector(new ItemStack(material)).convert(e.item)).getStack();
         }else if(data==BlockData.class){
             if(e.block==null)throw new IllegalArgumentException("Particle block is required");
             extra=org.bukkit.Bukkit.createBlockData(e.block.toLowerCase(java.util.Locale.ROOT));

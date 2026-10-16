@@ -91,6 +91,13 @@
                 <include name="Platform/Utility/build.xml"/>
             </fileset>
         </subant>
+        <echo message="Building Bukkit Core and version connectors..."/>
+        <ant antfile="../Platform/Bukkit/Core/build.xml" target="jar" inheritall="false"><property name="no.deps" value="true"/></ant>
+        <subant target="jar">
+            <property name="no.deps" value="true"/>
+            <fileset dir=".."><include name="Platform/Bukkit/Version/*/build.xml"/></fileset>
+        </subant>
+        <ant antfile="../Platform/Bukkit/Core/build.xml" target="version-bootstrap" inheritall="false"/>
         <echo message="Building platforms..."/>
         
         <subant target="jar" failonerror="false"> <!-- failonerror=false to allow building for one platform when all others fail -->
@@ -98,6 +105,8 @@
             <fileset dir="..">
                 <include name="Platform/**/build.xml"/>
                 <exclude name="Platform/Utility/build.xml"/>
+                <exclude name="Platform/Bukkit/Core/build.xml"/>
+                <exclude name="Platform/Bukkit/Version/**/build.xml"/>
             </fileset>
         </subant>
         

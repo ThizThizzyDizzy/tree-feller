@@ -4,8 +4,8 @@ public class EffectConfiguration{
     public float chance = 1;
     public EffectLocation location;
     public EffectType type;
-    // Empty means all materials; tool locations match the initiating tool.
-    public String[] filter = new String[0];
+    // Empty means all definitions; TOOL/TOOL_BREAK use item definitions, other locations use block definitions.
+    public com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject[] filter = new com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition[0];
     
     // particles
     public String particle;
@@ -13,7 +13,7 @@ public class EffectConfiguration{
     public int count = 1;
     public float r, g, b;
     public float size = 1;
-    public String item;
+    public com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition item;
     public String block;
     
     // sounds

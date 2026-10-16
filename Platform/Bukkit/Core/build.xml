@@ -70,4 +70,21 @@
     nbproject/build-impl.xml file. 
 
     -->
+    <!-- Compile direct native constructors after the version hooks, without a separate API project. -->
+    <target name="version-bootstrap">
+        <path id="version.bootstrap.classpath">
+            <pathelement location="build/classes"/>
+            <pathelement location="../../../Core/dist/TreeFellerCore.jar"/>
+            <pathelement location="../../../Libraries/Bukkit/1.8/craftbukkit-1.8.jar"/>
+            <fileset dir="../Version" includes="*/dist/*.jar"/>
+        </path>
+        <delete>
+            <fileset dir="build/classes" includes="**/BukkitNbtConnectors.class,**/TreeFellerBukkitBootstrap.class"/>
+        </delete>
+        <javac srcdir="src" destdir="build/classes" release="8" includeantruntime="false"
+               includes="**/BukkitNbtConnectors.java,**/TreeFellerBukkitBootstrap.java">
+            <classpath refid="version.bootstrap.classpath"/>
+        </javac>
+        <jar destfile="dist/TreeFellerPlatformBukkitCore.jar" basedir="build/classes" update="true"/>
+    </target>
 </project>

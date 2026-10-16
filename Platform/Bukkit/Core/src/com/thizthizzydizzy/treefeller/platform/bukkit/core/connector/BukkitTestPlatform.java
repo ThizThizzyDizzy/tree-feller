@@ -130,6 +130,19 @@ public final class BukkitTestPlatform implements ITestPlatform{
                 if(world.getBlockAt(x,y,z).getType()==Material.FIRE)count++;
             return count;
         }
+        @Override public com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector state(){return new BukkitWorldConnector(world);}
+        @Override public int droppedItemCount(com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition definition,int minX,int minY,int minZ,int maxX,int maxY,int maxZ){
+            int count=0;
+            for(org.bukkit.entity.Entity entity:world.getEntities()){
+                org.bukkit.Location location=entity.getLocation();
+                if(location.getX()<minX||location.getX()>maxX||location.getY()<minY||location.getY()>maxY||location.getZ()<minZ||location.getZ()>maxZ)continue;
+                if(entity instanceof org.bukkit.entity.Item){
+                    ItemStack stack=((org.bukkit.entity.Item)entity).getItemStack();
+                    if(new BukkitItemConnector(stack).matches(definition))count+=stack.getAmount();
+                }
+            }
+            return count;
+        }
         @Override public int maxHeight(){return world.getMaxHeight();}
         @Override public boolean supports(String material){return BukkitConnector.blockData.supportsTestMaterial(material);}
         @Override public void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance){

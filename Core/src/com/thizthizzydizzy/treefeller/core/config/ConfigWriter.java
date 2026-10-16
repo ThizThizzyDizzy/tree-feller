@@ -137,6 +137,9 @@ public class ConfigWriter{
     }
     private static String mapKey(Object key){
         Object simplified = key instanceof ISpecialConfigObject?((ISpecialConfigObject)key).asSimplified():key;
+        if(!(simplified instanceof String)&&key instanceof ISpecialConfigObject){
+            StringBuilder encoded=new StringBuilder();writeValue(encoded,key,0);return encoded.toString();
+        }
         if(!(simplified instanceof String))throw new IllegalArgumentException("Configuration map keys must simplify to strings: "+key);
         return (String)simplified;
     }

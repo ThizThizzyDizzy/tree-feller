@@ -26,6 +26,8 @@ public class BukkitItemConnector implements IItemConnector{
         BukkitItemDefinition target = (BukkitItemDefinition)definition;
         ItemStack copy = stack.clone();
         if(target.material!=null)copy.setType(target.material);
+        if(target.nbt!=null)copy=BukkitConnector.nbt.item(copy,target.mergeItemNbt(BukkitConnector.nbt,
+                BukkitConnector.nbt.item(copy),BukkitConnector.nbt.itemDataKey()));
         return new BukkitItemConnector(copy);
     }
     @Override

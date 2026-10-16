@@ -27,7 +27,7 @@ public final class FixtureOptionTestSuite{
                 ctx.teleportPlayer(OptionTestSuite.PLAYER, f.x+f.cutX+.5, arena.floorY+1, f.z+f.cutZ-3.5, 0.0, 0.0);
                 TestArena.onServer(ctx, () -> {hooks.preparePlayer(OptionTestSuite.PLAYER, true); return null;});
                 f.before.run(ctx, hooks);
-                TestArena.onServer(ctx, () -> {hooks.showTestStatus(OptionTestSuite.PLAYER, option+" | "+name+" | "+config.replace('\n', ' ')); return null;});
+                TestArena.onServer(ctx, () -> {hooks.showTestStatus(OptionTestSuite.PLAYER, option+" | "+name+" | "+(f.description==null?config.replace('\n', ' '):f.description)); return null;});
                 ctx.breakBlock(f.x+f.cutX, arena.floorY+1+f.cutY, f.z+f.cutZ);
                 if(f.allowed)arena.assertLogsRemoved(f.tree, f.x, f.z);
                 else TestArena.onServer(ctx, () -> {
@@ -42,6 +42,7 @@ public final class FixtureOptionTestSuite{
                     for(Probe probe : f.probes)assertBlock(f, probe.x, probe.y, probe.z, probe.expected);
                     return null;
                 });
+                f.after.run(ctx,hooks);
             }finally{
                 cleanup(ctx, hooks);
             }
@@ -78,7 +79,9 @@ public final class FixtureOptionTestSuite{
         public TestTrees.Tree tree=SMALL_TREE;
         public int cutX,cutY,cutZ;
         public boolean allowed=true;
+        public String description;
         public OptionTestSuite.Test before=(ctx,hooks) -> {};
+        public OptionTestSuite.Test after=(ctx,hooks) -> {};
         final List<Probe> blocks=new ArrayList<>(), probes=new ArrayList<>();
         Fixture(int x,int z){this.x=x;this.z=z;}
         public Fixture block(int x,int y,int z,String material,BlockAxis axis,int distance,String expected){
