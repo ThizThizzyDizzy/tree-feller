@@ -5,11 +5,17 @@ public interface ITestPlatform{
     /** Observe native output during a real client action. Close removes every hook. */
     EffectCapture captureEffects(String player);
     interface EffectCapture extends AutoCloseable{
+        java.util.List<MessageObservation> messages();
         java.util.List<ParticleObservation> particles();
         java.util.List<SoundObservation> sounds();
         java.util.List<MarkerObservation> markers();
         java.util.List<ExplosionObservation> explosions();
         @Override void close();
+    }
+    final class MessageObservation{
+        public final boolean actionbar;
+        public final String text;
+        public MessageObservation(boolean actionbar,String text){this.actionbar=actionbar;this.text=text;}
     }
     final class ParticleObservation{
         public final double x,y,z,dx,dy,dz,speed,r,g,b,size;

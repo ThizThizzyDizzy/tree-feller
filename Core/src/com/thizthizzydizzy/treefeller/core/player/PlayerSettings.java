@@ -14,6 +14,7 @@ public class PlayerSettings{
     private PlayerSettings(IPlayerConnector player){
         this.player = player;
         toggleState = TreeFellerCore.config.global.trigger.default_enabled;
+        com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages.checks(player,"global","trigger").check("default_enabled",toggleState,toggleState);
     }
     public boolean isToggledOn(){
         return toggleState;

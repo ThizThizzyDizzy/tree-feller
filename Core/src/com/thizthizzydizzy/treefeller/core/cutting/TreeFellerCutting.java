@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.cutting;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
+import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.breaking.BreakingResult;
@@ -91,6 +92,7 @@ public class TreeFellerCutting{
                 context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED,"Retain branch: partial trunk limit exceeded");
                 totalTrimmed += detected.detected.trim(node);
             }
+            if(totalTrimmed>0)TreeFellerMessages.send(player,"partial");
             context.info("Partial Trunk Limit "+limit+" - Trimmed "+totalTrimmed+" nodes from "+toTrim.size()+" branches");
             context.snapshot(detected.detected,DebugLevel.SUMMARY,OverlayMark.SELECTED);
         }
@@ -111,8 +113,10 @@ public class TreeFellerCutting{
         if(cost>budget){
             if(Boolean.TRUE.equals(config.allow_partial_tool)&&!Boolean.TRUE.equals(config.prevent_breakage)){
                 cost = (int)Math.min(Integer.MAX_VALUE, available);
+                TreeFellerMessages.send(player,"partial_tool");
                 context.info("Partial tool: felling the full selection with remaining durability");
             }else if(Boolean.TRUE.equals(config.allow_partial)){
+                TreeFellerMessages.send(player,"partial");
                 double accumulated = 0;
                 for(TreeNode node : nodes){
                     if(!isCuttable(node))continue; // An earlier branch may already have been trimmed.
@@ -127,10 +131,16 @@ public class TreeFellerCutting{
                 cost = cost(nodes, config, divisor);
                 context.info("Partial cut: "+nodes.size()+" blocks, durability cost: "+cost);
             }else{
+                if(Boolean.TRUE.equals(config.prevent_breakage))
+                    TreeFellerMessages.checks(player,TreeFellerMessages.scope("prevent_breakage",detected.tree.cutting,detected.tool.cutting),"cutting").check("prevent_breakage",false,cost,budget);
+                TreeFellerMessages.checks(player,TreeFellerMessages.scope("allow_partial",detected.tree.cutting,detected.tool.cutting),"cutting").check("allow_partial",false,available,cost);
+                TreeFellerMessages.checks(player,TreeFellerMessages.scope("allow_partial_tool",detected.tree.cutting,detected.tool.cutting),"cutting").check("allow_partial_tool",false,available,cost);
+                TreeFellerMessages.send(player,Boolean.TRUE.equals(config.prevent_breakage)?"prevent_breakage":"durability_low",available,cost);
                 context.fail("Insufficient durability"+(Boolean.TRUE.equals(config.prevent_breakage)?" while preventing tool breakage":""));
                 return false;
             }
         }
+        if(Boolean.TRUE.equals(config.prevent_breakage))TreeFellerMessages.send(player,"prevent_breakage_success");
         if(nodes.isEmpty()||nodes.stream().noneMatch(n -> n.type==TreeNodeType.TRUNK)){
             context.fail("No trunk remains in the cut selection");
             return false;
@@ -139,6 +149,13 @@ public class TreeFellerCutting{
         context.snapshot(detected.detected,DebugLevel.USER,OverlayMark.SELECTED);
         TreeFellerBreaking.PreparedBreak prepared = TreeFellerBreaking.prepare(world, player, detected, nodes, item);
         if(prepared==null)return false;
+        TreeFellerMessages.checks(player,"tree","result.sapling_replant").check("saplings",true,(Object)detected.tree.saplings);
+        TreeFellerMessages.checks(player,"tree","result.sapling_replant").check("max_saplings",true,detected.tree.max_saplings);
+        if(detected.tree.cascade_trees!=null)TreeFellerMessages.checks(player,"tree","result.cascade").check("trees",true,detected.tree.cascade_trees);
+        TreeFellerMessages.send(player,"success");
+        TreeFellerMessages.checks(player,"global","cutting").applied(config);
+        TreeFellerMessages.checks(player,"global","breaking").applied(TreeFellerConfiguration.getCombinedBreakingConfiguration(detected.tree,detected.tool));
+        TreeFellerMessages.checks(player,"global","result").applied(TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree,detected.tool));
         Runnable cascadeComplete = TreeFellerCascade.enqueue(world, player, detected, nodes, sourceTrunks, chain);
         boolean animationScheduled = false;
         try{

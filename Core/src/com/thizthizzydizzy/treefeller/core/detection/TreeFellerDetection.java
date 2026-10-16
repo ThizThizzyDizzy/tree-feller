@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.detection;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
+import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
@@ -19,6 +20,13 @@ public class TreeFellerDetection{
         DetectionConfiguration detection = TreeFellerConfiguration.getCombinedDetectionConfiguration(tree);
 
         context.values("Detection settings",detection);
+        if(!secondary){
+            TreeFellerMessages.Checks messages=TreeFellerMessages.checks(player,"tree","detection");
+            messages.applied(detection);
+            if(tree.roots!=null)messages.check("roots",true,(Object)tree.roots);
+            if(tree.trunk!=null)messages.check("trunk",true,(Object)tree.trunk);
+            if(tree.leaves!=null)messages.check("leaves",true,(Object)tree.leaves);
+        }
         // only use for short-circuiting. Full criteria checking is the job of TreeFellerCriteria
         int trunkScanLimit = Integer.MAX_VALUE;
         for(CriteriaConfiguration criteria :
@@ -45,8 +53,10 @@ public class TreeFellerDetection{
         }
 
         if(detected.findAnyNode(n -> n.type==TreeNodeType.TRUNK)==null){context.summary("No trunk found within root distance "+detection.root_distance);return null;}
-        if(scanTrunk(context, world, detected, tree, 0, trunkScanLimit)==-1)
+        if(scanTrunk(context, world, detected, tree, 0, trunkScanLimit)==-1){
+            scanLimitMessage(secondary?null:player,detected,tree,tool);
             return null;
+        }
 
         context.info("Leaf Range: "+detection.leaf_detect_range);
         context.info("Disconnected Trunk Distance: "+detection.disconnected_trunk_distance);
@@ -69,7 +79,7 @@ public class TreeFellerDetection{
                         node.sectionId = detected.nextSectionId();
                         detected.addNode(node);
                         context.info("Scanning new trunk section: "+node.sectionId);
-                        if(scanTrunk(context, world, detected, tree, node.sectionId, trunkScanLimit)==-1)return null;
+                        if(scanTrunk(context, world, detected, tree, node.sectionId, trunkScanLimit)==-1){scanLimitMessage(secondary?null:player,detected,tree,tool);return null;}
                         i = -1; // restart leaf scan to detect this section's leaves
                     }
                 }
@@ -173,6 +183,16 @@ public class TreeFellerDetection{
         context.user("Found tree: "+detected.count(TreeNodeType.TRUNK)+" logs, "+detected.count(TreeNodeType.LEAVES)+" leaves, "+detected.count(TreeNodeType.DECORATION)+" decorations");
         context.info(detected);
         return detected;
+    }
+    private static void scanLimitMessage(IPlayerConnector player,TreeTree detected,TreeConfiguration tree,ToolConfiguration tool){
+        int count=detected.count(TreeNodeType.TRUNK);
+        CriteriaConfiguration[] criteria={TreeFellerCore.config.global.criteria,tree.criteria,tool.criteria};
+        String[] scopes={"global","tree","tool"};
+        for(int i=0;i<criteria.length;i++)if(criteria[i]!=null&&criteria[i].required_trunk!=null
+                &&criteria[i].required_trunk.max!=null&&count>criteria[i].required_trunk.max){
+            TreeFellerMessages.checks(player,scopes[i],"criteria").check("required_trunk",false,count,criteria[i].required_trunk);
+            break;
+        }
     }
     private static int scanTrunk(DebuggerContext context, IWorldConnector world, TreeTree detected, TreeConfiguration tree, int sectionId, int trunkScanLimit){
         int total = 0;

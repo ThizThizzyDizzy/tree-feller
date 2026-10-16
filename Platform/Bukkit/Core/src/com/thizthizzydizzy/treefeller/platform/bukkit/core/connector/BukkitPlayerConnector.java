@@ -117,6 +117,10 @@ public class BukkitPlayerConnector implements IPlayerConnector{
         player.sendMessage(message);
     }
     @Override
+    public void sendActionbar(String message){
+        BukkitActionbar.send(player,message);
+    }
+    @Override
     public String getPlayerName(){
         return player.getName();
     }

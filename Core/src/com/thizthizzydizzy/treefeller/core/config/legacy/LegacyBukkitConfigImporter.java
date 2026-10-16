@@ -356,18 +356,32 @@ public final class LegacyBukkitConfigImporter{
         String channel=null;
         for(String prefix:Arrays.asList("debug","chat","actionbar"))if(name.startsWith(prefix+"-"))channel=prefix;
         if(channel==null)return false;
+        if(channel.equals("debug")){issue(issues,name,"Debug messages are fixed in v2 and cannot be customized.");return true;}
         String suffix=name.substring(channel.length()+1),branch="global";
         List<String> singles=Arrays.asList("toggle","checking","prevent-breakage","prevent-breakage-success","durability-low","partial","partial-tool","protected","success","reload","debug-enable","debug-disable","toggle-on","toggle-off","unknown-command","no-permission","command-usage");
         boolean single=singles.contains(suffix);
         if(!single)for(String end:Arrays.asList("tool","tree","success"))if(suffix.endsWith("-"+end)){
             suffix=suffix.substring(0,suffix.length()-end.length()-1);branch=end;break;
         }
-        String target=suffix.equals("protected")?"tree_protected":suffix.replace('-','_');
-        try{MessagesConfiguration.class.getField(target);}
-        catch(NoSuchFieldException ex){issue(issues,name,"No corresponding v2 message field.");return true;}
+        String target;
+        if(single)target=suffix.equals("protected")?"tree_protected":suffix.replace('-','_');
+        else{
+            Field option=FIELDS.get(suffix);
+            target=option==null?null:option.target;
+            if(suffix.equals("allowed-trees"))target="trigger.allowed_trees.whitelist";
+            if(suffix.equals("required-enchantments"))target="item.enchantments.whitelist";
+            if(suffix.equals("banned-enchantments"))target="item.enchantments.blacklist";
+            if(suffix.equals("required-lore"))target="item.lore.whitelist";
+        }
+        try{
+            Class<?> type=MessagesConfiguration.class;
+            if(target==null)throw new NoSuchFieldException(suffix);
+            for(String part:target.split("\\."))type=type.getField(part).getType();
+        }catch(NoSuchFieldException ex){issue(issues,name,"No corresponding v2 message field.");return true;}
         put(root,"messages."+target+(single?"":"."+branch)+"."+channel,value);
         translated.add(name+" → messages."+target+(single?"":"."+branch)+"."+channel);return true;
     }
+
     private static void checkScopeInteractions(List<Object> trees,List<Object> tools,List<String> issues){
         for(int t=0;t<trees.size();t++)for(int u=0;u<tools.size();u++){
             Map<String,Object> tree=flattenPaths((Map<String,Object>)trees.get(t),"");

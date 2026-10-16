@@ -11,6 +11,7 @@ import org.bukkit.event.*;
 import org.bukkit.plugin.Plugin;
 /** Native output observation for MCAutoTester; no scenario decisions or assertions. */
 final class BukkitEffectCapture implements EffectCapture, Listener{
+    private final List<MessageObservation> messages=new CopyOnWriteArrayList<>();
     private final List<ParticleObservation> particles=new CopyOnWriteArrayList<>();
     private final List<SoundObservation> sounds=new CopyOnWriteArrayList<>();
     private final List<Entity> markers=new ArrayList<>();
@@ -52,7 +53,15 @@ final class BukkitEffectCapture implements EffectCapture, Listener{
     }
     private void observe(Object packet){
         String name=packet.getClass().getSimpleName();
-        if(name.equals("ClientboundLevelParticlesPacket")){
+        if(name.equals("ClientboundBundlePacket")){
+            for(Object child:(Iterable<?>)get(packet,"subPackets"))observe(child);
+            return;
+        }
+        if(name.equals("ClientboundSystemChatPacket")||name.equals("ClientboundSetActionBarTextPacket")){
+            boolean actionbar=name.equals("ClientboundSetActionBarTextPacket")||(Boolean)get(packet,"overlay");
+            Object component=get(packet,name.equals("ClientboundSetActionBarTextPacket")?"text":"content");
+            messages.add(new MessageObservation(actionbar,(String)get(component,"getString")));
+        }else if(name.equals("ClientboundLevelParticlesPacket")){
             Object particle=get(packet,"getParticle");
             particles.add(new ParticleObservation(number(packet,"getX"),number(packet,"getY"),number(packet,"getZ"),
                     number(packet,"getXDist"),number(packet,"getYDist"),number(packet,"getZDist"),number(packet,"getMaxSpeed"),
@@ -86,6 +95,7 @@ final class BukkitEffectCapture implements EffectCapture, Listener{
         return result.toString();
     }
     private void check(){if(failure!=null)throw failure;}
+    @Override public List<MessageObservation> messages(){check();return new ArrayList<>(messages);}
     @Override public List<ParticleObservation> particles(){check();return new ArrayList<>(particles);}
     @Override public List<SoundObservation> sounds(){check();return new ArrayList<>(sounds);}
     @Override public List<ExplosionObservation> explosions(){return new ArrayList<>(explosions);}

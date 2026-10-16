@@ -33,6 +33,8 @@ public class BukkitItemDefinition extends ItemDefinition{
             return material==null?null:material.toString();
         return this;
     }
+    @Override
+    protected String identityField(){return "material";}
     public boolean matches(ItemStack stack){
         if(stack==null||stack.getType()==Material.AIR)
             return (material==null||material==Material.AIR)&&durability==null&&custom_name==null

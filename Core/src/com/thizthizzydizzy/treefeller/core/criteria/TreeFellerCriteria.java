@@ -1,5 +1,6 @@
 package com.thizthizzydizzy.treefeller.core.criteria;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
+import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CriteriaConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
@@ -21,15 +22,16 @@ public class TreeFellerCriteria{
         if(config==null)return true;
         DebuggerContext context = TreeFellerDebugger.begin(DebugPhase.CRITERIA,player,world);
         context.values(scope+" criteria",config);
+        TreeFellerMessages.Checks messages=TreeFellerMessages.checks(player,scope,"criteria");
         context.at(detected.root.pos);
         if(config.required_trunk!=null){
             int trunks = detected.count(TreeNodeType.TRUNK);
-            if(!context.check("Trunk Count", trunks, config.required_trunk, config.required_trunk.matches(trunks)))
+            if(!messages.check("required_trunk", context.check("Trunk Count", trunks, config.required_trunk, config.required_trunk.matches(trunks)), trunks, config.required_trunk))
                 return false;
         }
         if(config.required_leaves!=null){
             int leaves = detected.count(TreeNodeType.LEAVES);
-            if(!context.check("Leaf Count", leaves, config.required_leaves, config.required_leaves.matches(leaves)))
+            if(!messages.check("required_leaves", context.check("Leaf Count", leaves, config.required_leaves, config.required_leaves.matches(leaves)), leaves, config.required_leaves))
                 return false;
         }
         ReferenceArrayList<TreeNode> trunks = detected.getNodes(TreeNodeType.TRUNK, -1, -1);
@@ -48,11 +50,11 @@ public class TreeFellerCriteria{
             int cutY = BlockPos.getY(detected.root.pos);
             int cutHeight = cutY-lowestTrunkY;
             context.info("Cut Y="+cutY+", lowest trunk Y="+lowestTrunkY);
-            if(!context.check("Cut Height", cutHeight, config.max_height, cutHeight<=config.max_height))
+            if(!messages.check("max_height", context.check("Cut Height", cutHeight, config.max_height, cutHeight<=config.max_height), cutHeight, config.max_height))
                 return false;
         }
         if(Boolean.TRUE.equals(config.require_cross_section)){
-            if(trunks.stream().anyMatch((n) -> n.pos!=detected.root.pos&&BlockPos.getY(n.pos)==BlockPos.getY(detected.root.pos)))
+            if(!messages.check("require_cross_section", !trunks.stream().anyMatch((n) -> n.pos!=detected.root.pos&&BlockPos.getY(n.pos)==BlockPos.getY(detected.root.pos)), detected.root.pos))
             {
                 context.fail("Cut a complete horizontal cross-section first");
                 return false;
@@ -70,6 +72,7 @@ public class TreeFellerCriteria{
                         }
                     }
                     if(!found){
+                        messages.check("trunk_filter",false,block,"required");
                         context.fail(scope+" requires trunk: "+DebuggerContext.describe(block));
                         context.info(block);
                         return false;
@@ -81,6 +84,7 @@ public class TreeFellerCriteria{
                     for(TreeNode node : trunks){
                         context.decision(DebugLevel.TRACE,node.pos,OverlayMark.CANDIDATE,"Check block filter against "+DebuggerContext.describe(block));
                         if(world.matches(node.pos, block)){
+                            messages.check("trunk_filter",false,block,"blacklist");
                             context.fail(scope+" forbids trunk "+DebuggerContext.describe(block)+" at "+DebuggerContext.position(node.pos));
                             context.mark(DebugLevel.USER,node.pos,OverlayMark.REJECTED);
                             context.info(node.pos, block);
@@ -89,6 +93,7 @@ public class TreeFellerCriteria{
                     }
                 }
             }
+            messages.check("trunk_filter",true,config.trunk_filter);
         }
         if(config.leaf_filter!=null){
             if(config.leaf_filter.required!=null){
@@ -102,6 +107,7 @@ public class TreeFellerCriteria{
                         }
                     }
                     if(!found){
+                        messages.check("leaf_filter",false,block,"required");
                         context.fail(scope+" requires leaf: "+DebuggerContext.describe(block));
                         context.info(block);
                         return false;
@@ -113,6 +119,7 @@ public class TreeFellerCriteria{
                     for(TreeNode node : leaves){
                         context.decision(DebugLevel.TRACE,node.pos,OverlayMark.CANDIDATE,"Check block filter against "+DebuggerContext.describe(block));
                         if(world.matches(node.pos, block)){
+                            messages.check("leaf_filter",false,block,"blacklist");
                             context.fail(scope+" forbids leaf "+DebuggerContext.describe(block)+" at "+DebuggerContext.position(node.pos));
                             context.mark(DebugLevel.USER,node.pos,OverlayMark.REJECTED);
                             context.info(node.pos, block);
@@ -121,6 +128,7 @@ public class TreeFellerCriteria{
                     }
                 }
             }
+            messages.check("leaf_filter",true,config.leaf_filter);
         }
         if(config.decoration_filter!=null){
             if(config.decoration_filter.required!=null){
@@ -134,6 +142,7 @@ public class TreeFellerCriteria{
                         }
                     }
                     if(!found){
+                        messages.check("decoration_filter",false,block,"required");
                         context.fail(scope+" requires decoration: "+DebuggerContext.describe(block));
                         context.info(block);
                         return false;
@@ -145,6 +154,7 @@ public class TreeFellerCriteria{
                     for(TreeNode node : decorations){
                         context.decision(DebugLevel.TRACE,node.pos,OverlayMark.CANDIDATE,"Check block filter against "+DebuggerContext.describe(block));
                         if(world.matches(node.pos, block)){
+                            messages.check("decoration_filter",false,block,"blacklist");
                             context.fail(scope+" forbids decoration "+DebuggerContext.describe(block)+" at "+DebuggerContext.position(node.pos));
                             context.mark(DebugLevel.USER,node.pos,OverlayMark.REJECTED);
                             context.info(node.pos, block);
@@ -153,6 +163,7 @@ public class TreeFellerCriteria{
                     }
                 }
             }
+            messages.check("decoration_filter",true,config.decoration_filter);
         }
         if(config.trunk_max_horizontal_line!=null){
             int maxHorizontalLine = 0;
@@ -229,7 +240,7 @@ public class TreeFellerCriteria{
                 maxHorizontalLine = Math.max(maxHorizontalLine, line.size());
                 zAxis.removeAll(line);//don't need to recheck the same line many times. Maybe this will actually make it faster even with all the nonsense above
             }
-            if(!context.check("Horizontal Line", maxHorizontalLine, config.trunk_max_horizontal_line, maxHorizontalLine<=config.trunk_max_horizontal_line))return false;
+            if(!messages.check("trunk_max_horizontal_line", context.check("Horizontal Line", maxHorizontalLine, config.trunk_max_horizontal_line, maxHorizontalLine<=config.trunk_max_horizontal_line), maxHorizontalLine, config.trunk_max_horizontal_line))return false;
         }
         if(config.height_ratio!=null){
             int minX = Integer.MAX_VALUE;
@@ -253,7 +264,7 @@ public class TreeFellerCriteria{
             int height = maxY-minY+1;
             float value = height/(float)width;
             context.info("Tree height="+height+", width="+width);
-            if(!context.check("Height Ratio", value, config.height_ratio, config.height_ratio.matches(value)))
+            if(!messages.check("height_ratio", context.check("Height Ratio", value, config.height_ratio, config.height_ratio.matches(value)), value, config.height_ratio))
                 return false;
         }
         if(config.trunk_vertical_ratio!=null){
@@ -267,7 +278,7 @@ public class TreeFellerCriteria{
             }
             float value = vertical/(float)horizontal;
             context.info("Vertical logs="+vertical+", horizontal logs="+horizontal);
-            if(!context.check("Trunk Vertical Ratio", value, config.trunk_vertical_ratio, config.trunk_vertical_ratio.matches(value)))return false;
+            if(!messages.check("trunk_vertical_ratio", context.check("Trunk Vertical Ratio", value, config.trunk_vertical_ratio, config.trunk_vertical_ratio.matches(value)), value, config.trunk_vertical_ratio))return false;
         }
         context.summary(scope+" criteria passed");
         context.snapshot(detected,DebugLevel.SUMMARY,OverlayMark.ACCEPTED);

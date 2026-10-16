@@ -26,6 +26,7 @@ public interface IPlayerConnector{
     public boolean isSneaking();
     public IItemConnector getTool();
     public void sendMessage(String message);
+    public void sendActionbar(String message);
     public String getPlayerName();
     /** Draw a semantic client-only world marker; material is an optional platform hint. */
     public void debugOverlay(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world, long pos,
