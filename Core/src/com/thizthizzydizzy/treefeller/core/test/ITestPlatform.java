@@ -89,6 +89,9 @@ public interface ITestPlatform{
         void removeDroppedItems(int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
         void loadChunk(int x, int z);
         void daylight();
+        boolean mobSpawning();
+        void setMobSpawning(boolean enabled);
+        void removeMobs(int minX,int minZ,int maxX,int maxZ);
         long fullTime();
         void setFullTime(long ticks);
         boolean daylightCycle();

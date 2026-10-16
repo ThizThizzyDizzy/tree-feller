@@ -19,6 +19,9 @@ public class TreeFellerCriteria{
         return check(world, detected, config, false, null, "explicit");
     }
     private static boolean check(IWorldConnector world, TreeTree detected, CriteriaConfiguration config, boolean cascading,IPlayerConnector player,String scope){
+        return check(world,detected,config,cascading,player,scope,false);
+    }
+    private static boolean check(IWorldConnector world, TreeTree detected, CriteriaConfiguration config, boolean cascading,IPlayerConnector player,String scope,boolean retained){
         if(config==null)return true;
         DebuggerContext context = TreeFellerDebugger.begin(DebugPhase.CRITERIA,player,world);
         context.values(scope+" criteria",config);
@@ -53,7 +56,7 @@ public class TreeFellerCriteria{
             if(!messages.check("max_height", context.check("Cut Height", cutHeight, config.max_height, cutHeight<=config.max_height), cutHeight, config.max_height))
                 return false;
         }
-        if(Boolean.TRUE.equals(config.require_cross_section)){
+        if(!retained&&Boolean.TRUE.equals(config.require_cross_section)){
             if(!messages.check("require_cross_section", !trunks.stream().anyMatch((n) -> n.pos!=detected.root.pos&&BlockPos.getY(n.pos)==BlockPos.getY(detected.root.pos)), detected.root.pos))
             {
                 context.fail("Cut a complete horizontal cross-section first");
@@ -286,6 +289,12 @@ public class TreeFellerCriteria{
     }
     public static boolean check(IWorldConnector world, DetectionResult detected){
         return check(world, detected, false, null);
+    }
+    /** A retained tree must qualify structurally; a future cut can choose its height/cross-section. */
+    public static boolean checkRetained(IWorldConnector world, DetectionResult detected){
+        return check(world,detected.detected,TreeFellerCore.config.global.criteria,true,null,"global",true)
+                &&check(world,detected.detected,detected.tree.criteria,true,null,"tree",true)
+                &&check(world,detected.detected,detected.tool.criteria,true,null,"tool",true);
     }
     public static boolean check(IWorldConnector world, DetectionResult detected, boolean cascading){return check(world,detected,cascading,null);}
     public static boolean check(IWorldConnector world, DetectionResult detected, boolean cascading,IPlayerConnector player){

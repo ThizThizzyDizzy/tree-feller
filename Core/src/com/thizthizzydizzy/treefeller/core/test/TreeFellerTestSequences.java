@@ -31,6 +31,7 @@ public class TreeFellerTestSequences{
         com.thizthizzydizzy.treefeller.core.test.options.detection.LeafDetectRangeTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.detection.DiagonalLeavesTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.detection.SecondaryTreeVerificationTests.register(platform);
+        com.thizthizzydizzy.treefeller.core.test.options.detection.SeparateTrunksTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.detection.ParallelTrunkPillarsTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.detection.LeafDistanceTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.detection.DecorationTests.register(platform);

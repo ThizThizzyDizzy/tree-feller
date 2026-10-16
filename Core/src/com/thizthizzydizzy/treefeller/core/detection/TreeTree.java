@@ -100,6 +100,7 @@ public class TreeTree{
         sections.clear();
         registerNode(root = newRoot);
     }
+    boolean isSecondary(){return secondary;}
     public boolean isEmpty(){
         return nodeMap.isEmpty();
     }

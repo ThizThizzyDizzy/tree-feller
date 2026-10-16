@@ -154,3 +154,43 @@ filters accept both states. Default leaf definitions explicitly set
 `persistent = false`; other block definitions omit this filter unless configured. The v1
 `player-leaves` importer applies global settings to each tree's leaf definitions
 and then applies tree overrides; true removes the persistence restriction.
+
+`detection.separate-trunks` configures the v2 `separate_trunks` boolean directly
+and performs real client cuts on branch-connected dark oaks. A nine-tree forest is cut in mixed
+order, checking untouched trunks and foliage after each action and every log
+(including the connecting branches) after the last action. Distinct cases cover
+scoped overrides in both directions, disabled separation, uneven elevations,
+custom roots, low forks, a bulky upper branch, a bent thick trunk, large oak,
+mangrove, giant jungle, acacia, cherry, elevated cuts, full cross-sections,
+required decorations, the selected tree's size limit, ineligible neighboring
+clumps (size, canopy, or required material), and a shared canopy whose clumps cannot qualify
+independently. All fixtures share one setup and one final camera view. Separate viewing
+bays and a test axe with extended interaction range keep the whole fixture visible.
+Natural mob spawning is disabled during this suite and existing arena mobs are
+removed so they cannot intercept mining; cleanup restores the prior spawning rule.
+For the recording, the automated client's GUI scale was 2 and chat scale was 0.8,
+with its tutorial disabled, so chat stayed below the visible trunks.
+Legacy conversions are asserted in `LegacyBukkitConfigImporterTester` (use
+`--conversions` to run the focused checks independently of its full YAML fixture).
+
+The option defaults to false. Its conservative cores are connected solid 2x2x2
+log clumps, rather than logs at a common Y level. Thin connections at the bottom
+of either core join roots/forks/continuations; higher connections are partitioned
+by distance through logs. Each resulting log component stays attached to a whole
+core. The existing trunk-connection rules also apply to ownership. Trees without
+multiple dense cores, or whose proposed components violate the log-count limits,
+use the connected scan unchanged.
+
+Separated clumps scan foliage together, one ordinary scanner layer per clump at
+one distance at a time. A leaf joins the first frontier that reaches it; stable
+clump ordering breaks ties. Its parent path stays within that clump. Decorations
+then grow from the assigned logs and leaves using the same scanner. There is no
+separate foliage/decoration protection pass. Every remaining clump must meet the
+existing structural criteria (a future cut can choose its own height/cross-section).
+If it cannot qualify, the connected scan is kept intact. Trees with additional
+leaf-connected trunk sections keep their existing composite scan intact too.
+With separation enabled, the full connected logs are scanned before applying the
+selected tree's size limit. Ownership uses linear space and neighbor flood fills.
+After the last cut of each separated fixture, assertions check every original
+leaf as well as every log. The decoration case checks both an ambiguously attached
+bridge decoration assigned by the scan and a decoration on the other trunk.

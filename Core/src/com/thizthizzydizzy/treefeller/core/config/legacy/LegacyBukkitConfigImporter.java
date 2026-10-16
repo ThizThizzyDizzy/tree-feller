@@ -224,6 +224,11 @@ public final class LegacyBukkitConfigImporter{
                         value=resolvedConversions;
                         break;
                     case "inverse":value=!booleanValue(value);break;
+                    case "separate-trunks":
+                        value=integerValue(value,false)==1;
+                        put(out,field.target,value);
+                        translated.add(at+" → "+field.target+" (separate branch-connected trees when max-trunks is 1; not a trunk-count refusal)");
+                        continue;
                     case "spawn":
                         int mode=integerValue(value,false);
                         if(mode!=0&&mode!=1)throw new IllegalArgumentException("spawn-saplings=2 always creates new saplings; v2 boolean only describes fallback spawning");

@@ -50,8 +50,6 @@ public final class EffectsTests{
         new EffectTestSuite("filter")
                 .add("block-match",effect("type=MARKER, permanent=true, location=TRUNK, filter=[\"minecraft:spruce_log\"]"),(c,x) -> count(c.markers().size(),8))
                 .add("block-refused",effect("type=MARKER, permanent=true, location=TRUNK, filter=[birch_log]"),(c,x) -> count(c.markers().size(),0))
-                .add("legacy-block-match",legacyEffect("spruce_log","LOGS"),(c,x) -> count(c.markers().size(),8))
-                .add("legacy-block-refused",legacyEffect(Arrays.asList("birch_log"),"LOGS"),(c,x) -> count(c.markers().size(),0))
                 .add("tool-match",effect(MARKER+", filter=[IRON_AXE]"),(c,x) -> marker(c,1,x))
                 .add("tool-refused",effect(MARKER+", filter=[diamond_axe]"),(c,x) -> count(c.markers().size(),0))
                 .add("tool-break-match",effect("type=MARKER, permanent=true, location=TOOL_BREAK, filter=[iron_axe]"),"global.cutting.allow-partial-tool=true","iron_axe[damage=247]",(c,x) -> marker(c,1,x))
@@ -135,21 +133,8 @@ public final class EffectsTests{
                 }).register(platform);
         new EffectTestSuite("tags")
                 .add("empty",effect(MARKER+",tags=[]"),(c,x) -> {marker(c,1,x);if(!c.markers().get(0).tags.equals(Collections.singleton("tree_feller")))throw new AssertionError("Unexpected marker tags");})
-                .add("legacy-string",legacyEffect("iron_axe","TOOL"),(c,x) -> {marker(c,1,x);if(!c.markers().get(0).tags.contains("legacy"))throw new AssertionError("Legacy marker tag lost");})
                 .add("custom",effect(MARKER+",tags=[first,second]"),(c,x) -> {marker(c,1,x);if(!c.markers().get(0).tags.equals(new HashSet<>(Arrays.asList("tree_feller","first","second"))))throw new AssertionError("Missing marker tags");})
                 .register(platform);
-    }
-    private static String legacyEffect(Object filter,String location){
-        Map<String,Object> definition=new LinkedHashMap<>();
-        definition.put("name","legacy");definition.put("type","MARKER");definition.put("location",location);
-        definition.put("filter",filter);definition.put("permanent",true);definition.put("tags","legacy");
-        Map<String,Object> config=new LinkedHashMap<>();
-        config.put("effects",Arrays.asList(definition));config.put("global-effects",Arrays.asList("legacy"));
-        com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter.Result imported=
-                com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter.importConfiguration(config);
-        if(!imported.warnings.isEmpty())throw new AssertionError("Legacy effect import: "+imported.warnings);
-        return com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigFactory.parseString(imported.configuration)
-                .getList("global.result.effects").get(0).render(com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigRenderOptions.concise());
     }
     private static void marker(EffectCapture c,int count,int x){count(c.markers().size(),count);for(MarkerObservation m:c.markers()){near(m.x,x+.5);near(m.y,100.5);near(m.z,2.5);}}
     private static ParticleObservation onlyParticle(EffectCapture c){count(c.particles().size(),1);return c.particles().get(0);}

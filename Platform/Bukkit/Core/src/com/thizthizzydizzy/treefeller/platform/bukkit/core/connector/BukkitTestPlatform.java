@@ -170,6 +170,15 @@ public final class BukkitTestPlatform implements ITestPlatform{
         @Override public String dimension(){return world.getName();}
         @Override public String biome(int x, int z){return world.getBiome(x, z).name();}
         @Override public void setBiome(int x, int z, String biome){world.setBiome(x, z, org.bukkit.block.Biome.valueOf(biome));}
+        @Override public boolean mobSpawning(){return Boolean.parseBoolean(world.getGameRuleValue("doMobSpawning"));}
+        @Override public void setMobSpawning(boolean enabled){world.setGameRuleValue("doMobSpawning",Boolean.toString(enabled));}
+        @Override public void removeMobs(int minX,int minZ,int maxX,int maxZ){
+            for(org.bukkit.entity.Entity entity:world.getEntities()){
+                org.bukkit.Location p=entity.getLocation();
+                if(entity instanceof org.bukkit.entity.LivingEntity&&!(entity instanceof Player)
+                        &&p.getX()>=minX&&p.getX()<=maxX&&p.getZ()>=minZ&&p.getZ()<=maxZ)entity.remove();
+            }
+        }
         @Override public void daylight(){world.setTime(6000); world.setStorm(false); world.setThundering(false);}
     }
 }

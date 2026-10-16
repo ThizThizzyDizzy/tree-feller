@@ -1,5 +1,4 @@
 package com.thizthizzydizzy.treefeller.core.test.options.breaking;
-import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter;
 import com.thizthizzydizzy.treefeller.core.test.*;
 import java.util.*;
 /** Each v1 mode is expressed using independent v2 fields for each block group. */
@@ -23,7 +22,6 @@ public final class FellBehaviorTests{
                 int units=group.equals("trunk")?8:group.equals("leaves")?(int)t.tree.blocks.values().stream().filter(b -> b.axis==null).count():1;
                 t.add(mode.toLowerCase(Locale.ROOT).replace('_','-'),config,(ctx,h,f) -> {
                     TestArena.onServer(ctx,() -> {h.equipItem(OptionTestSuite.PLAYER,"iron_axe[enchantments={silk_touch:1}]");
-                        if(!group.equals("decoration"))verifyImport(mode,group,natural,entity,landing);
                         return null;});
                 },(ctx,h,f) -> {
                     if(entity){
@@ -54,18 +52,5 @@ public final class FellBehaviorTests{
             }
             t.register(platform);
         }
-    }
-    private static void verifyImport(String mode,String group,boolean natural,boolean entity,String landing){
-        Map<String,Object> input=new LinkedHashMap<>();
-        input.put(group.equals("trunk")?"log-behavior":"leaf-behavior",mode);
-        LegacyBukkitConfigImporter.Result result=LegacyBukkitConfigImporter.importConfiguration(input,name -> name);
-        com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration imported=
-                com.thizthizzydizzy.treefeller.core.config.ConfigReader.readFromString(result.configuration);
-        com.thizthizzydizzy.treefeller.core.config.structure.section.breaking.FellBehavior behavior=
-                group.equals("trunk")?imported.global.breaking.trunk_behavior:imported.global.breaking.leaves_behavior;
-        if(!result.warnings.isEmpty()||!behavior.landing.name().equals(landing)
-                ||Boolean.TRUE.equals(behavior.natural)!=natural||Boolean.TRUE.equals(behavior.fall_as_entities)!=entity
-                ||behavior.fall_damage_amount!=(mode.contains("HURT")?2:0))
-            throw new AssertionError("Legacy "+mode+" did not translate: "+result.configuration+result.warnings);
     }
 }

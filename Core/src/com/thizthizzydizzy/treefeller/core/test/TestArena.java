@@ -28,8 +28,8 @@ public final class TestArena{
         ctx.log("Preparing a sky arena with clear columns to the build ceiling");
         TestArena arena = onServer(ctx, () -> {
             ITestPlatform.ITestWorld world = platform.world(player);
-            if(size<8||size>128||floorY<1||floorY+34>=world.maxHeight())
-                throw new IllegalArgumentException("Arena must fit a 34-block tree below the build ceiling; size must be 8..128");
+            if(size<8||size>256||floorY<1||floorY+34>=world.maxHeight())
+                throw new IllegalArgumentException("Arena must fit a 34-block tree below the build ceiling; size must be 8..256");
             if(!world.supports("grass_block")||!world.supports("air"))
                 throw new IllegalArgumentException("Platform lacks arena materials");
             platform.preparePlayer(player, false);

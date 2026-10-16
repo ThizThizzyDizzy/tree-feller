@@ -60,6 +60,7 @@ if (($# == 0)); then
         treefeller-option-detection-leaf-detect-range \
         treefeller-option-detection-diagonal-leaves \
         treefeller-option-detection-secondary-tree-verification \
+        treefeller-option-detection-separate-trunks \
         treefeller-option-detection-block-data-rules-ignore-parallel-trunk-pillars \
         treefeller-option-detection-block-data-rules-use-leaf-distance \
         treefeller-option-detection-decorations-blocks \

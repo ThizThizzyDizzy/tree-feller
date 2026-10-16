@@ -15,6 +15,13 @@ public class DetectionConfiguration{
     @ConfigComment("The maximum distance between disconnected trunk sections, connected by leaves")
     @ConfigGlobalDefaultInteger(0)
     public Integer disconnected_trunk_distance;
+
+    @ConfigComment("Separate branch-connected trees using dense log cores (solid 2x2x2 clumps). Thin connections entering the bottom of a core remain part of the same tree; higher connections belong to the nearest core along logs. Disabled by default.")
+    @ConfigGlobalDefaultBoolean(false)
+    @LegacyBukkitOption(value = "max-trunks",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.SEPARATE_TRUNKS)
+    public Boolean separate_trunks;
     
     @ConfigComment("The maximum vertical distance between the topmost trunk block and where leaves may detected from connected trunks. This does not affect leaves detected from other leaves.")
     public Integer max_leaf_distance_from_top;

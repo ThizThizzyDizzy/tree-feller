@@ -10,6 +10,7 @@ import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
 import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import java.util.function.Consumer;
+import java.util.function.LongConsumer;
 import java.util.function.Predicate;
 public class TreeScanner{
     private static final byte[] NEIGHBORS_DIRECT_X = {1, -1, 0, 0, 0, 0};
@@ -23,6 +24,14 @@ public class TreeScanner{
     private static final byte[] NEIGHBORS_CORNER_X = {1, 1, 1, 1, -1, -1, -1, -1};
     private static final byte[] NEIGHBORS_CORNER_Y = {1, 1, -1, -1, 1, 1, -1, -1};
     private static final byte[] NEIGHBORS_CORNER_Z = {1, -1, 1, -1, 1, -1, 1, -1};
+    static void forEachTrunkNeighbor(long pos, LongConsumer visit){
+        for(int i=0;i<NEIGHBORS_DIRECT_X.length;i++)
+            visit.accept(BlockPos.getRelative(pos,NEIGHBORS_DIRECT_X[i],NEIGHBORS_DIRECT_Y[i],NEIGHBORS_DIRECT_Z[i]));
+        for(int i=0;i<NEIGHBORS_EDGE_X.length;i++)
+            visit.accept(BlockPos.getRelative(pos,NEIGHBORS_EDGE_X[i],NEIGHBORS_EDGE_Y[i],NEIGHBORS_EDGE_Z[i]));
+        for(int i=0;i<NEIGHBORS_CORNER_X.length;i++)
+            visit.accept(BlockPos.getRelative(pos,NEIGHBORS_CORNER_X[i],NEIGHBORS_CORNER_Y[i],NEIGHBORS_CORNER_Z[i]));
+    }
     public static int step(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeConfiguration treeConfig, ScanMode mode, TreeNodeType type, int sectionId, Consumer<TreeNode> nodeHandler, Predicate<Long> posFilter){
         context.info("Step (S:"+sectionId+")", mode, type);
         DetectionConfiguration config = TreeFellerConfiguration.getCombinedDetectionConfiguration(treeConfig);
@@ -143,51 +152,7 @@ public class TreeScanner{
             long pos = neighbors[i];
             if(tree.contains(pos)){context.trace("Already detected "+DebuggerContext.position(pos));continue;} // already scanned that one
             if(posFilter!=null&&!posFilter.test(pos)){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"outside scan bounds");continue;}
-            if(mode==ScanMode.TRUNK){
-                if(config.block_data_rules.ignore_parallel_trunk_pillars){
-                    do{
-                        // Check if both are pillars of same orientation
-                        BlockAxis axis = world.getBlockAxis(node.pos);
-                        if(axis==null)break;
-                        if(world.getBlockAxis(pos)!=axis)break;
-
-                        int nx = BlockPos.getX(pos);
-                        int ny = BlockPos.getY(pos);
-                        int nz = BlockPos.getZ(pos);
-
-                        // Early reject if they are at the same axis position (direct parallel neighbor)
-                        if(axis==BlockAxis.X&&x==nx){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel X trunk");continue NEIGHBORS;}
-                        if(axis==BlockAxis.Y&&y==ny){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel Y trunk");continue NEIGHBORS;}
-                        if(axis==BlockAxis.Z&&z==nz){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel Z trunk");continue NEIGHBORS;}
-
-                        // Pass if they are aligned on the same axis
-                        if(axis==BlockAxis.X&&y==ny&&z==nz)break;
-                        if(axis==BlockAxis.Y&&x==nx&&z==nz)break;
-                        if(axis==BlockAxis.Z&&x==nx&&y==ny)break;
-
-                        //blocks are diagonal neighbors; reject if either direct axial neighbor is a pillar of same orientation
-                        long[] extraPositions = new long[]{
-                            BlockPos.toPos(axis==BlockAxis.X?x:nx, axis==BlockAxis.Y?y:ny, axis==BlockAxis.Z?z:nz),
-                            BlockPos.toPos(axis==BlockAxis.X?nx:x, axis==BlockAxis.Y?ny:y, axis==BlockAxis.Z?nz:z)
-                        };
-                        for(long extraPos : extraPositions){
-                            Boolean itIsATrunkBlock = tree.contains(extraPos)?tree.nodeMap.get(extraPos).type==TreeNodeType.TRUNK:null;
-                            if(itIsATrunkBlock==null){
-                                itIsATrunkBlock = false;
-                                for(IBlockDefinition block : blocks){
-                                    if(world.matches(extraPos, block)){
-                                        itIsATrunkBlock = true;
-                                        break;
-                                    }
-                                }
-                            }
-                            if(itIsATrunkBlock&&world.getBlockAxis(extraPos)==axis){
-                                context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"diagonal parallel trunk");continue NEIGHBORS;
-                            }
-                        }
-                    }while(false);
-                }
-            }
+            if(mode==ScanMode.TRUNK&&!connectsTrunk(context,world,tree,node.pos,pos,blocks,config))continue;
             if(mode==ScanMode.LEAVES){
                 if(config.block_data_rules.use_leaf_distance){
                     do{
@@ -222,7 +187,7 @@ public class TreeScanner{
                     }
                     if(scanNode(context, world, tree, new TreeNode(pos, node), decoration.blocks, type, (n) -> {
                         n.decoration = decoration;
-                        if(nodeHandler==null)tree.addNode(n);
+                        if(nodeHandler==null)tree.addNode(n);else nodeHandler.accept(n);
                     })){
                         count++;
                         break;
@@ -234,6 +199,50 @@ public class TreeScanner{
                 count++;
         }
         return count;
+    }
+    static boolean connectsTrunk(DebuggerContext context, IWorldConnector world, TreeTree tree, long from, long pos, IBlockDefinition[] blocks, DetectionConfiguration config){
+        if(!config.block_data_rules.ignore_parallel_trunk_pillars)return true;
+        int x=BlockPos.getX(from), y=BlockPos.getY(from), z=BlockPos.getZ(from);
+        // Check if both are pillars of same orientation
+        BlockAxis axis = world.getBlockAxis(from);
+        if(axis==null)return true;
+        if(world.getBlockAxis(pos)!=axis)return true;
+
+        int nx = BlockPos.getX(pos);
+        int ny = BlockPos.getY(pos);
+        int nz = BlockPos.getZ(pos);
+
+        // Early reject if they are at the same axis position (direct parallel neighbor)
+        if(axis==BlockAxis.X&&x==nx){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel X trunk");return false;}
+        if(axis==BlockAxis.Y&&y==ny){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel Y trunk");return false;}
+        if(axis==BlockAxis.Z&&z==nz){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"parallel Z trunk");return false;}
+
+        // Pass if they are aligned on the same axis
+        if(axis==BlockAxis.X&&y==ny&&z==nz)return true;
+        if(axis==BlockAxis.Y&&x==nx&&z==nz)return true;
+        if(axis==BlockAxis.Z&&x==nx&&y==ny)return true;
+
+        //blocks are diagonal neighbors; reject if either direct axial neighbor is a pillar of same orientation
+        long[] extraPositions = new long[]{
+            BlockPos.toPos(axis==BlockAxis.X?x:nx, axis==BlockAxis.Y?y:ny, axis==BlockAxis.Z?z:nz),
+            BlockPos.toPos(axis==BlockAxis.X?nx:x, axis==BlockAxis.Y?ny:y, axis==BlockAxis.Z?nz:z)
+        };
+        for(long extraPos : extraPositions){
+            Boolean itIsATrunkBlock = tree.contains(extraPos)?tree.nodeMap.get(extraPos).type==TreeNodeType.TRUNK:null;
+            if(itIsATrunkBlock==null){
+                itIsATrunkBlock = false;
+                for(IBlockDefinition block : blocks){
+                    if(world.matches(extraPos, block)){
+                        itIsATrunkBlock = true;
+                        break;
+                    }
+                }
+            }
+            if(itIsATrunkBlock&&world.getBlockAxis(extraPos)==axis){
+                context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"diagonal parallel trunk");return false;
+            }
+        }
+        return true;
     }
     private static boolean scanNode(DebuggerContext context, IWorldConnector world, TreeTree tree, TreeNode node, IBlockDefinition[] blocks, TreeNodeType type, Consumer<TreeNode> nodeHandler){
         context.mark(DebugLevel.TRACE,node.pos,OverlayMark.CANDIDATE);
