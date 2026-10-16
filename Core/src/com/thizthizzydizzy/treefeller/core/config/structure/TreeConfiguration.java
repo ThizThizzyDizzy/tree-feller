@@ -19,6 +19,9 @@ public class TreeConfiguration{
     public IBlockDefinition[] trunk;
 
     @ConfigComment("The blocks to search for in the tree leaves")
+    @LegacyBukkitOption(value = "player-leaves",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.PLAYER_LEAVES)
     public IBlockDefinition[] leaves;
 
     @ConfigComment("The maximum number of saplings that may be planted for this tree; zero disables replanting")

@@ -136,6 +136,15 @@ public class BukkitBlockDataConnectorV1_13 implements BukkitBlockDataConnector{
         }
         return null;
     }
+    @Override public Boolean getPersistent(Block block){
+        BlockData data=block.getBlockData();
+        return data instanceof Leaves?((Leaves)data).isPersistent():null;
+    }
+    @Override public void setTestPersistent(Block block, boolean persistent){
+        Leaves data=(Leaves)block.getBlockData();
+        data.setPersistent(persistent);
+        block.setBlockData(data,false);
+    }
     @Override
     public int getLeafDistance(Block block){
         BlockData data = block.getBlockData();

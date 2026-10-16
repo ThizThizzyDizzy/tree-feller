@@ -135,6 +135,9 @@ public final class BukkitTestPlatform implements ITestPlatform{
         @Override public void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance){
             BukkitConnector.blockData.setTestBlock(world.getBlockAt(x, y, z), material, axis, leafDistance);
         }
+        @Override public void setPersistent(int x, int y, int z, boolean persistent){
+            BukkitConnector.blockData.setTestPersistent(world.getBlockAt(x,y,z),persistent);
+        }
         @Override public String blockState(int x, int y, int z){return BukkitConnector.blockData.testBlockState(world.getBlockAt(x, y, z));}
         @Override public boolean isMaterial(int x, int y, int z, String material){
             return BukkitConnector.blockData.isTestMaterial(world.getBlockAt(x, y, z), material);

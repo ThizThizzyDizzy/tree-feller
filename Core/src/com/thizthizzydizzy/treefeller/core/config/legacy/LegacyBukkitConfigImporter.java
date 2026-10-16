@@ -125,6 +125,8 @@ public final class LegacyBukkitConfigImporter{
                 issue(issues,path,"V1 ignores trees with no available trunk or leaf materials; selector numbering uses the remaining trees.");continue;
             }
             result.put("trunk",trunkMaterials);result.put("leaves",leafMaterials);
+            // V1 defaults to excluding player leaves, even when the option is omitted.
+            playerLeaves(result,false);
             trees.add(result);treeOptions.add(options);
             translated.add(path+" → trees["+(trees.size()-1)+"].trunk, leaves (loaded order retained)");
         }
@@ -191,6 +193,13 @@ public final class LegacyBukkitConfigImporter{
             }
             try{
                 switch(field.kind){
+                    case "player-leaves":
+                        boolean allowPlayerLeaves=booleanValue(value);
+                        if(scope.equals("global")){
+                            for(Object tree:list(root.get("trees")))playerLeaves((Map<String,Object>)tree,allowPlayerLeaves);
+                        }else playerLeaves(out,allowPlayerLeaves);
+                        translated.add(at+" → trees' leaf definitions (persistent "+(allowPlayerLeaves?"omitted":"false")+")");
+                        continue;
                     case "boolean":value=booleanValue(value);break;
                     case "integer":value=integerValue(value,name.contains("durability")&&!name.contains("percent"));break;
                     case "float32":value=number(value).floatValue();break;
@@ -280,6 +289,16 @@ public final class LegacyBukkitConfigImporter{
                 }
             }
         }
+    }
+    private static void playerLeaves(Map<String,Object> tree,boolean allow){
+        List<Object> leaves=new ArrayList<>();
+        for(Object leaf:list(tree.get("leaves"))){
+            Map<String,Object> definition=leaf instanceof Map?copyMap((Map<?,?>)leaf):new LinkedHashMap<>();
+            if(!(leaf instanceof Map))definition.put("material",leaf);
+            if(allow)definition.remove("persistent");else definition.put("persistent",false);
+            leaves.add(allow&&definition.size()==1&&definition.containsKey("material")?definition.get("material"):definition);
+        }
+        tree.put("leaves",leaves);
     }
     private static void behavior(Map<String,Object> out,String target,Object value,Map<String,Object> local,Map<String,Object> global,String at,List<String> issues){
         String mode=value.toString().trim().toUpperCase(Locale.ROOT).replace('-','_');

@@ -147,3 +147,10 @@ and check budgets one and 64. Cascades bypass cutting height as in v1, while
 retaining the normal trigger, criteria, cutting, breaking, and result pipeline.
 The concurrency budget includes the initiating animated cut until its final layer
 finishes. Limits below one use one, matching the minimum allowed by v1's UI.
+
+`blocks.persistent` verifies default trees reject player-placed leaves, explicit
+false/true filters remove only matching leaves from mixed crowns, and omitted/null
+filters accept both states. Default leaf definitions explicitly set
+`persistent = false`; other block definitions omit this filter unless configured. The v1
+`player-leaves` importer applies global settings to each tree's leaf definitions
+and then applies tree overrides; true removes the persistence restriction.

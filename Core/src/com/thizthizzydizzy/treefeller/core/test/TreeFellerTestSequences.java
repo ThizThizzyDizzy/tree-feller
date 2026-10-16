@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.blocks.PersistentTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.messages.MessageTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.debug.DebugVerbosityTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.item.CustomModelDataTests.register(platform);

@@ -1,8 +1,9 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.definition;
-import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.BlockDefinition;
+import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-public class BukkitBlockDefinition implements IBlockDefinition{
+public class BukkitBlockDefinition extends BlockDefinition{
     public Material material;
     public BukkitBlockDefinition(){
     }
@@ -15,11 +16,10 @@ public class BukkitBlockDefinition implements IBlockDefinition{
     }
     @Override
     public Object asSimplified(){
-        if(material==null)return null;
-        return material.toString();
+        return simplify(material==null?null:material.toString());
     }
     public boolean matches(Block block){
         if(material!=null&&material!=block.getType())return false;
-        return true;
+        return matchesPersistent(BukkitConnector.blockData.getPersistent(block));
     }
 }

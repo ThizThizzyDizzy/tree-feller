@@ -9,7 +9,7 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-option-messages-chat treefeller-option-messages-actionbar \
+    set -- treefeller-option-blocks-persistent treefeller-option-messages-chat treefeller-option-messages-actionbar \
         treefeller-option-debug-text-level \
         treefeller-option-debug-overlay-level \
         treefeller-option-debug-step-through \

@@ -6,6 +6,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.general.SimpleDirect
 import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.detection.DecorationConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.BlockDefinition;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.SaplingConfiguration;
 import java.util.ArrayList;
@@ -59,6 +60,10 @@ public class DefaultConfigBuilder{
                 tree.saplings=new SaplingConfiguration[]{sapling};
             }
             if(wood.equals("spruce")||wood.equals("jungle")||wood.equals("dark_oak")||wood.equals("pale_oak"))tree.max_saplings=4;
+            for(IBlockDefinition leaf : leaves){
+                if(leaf instanceof BlockDefinition)
+                    ((BlockDefinition)leaf).persistent=false;
+            }
             tree.leaves = leaves.toArray(IBlockDefinition[]::new);
             trees.add(tree);
         }

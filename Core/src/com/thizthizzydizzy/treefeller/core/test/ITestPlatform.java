@@ -82,6 +82,7 @@ public interface ITestPlatform{
         int maxHeight(); // Exclusive build ceiling; arenas deliberately use positive Y.
         boolean supports(String material);
         void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance);
+        void setPersistent(int x, int y, int z, boolean persistent);
         String blockState(int x, int y, int z);
         boolean isMaterial(int x, int y, int z, String material);
         int droppedItemCount(String material, int minX, int minY, int minZ, int maxX, int maxY, int maxZ);
