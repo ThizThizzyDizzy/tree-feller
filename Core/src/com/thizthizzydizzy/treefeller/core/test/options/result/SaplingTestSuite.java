@@ -117,7 +117,7 @@ final class SaplingTestSuite{
         String saplings="[spruce_sapling]",item="spruce_sapling",expectedBlock="spruce_sapling",soil="grass_block",trunks="air";
         int cap=1,inventory,remaining=-1,arrival=-1,wait=12,timeout=-1,inventoryLeft=-1;
         Set<Long> plantedPositions;
-        boolean blocked,stump,defaults,rootCut;
+        boolean blocked,stump,defaults,rootCut,immediate;
         Case(int x,String name,String config,int planted){this.x=x;this.name=name;this.config=config;this.planted=planted;}
         Case inventory(int count,int remaining){this.inventory=count;this.remaining=remaining;return this;}
         Case treeDrops(int consumed){remaining=(int)tree.blocks.values().stream().filter(b -> b.axis==null).count()-consumed;return this;}
@@ -133,6 +133,8 @@ final class SaplingTestSuite{
                 else ticks++;
                 if(ticks==0&&c.blocked)arena.world.setBlock(c.x,arena.floorY+1,2,"stone",null,-1);
                 if(ticks==c.arrival&&c.arrival>=0)hooks.setInventoryItem(OptionTestSuite.PLAYER,9,c.item,2);
+                if(c.immediate&&ticks==2&&!arena.world.isMaterial(c.x,arena.floorY+1,2,c.expectedBlock))
+                    throw new AssertionError("Always-spawn sapling was not planted immediately");
                 if(c.timeout>=0&&ticks>=0&&ticks<c.timeout-1&&arena.world.isMaterial(c.x,arena.floorY+1,2,c.expectedBlock))
                     throw new AssertionError("Fallback spawned before timeout "+c.timeout);
                 if(ticks>=c.wait){active=false;finished.complete(null);return;}

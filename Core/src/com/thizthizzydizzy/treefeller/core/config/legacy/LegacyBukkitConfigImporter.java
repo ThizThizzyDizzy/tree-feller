@@ -231,7 +231,8 @@ public final class LegacyBukkitConfigImporter{
                         continue;
                     case "spawn":
                         int mode=integerValue(value,false);
-                        if(mode!=0&&mode!=1)throw new IllegalArgumentException("spawn-saplings=2 always creates new saplings; v2 boolean only describes fallback spawning");
+                        if(mode<0||mode>2)throw new IllegalArgumentException("spawn-saplings must be 0, 1, or 2");
+                        put(out,field.target.substring(0,field.target.lastIndexOf('.')+1)+"always_spawn_saplings",mode==2);
                         value=mode==1;break;
                     case "sapling":
                         List<Object> saplings=stringList(value);

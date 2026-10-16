@@ -62,7 +62,7 @@ public final class SaplingReplant{
     }
     /** Reserve only enough tree drops to fill outstanding sites; surplus keeps its usual destination. */
     public void offer(long pos, List<IItemConnector> drops, boolean inventory){
-        if(expired||sites.isEmpty()||!Boolean.TRUE.equals(config.use_tree_saplings))return;
+        if(expired||sites.isEmpty()||alwaysSpawn()||!Boolean.TRUE.equals(config.use_tree_saplings))return;
         for(IItemConnector item : drops){
             SaplingConfiguration sapling=matching(item);
             if(sapling==null)continue;
@@ -80,6 +80,7 @@ public final class SaplingReplant{
         offer(pos,drops,inventory);
         TreeFellerResult.deliverDrops(world,player,pos,drops,inventory);
     }
+    private boolean alwaysSpawn(){return Boolean.TRUE.equals(config.always_spawn_saplings);}
     private void tick(){
         age++;
         int timeout=config.sapling_timeout==null?50:Math.max(0,config.sapling_timeout);
@@ -90,6 +91,12 @@ public final class SaplingReplant{
             for(SaplingConfiguration sapling : saplings)if(world.matches(pos,sapling.block)){alreadyPlanted=true;break;}
             if(alreadyPlanted){it.remove();continue;}
             if(!world.isAir(pos)||!soil(pos)){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Planting blocked or soil changed, age="+age);continue;}
+            if(alwaysSpawn()){
+                world.setBlock(pos,saplings[0].block);
+                context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Spawned new sapling (always)");
+                it.remove();
+                continue;
+            }
             if(!reserved.isEmpty()){
                 Reserved next=reserved.remove(0);
                 world.setBlock(pos,next.sapling.block);

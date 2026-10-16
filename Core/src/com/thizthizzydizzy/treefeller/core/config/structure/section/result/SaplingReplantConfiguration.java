@@ -29,6 +29,10 @@ public class SaplingReplantConfiguration{
             conversion = LegacyBukkitOption.Conversion.SPAWN)
     public Boolean spawn_saplings;
     
+    @ConfigComment("Always spawn new saplings immediately, without consuming tree drops or inventory; takes priority over other sapling sources")
+    @ConfigGlobalDefaultBoolean(false)
+    public Boolean always_spawn_saplings;
+
     @ConfigComment("The maximum time, in game ticks, to wait for saplings before giving up")
     @ConfigGlobalDefaultInteger(50)
     @LegacyBukkitOption(value = "sapling-timeout",

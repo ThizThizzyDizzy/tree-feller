@@ -128,8 +128,10 @@ specimens share one setup per suite. Silk-touch leaf drops converted to saplings
 provide deterministic tree sources; assertions count both planted blocks and
 unconsumed items. Cases also cover animation, delayed falling-leaf drops,
 blocked planting sites, retained stumps, default species, and block/item pairs.
-Timeout cases observe server ticks and supply inventory items before and after
-the deadline at two configured values. Each suite ends with one camera view.
+The spawn suite also imports legacy `spawn-saplings: 2`, checks immediate spawning
+without consuming either source, and rejects invalid soil with
+`always_spawn_saplings = true`. Timeout cases observe server ticks and supply
+inventory items before and after the deadline at two configured values. Each suite ends with one camera view.
 
 Sapling priority cases use seven connected, intact spruce columns with heights
 5, 7, 4, 10, 6, 9, and 8. With either `max-saplings = 2` or only two inventory
