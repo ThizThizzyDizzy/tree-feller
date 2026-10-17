@@ -254,6 +254,7 @@ public class ConfigGenerator{
             add("    - [[MANGROVE_LOG, MANGROVE_WOOD], [MANGROVE_ROOTS, MANGROVE_LEAVES], {roots: [MANGROVE_ROOTS], sapling: [MANGROVE_PROPAGULE], max-saplings: 1, max-trunks: 16, max-horizontal-trunk-pillar-length: 16, leaf-detect-range: 16, leaf-break-range: 16, required-logs: 3, root-distance: 16, diagonal-leaves: true}]");
             add("    - [[CHERRY_LOG, CHERRY_WOOD], CHERRY_LEAVES, {sapling: CHERRY_SAPLING, max-saplings: 1}]");
             add("    - [[PALE_OAK_LOG, PALE_OAK_WOOD], PALE_OAK_LEAVES, {sapling: PALE_OAK_SAPLING, max-saplings: 4}]");
+            add("    - [[POPLAR_LOG, POPLAR_WOOD], [RED_POPLAR_LEAVES, ORANGE_POPLAR_LEAVES, YELLOW_POPLAR_LEAVES], {sapling: POPLAR_SAPLING, max-saplings: 1, max-horizontal-trunk-pillar-length: 7, min-vertical-log-ratio: 0.35}]");
             add("    - [[CRIMSON_STEM, CRIMSON_HYPHAE], [NETHER_WART_BLOCK, SHROOMLIGHT], {sapling: CRIMSON_FUNGUS, max-saplings: 1, grass: [CRIMSON_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]");
             add("    - [[WARPED_STEM, WARPED_HYPHAE], [WARPED_WART_BLOCK, SHROOMLIGHT], {sapling: WARPED_FUNGUS, max-saplings: 1, grass: [WARPED_NYLIUM], diagonal-leaves: true, leaf-detect-range: 8, leaf-break-range: 8}]");
             add();
