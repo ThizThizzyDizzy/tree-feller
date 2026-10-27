@@ -383,13 +383,13 @@ public final class LegacyBukkitConfigImporter{
         if(channel==null)return false;
         if(channel.equals("debug")){issue(issues,name,"Debug messages are fixed in v2 and cannot be customized.");return true;}
         String suffix=name.substring(channel.length()+1),branch="global";
-        List<String> singles=Arrays.asList("toggle","checking","prevent-breakage","prevent-breakage-success","durability-low","partial","partial-tool","protected","success","reload","debug-enable","debug-disable","toggle-on","toggle-off","unknown-command","no-permission","command-usage");
+        List<String> singles=Arrays.asList("toggle","checking","prevent-breakage","prevent-breakage-success","durability-low","partial","partial-tool","success","reload","debug-enable","debug-disable","toggle-on","toggle-off","unknown-command","no-permission","command-usage");
         boolean single=singles.contains(suffix);
         if(!single)for(String end:Arrays.asList("tool","tree","success"))if(suffix.endsWith("-"+end)){
             suffix=suffix.substring(0,suffix.length()-end.length()-1);branch=end;break;
         }
         String target;
-        if(single)target=suffix.equals("protected")?"tree_protected":suffix.replace('-','_');
+        if(single)target=suffix.replace('-','_');
         else{
             Field option=FIELDS.get(suffix);
             target=option==null?null:option.target;

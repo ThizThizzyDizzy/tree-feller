@@ -45,6 +45,11 @@ public interface ITestPlatform{
         public final int blocks;
         public ExplosionObservation(double x,double y,double z,int blocks){this.x=x;this.y=y;this.z=z;this.blocks=blocks;}
     }
+    /** Native UI event translation; assertions and navigation choices stay in Core. */
+    java.util.List<String> controlEntries(String player);
+    void clickControl(String player, int slot);
+    void submitControlText(String player, String text);
+    void closeControl(String player);
     ITestWorld world(String player);
     void preparePlayer(String player, boolean survival);
     void setPlayerGameMode(String player, com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode mode);

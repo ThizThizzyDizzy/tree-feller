@@ -14,9 +14,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 public abstract class TreeFellerBukkit extends JavaPlugin{
     public abstract com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitNbtConnector createNbtConnector(String version);
     public BukkitConnector connector;
+    private com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitControlAudience.Renderer controls;
     @Override
     public void onEnable(){
         TreeFellerCore.initialize(connector = new BukkitConnector(this));
+        controls=new com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitControlAudience.Renderer(this);
+        getServer().getPluginManager().registerEvents(controls,this);
         BukkitEvents events=new BukkitEvents(this);
         getServer().getPluginManager().registerEvents(events, this);
         events.registerFallingDrops();
@@ -29,9 +32,14 @@ public abstract class TreeFellerBukkit extends JavaPlugin{
     public void onDisable(){com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger.clearAll();}
     @Override
     public boolean onCommand(org.bukkit.command.CommandSender sender,org.bukkit.command.Command command,String label,String[] args){
-        if(!(sender instanceof Player)){sender.sendMessage("This debug command requires a player.");return true;}
-        if(!sender.hasPermission("treefeller.debug")){sender.sendMessage("You need treefeller.debug.");return true;}
-        return com.thizthizzydizzy.treefeller.core.debug.DebugCommands.execute(getPlayerConnector((Player)sender),args);
+        return com.thizthizzydizzy.treefeller.core.control.TreeFellerCommands.execute(audience(sender),args);
+    }
+    private com.thizthizzydizzy.treefeller.core.control.ControlAudience audience(org.bukkit.command.CommandSender sender){
+        return new com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitControlAudience(this,sender,controls);
+    }
+    @Override
+    public java.util.List<String> onTabComplete(org.bukkit.command.CommandSender sender,org.bukkit.command.Command command,String alias,String[] args){
+        return com.thizthizzydizzy.treefeller.core.control.TreeFellerCommands.complete(audience(sender),args);
     }
     private final HashMap<Player, BukkitPlayerConnector> playerConnectors = new HashMap<>();
     public IPlayerConnector getPlayerConnector(Player player){

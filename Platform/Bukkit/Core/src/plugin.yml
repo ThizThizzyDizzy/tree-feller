@@ -7,9 +7,17 @@ folia-supported: true
 
 commands:
   treefeller:
-    description: TreeFeller debug trace controls
-    usage: /treefeller debug <next [event|layer|phase|all|count]|clear|status>
+    description: TreeFeller controls and configuration
+    usage: /treefeller <help|toggle|on|off|reload|debug|config>
 permissions:
   treefeller.debug:
     description: Control your TreeFeller debug trace
+    default: op
+  treefeller.help:
+    default: true
+  treefeller.toggle:
+    default: true
+  treefeller.reload:
+    default: op
+  treefeller.config:
     default: op

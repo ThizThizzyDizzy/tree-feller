@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.function.Function;
 public class TestConnector implements TreeFellerConnector{
+    @Override public Path configurationPath(){return Path.of("Core/test/config.conf");}
     @Override public void schedule(int delayTicks, Runnable action){}
     @Override
     public void log(String text){

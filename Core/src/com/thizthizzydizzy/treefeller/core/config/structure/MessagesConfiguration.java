@@ -11,14 +11,17 @@ public class MessagesConfiguration{
     public SingleMessageConfiguration durability_low = new SingleMessageConfiguration();
     public SingleMessageConfiguration partial = new SingleMessageConfiguration();
     public SingleMessageConfiguration partial_tool = new SingleMessageConfiguration();
-    public SingleMessageConfiguration tree_protected = new SingleMessageConfiguration();
     public SingleMessageConfiguration success = new SingleMessageConfiguration();
-    public SingleMessageConfiguration reload = new SingleMessageConfiguration();
-    public SingleMessageConfiguration toggle_on = new SingleMessageConfiguration();
-    public SingleMessageConfiguration toggle_off = new SingleMessageConfiguration();
-    public SingleMessageConfiguration unknown_command = new SingleMessageConfiguration();
-    public SingleMessageConfiguration no_permission = new SingleMessageConfiguration();
-    public SingleMessageConfiguration command_usage = new SingleMessageConfiguration();
+    public SingleMessageConfiguration reload = commandMessage("TreeFeller configuration reloaded.");
+    public SingleMessageConfiguration toggle_on = commandMessage("TreeFeller enabled.");
+    public SingleMessageConfiguration toggle_off = commandMessage("TreeFeller disabled.");
+    public SingleMessageConfiguration unknown_command = commandMessage("Unknown TreeFeller action.");
+    public SingleMessageConfiguration no_permission = commandMessage("You do not have permission.");
+    public SingleMessageConfiguration command_usage = commandMessage("Usage: /treefeller <help|toggle [on|off]|on|off|reload|debug|config>");
+
+    private static SingleMessageConfiguration commandMessage(String text){
+        SingleMessageConfiguration message=new SingleMessageConfiguration();message.chat=text;return message;
+    }
 
     @ConfigComment("Option failures use global/tool/tree; passing checks use success. Both chat and actionbar are optional.")
     public TriggerMessages trigger = new TriggerMessages();

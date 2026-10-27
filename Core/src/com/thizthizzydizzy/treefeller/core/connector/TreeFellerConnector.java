@@ -8,6 +8,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.function.Function;
 public interface TreeFellerConnector{
+    /** Location of the active configuration; serialization belongs to Core. */
+    public Path configurationPath();
     public void log(String text);
     /** Execute on the server thread after the given number of game ticks. */
     public void schedule(int delayTicks, Runnable action);

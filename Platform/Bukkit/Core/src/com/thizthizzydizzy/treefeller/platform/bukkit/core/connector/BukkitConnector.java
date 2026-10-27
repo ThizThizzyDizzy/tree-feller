@@ -74,6 +74,8 @@ public class BukkitConnector implements TreeFellerConnector{
                 .match(Bukkit.getBukkitVersion().split("-",2)[0]));
     }
     @Override
+    public Path configurationPath(){return new File(treefeller.getDataFolder(), "config.conf").toPath();}
+    @Override
     public void log(String text){
         treefeller.getLogger().info(text);
     }

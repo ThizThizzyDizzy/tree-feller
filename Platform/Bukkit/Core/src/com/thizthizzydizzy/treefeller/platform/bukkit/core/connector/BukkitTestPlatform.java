@@ -14,6 +14,21 @@ public final class BukkitTestPlatform implements ITestPlatform{
         if(player==null)throw new IllegalArgumentException("Test player is offline: "+name);
         return player;
     }
+    @Override public java.util.List<String> controlEntries(String name){
+        java.util.List<String> entries=new java.util.ArrayList<>();
+        for(ItemStack item:player(name).getOpenInventory().getTopInventory().getContents())
+            entries.add(item==null||!item.hasItemMeta()?"":item.getItemMeta().getDisplayName());
+        return entries;
+    }
+    @Override public void clickControl(String name,int slot){
+        Bukkit.getPluginManager().callEvent(new org.bukkit.event.inventory.InventoryClickEvent(player(name).getOpenInventory(),
+                org.bukkit.event.inventory.InventoryType.SlotType.CONTAINER,slot,
+                org.bukkit.event.inventory.ClickType.LEFT,org.bukkit.event.inventory.InventoryAction.PICKUP_ALL));
+    }
+    @Override public void submitControlText(String name,String text){
+        Bukkit.getPluginManager().callEvent(new org.bukkit.event.player.AsyncPlayerChatEvent(false,player(name),text,new java.util.HashSet<>(Bukkit.getOnlinePlayers())));
+    }
+    @Override public void closeControl(String name){player(name).closeInventory();}
     @Override public EffectCapture captureEffects(String name){return new BukkitEffectCapture(player(name));}
     @Override
     public ITestWorld world(String player){

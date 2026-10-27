@@ -19,6 +19,8 @@ public class CuttingConfiguration{
     public Integer leaf_break_range;
 
     @ConfigComment("The maximum number of trunk blocks that can be cut down at once. This will cause trees to be partially cut if exceeded.")
+    @LegacyBukkitOption(value = "partial-log-limit",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE})
     public Integer partial_trunk_limit;
 
     // Tool durability checks
