@@ -4,6 +4,13 @@ import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 public interface ITestPlatform{
     /** Observe native output during a real client action. Close removes every hook. */
     EffectCapture captureEffects(String player);
+    BreakCapture captureBreaks(String player,java.util.function.LongPredicate cancelled);
+    interface BreakCapture extends AutoCloseable{
+        java.util.List<Long> positions();
+        @Override void close();
+    }
+    java.util.UUID playerId(String player);
+    Runnable operator(String player,boolean enabled);
     interface EffectCapture extends AutoCloseable{
         java.util.List<MessageObservation> messages();
         java.util.List<ParticleObservation> particles();

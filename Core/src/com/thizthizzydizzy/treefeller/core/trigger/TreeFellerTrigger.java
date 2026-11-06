@@ -68,6 +68,15 @@ public class TreeFellerTrigger{
                 if(detected==null)continue;
                 DetectionResult result = new DetectionResult(detected, tree, tool);
                 if(!secondary&&!TreeFellerCriteria.check(world, result, cascading,player))continue;
+                if(!secondary){
+                    java.util.List<com.thizthizzydizzy.treefeller.core.detection.TreeNode> protectedNodes=detected.nodeMap.values().stream()
+                        .filter(node -> node.type==com.thizthizzydizzy.treefeller.core.detection.TreeNodeType.TRUNK
+                            ||node.type==com.thizthizzydizzy.treefeller.core.detection.TreeNodeType.LEAVES
+                            ||node.type==com.thizthizzydizzy.treefeller.core.detection.TreeNodeType.DECORATION)
+                        .collect(java.util.stream.Collectors.toList());
+                    if(!com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.check(
+                        new com.thizthizzydizzy.treefeller.core.compatibility.CompatibilityContext(world,player,item,result,protectedNodes)))continue;
+                }
                 context.user("Tree and tool matched");
                 context.mark(DebugLevel.USER,pos,OverlayMark.ACCEPTED);
                 return result;

@@ -145,10 +145,15 @@ public class TreeFellerCutting{
             context.fail("No trunk remains in the cut selection");
             return false;
         }
+        com.thizthizzydizzy.treefeller.core.compatibility.CompatibilityContext compatibility=new com.thizthizzydizzy.treefeller.core.compatibility.CompatibilityContext(world,player,item,detected,nodes);
+        if(!com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.check(compatibility)){
+            context.fail("A plugin compatibility refused the tree");return false;
+        }
         context.user("Cutting "+nodes.size()+" blocks; tool durability cost "+cost);
         context.snapshot(detected.detected,DebugLevel.USER,OverlayMark.SELECTED);
         TreeFellerBreaking.PreparedBreak prepared = TreeFellerBreaking.prepare(world, player, detected, nodes, item);
         if(prepared==null)return false;
+        com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.fell(compatibility);
         TreeFellerMessages.checks(player,"tree","result.sapling_replant").check("saplings",true,(Object)detected.tree.saplings);
         TreeFellerMessages.checks(player,"tree","result.sapling_replant").check("max_saplings",true,detected.tree.max_saplings);
         if(detected.tree.cascade_trees!=null)TreeFellerMessages.checks(player,"tree","result.cascade").check("trees",true,detected.tree.cascade_trees);

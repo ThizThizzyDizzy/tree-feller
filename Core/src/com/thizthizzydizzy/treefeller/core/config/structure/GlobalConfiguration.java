@@ -42,7 +42,7 @@ public class GlobalConfiguration{
             }
         }
     }
-    private void applyGlobalConfiguration(Class<?> type, Object object) throws Exception{
+    public static void applyGlobalConfiguration(Class<?> type, Object object) throws Exception{
         for(Field field : type.getFields()){
             Class<?> fieldType = field.getType();
             if(fieldType==Boolean.class){

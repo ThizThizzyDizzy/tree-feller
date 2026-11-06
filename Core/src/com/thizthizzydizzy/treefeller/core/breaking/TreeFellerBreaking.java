@@ -15,6 +15,7 @@ import com.thizthizzydizzy.treefeller.core.detection.*;
 import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
 import com.thizthizzydizzy.treefeller.core.result.SaplingReplant;
 import java.util.*;
+import com.thizthizzydizzy.treefeller.core.compatibility.*;
 /** Core owns removal, motion plans, placement, and exactly-once deferred outcomes. */
 public class TreeFellerBreaking{
     public static BreakingResult breakTree(IWorldConnector world, IPlayerConnector player, DetectionResult detected, List<TreeNode> nodes, IItemConnector tool){
@@ -44,6 +45,8 @@ public class TreeFellerBreaking{
     }
     public static final class PreparedBreak{
         private final IWorldConnector world;
+        private final CompatibilityContext compatibility;
+        private final boolean sendEvents;
         private final IPlayerConnector player;
         private final BreakingConfiguration config;
         private final ResultConfiguration resultConfig;
@@ -62,6 +65,8 @@ public class TreeFellerBreaking{
         private PreparedBreak(IWorldConnector world,IPlayerConnector player,DetectionResult detected,List<TreeNode> nodes,IItemConnector tool,
                 BreakingConfiguration config,ResultConfiguration resultConfig,DebuggerContext context){
             this.world=world;this.player=player;this.config=config;this.resultConfig=resultConfig;this.context=context;
+            compatibility=new CompatibilityContext(world,player,tool,detected,nodes);
+            sendEvents=Boolean.TRUE.equals(TreeFellerConfiguration.getCombinedBukkitConfiguration(detected.tree,detected.tool).send_block_break_events);
             origin=detected.detected.root.pos;
             effects=new com.thizthizzydizzy.treefeller.core.result.TreeFellerEffects(world,player,origin,nodes,tool,resultConfig.effects);
             lowest=nodes.stream().filter(n -> n.type==TreeNodeType.TRUNK).mapToInt(n -> BlockPos.getY(n.pos)).min().orElse(BlockPos.getY(origin));
@@ -90,7 +95,7 @@ public class TreeFellerBreaking{
             }
             List<TreeNode> replantNodes=new ArrayList<>();
             for(BlockPlan plan : plans.values())if(plan.conversion==null)replantNodes.add(plan.node);
-            replant=new SaplingReplant(world,player,detected.tree,replantNodes,resultConfig.sapling_replant);
+            replant=new SaplingReplant(world,player,detected.tree,replantNodes,resultConfig.sapling_replant,compatibility);
             for(BlockPlan plan : plans.values())if(plan.natural||plan.landing==Landing.PLACE)replant.hold(plan.node.pos);
         }
         public void toolEffects(boolean broken){effects.tool(broken);}
@@ -100,7 +105,22 @@ public class TreeFellerBreaking{
             for(TreeNode node : nodes){
                 BlockPlan plan=plans.remove(node.pos);
                 if(plan==null)throw new IllegalStateException("Block processed twice");
+                remaining--;
+                if(sendEvents&&node.pos!=origin&&!world.sendBlockBreakEvent(node.pos,player)){
+                    replant.release(node.pos);
+                    if(plan.conversion==null&&plan.natural&&plan.entity&&plan.landing==Landing.PLACE){naturalEntities--;settleNatural();}
+                    context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.RETAINED,"Cancelled Bukkit block break event");
+                    continue;
+                }
                 selected.add(plan);
+                boolean removed=plan.conversion!=null||plan.natural||plan.landing==Landing.PLACE;
+                double multiplier=1;
+                if(removed)TreeFellerCompatibility.removeBlock(compatibility,node.pos);
+                else multiplier=TreeFellerCompatibility.breakBlock(compatibility,node.pos);
+                if(plan.conversion==null){
+                    TreeFellerResult.multiplyDrops(plan.drops,multiplier);
+                }
+                java.util.Map<PluginCompatibility,Object> previous=plan.conversion==null?null:TreeFellerCompatibility.capture(compatibility,node.pos);
                 world.removeBlock(node.pos);
                 if(plan.conversion!=null){
                     // Vanilla completes the initiating break after MONITOR listeners.
@@ -108,10 +128,10 @@ public class TreeFellerBreaking{
                         // NBT-only conversions need the captured source data to merge into.
                         world.setBlock(node.pos,plan.data);
                         world.setBlock(node.pos,plan.conversion);
+                        TreeFellerCompatibility.addBlock(compatibility,node.pos,previous);
                         context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.CONVERTED,"Converted "+node.type+" to "+DebuggerContext.describe(plan.conversion));
                     });
                 }else context.decision(DebugLevel.DETAIL,node.pos,OverlayMark.REMOVED,"Removed "+node.type);
-                remaining--;
             }
             for(BlockPlan plan : selected){
                 effects.block(plan.node.pos);
@@ -142,7 +162,12 @@ public class TreeFellerBreaking{
             replant.start();
             context.user("Processed "+nodes.size()+" blocks");
             for(BlockPlan plan : selected)context.mark(DebugLevel.USER,plan.node.pos,plan.conversion==null?OverlayMark.REMOVED:OverlayMark.CONVERTED);
-            return new BreakingResult(new ArrayList<>(nodes),immediate);
+            return new BreakingResult(selected.stream().map(p -> p.node).collect(java.util.stream.Collectors.toList()),immediate);
+        }
+        private void place(long pos,BlockSnapshot data){
+            Map<PluginCompatibility,Object> previous=TreeFellerCompatibility.capture(compatibility,pos);
+            world.setBlock(pos,data);
+            TreeFellerCompatibility.addBlock(compatibility,pos,previous);
         }
         private boolean replaceable(long pos){
             if(BlockPos.getY(pos)<world.minHeight()||BlockPos.getY(pos)>=world.maxHeight())return false;
@@ -221,6 +246,23 @@ public class TreeFellerBreaking{
                 watchLanding(plan);
             });
         }
+        private void settleNatural(){
+            if(naturalEntities!=0)return;
+
+            // Landing the bottom of the tree early would obstruct the higher
+            // trajectories before they can clear the original trunk footprint.
+            Set<Long> placed=new HashSet<>();
+            for(Map.Entry<BlockPlan,Long> entry : naturalLandings.entrySet()){
+                long destination=entry.getValue();
+                while(placed.contains(destination)&&BlockPos.getY(destination)+1<world.maxHeight())
+                    destination=BlockPos.toPos(BlockPos.getX(destination),BlockPos.getY(destination)+1,BlockPos.getZ(destination));
+                if(replaceable(destination)){place(destination,rotated(entry.getKey(),destination));placed.add(destination);context.decision(DebugLevel.USER,destination,OverlayMark.LANDING,"Natural falling block placed");}
+                else replant.deliver(destination,entry.getKey().drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
+                replant.release(entry.getKey().node.pos);
+                entry.getKey().handle.remove();
+            }
+            naturalLandings.clear();
+        }
         private void finish(BlockPlan plan,long target,boolean failed,float distance){
             if(plan.done)return;
             plan.done=true;
@@ -247,21 +289,7 @@ public class TreeFellerBreaking{
                     replant.release(plan.node.pos);
                     if(!creative)replant.deliver(target,plan.drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
                 }
-                if(naturalEntities==0){
-                    // Landing the bottom of the tree early would obstruct the higher
-                    // trajectories before they can clear the original trunk footprint.
-                    Set<Long> placed=new HashSet<>();
-                    for(Map.Entry<BlockPlan,Long> entry : naturalLandings.entrySet()){
-                        long destination=entry.getValue();
-                        while(placed.contains(destination)&&BlockPos.getY(destination)+1<world.maxHeight())
-                            destination=BlockPos.toPos(BlockPos.getX(destination),BlockPos.getY(destination)+1,BlockPos.getZ(destination));
-                        if(replaceable(destination)){world.setBlock(destination,rotated(entry.getKey(),destination));placed.add(destination);context.decision(DebugLevel.USER,destination,OverlayMark.LANDING,"Natural falling block placed");}
-                        else replant.deliver(destination,entry.getKey().drops,Boolean.TRUE.equals(resultConfig.drop_to_inventory));
-                        replant.release(entry.getKey().node.pos);
-                        entry.getKey().handle.remove();
-                    }
-                    naturalLandings.clear();
-                }
+                settleNatural();
                 return;
             }
             if(plan.entity&&creative){
@@ -269,7 +297,7 @@ public class TreeFellerBreaking{
                 return; // V1's entity falls disappear in creative mode.
             }
             if(!failed&&plan.landing==Landing.PLACE&&replaceable(target)){
-                world.setBlock(target,rotated(plan,target));
+                place(target,rotated(plan,target));
                 context.decision(DebugLevel.USER,target,OverlayMark.LANDING,"Landed "+plan.node.type);
             }else{
                 boolean inventory=plan.landing==Landing.INVENTORY||Boolean.TRUE.equals(resultConfig.drop_to_inventory);

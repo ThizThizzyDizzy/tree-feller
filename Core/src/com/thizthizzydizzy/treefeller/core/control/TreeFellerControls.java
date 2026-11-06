@@ -49,6 +49,7 @@ public final class TreeFellerControls{
             if(replacement==null)throw new IllegalStateException("No configuration was loaded");
             TreeFellerDebugger.clearAll();
             TreeFellerCore.config=replacement;
+            com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.reload();
             message(source,replacement.messages.reload);
         }catch(RuntimeException ex){source.sendMessage("Could not reload TreeFeller: "+ex.getMessage());}
     }

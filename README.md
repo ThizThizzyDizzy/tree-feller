@@ -172,3 +172,7 @@ global.result.drop-conversions = {
 Effect filters accept item definitions for `TOOL`/`TOOL_BREAK` locations and block definitions for other locations. Particle `item` values also accept item definitions, including NBT.
 
 The config writer also preserves structured conversion source definitions by encoding them as HOCON object strings in map keys.
+
+## Bukkit integrations
+
+Bukkit-only settings live in the top-level `bukkit` section. See [Bukkit compatibility projects](Platform/Bukkit/Compatibility/README.md) for configuration, isolated plugin API projects, and MCAutoTester plugin tests.

@@ -60,6 +60,16 @@ public class BukkitWorldConnector implements IWorldConnector{
             drops.add(new BukkitItemConnector(stack));
         return drops;
     }
+    @Override public boolean sendBlockBreakEvent(long pos,IPlayerConnector player){
+        org.bukkit.event.block.BlockBreakEvent event=new org.bukkit.event.block.BlockBreakEvent(block(pos),((BukkitPlayerConnector)player).getPlayer());
+        com.thizthizzydizzy.treefeller.platform.bukkit.core.event.BukkitEvents.sentBlockBreakEvents.add(event);
+        try{org.bukkit.Bukkit.getPluginManager().callEvent(event);return !event.isCancelled();}
+        finally{com.thizthizzydizzy.treefeller.platform.bukkit.core.event.BukkitEvents.sentBlockBreakEvents.remove(event);}
+    }
+    @Override public void dropItem(long pos,IItemConnector item,IPlayerConnector player){
+        org.bukkit.entity.Item dropped=world.dropItemNaturally(block(pos).getLocation().add(.5,.5,.5),((BukkitItemConnector)item).getStack());
+        com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.dropItem(player,dropped);
+    }
     @Override
     public void removeBlock(long pos){
         block(pos).setType(Material.AIR, false);

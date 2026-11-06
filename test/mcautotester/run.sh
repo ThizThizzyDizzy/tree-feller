@@ -9,7 +9,7 @@ fi
 runner_home=${MCAUTOTESTER_HOME:-"$project_dir/../MCAutoTester/dist"}
 runner_home=$(cd -- "$runner_home" && pwd)
 if (($# == 0)); then
-    set -- treefeller-option-controls-commands treefeller-option-controls-config \
+    set -- treefeller-option-bukkit-send-block-break-events treefeller-option-controls-commands treefeller-option-controls-config \
         treefeller-option-blocks-nbt treefeller-option-item-nbt treefeller-option-blocks-persistent treefeller-option-messages-chat treefeller-option-messages-actionbar \
         treefeller-option-debug-text-level \
         treefeller-option-debug-overlay-level \
@@ -141,6 +141,10 @@ cd -- "$run_dir"
     printf ' -s "%s" -p "%s" -c' \
         "${MCAUTOTESTER_TARGET:-paper:1.21.5}" \
         "$project_dir/Builder/dist/treefeller-DEV.jar"
+    if [[ -n "${MCAUTOTESTER_PLUGINS:-}" ]]; then
+        IFS=: read -r -a compatibility_plugins <<< "$MCAUTOTESTER_PLUGINS"
+        printf ' -p "%s"' "${compatibility_plugins[@]}"
+    fi
     printf ' -t "%s"' "$@"
     printf '\nexit\n'
 } | java -Ddizzyengine.headless=true -jar "$runner_home/MCAutoTester.jar" 2>&1 | tee run.log

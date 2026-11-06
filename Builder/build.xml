@@ -97,6 +97,10 @@
             <property name="no.deps" value="true"/>
             <fileset dir=".."><include name="Platform/Bukkit/Version/*/build.xml"/></fileset>
         </subant>
+        <echo message="Building Bukkit compatibility connectors..."/>
+        <subant target="jar">
+            <fileset dir=".."><include name="Platform/Bukkit/Compatibility/**/build.xml"/></fileset>
+        </subant>
         <ant antfile="../Platform/Bukkit/Core/build.xml" target="version-bootstrap" inheritall="false"/>
         <echo message="Building platforms..."/>
         
@@ -107,6 +111,7 @@
                 <exclude name="Platform/Utility/build.xml"/>
                 <exclude name="Platform/Bukkit/Core/build.xml"/>
                 <exclude name="Platform/Bukkit/Version/**/build.xml"/>
+                <exclude name="Platform/Bukkit/Compatibility/**/build.xml"/>
             </fileset>
         </subant>
         

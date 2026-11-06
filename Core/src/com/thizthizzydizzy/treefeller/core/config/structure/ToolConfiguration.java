@@ -9,6 +9,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfig
 import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
 public class ToolConfiguration{
+    public BukkitConfiguration bukkit;
     @ConfigComment("The item to match for this tool")
     @LegacyBukkitOption(value = "min-durability",
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
@@ -34,6 +35,18 @@ public class ToolConfiguration{
             scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
             conversion = LegacyBukkitOption.Conversion.LIST,
             suffix = ".custom_model_data.whitelist")
+    @LegacyBukkitOption(value = "required-enchantments",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.ENCHANTMENTS,
+            suffix = ".enchantments.whitelist")
+    @LegacyBukkitOption(value = "banned-enchantments",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.ENCHANTMENTS,
+            suffix = ".enchantments.blacklist")
+    @LegacyBukkitOption(value = "required-lore",
+            scopes = {LegacyBukkitOption.Scope.GLOBAL, LegacyBukkitOption.Scope.TOOL, LegacyBukkitOption.Scope.TREE},
+            conversion = LegacyBukkitOption.Conversion.LIST,
+            suffix = ".lore.whitelist")
     public IItemDefinition item;
 
     @ConfigComment("The indicies of trees that this tool may cut down")

@@ -9,6 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 public class BukkitEvents implements Listener{
+    public static final java.util.Set<BlockBreakEvent> sentBlockBreakEvents=java.util.Collections.newSetFromMap(new java.util.IdentityHashMap<BlockBreakEvent,Boolean>());
     private final TreeFellerBukkit plugin;
     public BukkitEvents(TreeFellerBukkit plugin){
         this.plugin = plugin;
@@ -50,7 +51,7 @@ public class BukkitEvents implements Listener{
     // Felling observes the original event's cancellation without modifying it.
     @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event){
-        if(event.getClass().getName().contains("Fake"))return;
+        if(sentBlockBreakEvents.contains(event)||event.getClass().getName().contains("Fake"))return;
         Block block = event.getBlock();
         TreeFellerEvents.fireEvent(new PlayerBreakBlockEvent(plugin.getPlayerConnector(event.getPlayer()), plugin.getWorldConnector(event.getBlock().getWorld()), BlockPos.toPos(block.getX(), block.getY(), block.getZ())));
     }

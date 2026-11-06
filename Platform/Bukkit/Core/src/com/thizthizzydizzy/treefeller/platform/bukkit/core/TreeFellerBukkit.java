@@ -13,11 +13,14 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 public abstract class TreeFellerBukkit extends JavaPlugin{
     public abstract com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitNbtConnector createNbtConnector(String version);
+    public abstract void registerCompatibilities();
     public BukkitConnector connector;
     private com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitControlAudience.Renderer controls;
     @Override
     public void onEnable(){
         TreeFellerCore.initialize(connector = new BukkitConnector(this));
+        registerCompatibilities();
+        com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.reload();
         controls=new com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitControlAudience.Renderer(this);
         getServer().getPluginManager().registerEvents(controls,this);
         BukkitEvents events=new BukkitEvents(this);
@@ -29,7 +32,7 @@ public abstract class TreeFellerBukkit extends JavaPlugin{
     }
     
     @Override
-    public void onDisable(){com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger.clearAll();}
+    public void onDisable(){com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.close();com.thizthizzydizzy.treefeller.core.debug.TreeFellerDebugger.clearAll();}
     @Override
     public boolean onCommand(org.bukkit.command.CommandSender sender,org.bukkit.command.Command command,String label,String[] args){
         return com.thizthizzydizzy.treefeller.core.control.TreeFellerCommands.execute(audience(sender),args);

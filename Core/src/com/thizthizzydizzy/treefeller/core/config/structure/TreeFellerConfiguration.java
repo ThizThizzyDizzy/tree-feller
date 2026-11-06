@@ -11,6 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 public class TreeFellerConfiguration{
+    public BukkitConfiguration bukkit = com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.defaultConfiguration();
     public DebugConfiguration debug = new DebugConfiguration();
     public GlobalConfiguration global = new GlobalConfiguration();
     public ToolConfiguration[] tools = new ToolConfiguration[0];
@@ -85,6 +86,9 @@ public class TreeFellerConfiguration{
         Object result = type.getConstructor().newInstance();
         for(Field field : type.getFields())field.set(result, copy(field.get(value)));
         return result;
+    }
+    public static BukkitConfiguration getCombinedBukkitConfiguration(TreeConfiguration tree, ToolConfiguration tool){
+        return effective(com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.defaults(),tree.bukkit,tool.bukkit);
     }
     private static <T> T effective(T global, T tree, T tool){
         try{

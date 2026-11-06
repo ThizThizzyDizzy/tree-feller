@@ -10,6 +10,7 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfi
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.SaplingConfiguration;
 public class TreeConfiguration{
+    public BukkitConfiguration bukkit;
     @ConfigComment("Blocks that can be used to trigger tree felling indirectly (tree felling will be triggered at the nearest connected trunk)")
     @LegacyBukkitOption(value = "roots",
             scopes = {LegacyBukkitOption.Scope.TREE})

@@ -9,6 +9,26 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 /** Bukkit API translation only; fixture construction lives in Core. */
 public final class BukkitTestPlatform implements ITestPlatform{
+    @Override public Runnable operator(String name,boolean enabled){
+        Player target=player(name);boolean previous=target.isOp();target.setOp(enabled);return () -> target.setOp(previous);
+    }
+    @Override public java.util.UUID playerId(String name){return player(name).getUniqueId();}
+    @Override public BreakCapture captureBreaks(String name,java.util.function.LongPredicate cancelled){
+        java.util.List<Long> positions=new java.util.ArrayList<>();
+        org.bukkit.event.Listener listener=new org.bukkit.event.Listener(){};
+        Bukkit.getPluginManager().registerEvent(org.bukkit.event.block.BlockBreakEvent.class,listener,org.bukkit.event.EventPriority.HIGH,(ignored,event) -> {
+            org.bukkit.event.block.BlockBreakEvent broken=(org.bukkit.event.block.BlockBreakEvent)event;
+            if(!broken.getPlayer().getName().equals(name))return;
+            org.bukkit.block.Block block=broken.getBlock();
+            long pos=com.thizthizzydizzy.treefeller.core.connector.world.BlockPos.toPos(block.getX(),block.getY(),block.getZ());
+            positions.add(pos);
+            if(cancelled.test(pos))broken.setCancelled(true);
+        },Bukkit.getPluginManager().getPlugin("treefeller"));
+        return new BreakCapture(){
+            @Override public java.util.List<Long> positions(){return new java.util.ArrayList<>(positions);}
+            @Override public void close(){org.bukkit.event.HandlerList.unregisterAll(listener);}
+        };
+    }
     private Player player(String name){
         Player player = Bukkit.getPlayerExact(name);
         if(player==null)throw new IllegalArgumentException("Test player is offline: "+name);

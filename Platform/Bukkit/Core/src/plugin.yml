@@ -2,7 +2,7 @@ main: com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.TreeFellerBu
 version: 2.0.0
 api-version: 1.13
 name: treefeller
-softdepend: [mcautotester]
+softdepend: [mcautotester, MMOCore, Jobs, mcMMO, CoreProtect, WorldGuard, GriefPrevention, Towny, OreRegenerator, Drop2Inventory, EcoSkills, EcoJobs, LogBlock, Lands, PlaceholderAPI, SaberFactions, AureliumSkills, AuraSkills, BlockRegen, Prism, prism, AuroraCollections, Quests]
 folia-supported: true
 
 commands:

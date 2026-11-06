@@ -25,6 +25,10 @@ public class PlayerSettings{
     public void startCooldown(TriggerConfiguration config){
         if(config!=null&&config.cooldown!=null&&config.cooldown>0)cooldowns.put(config, System.currentTimeMillis());
     }
+    public long remainingCooldown(TriggerConfiguration config){
+        Long started=cooldowns.get(config);
+        return started==null||config==null||config.cooldown==null?0:Math.max(0,config.cooldown*50L-(System.currentTimeMillis()-started));
+    }
     public boolean isOnCooldown(TriggerConfiguration config){
         Long cooldown = cooldowns.get(config);
         if(cooldown==null)return false;

@@ -1,6 +1,7 @@
 package com.thizthizzydizzy.treefeller.core.test;
 public class TreeFellerTestSequences{
     public static void register(ITestPlatform platform){
+        com.thizthizzydizzy.treefeller.core.test.options.bukkit.BukkitTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.control.ControlTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.blocks.NbtTests.register(platform);
         com.thizthizzydizzy.treefeller.core.test.options.item.NbtTests.register(platform);

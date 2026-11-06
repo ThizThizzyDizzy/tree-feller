@@ -25,8 +25,8 @@ public class TreeFellerResult{
             if(item.getCount()<=0)continue;
             context.decision(DebugLevel.DETAIL,pos,OverlayMark.DROP,"Deliver "+item.getItemId()+" x"+item.getCount()+", inventory="+inventory);
             if(inventory)for(IItemConnector overflow : player.giveItems(item)){
-                context.info("Inventory overflow: "+overflow.getItemId()+" x"+overflow.getCount());world.dropItem(pos,overflow);
-            }else world.dropItem(pos,item);
+                context.info("Inventory overflow: "+overflow.getItemId()+" x"+overflow.getCount());world.dropItem(pos,overflow,player);
+            }else world.dropItem(pos,item,player);
         }
     }
     public static List<IItemConnector> collectDrops(IWorldConnector world, IPlayerConnector player, TreeNode node, IItemConnector tool, ResultConfiguration config){
@@ -61,6 +61,14 @@ public class TreeFellerResult{
         }
         return drops;
     }
+    public static void multiplyDrops(List<IItemConnector> drops,double multiplier){
+        if(multiplier==1)return;
+        if(!Double.isFinite(multiplier)||multiplier<0)throw new IllegalArgumentException("Invalid compatibility drop multiplier: "+multiplier);
+        for(IItemConnector item:drops){
+            double count=item.getCount()*multiplier;
+            item.setCount((int)Math.min(Integer.MAX_VALUE,Math.floor(count)+(ThreadLocalRandom.current().nextDouble()<count-Math.floor(count)?1:0)));
+        }
+    }
     public static void complete(IWorldConnector world, IPlayerConnector player, DetectionResult detected, BreakingResult result){
         complete(world, player, detected, result, TreeFellerConfiguration.getCombinedResultConfiguration(detected.tree, detected.tool),
                 TreeFellerCore.config.global.trigger);
@@ -82,8 +90,8 @@ public class TreeFellerResult{
                 items += item.getCount();
                 context.decision(DebugLevel.DETAIL,entry.getKey(),OverlayMark.DROP,"Drop: "+item.getItemId()+" x"+item.getCount()+", inventory="+config.drop_to_inventory);
                 if(Boolean.TRUE.equals(config.drop_to_inventory)){
-                    for(IItemConnector overflow : player.giveItems(item)){context.info("Inventory overflow: "+overflow.getItemId()+" x"+overflow.getCount());world.dropItem(entry.getKey(), overflow);}
-                }else world.dropItem(entry.getKey(), item);
+                    for(IItemConnector overflow : player.giveItems(item)){context.info("Inventory overflow: "+overflow.getItemId()+" x"+overflow.getCount());world.dropItem(entry.getKey(), overflow,player);}
+                }else world.dropItem(entry.getKey(), item,player);
             }
         }
         if(player.getGameMode()!=PlayerGameMode.CREATIVE){

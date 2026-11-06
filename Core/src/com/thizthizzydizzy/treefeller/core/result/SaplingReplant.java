@@ -9,9 +9,11 @@ import com.thizthizzydizzy.treefeller.core.connector.world.*;
 import com.thizthizzydizzy.treefeller.core.detection.*;
 import com.thizthizzydizzy.treefeller.core.debug.*;
 import java.util.*;
+import com.thizthizzydizzy.treefeller.core.compatibility.*;
 /** One bounded replant lifecycle per accepted cut, shared by animated and landing drops. */
 public final class SaplingReplant{
     private final DebuggerContext context;
+    private final CompatibilityContext compatibility;
     private final IWorldConnector world;
     private final IPlayerConnector player;
     private final SaplingReplantConfiguration config;
@@ -22,7 +24,8 @@ public final class SaplingReplant{
     private boolean started, expired;
     private int age;
     public SaplingReplant(IWorldConnector world, IPlayerConnector player, TreeConfiguration tree,
-            List<TreeNode> nodes, SaplingReplantConfiguration config){
+            List<TreeNode> nodes, SaplingReplantConfiguration config, CompatibilityContext compatibility){
+        this.compatibility=compatibility;
         context=TreeFellerDebugger.begin(DebugPhase.REPLANT,player,world);
         context.values("Replant settings",config);
         this.world=world;this.player=player;this.config=config;this.saplings=tree.saplings;
@@ -80,6 +83,11 @@ public final class SaplingReplant{
         offer(pos,drops,inventory);
         TreeFellerResult.deliverDrops(world,player,pos,drops,inventory);
     }
+    private void plant(long pos,IBlockDefinition block){
+        Map<PluginCompatibility,Object> previous=TreeFellerCompatibility.capture(compatibility,pos);
+        world.setBlock(pos,block);
+        TreeFellerCompatibility.addBlock(compatibility,pos,previous);
+    }
     private boolean alwaysSpawn(){return Boolean.TRUE.equals(config.always_spawn_saplings);}
     private void tick(){
         age++;
@@ -92,14 +100,14 @@ public final class SaplingReplant{
             if(alreadyPlanted){it.remove();continue;}
             if(!world.isAir(pos)||!soil(pos)){context.decision(DebugLevel.TRACE,pos,OverlayMark.REJECTED,"Planting blocked or soil changed, age="+age);continue;}
             if(alwaysSpawn()){
-                world.setBlock(pos,saplings[0].block);
+                plant(pos,saplings[0].block);
                 context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Spawned new sapling (always)");
                 it.remove();
                 continue;
             }
             if(!reserved.isEmpty()){
                 Reserved next=reserved.remove(0);
-                world.setBlock(pos,next.sapling.block);
+                plant(pos,next.sapling.block);
                 context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Planted reserved tree sapling");
                 it.remove();
                 continue;
@@ -111,7 +119,7 @@ public final class SaplingReplant{
                     if(item==null||item.getCount()<=0)continue;
                     SaplingConfiguration sapling=matching(item);
                     if(sapling==null)continue;
-                    world.setBlock(pos,sapling.block);
+                    plant(pos,sapling.block);
                     context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Planted inventory sapling from slot "+slot);
                     item.setCount(item.getCount()-1);
                     player.setInventoryItem(slot,item);
@@ -120,7 +128,7 @@ public final class SaplingReplant{
                 }
             }
             if(!planted&&age>=timeout&&Boolean.TRUE.equals(config.spawn_saplings)){
-                world.setBlock(pos,saplings[0].block);
+                plant(pos,saplings[0].block);
                 context.decision(DebugLevel.USER,pos,OverlayMark.REPLANT,"Spawned fallback sapling at timeout "+timeout);
                 planted=true;
             }

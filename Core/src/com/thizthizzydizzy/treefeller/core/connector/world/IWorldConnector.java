@@ -21,6 +21,9 @@ public interface IWorldConnector{
     public void removeBlock(long pos);
     public void setBlock(long pos, IBlockDefinition definition);
     public void dropItem(long pos, IItemConnector item);
+    void dropItem(long pos, IItemConnector item, IPlayerConnector player);
+    /** Dispatch a native synthetic break event, returning false when cancelled. */
+    boolean sendBlockBreakEvent(long pos, IPlayerConnector player);
     public float getDayTime();
     public float getMoonPhase();
     public String getDimension();

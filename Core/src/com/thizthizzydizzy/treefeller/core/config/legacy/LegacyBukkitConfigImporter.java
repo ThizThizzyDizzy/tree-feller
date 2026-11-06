@@ -200,11 +200,16 @@ public final class LegacyBukkitConfigImporter{
                         }else playerLeaves(out,allowPlayerLeaves);
                         translated.add(at+" → trees' leaf definitions (persistent "+(allowPlayerLeaves?"omitted":"false")+")");
                         continue;
+                    case "double-map":value=numericMap(value,false);break;
+                    case "integer-map":value=numericMap(value,true);break;
                     case "boolean":value=booleanValue(value);break;
                     case "integer":value=integerValue(value,name.contains("durability")&&!name.contains("percent"));break;
                     case "float32":value=number(value).floatValue();break;
                     case "float":value=number(value).floatValue();break;
+                    case "enchantments":
+                        value=enchantments(value,name.equals("banned-enchantments"),at,issues);break;
                     case "list":
+                        if(name.equals("required-lore"))issue(issues,at,"V1 matches lore substrings; v2 matches whole lines. Candidate retains the text as exact-line requirements; review before activation.");
                         value=name.equals("custom-model-data")?Collections.singletonList(integerValue(entry.getValue(),false)):
                                 name.equals("required-name")?Collections.singletonList(value.toString()):stringList(value);
                         if(name.equals("roots")||name.equals("grass")||name.equals("overridables")||name.equals("banned-logs")||name.equals("banned-leaves"))
@@ -276,7 +281,7 @@ public final class LegacyBukkitConfigImporter{
                         translated.add(at+" → "+field.target);continue;
                     default:break;
                 }
-                if(name.equals("startup-logs"))put(root,field.target,value);else put(out,field.target,value);
+                if(name.equals("startup-logs")||scope.equals("global")&&field.target.startsWith("bukkit."))put(root,field.target,value);else put(out,field.target,value);
                 translated.add(at+" → "+field.target);
             }catch(IllegalArgumentException ex){issue(issues,at,ex.getMessage());}
         }
@@ -442,6 +447,129 @@ public final class LegacyBukkitConfigImporter{
         if(value instanceof String)try{return shortValue?Short.parseShort((String)value):Integer.parseInt((String)value);}catch(NumberFormatException ex){}
         throw new IllegalArgumentException("V1 does not load this value as an integer; retained without coercion: "+value);
     }
+    private static List<Object> enchantments(Object value,boolean banned,String path,List<String> issues){
+        Map<String,Integer> levels=new LinkedHashMap<>();
+        for(Object entry:list(value)){
+            if(!(entry instanceof Map))throw new IllegalArgumentException("Expected enchantment map or list of maps");
+            for(Map.Entry<String,Object> enchantment:copyMap((Map<?,?>)entry).entrySet()){
+                String name=legacyEnchantment(enchantment.getKey());
+                if(name==null){issue(issues,path,"No supported v2 enchantment name for "+enchantment.getKey()+"; entry skipped.");continue;}
+                int level;
+                try{level=integerValue(enchantment.getValue(),false);}
+                catch(IllegalArgumentException ex){issue(issues,path,"Invalid level for "+enchantment.getKey()+"; entry skipped.");continue;}
+                Integer previous=levels.get(name);
+                levels.put(name,previous==null?level:banned?Math.min(previous,level):Math.max(previous,level));
+            }
+        }
+        List<Object> result=new ArrayList<>();
+        for(Map.Entry<String,Integer> entry:levels.entrySet()){
+            Map<String,Object> requirement=new LinkedHashMap<>(),level=new LinkedHashMap<>();
+            requirement.put("enchantment",entry.getKey());
+            level.put("min",entry.getValue());requirement.put("level",level);
+            result.add(requirement);
+        }
+        return result;
+    }
+    /** V1 aliases translated to Bukkit names accepted by the existing v2 predicate. */
+    private static String legacyEnchantment(String string){
+        if(string.startsWith("minecraft:"))string=string.substring("minecraft:".length());
+        switch(string.toLowerCase(Locale.ROOT).replace("_", " ")){
+            case "power":
+            case "arrow damage":
+                return "ARROW_DAMAGE";
+            case "flame":
+            case "arrow fire":
+                return "ARROW_FIRE";
+            case "arrow infinite":
+            case "infinity":
+                return "ARROW_INFINITE";
+            case "arrow knockback":
+            case "punch":
+                return "ARROW_KNOCKBACK";
+            case "binding":
+            case "binding curse":
+            case "curse of binding":
+                return "BINDING_CURSE";
+            case "channeling":
+                return "CHANNELING";
+            case "sharpness":
+            case "damage all":
+                return "DAMAGE_ALL";
+            case "damage arthropods":
+            case "bane of arthropods":
+                return "DAMAGE_ARTHROPODS";
+            case "damage undead":
+            case "smite":
+                return "DAMAGE_UNDEAD";
+            case "depth strider":
+                return "DEPTH_STRIDER";
+            case "efficiency":
+            case "dig speed":
+                return "DIG_SPEED";
+            case "durability":
+            case "unbreaking":
+                return "DURABILITY";
+            case "fire aspect":
+                return "FIRE_ASPECT";
+            case "frost walker":
+                return "FROST_WALKER";
+            case "impaling":
+                return "IMPALING";
+            case "knockback":
+                return "KNOCKBACK";
+            case "fortune":
+            case "loot bonus blocks":
+                return "LOOT_BONUS_BLOCKS";
+            case "looting":
+            case "loot bonus mobs":
+                return "LOOT_BONUS_MOBS";
+            case "loyalty":
+                return "LOYALTY";
+            case "luck":
+            case "luck of the sea":
+                return "LUCK";
+            case "lure":
+                return "LURE";
+            case "mending":
+                return "MENDING";
+            case "oxygen":
+            case "respiration":
+                return "OXYGEN";
+            case "protection environmental":
+            case "protection":
+                return "PROTECTION_ENVIRONMENTAL";
+            case "protection explosions":
+            case "blast protection":
+                return "PROTECTION_EXPLOSIONS";
+            case "protection fall":
+            case "feather falling":
+            case "feather fall":
+                return "PROTECTION_FALL";
+            case "protection fire":
+            case "fire protection":
+                return "PROTECTION_FIRE";
+            case "protection projectile":
+            case "projectile protection":
+                return "PROTECTION_PROJECTILE";
+            case "riptide":
+                return "RIPTIDE";
+            case "silk touch":
+                return "SILK_TOUCH";
+            case "sweeping":
+            case "sweeping edge":
+                return "SWEEPING_EDGE";
+            case "thorns":
+                return "THORNS";
+            case "vanishing":
+            case "vanishing curse":
+            case "curse of vanishing":
+                return "VANISHING_CURSE";
+            case "water worker":
+            case "aqua affinity":
+                return "WATER_WORKER";
+            default:return null;
+        }
+    }
     private static List<Object> treeSelectors(Object value,Map<String,Object> global){
         List<Object> selected=new ArrayList<>(),trees=list(global.get("trees"));
         for(Object selector:flatten(value)){
@@ -585,6 +713,20 @@ public final class LegacyBukkitConfigImporter{
         map.put(keys[keys.length-1],value);
     }
     private static void issue(List<String> issues,String path,String reason){String issue="`"+path+"`: "+reason;if(!issues.contains(issue))issues.add(issue);}
+    private static Map<String,Object> numericMap(Object value,boolean integer){
+        Map<String,Object> result=new LinkedHashMap<>();
+        List<?> sources=value instanceof Map?Collections.singletonList(value):list(value);
+        if(!(value instanceof Map)&&!(value instanceof List))throw new IllegalArgumentException("Expected a map or list of maps");
+        for(Object source:sources){
+            if(!(source instanceof Map))throw new IllegalArgumentException("Expected an XP/level map");
+            for(Map.Entry<?,?> entry:((Map<?,?>)source).entrySet()){
+                String key=String.valueOf(entry.getKey());
+                double amount=number(entry.getValue()).doubleValue()+((Number)result.getOrDefault(key,0)).doubleValue();
+                if(integer)result.put(key,(int)amount);else result.put(key,amount);
+            }
+        }
+        return result;
+    }
     private static Map<String,Field> loadFields(){
         // Stable ordering, independent of the JVM's reflection field order.
         Map<String,Field> fields=new TreeMap<>();
@@ -636,6 +778,13 @@ public final class LegacyBukkitConfigImporter{
             }
         }catch(ReflectiveOperationException|ClassCastException ex){
             throw new IllegalStateException("Specify a legacy conversion for "+member+suffix,ex);
+        }
+        if(destination instanceof ParameterizedType){
+            ParameterizedType map=(ParameterizedType)destination;
+            if(map.getRawType() instanceof Class&&Map.class.isAssignableFrom((Class<?>)map.getRawType())&&map.getActualTypeArguments()[0]==String.class){
+                if(map.getActualTypeArguments()[1]==Double.class)return LegacyBukkitOption.Conversion.DOUBLE_MAP;
+                if(map.getActualTypeArguments()[1]==Integer.class)return LegacyBukkitOption.Conversion.INTEGER_MAP;
+            }
         }
         if(destination==Boolean.class||destination==boolean.class)return LegacyBukkitOption.Conversion.BOOLEAN;
         if(destination==Integer.class||destination==int.class)return LegacyBukkitOption.Conversion.INTEGER;
