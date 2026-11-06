@@ -218,13 +218,30 @@ public final class LegacyBukkitConfigImporter{
                     case "conversions":
                         if(value instanceof List)throw new IllegalArgumentException("V1 list-form conversions load MemorySection entries, not ordinary YAML map entries; no clear list-form conversion");
                         value=conversionMap(value);
-                        for(Object target:((Map<?,?>)value).values())if(target instanceof String&&((String)target).contains("{"))
-                            throw new IllegalArgumentException("NBT-bearing conversion targets have no v2 item/block data match");
                         Map<String,Object> resolvedConversions=new LinkedHashMap<>();
                         for(Map.Entry<String,Object> conversion:((Map<String,Object>)value).entrySet()){
-                            String from=materialResolver.apply(conversion.getKey()), to=conversion.getValue() instanceof String?materialResolver.apply((String)conversion.getValue()):null;
+                            String target=conversion.getValue() instanceof String?(String)conversion.getValue():null;
+                            String nbt=null;
+                            if(target!=null&&target.contains("{")){
+                                // V1 only accepts appended SNBT on drop conversion targets.
+                                // Keep the compound opaque: its syntax belongs to the server's NBT parser.
+                                if(!name.equals("drop-conversions")){
+                                    issue(issues,at,"V1 does not load NBT-bearing block conversion targets; entry skipped: "+conversion.getKey());
+                                    continue;
+                                }
+                                int start=target.indexOf('{');
+                                nbt=target.substring(start);
+                                target=target.substring(0,start).trim();
+                            }
+                            String from=materialResolver.apply(conversion.getKey()), to=target==null?null:materialResolver.apply(target);
                             if(from==null||to==null)issue(issues,at,"Unavailable conversion material skipped: "+conversion);
-                            else resolvedConversions.put(from,to);
+                            else if(nbt==null)resolvedConversions.put(from,to);
+                            else{
+                                Map<String,Object> definition=new LinkedHashMap<>();
+                                definition.put("material",to);
+                                definition.put("nbt",nbt);
+                                resolvedConversions.put(from,definition);
+                            }
                         }
                         value=resolvedConversions;
                         break;
