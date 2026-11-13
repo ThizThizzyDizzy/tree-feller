@@ -1,19 +1,22 @@
 package com.thizthizzydizzy.treefeller.core.test.options.blocks;
-import com.thizthizzydizzy.treefeller.core.test.*;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.ConfigReader;
 import com.thizthizzydizzy.treefeller.core.config.ConfigWriter;
-import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
+import com.thizthizzydizzy.treefeller.core.test.*;
+import java.util.Locale;
+import java.util.Map.Entry;
+
 public final class NbtTests{
     private TestArena arena;
-    private ITestPlatform.EffectCapture capture;
+    private ITestPlatform.TestOutputRecorder capture;
     private final TestTrees.Tree tree=TestTrees.specimen(TestTrees.Kind.SPRUCE);
     private static final String INITIAL="{PublicBukkitValues:{\"treefeller:fixture\":{flag:1b,kept:7s,values:[L;3L,4L]}}}";
     private static String tag(int flag){return "{PublicBukkitValues:{\"treefeller:fixture\":{flag:"+flag+"b}}}";}
     private static String quote(String value){return "\""+value.replace("\\","\\\\").replace("\"","\\\"")+"\"";}
     private static IBlockDefinition definition(String material,String nbt){
-        return ConfigReader.readFromString("trees=[{trunk=[{material="+material.toUpperCase(java.util.Locale.ROOT)+",nbt="+quote(nbt)+"}]}]").trees[0].trunk[0];
+        return ConfigReader.readFromString("trees=[{trunk=[{material="+material.toUpperCase(Locale.ROOT)+",nbt="+quote(nbt)+"}]}]").trees[0].trunk[0];
     }
     public static void register(ITestPlatform platform){new NbtTests().registerTests(platform);}
     private void registerTests(ITestPlatform platform){
@@ -47,7 +50,7 @@ public final class NbtTests{
                 TestArena.onServer(ctx,() -> {
                     TreeFellerCore.config=ConfigReader.readFromString(ConfigWriter.writeToString(TreeFellerCore.config));
                     hooks.preparePlayer(OptionTestSuite.PLAYER,true);
-                    if(capture!=null)capture.close();capture=hooks.captureEffects(OptionTestSuite.PLAYER);return null;
+                    if(capture!=null)capture.close();capture=hooks.recordOutput(OptionTestSuite.PLAYER);return null;
                 });
                 ctx.waitTicks(2); // Let the client receive survival mode and the equipped axe.
                 TestArena.onServer(ctx,() -> {
@@ -67,7 +70,7 @@ public final class NbtTests{
                         if(!arena.world.isMaterial(x-1,101,6,"air"))throw new AssertionError("Nonmatching NBT source must break normally");
                     }else{
                         if(!arena.world.state().matches(BlockPos.toPos(x-1,101,6),definition("chest",INITIAL.replace("flag:1b","flag:0b"))))throw new AssertionError("Refusal changed the other decoration");
-                        for(java.util.Map.Entry<Long,TestTrees.Block> entry:tree.blocks.entrySet()){
+                        for(Entry<Long,TestTrees.Block> entry:tree.blocks.entrySet()){
                             long pos=entry.getKey();
                             if(!arena.world.isMaterial(x+BlockPos.getX(pos),100+BlockPos.getY(pos),6+BlockPos.getZ(pos),entry.getValue().material))throw new AssertionError("Refused cut changed the tree");
                         }

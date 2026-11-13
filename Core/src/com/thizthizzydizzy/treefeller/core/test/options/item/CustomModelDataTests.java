@@ -23,7 +23,8 @@ public final class CustomModelDataTests{
         FixtureOptionTestSuite.Fixture fixture = tests.add(name+"-data-"+(data==null?"absent":data), config);
         fixture.allowed = allowed;
         fixture.before = (ctx, hooks) -> TestArena.onServer(ctx, () -> {
-            hooks.equipItem(OptionTestSuite.PLAYER, data==null?"iron_axe":"iron_axe[custom_model_data={floats:["+data+".0f]}]");
+            hooks.equipItem(OptionTestSuite.PLAYER,"iron_axe");
+            hooks.setCustomModelData(OptionTestSuite.PLAYER,data);
             return null;
         });
     }

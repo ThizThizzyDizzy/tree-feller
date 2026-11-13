@@ -1,15 +1,21 @@
 package com.thizthizzydizzy.treefeller.core.test.options.detection;
 import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.test.*;
 import java.util.*;
+import java.util.stream.Collectors;
+
 /** Real client cuts, including subsequent cuts of every retained component. */
 public final class SeparateTrunksTests{
     private final OptionTestSuite suite=new OptionTestSuite("detection.separate-trunks");
     private final List<Fixture> fixtures=new ArrayList<>();
     private TestArena arena;
     private Boolean previousMobSpawning;
+    private boolean extendedReach;
+    private String trunkMaterials,leafMaterials;
+    private final Set<Long> supports=new HashSet<>();
     public static void register(ITestPlatform hooks){new SeparateTrunksTests().registerTests(hooks);}
     private void registerTests(ITestPlatform hooks){
         Fixture forest=add("true-forest-no-orphans",true,false);
@@ -130,17 +136,28 @@ public final class SeparateTrunksTests{
         required.blocks.put(BlockPos.toPos(0,1,0),new Block("oak_log",BlockAxis.Y,-1));
         required.extra="global.criteria.trunk_filter.required = [oak_log]\n";
         required.together=true;
+        extendedReach=hooks.supportsExtendedReach();
+        trunkMaterials=materials(hooks,"dark_oak_log","oak_log","mangrove_log","jungle_log","acacia_log","cherry_log");
+        leafMaterials=materials(hooks,"dark_oak_leaves","oak_leaves","mangrove_leaves","mangrove_roots","jungle_leaves","acacia_leaves","cherry_leaves");
+        for(Fixture f:new ArrayList<>(fixtures)){
+            if(f.blocks.values().stream().anyMatch(b -> !hooks.supportsMaterial(b.material))){
+                fixtures.remove(f);
+                TreeFellerCore.connector.log("MCAutoTester: separate-trunks/"+f.name+" unavailable on this version (tree materials absent)");
+            }else suite.add(f.name,() -> config(f),(ctx,h) -> run(ctx,h,f));
+        }
         suite.lifecycle(this::prepare,this::finish,this::cleanup).register(hooks);
     }
     private Fixture add(String name,boolean separate,boolean local){
         int index=fixtures.size();
         Fixture f=new Fixture(name,separate,local,index%7*32+8,index/7*56+32);fixtures.add(f);
-        suite.add(name,() -> config(f),(ctx,h) -> run(ctx,h,f));return f;
+        return f;
+    }
+    private static String materials(ITestPlatform hooks,String... names){
+        return Arrays.stream(names).filter(hooks::supportsMaterial).collect(Collectors.joining(","));
     }
     private String config(Fixture f){
         return "global.detection.separate_trunks = "+(f.local?!f.separate:f.separate)+"\n"
-                +"trees=[{trunk=[dark_oak_log,oak_log,mangrove_log,jungle_log,acacia_log,cherry_log],"
-                +"leaves=[dark_oak_leaves,oak_leaves,mangrove_leaves,mangrove_roots,jungle_leaves,acacia_leaves,cherry_leaves]"
+                +"trees=[{trunk=["+trunkMaterials+"],leaves=["+leafMaterials+"]"
                 +(f.local?",detection.separate_trunks="+f.separate:"")+"}]\n"
                 +"global.criteria.trunk_max_horizontal_line = null\n"
                 +"debug {chat=true,text_level=USER}\n"
@@ -149,7 +166,7 @@ public final class SeparateTrunksTests{
     private void prepareAxe(ITestPlatform h){
         h.preparePlayer(OptionTestSuite.PLAYER,true);
         // The real client can mine with the entire fixture in view.
-        h.equipItem(OptionTestSuite.PLAYER,"iron_axe[attribute_modifiers=[{id:'treefeller:test_reach',type:'minecraft:block_interaction_range',amount:60,operation:'add_value',slot:'mainhand'}]]");
+        h.equipItem(OptionTestSuite.PLAYER,extendedReach?"iron_axe[attribute_modifiers=[{id:'treefeller:test_reach',type:'minecraft:block_interaction_range',amount:60,operation:'add_value',slot:'mainhand'}]]":"iron_axe");
     }
     private void prepare(TestContext ctx,ITestPlatform h){
         TestArena.onServer(ctx,() -> {
@@ -190,7 +207,7 @@ public final class SeparateTrunksTests{
         if(order==null){order=new int[f.cuts.size()];for(int i=0;i<order.length;i++)order[i]=i;}
         for(int index:order){
             int[] cut=f.cuts.get(index);
-            ctx.teleportPlayer(OptionTestSuite.PLAYER,f.x+cut[0]+.5,arena.floorY+1,f.z-viewingDistance,0.0,0.0);
+            position(ctx,f,cut,viewingDistance);
             // Position acknowledgement precedes destination chunk data on the client.
             // Wait before breakBlock can mistake an unloaded target for air.
             if(felled.isEmpty())ctx.waitTicks(10);
@@ -199,7 +216,7 @@ public final class SeparateTrunksTests{
                 int[] base=f.origins.get(index);
                 for(int[] offset:new int[][]{{0,0},{1,0},{0,1}}){
                     int x=base[0]+offset[0],z=base[2]+offset[1];
-                    ctx.teleportPlayer(OptionTestSuite.PLAYER,f.x+x+.5,arena.floorY+1,f.z-viewingDistance,0.0,0.0);
+                    position(ctx,f,new int[]{x,0,z},viewingDistance);
                     TestArena.onServer(ctx,() -> {h.showTestStatus(OptionTestSuite.PLAYER,"separate_trunks=true | full-cross-section | cut ("+x+",0,"+z+")");return null;});
                     ctx.breakBlock(f.x+x,arena.floorY+1,f.z+z);
                     crossCuts.add(BlockPos.toPos(x,0,z));
@@ -209,7 +226,7 @@ public final class SeparateTrunksTests{
                         return null;
                     });
                 }
-                ctx.teleportPlayer(OptionTestSuite.PLAYER,f.x+cut[0]+.5,arena.floorY+1,f.z-viewingDistance,0.0,0.0);
+                position(ctx,f,cut,viewingDistance);
             }
             TestArena.onServer(ctx,() -> {prepareAxe(h);h.showTestStatus(OptionTestSuite.PLAYER,
                     "separate_trunks="+f.separate+" | "+f.name+" | tree "+index+" cut ("+cut[0]+","+cut[1]+","+cut[2]+")");return null;});
@@ -244,12 +261,32 @@ public final class SeparateTrunksTests{
             if(f.together||f.refused)break;
         }
     }
+    private void position(TestContext ctx,Fixture f,int[] cut,double distance){
+        if(extendedReach){ctx.teleportPlayer(OptionTestSuite.PLAYER,f.x+cut[0]+.5,arena.floorY+1,f.z-distance,0.0,0.0);return;}
+        int y=Math.max(arena.floorY+1,arena.floorY+cut[1]-1);
+        int x=f.x+cut[0],z=f.z+cut[2]-4;
+        if(y>arena.floorY+1)TestArena.onServer(ctx,() -> {
+            if(arena.world.isMaterial(x,y-1,z,"air")){
+                if(f.blocks.containsKey(BlockPos.toPos(cut[0],y-1-arena.floorY-1,cut[2]-4)))throw new AssertionError("Support would alter the fixture");
+                arena.world.setBlock(x,y-1,z,"stone",null,-1);
+                supports.add(BlockPos.toPos(x,y-1,z));
+            }
+            return null;
+        });
+        ctx.teleportPlayer(OptionTestSuite.PLAYER,x+.5,y,z+.5,0.0,0.0);
+    }
     private void assertMaterial(Fixture f,long p,String expected){
         int x=f.x+BlockPos.getX(p),y=arena.floorY+1+BlockPos.getY(p),z=f.z+BlockPos.getZ(p);
         if(!arena.world.isMaterial(x,y,z,expected))throw new AssertionError(f.name+": expected "+expected+" at "+x+","+y+","+z+", got "+arena.world.blockState(x,y,z));
     }
     private void cleanup(TestContext ctx,ITestPlatform h){
         TestArena.onServer(ctx,() -> {
+            if(arena!=null)for(long p:supports){
+                int x=BlockPos.getX(p),y=BlockPos.getY(p),z=BlockPos.getZ(p);
+                arena.world.setBlock(x,y,z,"air",null,-1);
+                if(!arena.world.isMaterial(x,y,z,"air"))throw new AssertionError("Temporary support remains");
+            }
+            supports.clear();
             if(previousMobSpawning!=null){
                 h.world(OptionTestSuite.PLAYER).setMobSpawning(previousMobSpawning);
                 previousMobSpawning=null;

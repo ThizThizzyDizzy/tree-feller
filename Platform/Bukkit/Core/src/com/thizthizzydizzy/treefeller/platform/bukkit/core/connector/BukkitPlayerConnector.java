@@ -1,24 +1,30 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
+import com.thizthizzydizzy.treefeller.core.breaking.FallVector;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
+import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.debug.OverlayMark;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
 public class BukkitPlayerConnector implements IPlayerConnector{
     private final Player player;
     public BukkitPlayerConnector(Player player){
         this.player = player;
     }
     @Override
-    public com.thizthizzydizzy.treefeller.core.breaking.FallVector position(){
+    public FallVector position(){
         Location l=player.getLocation();
-        return new com.thizthizzydizzy.treefeller.core.breaking.FallVector(l.getX(),l.getY(),l.getZ());
+        return new FallVector(l.getX(),l.getY(),l.getZ());
     }
     @Override
     public int inventorySize(){return player.getInventory().getSize();}
@@ -118,16 +124,16 @@ public class BukkitPlayerConnector implements IPlayerConnector{
     }
     @Override
     public void sendActionbar(String message){
-        BukkitActionbar.send(player,message);
+        BukkitConnector.packets.actionbar(player,message);
     }
     @Override
     public String getPlayerName(){
         return player.getName();
     }
     @Override
-    public void debugOverlay(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world,long pos,
-            com.thizthizzydizzy.treefeller.core.debug.OverlayMark mark,String material){
-        org.bukkit.World target=((BukkitWorldConnector)world).getWorld();
+    public void debugOverlay(IWorldConnector world,long pos,
+            OverlayMark mark,String material){
+        World target=((BukkitWorldConnector)world).getWorld();
         if(player.getWorld()!=target)return;
         Material selected;
         switch(mark){
@@ -157,14 +163,14 @@ public class BukkitPlayerConnector implements IPlayerConnector{
             default: throw new IllegalArgumentException("Unknown marker "+mark);
         }
         if(material!=null){
-            Material custom=Material.matchMaterial(material.replace("minecraft:","").toUpperCase(java.util.Locale.ROOT));
+            Material custom=Material.matchMaterial(material.replace("minecraft:","").toUpperCase(Locale.ROOT));
             if(custom!=null&&custom.isBlock())selected=custom;
         }
         BukkitConnector.blockData.sendBlockChange(player,new Location(target,BlockPos.getX(pos),BlockPos.getY(pos),BlockPos.getZ(pos)),selected);
     }
     @Override
-    public void debugRestore(com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector world,long pos){
-        org.bukkit.World target=((BukkitWorldConnector)world).getWorld();
+    public void debugRestore(IWorldConnector world,long pos){
+        World target=((BukkitWorldConnector)world).getWorld();
         if(player.getWorld()!=target)return;
         BukkitConnector.blockData.restoreBlockChange(player,new Location(target,BlockPos.getX(pos),BlockPos.getY(pos),BlockPos.getZ(pos)));
     }

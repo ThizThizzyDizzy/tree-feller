@@ -3,20 +3,25 @@ import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.config.*;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
+import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.control.*;
 import com.thizthizzydizzy.treefeller.core.player.PlayerSettings;
 import com.thizthizzydizzy.treefeller.core.test.*;
-import java.nio.file.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.*;
 import java.util.*;
+import java.util.function.Consumer;
+
 public final class ControlTests{
     private static final String PLAYER=OptionTestSuite.PLAYER;
     private TestArena arena;
+    private Boolean previousToggle;
     private final TestTrees.Tree tree=TestTrees.specimen(TestTrees.Kind.SPRUCE);
     private static final String BASE="debug.startup_logs=false\nglobal.trigger.cooldown=0\n";
     public static void register(ITestPlatform platform){new ControlTests().registerSuites(platform);}
     private void registerSuites(ITestPlatform hooks){
-        OptionTestSuite commands=new OptionTestSuite("controls.commands").lifecycle(this::setup,this::finish,(c,h) -> {});
+        OptionTestSuite commands=new OptionTestSuite("controls.commands").lifecycle(this::setup,this::finish,this::cleanup);
         commands.add("toggle",BASE,(c,h) -> {
             String[] actions={"off","on","toggle off","toggle on","toggle","toggle"};
             for(int i=0;i<actions.length;i++){
@@ -31,7 +36,7 @@ public final class ControlTests{
             }
         });
         commands.add("permissions-and-help",BASE,(c,h) -> {
-            ITestPlatform.EffectCapture capture=TestArena.onServer(c,() -> h.captureEffects(PLAYER));
+            ITestPlatform.TestOutputRecorder capture=TestArena.onServer(c,() -> h.recordOutput(PLAYER));
             Runnable remove=TestArena.onServer(c,() -> h.permissions(PLAYER,permissions(false)));
             try{
                 check(c,() -> PlayerSettings.get(h.playerState(PLAYER)).setToggledOn(true));
@@ -67,7 +72,7 @@ public final class ControlTests{
             command(c,h,"debug clear","debug clear | clear trace");
         });
         commands.add("feedback",BASE+"messages.toggle_on {chat=\"Custom enabled\",actionbar=\"Enabled bar\"}\nmessages.toggle_off {chat=null,actionbar=null}\n",(c,h) -> {
-            ITestPlatform.EffectCapture capture=TestArena.onServer(c,() -> h.captureEffects(PLAYER));
+            ITestPlatform.TestOutputRecorder capture=TestArena.onServer(c,() -> h.recordOutput(PLAYER));
             try{
                 command(c,h,"on","messages.toggle_on=custom | chat and actionbar feedback");
                 command(c,h,"off","messages.toggle_off=null | silent feedback");
@@ -80,14 +85,21 @@ public final class ControlTests{
             }finally{check(c,capture::close);}
         });
         commands.register(hooks);
-        OptionTestSuite editor=new OptionTestSuite("controls.config").lifecycle(this::setup,this::finish,(c,h) -> check(c,() -> h.closeControl(PLAYER)));
+        OptionTestSuite editor=new OptionTestSuite("controls.config").lifecycle(this::setup,this::finish,(c,h) -> {check(c,() -> h.closeControl(PLAYER));cleanup(c,h);});
         editor.add("edit-save-reload",BASE,(c,h) -> configuration(c,h));
         editor.register(hooks);
     }
     private static Map<String,Boolean> permissions(boolean enabled){Map<String,Boolean> values=new HashMap<>();for(String key:new String[]{"toggle","reload","debug","config"})values.put("treefeller."+key,enabled);values.put("treefeller.help",true);return values;}
     private void setup(TestContext c,ITestPlatform h){
+        previousToggle=TestArena.onServer(c,() -> PlayerSettings.get(h.playerState(PLAYER)).isToggledOn());
         arena=TestArena.setup(c,h,PLAYER,-4,-6,56,99);
         arena.spawnAll(tree,new int[][]{{0,2},{8,2},{16,2},{24,2},{32,2},{40,2}});
+    }
+    private void cleanup(TestContext c,ITestPlatform h){
+        if(previousToggle!=null){
+            check(c,() -> PlayerSettings.get(h.playerState(PLAYER)).setToggledOn(previousToggle));
+            previousToggle=null;
+        }
     }
     private void configuration(TestContext c,ITestPlatform h){
         Path path=TreeFellerCore.connector.configurationPath();byte[] original;
@@ -111,7 +123,7 @@ public final class ControlTests{
             check(c,() -> TreeFellerCore.config.global.trigger.cooldown=99);
             command(c,h,"reload","reload | restore saved value");
             check(c,() -> equal(7,TreeFellerCore.config.global.trigger.cooldown,"Reload applied"));
-            try{Files.write(path,"unknown_key = true".getBytes(java.nio.charset.StandardCharsets.UTF_8));}catch(IOException ex){throw new IllegalStateException(ex);}
+            try{Files.write(path,"unknown_key = true".getBytes(StandardCharsets.UTF_8));}catch(IOException ex){throw new IllegalStateException(ex);}
             command(c,h,"reload","reload malformed config | retain live configuration");
             check(c,() -> equal(7,TreeFellerCore.config.global.trigger.cooldown,"Failed reload preserved live value"));
             command(c,h,"config","config | tools, trees, effects, messages");
@@ -155,9 +167,9 @@ public final class ControlTests{
     private static ControlAudience audience(ITestPlatform h){return new ControlAudience(){
         public boolean hasPermission(String permission){return h.playerState(PLAYER).hasPermission(permission);}
         public void sendMessage(String message){h.playerState(PLAYER).sendMessage(message);}
-        public com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector player(){return h.playerState(PLAYER);}
+        public IPlayerConnector player(){return h.playerState(PLAYER);}
         public void show(Screen screen){throw new AssertionError("Unexpected screen");}
-        public void requestText(String title,String initial,java.util.function.Consumer<String> submit,Runnable cancel){throw new AssertionError("Unexpected input");}
+        public void requestText(String title,String initial,Consumer<String> submit,Runnable cancel){throw new AssertionError("Unexpected input");}
     };}
     private void finish(TestContext c,ITestPlatform h){check(c,() -> {h.closeControl(PLAYER);h.prepareCamera(PLAYER);});c.teleportPlayer(PLAYER,20.5,arena.floorY+20,-15.5,0.0,40.0);c.waitTicks(40);}
 }

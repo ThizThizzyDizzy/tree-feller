@@ -3,7 +3,9 @@ import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
+
 /** Fixed representative specimens, independent of Minecraft's random world generation. */
 public final class TestTrees{
     private TestTrees(){}
@@ -37,6 +39,16 @@ public final class TestTrees{
         public final Kind kind;
         /** Coordinates relative to the bottom of the trunk. Logs override overlapping foliage. */
         public final Map<Long, Block> blocks;
+        /** Preserve geometry and axes while translating the wood species. */
+        public Tree withWood(Kind wood){
+            Map<Long,Block> translated=new LinkedHashMap<>();
+            for(Map.Entry<Long,Block> entry:blocks.entrySet()){
+                Block b=entry.getValue();
+                String material=b.material.startsWith(kind.wood+"_")?wood.wood+b.material.substring(kind.wood.length()):b.material;
+                translated.put(entry.getKey(),new Block(material,b.axis,b.leafDistance));
+            }
+            return new Tree(wood,translated);
+        }
         private Tree(Kind kind, Map<Long, Block> blocks){
             this.kind = kind;
             this.blocks = Collections.unmodifiableMap(blocks);
@@ -141,7 +153,7 @@ public final class TestTrees{
             put(x, y, z, kind.wood+(kind==Kind.CRIMSON||kind==Kind.WARPED?"_stem":"_log"), axis);
         }
         void disk(int cx, int y, int cz, int radius){
-            String leaves = kind.wood.equals("poplar")?kind.name().toLowerCase(java.util.Locale.ROOT)+"_leaves":kind==Kind.AZALEA?"azalea_leaves":kind==Kind.CRIMSON?"nether_wart_block":
+            String leaves = kind.wood.equals("poplar")?kind.name().toLowerCase(Locale.ROOT)+"_leaves":kind==Kind.AZALEA?"azalea_leaves":kind==Kind.CRIMSON?"nether_wart_block":
                     kind==Kind.WARPED?"warped_wart_block":kind.wood+"_leaves";
             for(int x = -radius; x<=radius; x++)for(int z = -radius; z<=radius; z++){
                 if(radius>0&&Math.abs(x)==radius&&Math.abs(z)==radius)continue;

@@ -1,8 +1,10 @@
 package com.thizthizzydizzy.treefeller.core.test.options.result;
+import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
+import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
+import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.test.*;
 import com.thizthizzydizzy.treefeller.core.test.ITestPlatform.*;
-import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
-import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
+
 /** One shared set of intact trees for an effect option's real client cuts. */
 final class EffectTestSuite{
     final OptionTestSuite suite;
@@ -10,7 +12,7 @@ final class EffectTestSuite{
     final String option;
     String foundationMaterial;
     TestArena arena;
-    EffectCapture capture;
+    TestOutputRecorder capture;
     int fixtures;
     EffectTestSuite(String option){
         this.option=option;
@@ -33,8 +35,8 @@ final class EffectTestSuite{
                 if(capture!=null)capture.close();
                 hooks.preparePlayer(OptionTestSuite.PLAYER,true);
                 hooks.equipItem(OptionTestSuite.PLAYER,tool);
-                if(effect.contains("EXPLOSION"))hooks.setPlayerGameMode(OptionTestSuite.PLAYER,com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode.CREATIVE);
-                capture=hooks.captureEffects(OptionTestSuite.PLAYER);
+                if(effect.contains("EXPLOSION"))hooks.setPlayerGameMode(OptionTestSuite.PLAYER,PlayerGameMode.CREATIVE);
+                capture=hooks.recordOutput(OptionTestSuite.PLAYER);
                 hooks.showTestStatus(OptionTestSuite.PLAYER,"result.effects"+(option.isEmpty()?"":"."+option)+" | "+name+" | "+effect);
                 return null;
             });
@@ -70,5 +72,5 @@ final class EffectTestSuite{
         ctx.teleportPlayer(OptionTestSuite.PLAYER,(fixtures-1)*6+.5,arena.floorY+20,-12.5,0.0,55.0);
         ctx.waitTicks(40);
     }
-    @FunctionalInterface interface Check{void run(EffectCapture capture,int x);}
+    @FunctionalInterface interface Check{void run(TestOutputRecorder capture,int x);}
 }

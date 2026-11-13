@@ -1,6 +1,6 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
-import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
 import com.thizthizzydizzy.treefeller.core.config.DefaultConfigBuilder;
+import com.thizthizzydizzy.treefeller.core.config.ISpecialConfigObject;
 import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
@@ -9,7 +9,10 @@ import com.thizthizzydizzy.treefeller.core.connector.TreeFellerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.Config;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigValue;
+import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitApiConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitBlockDataConnector;
+import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitNbtConnector;
+import com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitPacketConnector;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.TreeFellerBukkit;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitBlockDefinition;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitItemDefinition;
@@ -33,6 +36,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+
 public class BukkitConnector implements TreeFellerConnector{
     @Override
     public void schedule(int delayTicks, Runnable action){
@@ -40,17 +44,20 @@ public class BukkitConnector implements TreeFellerConnector{
     }
 
     private final TreeFellerBukkit treefeller;
+    private static final String MINECRAFT_VERSION=Bukkit.getBukkitVersion().replaceFirst("^([0-9]+(?:\\.[0-9]+)*).*", "$1");
     public static BukkitBlockDataConnector blockData;
-    public static com.thizthizzydizzy.treefeller.platform.bukkit.connector.BukkitNbtConnector nbt;
+    public static BukkitApiConnector api;
+    public static BukkitPacketConnector packets;
+    public static BukkitNbtConnector nbt;
     static{
         blockData = findConnector(BukkitBlockDataConnector.class, VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending("1_8")
             .atVersion("1.13", "1_13")
-            .match(Bukkit.getBukkitVersion()));
+            .match(MINECRAFT_VERSION));
 
 
     }
     private static <T> T findConnector(Class<T> clazz, String version){
-        String packageName = clazz.getPackageName();
+        String packageName = clazz.getPackage().getName();
         String className = packageName+".version.v"+version.toLowerCase(Locale.ROOT)+"."+clazz.getSimpleName()+"V"+version;
         try{
             return (T)Class.forName(className).getConstructor().newInstance();
@@ -61,17 +68,22 @@ public class BukkitConnector implements TreeFellerConnector{
     
     public BukkitConnector(TreeFellerBukkit treefeller){
         this.treefeller = treefeller;
-        nbt=treefeller.createNbtConnector(
-                VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending("1_8")
+        String nativeVersion=VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending("1_8")
                 .atVersion("1.13","1_13").atVersion("1.13.1","1_13_2")
                 .atVersion("1.16","1_16_1").atVersion("1.16.2","1_16_3").atVersion("1.16.4","1_16_5")
                 .atVersion("1.17","1_17_1").atVersion("1.18","1_18_R1").atVersion("1.18.2","1_18_R2")
-                .atVersion("1.19","1_19_R1").atVersion("1.19.3","1_19_R2").atVersion("1.19.4","1_19_R3")
+                .atVersion("1.19","1_19_R1").atVersion("1.19.1","1_19_R1_1").atVersion("1.19.3","1_19_R2").atVersion("1.19.4","1_19_R3")
                 .atVersion("1.20","1_20_R1").atVersion("1.20.2","1_20_R2").atVersion("1.20.3","1_20_R3").atVersion("1.20.5","1_20_R4")
                 .atVersion("1.21","1_21_R1").atVersion("1.21.2","1_21_R2").atVersion("1.21.4","1_21_R3")
                 .atVersion("1.21.5","1_21_R4").atVersion("1.21.6","1_21_R5").atVersion("1.21.9","1_21_R6")
-                .atVersion("1.21.11","1_21_R7").atVersion("26.1","26_R1")
-                .match(Bukkit.getBukkitVersion().split("-",2)[0]));
+                .atVersion("1.21.11","1_21_R7").atVersion("26.1","26_R1").atVersion("26.3","26_R2")
+                .match(MINECRAFT_VERSION);
+        nbt=treefeller.createNbtConnector(nativeVersion);
+        packets=treefeller.createPacketConnector(nativeVersion);
+        api=treefeller.createApiConnector(VersionMatcher.by(VersionMatcher.VersionType.MINECRAFT).ascending("1_8")
+            .atVersion("1.13","1_13").atVersion("1.16","1_16_1").atVersion("1.20.5","1_20_R4")
+            .atVersion("1.21.2","1_21_R2").atVersion("1.21.5","1_21_R4").atVersion("1.21.11","1_21_R7")
+            .atVersion("26.1","26_R1").match(MINECRAFT_VERSION));
     }
     @Override
     public Path configurationPath(){return new File(treefeller.getDataFolder(), "config.conf").toPath();}

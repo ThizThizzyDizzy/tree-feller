@@ -7,7 +7,8 @@
     </path>
     <target name="jar">
         <mkdir dir="build/classes"/>
-        <javac srcdir="src" destdir="build/classes" release="8" includeantruntime="false"><classpath refid="classpath"/></javac>
+        <!-- Keep Java 8 bytecode for older Paper remappers; the compiler JDK supplies native record types. -->
+        <javac srcdir="src" destdir="build/classes" source="8" target="8" includeantruntime="false"><classpath refid="classpath"/></javac>
         <mkdir dir="dist"/><jar destfile="dist/TreeFellerPlatformBukkitVersionV1_20_R3.jar" basedir="build/classes"/>
     </target>
     <target name="clean"><delete dir="build"/><delete dir="dist"/></target>

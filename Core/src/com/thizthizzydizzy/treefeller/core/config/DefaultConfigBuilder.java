@@ -64,14 +64,14 @@ public class DefaultConfigBuilder{
                 if(leaf instanceof BlockDefinition)
                     ((BlockDefinition)leaf).persistent=false;
             }
-            tree.leaves = leaves.toArray(IBlockDefinition[]::new);
+            tree.leaves = leaves.toArray(new IBlockDefinition[0]);
             trees.add(tree);
         }
         ArrayList<IBlockDefinition> grasses=new ArrayList<>();
         for(String soil : new String[]{"dirt","grass_block","podzol"})if(blocks.containsKey(soil))grasses.add(blocks.get(soil));
-        config.global.result.sapling_replant.grasses=grasses.toArray(IBlockDefinition[]::new);
-        config.tools = tools.toArray(ToolConfiguration[]::new);
-        config.trees = trees.toArray(TreeConfiguration[]::new);
+        config.global.result.sapling_replant.grasses=grasses.toArray(new IBlockDefinition[0]);
+        config.tools = tools.toArray(new ToolConfiguration[0]);
+        config.trees = trees.toArray(new TreeConfiguration[0]);
         config.global.detection.decorations = new DecorationConfiguration[]{
             new DecorationConfiguration(SimpleDirection.UP, false, blocks.get("snow")),
             new DecorationConfiguration(SimpleDirection.SIDE_AND_DOWN, true, blocks.get("vine")),

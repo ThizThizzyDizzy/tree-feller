@@ -1,22 +1,49 @@
 package com.thizthizzydizzy.treefeller.core.test;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition;
+import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
+import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
+import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
+import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.LongPredicate;
+
 /** Integration hooks only. All calls are made on the server thread. */
 public interface ITestPlatform{
     /** Observe native output during a real client action. Close removes every hook. */
-    EffectCapture captureEffects(String player);
-    BreakCapture captureBreaks(String player,java.util.function.LongPredicate cancelled);
-    interface BreakCapture extends AutoCloseable{
-        java.util.List<Long> positions();
+    TestOutputRecorder recordOutput(String player);
+    ItemCapture captureItems(String player);
+    interface ItemCapture extends AutoCloseable{
+        List<ItemObservation> items();
         @Override void close();
     }
-    java.util.UUID playerId(String player);
+    final class ItemObservation{
+        public final double x,y,z;
+        public final String material;
+        public final int count;
+        public ItemObservation(double x,double y,double z,String material,int count){this.x=x;this.y=y;this.z=z;this.material=material;this.count=count;}
+    }
+    BreakCapture captureBreaks(String player,LongPredicate cancelled);
+    interface BreakCapture extends AutoCloseable{
+        List<Long> positions();
+        @Override void close();
+    }
+    UUID playerId(String player);
     Runnable operator(String player,boolean enabled);
-    interface EffectCapture extends AutoCloseable{
-        java.util.List<MessageObservation> messages();
-        java.util.List<ParticleObservation> particles();
-        java.util.List<SoundObservation> sounds();
-        java.util.List<MarkerObservation> markers();
-        java.util.List<ExplosionObservation> explosions();
+    /**
+     * Start before a test action, then read snapshots of the actual player
+     * messages, particles, sounds, marker entities, and explosions it produced.
+     * Close after assertions to detach listeners and remove test markers.
+     */
+    interface TestOutputRecorder extends AutoCloseable{
+        List<MessageObservation> messages();
+        List<ParticleObservation> particles();
+        List<SoundObservation> sounds();
+        List<MarkerObservation> markers();
+        List<ExplosionObservation> explosions();
         @Override void close();
     }
     final class MessageObservation{
@@ -42,8 +69,8 @@ public interface ITestPlatform{
     final class MarkerObservation{
         public final double x,y,z;
         public final boolean permanent,alive,invisible,invulnerable,gravity,marker;
-        public final java.util.Set<String> tags;
-        public MarkerObservation(double x,double y,double z,boolean permanent,boolean alive,boolean invisible,boolean invulnerable,boolean gravity,boolean marker,java.util.Set<String> tags){
+        public final Set<String> tags;
+        public MarkerObservation(double x,double y,double z,boolean permanent,boolean alive,boolean invisible,boolean invulnerable,boolean gravity,boolean marker,Set<String> tags){
             this.x=x;this.y=y;this.z=z;this.permanent=permanent;this.alive=alive;this.invisible=invisible;this.invulnerable=invulnerable;this.gravity=gravity;this.marker=marker;this.tags=tags;
         }
     }
@@ -53,22 +80,27 @@ public interface ITestPlatform{
         public ExplosionObservation(double x,double y,double z,int blocks){this.x=x;this.y=y;this.z=z;this.blocks=blocks;}
     }
     /** Native UI event translation; assertions and navigation choices stay in Core. */
-    java.util.List<String> controlEntries(String player);
+    List<String> controlEntries(String player);
     void clickControl(String player, int slot);
     void submitControlText(String player, String text);
     void closeControl(String player);
     ITestWorld world(String player);
     void preparePlayer(String player, boolean survival);
-    void setPlayerGameMode(String player, com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode mode);
+    void setPlayerGameMode(String player, PlayerGameMode mode);
     void setPlayerSneaking(String player, boolean sneaking);
     /** Install explicit permission values; the returned hook removes the attachment. */
-    Runnable permissions(String player, java.util.Map<String, Boolean> values);
+    Runnable permissions(String player, Map<String, Boolean> values);
     /** Equip an item using Minecraft's item definition syntax. */
     void equipItem(String player, String definition);
+    boolean usesItemComponents();
+    boolean supportsMaterial(String material);
+    boolean supportsExtendedReach();
     void setToolCount(String player, int count);
+    void setCustomModelData(String player, Integer value);
+    Runnable preventItemPickup(String player);
     void setPlayerLevels(String player, int food, float health, float saturation);
-    com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector tool(String player);
-    com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector playerState(String player);
+    IItemConnector tool(String player);
+    IPlayerConnector playerState(String player);
     int inventoryItemCount(String player, String material);
     void setInventoryItem(String player, int slot, String material, int count);
     void prepareCamera(String player);
@@ -86,13 +118,13 @@ public interface ITestPlatform{
         void remove();
     }
     interface ITestWorld{
-        java.util.List<FallingObservation> fallingBlocks();
+        List<FallingObservation> fallingBlocks();
         void removeFallingBlocks();
         int fireCount(int minX,int minY,int minZ,int maxX,int maxY,int maxZ);
         TestTarget spawnTarget(double x,double y,double z);
 
-        com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector state();
-        int droppedItemCount(com.thizthizzydizzy.treefeller.core.config.structure.special.IItemDefinition definition,int minX,int minY,int minZ,int maxX,int maxY,int maxZ);
+        IWorldConnector state();
+        int droppedItemCount(IItemDefinition definition,int minX,int minY,int minZ,int maxX,int maxY,int maxZ);
         int maxHeight(); // Exclusive build ceiling; arenas deliberately use positive Y.
         boolean supports(String material);
         void setBlock(int x, int y, int z, String material, BlockAxis axis, int leafDistance);
@@ -111,7 +143,7 @@ public interface ITestPlatform{
         boolean daylightCycle();
         void setDaylightCycle(boolean enabled);
         String dimension();
-        String biome(int x, int z);
-        void setBiome(int x, int z, String biome);
+        String biome(int x, int y, int z);
+        void setBiome(int x, int y, int z, String biome);
     }
 }

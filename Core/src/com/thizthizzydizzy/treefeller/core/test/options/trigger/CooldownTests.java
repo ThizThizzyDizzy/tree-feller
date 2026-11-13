@@ -19,6 +19,7 @@ public final class CooldownTests{
                     tests.cut(ctx, hooks, 8, 0, "consecutive fell without waiting", true);
                 })
                 .add("enabled", "global.trigger.cooldown = "+COOLDOWN, (ctx, hooks) -> {
+                    ctx.waitTicks(COOLDOWN); // Earlier cuts also update the last-fell timestamp.
                     tests.cut(ctx, hooks, 16, COOLDOWN, "first fell starts cooldown", true);
                     tests.cut(ctx, hooks, 24, COOLDOWN, "consecutive fell during cooldown", false);
                     ctx.waitTicks(COOLDOWN); // Allow the real per-player cooldown to expire.

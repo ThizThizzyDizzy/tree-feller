@@ -20,8 +20,8 @@ public final class EnchantmentTests{
             else{
                 for(boolean enabled : new boolean[]{true, false})tests.add(Boolean.toString(enabled), selective+"global.result."+option+" = "+enabled,
                         item, (ctx, hooks) -> {}, (hooks, x) -> {
-                            int flint = tests.arena.world.droppedItemCount("flint", x-3, tests.arena.floorY, -1, x+3, tests.arena.floorY+12, 5);
-                            int gravel = tests.arena.world.droppedItemCount("gravel", x-3, tests.arena.floorY, -1, x+3, tests.arena.floorY+12, 5);
+                            int flint = tests.dropped("flint",x);
+                            int gravel = tests.dropped("gravel",x);
                             if(flint+gravel!=n||enabled&&flint!=n||!enabled&&gravel==0)
                                 throw new AssertionError("Expected "+n+" gravel drops with Fortune "+enabled+", got "+flint+" flint and "+gravel+" gravel");
                         });

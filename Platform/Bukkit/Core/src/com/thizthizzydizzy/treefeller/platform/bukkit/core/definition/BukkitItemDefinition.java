@@ -2,13 +2,16 @@ package com.thizthizzydizzy.treefeller.platform.bukkit.core.definition;
 import com.thizthizzydizzy.treefeller.core.config.ConfigComment;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.DualList;
 import com.thizthizzydizzy.treefeller.core.config.structure.general.VariableIntegerRange;
-import com.thizthizzydizzy.treefeller.core.config.structure.special.ItemDefinition;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.EnchantmentRange;
-import org.bukkit.enchantments.Enchantment;
+import com.thizthizzydizzy.treefeller.core.config.structure.special.ItemDefinition;
+import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector;
+import com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitEnchantments;
 import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+
 public class BukkitItemDefinition extends ItemDefinition{
     @ConfigComment("An item ID or item tag")
     public Material material;
@@ -57,12 +60,12 @@ public class BukkitItemDefinition extends ItemDefinition{
         if(enchantments!=null&&!enchantments.applyMulti(range -> range.matches(name -> enchantmentLevel(meta, name))))
             return false;
         if(custom_model_data!=null&&!matchesCustomModelData(customModelData(meta)))return false;
-        return nbt==null||matchesItemNbt(com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector.nbt,
-                com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector.nbt.item(stack),
-                com.thizthizzydizzy.treefeller.platform.bukkit.core.connector.BukkitConnector.nbt.itemDataKey());
+        return nbt==null||matchesItemNbt(BukkitConnector.nbt,
+                BukkitConnector.nbt.item(stack),
+                BukkitConnector.nbt.itemDataKey());
     }
     private static int enchantmentLevel(ItemMeta meta, String name){
-        Enchantment enchantment = name==null?null:Enchantment.getByName(name.toUpperCase(java.util.Locale.ROOT));
+        Enchantment enchantment = BukkitEnchantments.find(name);
         if(enchantment==null)throw new IllegalArgumentException("Unknown enchantment: "+name);
         return meta==null?0:meta.getEnchantLevel(enchantment);
     }

@@ -1,12 +1,13 @@
 package com.thizthizzydizzy.treefeller.core.cutting;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
-import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
-import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfiguration;
-import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.breaking.BreakingResult;
 import com.thizthizzydizzy.treefeller.core.breaking.TreeFellerBreaking;
+import com.thizthizzydizzy.treefeller.core.compatibility.CompatibilityContext;
+import com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.section.CuttingConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.ResultConfiguration;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.TriggerConfiguration;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.PlayerGameMode;
@@ -16,12 +17,15 @@ import com.thizthizzydizzy.treefeller.core.debug.*;
 import com.thizthizzydizzy.treefeller.core.detection.DetectionResult;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNode;
 import com.thizthizzydizzy.treefeller.core.detection.TreeNodeType;
-import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
+import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
 import com.thizthizzydizzy.treefeller.core.result.TreeFellerCascade;
+import com.thizthizzydizzy.treefeller.core.result.TreeFellerResult;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
+
 public class TreeFellerCutting{
     public static boolean cut(IWorldConnector world, IPlayerConnector player, DetectionResult detected){
         return cut(world, player, detected, null);
@@ -30,7 +34,7 @@ public class TreeFellerCutting{
             TreeFellerCascade.Chain chain){
         DebuggerContext context = TreeFellerDebugger.begin("Cutting", player, world);
         context.at(detected.detected.root.pos);
-        List<Long> sourceTrunks = detected.detected.getNodes(TreeNodeType.TRUNK, -1, -1).stream().map(node -> node.pos).toList();
+        List<Long> sourceTrunks = detected.detected.getNodes(TreeNodeType.TRUNK, -1, -1).stream().map(node -> node.pos).collect(Collectors.toList());
         CuttingConfiguration config = TreeFellerConfiguration.getCombinedCuttingConfiguration(detected.tree, detected.tool);
 
         context.values("Cutting settings",config);
@@ -145,15 +149,15 @@ public class TreeFellerCutting{
             context.fail("No trunk remains in the cut selection");
             return false;
         }
-        com.thizthizzydizzy.treefeller.core.compatibility.CompatibilityContext compatibility=new com.thizthizzydizzy.treefeller.core.compatibility.CompatibilityContext(world,player,item,detected,nodes);
-        if(!com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.check(compatibility)){
+        CompatibilityContext compatibility=new CompatibilityContext(world,player,item,detected,nodes);
+        if(!TreeFellerCompatibility.check(compatibility)){
             context.fail("A plugin compatibility refused the tree");return false;
         }
         context.user("Cutting "+nodes.size()+" blocks; tool durability cost "+cost);
         context.snapshot(detected.detected,DebugLevel.USER,OverlayMark.SELECTED);
         TreeFellerBreaking.PreparedBreak prepared = TreeFellerBreaking.prepare(world, player, detected, nodes, item);
         if(prepared==null)return false;
-        com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.fell(compatibility);
+        TreeFellerCompatibility.fell(compatibility);
         TreeFellerMessages.checks(player,"tree","result.sapling_replant").check("saplings",true,(Object)detected.tree.saplings);
         TreeFellerMessages.checks(player,"tree","result.sapling_replant").check("max_saplings",true,detected.tree.max_saplings);
         if(detected.tree.cascade_trees!=null)TreeFellerMessages.checks(player,"tree","result.cascade").check("trees",true,detected.tree.cascade_trees);

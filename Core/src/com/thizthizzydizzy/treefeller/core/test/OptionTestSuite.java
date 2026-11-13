@@ -50,13 +50,20 @@ public final class OptionTestSuite{
         }
     }
     private void batch(TestContext ctx, ITestPlatform platform, Map<String, Scenario> selected){
+        ITestPlatform.ITestWorld world=TestArena.onServer(ctx,() -> platform.world(PLAYER));
+        boolean mobSpawning=TestArena.onServer(ctx,() -> {
+            boolean previous=world.mobSpawning();
+            world.setMobSpawning(false);
+            return previous;
+        });
         try{
             prepare.run(ctx, platform);
             for(Map.Entry<String, Scenario> entry : selected.entrySet())run(ctx, platform, entry.getKey(), entry.getValue());
             cleanup.run(ctx, platform);
             finish.run(ctx, platform);
         }finally{
-            cleanup.run(ctx, platform);
+            try{cleanup.run(ctx, platform);}
+            finally{TestArena.onServer(ctx,() -> {world.setMobSpawning(mobSpawning);return null;});}
         }
     }
     private void run(TestContext ctx, ITestPlatform platform, String scenarioName, Scenario scenario){

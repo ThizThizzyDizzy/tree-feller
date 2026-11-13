@@ -3,10 +3,12 @@ import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+
 /** Reusable sky arena and deterministic tree placement. Never executes console commands. */
 public final class TestArena{
     public final int minX, minZ, size, floorY;
@@ -35,6 +37,7 @@ public final class TestArena{
             platform.preparePlayer(player, false);
             for(int x = minX>>4; x<=(minX+size-1)>>4; x++)
                 for(int z = minZ>>4; z<=(minZ+size-1)>>4; z++)world.loadChunk(x, z);
+            world.removeMobs(minX-16,minZ-16,minX+size+16,minZ+size+16);
             world.daylight();
             for(int x = minX; x<minX+size; x++)for(int z = minZ; z<minZ+size; z++){
                 for(int y = floorY+1; y<world.maxHeight(); y++)world.setBlock(x, y, z, "air", null, -1);
@@ -89,7 +92,7 @@ public final class TestArena{
                 StringBuilder hash = new StringBuilder();
                 for(byte value : digest.digest())hash.append(String.format("%02x", value&255));
                 return hash.toString();
-            }catch(java.security.NoSuchAlgorithmException ex){throw new AssertionError(ex);}
+            }catch(NoSuchAlgorithmException ex){throw new AssertionError(ex);}
         });
         ctx.log(tree.kind+" fixtures: "+origins.length+" trees, "+tree.blocks.size()+" blocks each; arena SHA-256 "+fingerprint);
         return fingerprint;

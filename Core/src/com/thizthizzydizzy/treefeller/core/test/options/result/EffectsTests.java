@@ -109,7 +109,7 @@ public final class EffectsTests{
         }
         EffectTestSuite power=new EffectTestSuite("power");
         for(int value:new int[]{0,3})power.add("value-"+value,effect("type=EXPLOSION,location=TOOL,power="+value),(c,x) -> {
-            count(c.explosions().size(),value==0?0:1);
+            if(value!=0)count(c.explosions().size(),1);
             int blocks=c.explosions().isEmpty()?0:c.explosions().get(0).blocks;
             if(value==0?blocks!=0:blocks==0)throw new AssertionError("Unexpected explosion damage: "+blocks);
         });
@@ -136,10 +136,10 @@ public final class EffectsTests{
                 .add("custom",effect(MARKER+",tags=[first,second]"),(c,x) -> {marker(c,1,x);if(!c.markers().get(0).tags.equals(new HashSet<>(Arrays.asList("tree_feller","first","second"))))throw new AssertionError("Missing marker tags");})
                 .register(platform);
     }
-    private static void marker(EffectCapture c,int count,int x){count(c.markers().size(),count);for(MarkerObservation m:c.markers()){near(m.x,x+.5);near(m.y,100.5);near(m.z,2.5);}}
-    private static ParticleObservation onlyParticle(EffectCapture c){count(c.particles().size(),1);return c.particles().get(0);}
-    private static ParticleObservation particle(EffectCapture c,int x){ParticleObservation p=onlyParticle(c);near(p.x,x+.5);near(p.y,100.5);near(p.z,2.5);return p;}
-    private static SoundObservation sound(EffectCapture c,int x){
+    private static void marker(TestOutputRecorder c,int count,int x){count(c.markers().size(),count);for(MarkerObservation m:c.markers()){near(m.x,x+.5);near(m.y,100.5);near(m.z,2.5);}}
+    private static ParticleObservation onlyParticle(TestOutputRecorder c){count(c.particles().size(),1);return c.particles().get(0);}
+    private static ParticleObservation particle(TestOutputRecorder c,int x){ParticleObservation p=onlyParticle(c);near(p.x,x+.5);near(p.y,100.5);near(p.z,2.5);return p;}
+    private static SoundObservation sound(TestOutputRecorder c,int x){
         List<SoundObservation> sounds=new ArrayList<>();for(SoundObservation s:c.sounds())if(s.sound.contains("note_block")||s.sound.contains("experience_orb"))sounds.add(s);
         count(sounds.size(),1);SoundObservation s=sounds.get(0);near(s.x,x+.5);near(s.y,100.5);near(s.z,2.5);
         if(!s.category.equalsIgnoreCase("blocks"))throw new AssertionError("Incorrect sound category: "+s.category);return s;

@@ -58,7 +58,7 @@ public final class WorldRequirementTests{
     private void biome(OptionTestSuite suite, String name, String list, int index, String biome, boolean allowed){
         suite.add(name, "global.trigger.biomes."+list+" = [PLAINS]", (ctx, platform) -> {
             TestArena.onServer(ctx, () -> {
-                if(!arena.world.biome(index*8, 2).equals(biome))throw new AssertionError("Unexpected fixture biome");
+                if(!arena.world.biome(index*8, arena.floorY+1, 2).equals(biome))throw new AssertionError("Unexpected fixture biome");
                 return null;
             });
             cut(ctx, platform, index, "biomes."+list+"=[PLAINS] | actual="+biome, allowed);
@@ -98,10 +98,10 @@ public final class WorldRequirementTests{
             if(option.equals("biomes")){
                 previousBiomes = new String[arena.size*arena.size];
                 for(int x = 0; x<arena.size; x++)for(int z = 0; z<arena.size; z++)
-                    previousBiomes[x*arena.size+z] = arena.world.biome(arena.minX+x, arena.minZ+z);
+                    previousBiomes[x*arena.size+z] = arena.world.biome(arena.minX+x, arena.floorY+1, arena.minZ+z);
                 for(int x = 0; x<arena.size; x++)for(int z = 0; z<arena.size; z++){
                     int fixture = Math.min(count-1, (x+arena.minX+4)/8);
-                    arena.world.setBiome(arena.minX+x, arena.minZ+z, fixture%2==0?"PLAINS":"DESERT");
+                    arena.world.setBiome(arena.minX+x, arena.floorY+1, arena.minZ+z, fixture%2==0?"PLAINS":"DESERT");
                 }
             }
             return null;
@@ -138,7 +138,7 @@ public final class WorldRequirementTests{
             arena.world.setDaylightCycle(previousCycle);
             if(previousBiomes!=null){
                 for(int x = 0; x<arena.size; x++)for(int z = 0; z<arena.size; z++)
-                    arena.world.setBiome(arena.minX+x, arena.minZ+z, previousBiomes[x*arena.size+z]);
+                    arena.world.setBiome(arena.minX+x, arena.floorY+1, arena.minZ+z, previousBiomes[x*arena.size+z]);
                 previousBiomes = null;
             }
             return null;

@@ -9,7 +9,7 @@ public final class DropConversionsTests{
                 (ctx, hooks) -> {}, (hooks, x) -> {
                     for(String material : new String[]{"diamond", "spruce_log", "spruce_leaves", "glowstone"}){
                         int expected = material.equals("diamond")?8:material.equals("spruce_log")?0:material.equals("glowstone")?1:tests.tree.blocks.size()-8;
-                        int actual = tests.arena.world.droppedItemCount(material, x-3, tests.arena.floorY, -1, x+3, tests.arena.floorY+12, 5);
+                        int actual = tests.dropped(material,x);
                         if(actual!=expected)throw new AssertionError(material+": expected "+expected+", got "+actual);
                     }
                 }).register(platform);

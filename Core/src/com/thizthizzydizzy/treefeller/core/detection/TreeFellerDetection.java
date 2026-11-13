@@ -1,6 +1,5 @@
 package com.thizthizzydizzy.treefeller.core.detection;
 import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
-import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
 import com.thizthizzydizzy.treefeller.core.config.structure.ToolConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.TreeFellerConfiguration;
@@ -9,13 +8,16 @@ import com.thizthizzydizzy.treefeller.core.config.structure.section.DetectionCon
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.criteria.TreeFellerCriteria;
 import com.thizthizzydizzy.treefeller.core.debug.*;
+import com.thizthizzydizzy.treefeller.core.message.TreeFellerMessages;
 import com.thizthizzydizzy.treefeller.core.trigger.TreeFellerTrigger;
 import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.ReferenceArrayList;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import com.thizthizzydizzy.treefeller.core.criteria.TreeFellerCriteria;
+import java.util.stream.Collectors;
+
 public class TreeFellerDetection{
     public static TreeTree detect(IPlayerConnector player, IWorldConnector world, TreeConfiguration tree, ToolConfiguration tool, long pos, IItemConnector item, boolean secondary){
         return detect(player,world,tree,tool,pos,item,secondary,true);
@@ -154,7 +156,7 @@ public class TreeFellerDetection{
 
                     if(additionalTrees.size()>prevTreeCount){
                         // new trees have been found, trim off the detection surfaces to limit scan depth
-                        List<TreeNode> potential = detected.getNodes(TreeNodeType.EXTENDED_LEAVES, -1, -1).stream().filter(t -> t.extendedDistance<=detection.leaf_detect_range).toList();
+                        List<TreeNode> potential = detected.getNodes(TreeNodeType.EXTENDED_LEAVES, -1, -1).stream().filter(t -> t.extendedDistance<=detection.leaf_detect_range).collect(Collectors.toList());
                         context.info("Potential extended leaves: "+potential.size());
                         POTENTIAL:
                         for(TreeNode node : potential){

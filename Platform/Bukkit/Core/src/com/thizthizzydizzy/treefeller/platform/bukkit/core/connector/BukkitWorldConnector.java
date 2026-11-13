@@ -1,29 +1,45 @@
 package com.thizthizzydizzy.treefeller.platform.bukkit.core.connector;
+import com.thizthizzydizzy.treefeller.core.breaking.FallVector;
+import com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility;
+import com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration;
 import com.thizthizzydizzy.treefeller.core.config.structure.special.IBlockDefinition;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.player.IPlayerConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockAxis;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
-import com.thizthizzydizzy.treefeller.core.nbt.NbtBlockSnapshot;
+import com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot;
+import com.thizthizzydizzy.treefeller.core.connector.world.FallingBlockHandle;
 import com.thizthizzydizzy.treefeller.core.connector.world.IWorldConnector;
+import com.thizthizzydizzy.treefeller.core.nbt.NbtBlockSnapshot;
 import com.thizthizzydizzy.treefeller.platform.bukkit.core.definition.BukkitBlockDefinition;
+import com.thizthizzydizzy.treefeller.platform.bukkit.core.event.BukkitEvents;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.LongConsumer;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.entity.FallingBlock;
+import org.bukkit.entity.Item;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.util.Vector;
+
 public class BukkitWorldConnector implements IWorldConnector{
     private final World world;
     public World getWorld(){return world;}
-    @Override public java.util.function.LongConsumer prepareEffect(com.thizthizzydizzy.treefeller.core.config.structure.section.result.EffectConfiguration effect){
-        java.util.function.Consumer<org.bukkit.Location> playback=BukkitEffectPlayback.prepare(effect);
+    @Override public LongConsumer prepareEffect(EffectConfiguration effect){
+        Consumer<Location> playback=BukkitEffectPlayback.prepare(effect);
         return pos -> playback.accept(block(pos).getLocation().add(.5,.5,.5));
     }
     @Override public String material(long pos){return block(pos).getType().name();}
-    @Override public com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot snapshot(long pos){return new NbtBlockSnapshot(BukkitConnector.blockData.snapshot(block(pos)),BukkitConnector.nbt.block(block(pos)));}
-    @Override public void setBlock(long pos,com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data){
+    @Override public BlockSnapshot snapshot(long pos){return new NbtBlockSnapshot(BukkitConnector.blockData.snapshot(block(pos)),BukkitConnector.nbt.block(block(pos)));}
+    @Override public void setBlock(long pos,BlockSnapshot data){
         NbtBlockSnapshot snapshot=data instanceof NbtBlockSnapshot?(NbtBlockSnapshot)data:null;
         BukkitConnector.blockData.place(block(pos),snapshot==null?data:snapshot.state);
         if(snapshot!=null&&snapshot.hasNbt())BukkitConnector.nbt.block(block(pos),snapshot.at(BukkitConnector.nbt.block(block(pos))));
@@ -36,14 +52,14 @@ public class BukkitWorldConnector implements IWorldConnector{
         catch(ReflectiveOperationException ex){throw new IllegalStateException(ex);}
     }
     @Override public int maxHeight(){return world.getMaxHeight();}
-    @Override public com.thizthizzydizzy.treefeller.core.connector.world.FallingBlockHandle spawnFallingBlock(long pos,
-            com.thizthizzydizzy.treefeller.core.connector.world.BlockSnapshot data,
-            com.thizthizzydizzy.treefeller.core.breaking.FallVector velocity,
-            java.util.function.BiConsumer<Long,Float> impact,java.util.function.LongConsumer failed){
-        org.bukkit.entity.FallingBlock entity=BukkitConnector.blockData.spawn(
+    @Override public FallingBlockHandle spawnFallingBlock(long pos,
+            BlockSnapshot data,
+            FallVector velocity,
+            BiConsumer<Long,Float> impact,LongConsumer failed){
+        FallingBlock entity=BukkitConnector.blockData.spawn(
                 block(pos).getLocation().add(.5,.5,.5),data instanceof NbtBlockSnapshot?((NbtBlockSnapshot)data).state:data);
         entity.setDropItem(false);
-        entity.setVelocity(new org.bukkit.util.Vector(velocity.x,velocity.y,velocity.z));
+        entity.setVelocity(new Vector(velocity.x,velocity.y,velocity.z));
         return new BukkitFallingBlock(entity,impact,failed);
     }
 
@@ -61,14 +77,14 @@ public class BukkitWorldConnector implements IWorldConnector{
         return drops;
     }
     @Override public boolean sendBlockBreakEvent(long pos,IPlayerConnector player){
-        org.bukkit.event.block.BlockBreakEvent event=new org.bukkit.event.block.BlockBreakEvent(block(pos),((BukkitPlayerConnector)player).getPlayer());
-        com.thizthizzydizzy.treefeller.platform.bukkit.core.event.BukkitEvents.sentBlockBreakEvents.add(event);
-        try{org.bukkit.Bukkit.getPluginManager().callEvent(event);return !event.isCancelled();}
-        finally{com.thizthizzydizzy.treefeller.platform.bukkit.core.event.BukkitEvents.sentBlockBreakEvents.remove(event);}
+        BlockBreakEvent event=new BlockBreakEvent(block(pos),((BukkitPlayerConnector)player).getPlayer());
+        BukkitEvents.sentBlockBreakEvents.add(event);
+        try{Bukkit.getPluginManager().callEvent(event);return !event.isCancelled();}
+        finally{BukkitEvents.sentBlockBreakEvents.remove(event);}
     }
     @Override public void dropItem(long pos,IItemConnector item,IPlayerConnector player){
-        org.bukkit.entity.Item dropped=world.dropItemNaturally(block(pos).getLocation().add(.5,.5,.5),((BukkitItemConnector)item).getStack());
-        com.thizthizzydizzy.treefeller.core.compatibility.TreeFellerCompatibility.dropItem(player,dropped);
+        Item dropped=world.dropItemNaturally(block(pos).getLocation().add(.5,.5,.5),((BukkitItemConnector)item).getStack());
+        TreeFellerCompatibility.dropItem(player,dropped);
     }
     @Override
     public void removeBlock(long pos){
@@ -99,7 +115,7 @@ public class BukkitWorldConnector implements IWorldConnector{
     }
     @Override
     public String getBiome(long pos){
-        return world.getBiome(BlockPos.getX(pos), BlockPos.getZ(pos)).toString();
+        return block(pos).getBiome().name();
     }
     @Override
     public boolean matches(long pos, IBlockDefinition definition){

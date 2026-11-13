@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="TreeFellerPlatformBukkitVersionV26_R2" default="jar" basedir=".">
+    <!-- Paper 26.3 supplies the particle record and ItemInstance copy signature. -->
+    <path id="classpath">
+        <pathelement location="../V26_R1/dist/TreeFellerPlatformBukkitVersionV26_R1.jar"/>
+        <fileset dir="../../../../Libraries/Bukkit/26_R2" includes="*.jar"/>
+        <fileset dir="../../../../Libraries/Bukkit/26_R1" includes="*.jar"/>
+        <pathelement location="../../../../Core/dist/TreeFellerCore.jar"/>
+        <pathelement location="../../Core/dist/TreeFellerPlatformBukkitCore.jar"/>
+    </path>
+    <target name="jar">
+        <mkdir dir="build/classes"/>
+        <!-- Keep Java 8 bytecode for older Paper remappers; the compiler JDK supplies native record types. -->
+        <javac srcdir="src" destdir="build/classes" source="8" target="8" includeantruntime="false"><classpath refid="classpath"/></javac>
+        <mkdir dir="dist"/><jar destfile="dist/TreeFellerPlatformBukkitVersionV26_R2.jar" basedir="build/classes"/>
+    </target>
+    <target name="clean"><delete dir="build"/><delete dir="dist"/></target>
+</project>

@@ -12,7 +12,7 @@ public final class DropToInventoryTests{
                 return null;
             });
         }, (hooks, x) -> {
-            int dropped = tests.arena.world.droppedItemCount("spruce_log", x-3, tests.arena.floorY, -1, x+3, tests.arena.floorY+12, 5);
+            int dropped = tests.dropped("spruce_log",x);
             if(dropped!=8||hooks.inventoryItemCount(OptionTestSuite.PLAYER, "spruce_log")!=0)
                 throw new AssertionError("Expected all eight logs to overflow onto the ground");
         });

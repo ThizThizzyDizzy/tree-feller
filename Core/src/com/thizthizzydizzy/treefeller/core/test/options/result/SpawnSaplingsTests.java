@@ -1,9 +1,11 @@
 package com.thizthizzydizzy.treefeller.core.test.options.result;
-import com.thizthizzydizzy.treefeller.core.test.*;
 import com.thizthizzydizzy.treefeller.core.config.legacy.LegacyBukkitConfigImporter;
+import com.thizthizzydizzy.treefeller.core.test.*;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigFactory;
 import com.thizthizzydizzy.treefeller.lib.com.typesafe.config.ConfigRenderOptions;
+import java.util.Collections;
 import java.util.Map;
+
 public final class SpawnSaplingsTests{
     private SpawnSaplingsTests(){}
     public static void register(ITestPlatform platform){
@@ -12,7 +14,7 @@ public final class SpawnSaplingsTests{
         SaplingTestSuite.Case spawn=t.add("fallback",SaplingTestSuite.SPAWN,1);
         spawn.timeout=8;
         t.add("existing-source",SaplingTestSuite.SPAWN+"global.result.sapling_replant.use_inventory_saplings = true",1).inventory(2,1);
-        LegacyBukkitConfigImporter.Result imported=LegacyBukkitConfigImporter.importConfiguration(Map.of("spawn-saplings",2));
+        LegacyBukkitConfigImporter.Result imported=LegacyBukkitConfigImporter.importConfiguration(Collections.singletonMap("spawn-saplings",2));
         if(!imported.warnings.isEmpty())throw new IllegalStateException(imported.report());
         String legacySettings=ConfigFactory.parseString(imported.configuration).getConfig("global.result.sapling_replant").root().render(ConfigRenderOptions.concise());
         SaplingTestSuite.Case always=t.add("always-sources","global.result.sapling_replant = "+legacySettings+"\n"

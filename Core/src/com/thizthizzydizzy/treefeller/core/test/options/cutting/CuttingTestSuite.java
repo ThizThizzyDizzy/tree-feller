@@ -1,19 +1,24 @@
 package com.thizthizzydizzy.treefeller.core.test.options.cutting;
 import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.connector.item.IItemConnector;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.test.*;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
 /** Independent specimens, shared setup, real client actions and server-side outcome checks. */
 final class CuttingTestSuite{
     private final OptionTestSuite suite;
     private final TestTrees.Tree tree = TestTrees.specimen(TestTrees.Kind.SPRUCE);
     private TestArena arena;
+    private Runnable restorePickup;
     private int fixtures;
     private final String option;
     CuttingTestSuite(String option){
         this.option = option;
-        suite = new OptionTestSuite("cutting."+option).lifecycle(this::prepare, this::finish, (ctx, hooks) -> {});
+        suite = new OptionTestSuite("cutting."+option).lifecycle(this::prepare, this::finish, (ctx,hooks) -> TestArena.onServer(ctx,() -> {if(restorePickup!=null){restorePickup.run();restorePickup=null;}return null;}));
     }
     // remainingLogs: -1 means refused, otherwise exact number of surviving logs.
     CuttingTestSuite add(String name, String config, String item, int cutHeight, int remainingLogs, int damage, int count){
@@ -36,11 +41,11 @@ final class CuttingTestSuite{
             });
             if(delay>0){
                 AnimationObservation observation = new AnimationObservation(x, delay);
-                TestArena.onServer(ctx, () -> {observation.poll(); return null;});
+                TestArena.onServer(ctx, () -> {observation.capture=hooks.captureItems(OptionTestSuite.PLAYER);observation.poll(); return null;});
                 try{
                     ctx.breakBlock(x, arena.floorY+1+cutHeight, 2);
                     observation.await();
-                }finally{observation.active = false;}
+                }finally{TestArena.onServer(ctx,() -> {observation.active=false;observation.capture.close();return null;});}
             }else ctx.breakBlock(x, arena.floorY+1+cutHeight, 2);
             if(remainingLogs==-1)arena.assertOnlyLogRemoved(tree, x, 2, 0, cutHeight, 0);
             else TestArena.onServer(ctx, () -> {
@@ -92,19 +97,19 @@ final class CuttingTestSuite{
     /** Observe server ticks so client/network latency cannot consume the short animation delay. */
     private final class AnimationObservation{
         final int x, delay;
-        final java.util.concurrent.CompletableFuture<Void> finished = new java.util.concurrent.CompletableFuture<>();
+        final CompletableFuture<Void> finished = new CompletableFuture<>();
         volatile boolean active = true;
         long firstTick = -1, secondTick = -1;
-        int initialDrops = -1;
+        ITestPlatform.ItemCapture capture;
         AnimationObservation(int x, int delay){this.x = x; this.delay = delay;}
         void poll(){
             if(!active)return;
             try{
-                if(initialDrops<0)initialDrops = arena.world.droppedItemCount("spruce_log", x-3, arena.floorY, -1, x+3, arena.floorY+12, 5);
                 int cutLogs = 0;
                 for(int y = 0; y<8; y++)if(!arena.world.isMaterial(x, arena.floorY+1+y, 2, "spruce_log"))cutLogs++;
                 if(cutLogs>0){
-                    int drops = arena.world.droppedItemCount("spruce_log", x-3, arena.floorY, -1, x+3, arena.floorY+12, 5)-initialDrops;
+                    int drops=0;
+                    for(ITestPlatform.ItemObservation item:capture.items())if(item.material.equals("spruce_log")&&item.x>=x-3&&item.x<=x+3&&item.z>=-1&&item.z<=5)drops+=item.count;
                     if(drops!=cutLogs)throw new AssertionError("Expected drops for "+cutLogs+" cut logs, got "+drops);
                     if(firstTick<0)firstTick = arena.world.fullTime();
                     if(cutLogs>=2&&secondTick<0)secondTick = arena.world.fullTime();
@@ -118,11 +123,11 @@ final class CuttingTestSuite{
                         return;
                     }
                 }
-                com.thizthizzydizzy.treefeller.core.TreeFellerCore.connector.schedule(1, this::poll);
+                TreeFellerCore.connector.schedule(1, this::poll);
             }catch(Throwable ex){active = false; finished.completeExceptionally(ex);}
         }
         void await(){
-            try{finished.get(10, java.util.concurrent.TimeUnit.SECONDS);}
+            try{finished.get(10, TimeUnit.SECONDS);}
             catch(Exception ex){throw new IllegalStateException("Animation observation failed: "+(ex.getCause()==null?ex:ex.getCause()), ex);}
         }
     }
@@ -134,11 +139,13 @@ final class CuttingTestSuite{
         });
     }
     private void prepare(TestContext ctx, ITestPlatform hooks){
+        restorePickup=TestArena.onServer(ctx,() -> hooks.preventItemPickup(OptionTestSuite.PLAYER));
         arena = TestArena.setup(ctx, hooks, OptionTestSuite.PLAYER, -4, -6, Math.max(20, fixtures*8+4), 99);
         int[][] origins = new int[fixtures][2];
         for(int i = 0; i<fixtures; i++)origins[i] = new int[]{i*8, 2};
         arena.spawnAll(tree, origins);
         TestArena.onServer(ctx, () -> {
+            arena.world.removeDroppedItems(arena.minX-16,arena.floorY-16,arena.minZ-16,arena.minX+arena.size+16,arena.world.maxHeight(),arena.minZ+arena.size+16);
             for(int i = 0; i<fixtures; i++)arena.world.setBlock(i*8+1, arena.floorY+1, 2, "glowstone", null, -1);
             return null;
         });

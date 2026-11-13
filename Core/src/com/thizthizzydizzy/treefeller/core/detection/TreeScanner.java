@@ -12,6 +12,8 @@ import com.thizthizzydizzy.treefeller.lib.it.unimi.dsi.fastutil.objects.Referenc
 import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
+
 public class TreeScanner{
     private static final byte[] NEIGHBORS_DIRECT_X = {1, -1, 0, 0, 0, 0};
     private static final byte[] NEIGHBORS_DIRECT_Y = {0, 0, 1, -1, 0, 0};
@@ -80,7 +82,7 @@ public class TreeScanner{
                         if(!trunks.isEmpty()&&config.max_leaf_distance_from_top!=null){
                             int highestTrunkY = trunks.stream().mapToInt((n)->BlockPos.getY(n.pos)).max().getAsInt();
                             lastLayer = new ReferenceArrayList<>();
-                            lastLayer.addAll(trunks.stream().filter(n -> BlockPos.getY(n.pos)>=highestTrunkY-config.max_leaf_distance_from_top).toList());
+                            lastLayer.addAll(trunks.stream().filter(n -> BlockPos.getY(n.pos)>=highestTrunkY-config.max_leaf_distance_from_top).collect(Collectors.toList()));
                             context.info("Leaf scan starts within "+config.max_leaf_distance_from_top+" blocks of highest trunk Y="+highestTrunkY);
                             for(TreeNode trunk : trunks)if(!lastLayer.contains(trunk))context.decision(DebugLevel.TRACE,trunk.pos,OverlayMark.REJECTED,"Too low to seed leaf scan");
                         }else

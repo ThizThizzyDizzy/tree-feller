@@ -8,6 +8,7 @@ public final class FellBehaviorTests{
         for(String group : new String[]{"trunk","leaves","decoration"}){
             BreakingTestSuite t=new BreakingTestSuite("breaking."+group+"-behavior");
             t.cutRoot=true;
+            t.observeFalling=true;
             for(String mode : new String[]{"BREAK","INVENTORY","NATURAL","FALL","FALL_HURT","FALL_BREAK","FALL_HURT_BREAK","FALL_INVENTORY","FALL_HURT_INVENTORY","FALL_NATURAL","FALL_NATURAL_HURT","FALL_NATURAL_BREAK","FALL_NATURAL_HURT_BREAK","FALL_NATURAL_INVENTORY","FALL_NATURAL_HURT_INVENTORY"}){
                 boolean entity=mode.startsWith("FALL"),natural=mode.contains("NATURAL"),inventory=mode.contains("INVENTORY");
                 boolean place=natural&&!mode.contains("BREAK")&&!inventory||entity&&!mode.contains("BREAK")&&!inventory;
@@ -26,9 +27,11 @@ public final class FellBehaviorTests{
                 },(ctx,h,f) -> {
                     if(entity){
                         TestArena.onServer(ctx,() -> {
-                            t.check(!t.falling(f).isEmpty(),"Expected live falling entities for "+mode);
-                            t.equal(0,h.inventoryItemCount(OptionTestSuite.PLAYER,material),"No premature inventory delivery");
-                            // Some lowest blocks may have landed already; at least the upper entity remains.
+                            t.check(f.sawFalling,"Expected falling entities during the client cut for "+mode+"; remaining blocks="+t.blocks(f,material)+", drops="+t.drops(f,material)+", inventory="+h.inventoryItemCount(OptionTestSuite.PLAYER,material));
+                            // The client can acknowledge the cut after lower blocks have
+                            // landed. Inventory delivery may only account for landed units.
+                            int airborne=(int)t.falling(f).stream().filter(p -> p.material.equals(material)).count();
+                            t.check(h.inventoryItemCount(OptionTestSuite.PLAYER,material)<=units-airborne,"Inventory delivery includes airborne blocks");
                             return null;
                         });
                         t.await(ctx,f);

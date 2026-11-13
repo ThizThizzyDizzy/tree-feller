@@ -10,6 +10,8 @@ final class ResultTestSuite{
     final String option, group;
     final String replacement;
     TestArena arena;
+    Runnable restorePickup;
+    ITestPlatform.ItemCapture capture;
     int fixtures;
     ResultTestSuite(String option, String group, boolean melon){
         this(option, group, melon?"melon":null);
@@ -18,7 +20,7 @@ final class ResultTestSuite{
         this.option = option;
         this.group = group;
         this.replacement = replacement;
-        suite = new OptionTestSuite("result."+option).lifecycle(this::prepare, this::finish, (ctx, hooks) -> {});
+        suite = new OptionTestSuite("result."+option).lifecycle(this::prepare, this::finish, (ctx,hooks) -> TestArena.onServer(ctx,() -> {if(restorePickup!=null){restorePickup.run();restorePickup=null;}if(capture!=null){capture.close();capture=null;}return null;}));
     }
     int units(){
         if(group.equals("trunk"))return 8;
@@ -26,7 +28,7 @@ final class ResultTestSuite{
         return group.equals("decoration")&&"gravel".equals(replacement)?8:1;
     }
     ResultTestSuite add(String name, String config, String item, OptionTestSuite.Test before, Check check){
-        int x = fixtures++*8;
+        int x = fixtures++*16;
         String trunk = replacement!=null&&group.equals("trunk")?replacement:"spruce_log";
         String leaves = replacement!=null&&group.equals("leaves")?replacement:"spruce_leaves";
         String decoration = replacement!=null&&group.equals("decoration")?replacement:"glowstone";
@@ -43,10 +45,13 @@ final class ResultTestSuite{
             });
             before.run(ctx, hooks);
             TestArena.onServer(ctx, () -> {
+                if(capture!=null)capture.close();
+                capture=hooks.captureItems(OptionTestSuite.PLAYER);
                 hooks.showTestStatus(OptionTestSuite.PLAYER, "result."+option+" | "+name+" | "+config.replace("global.result.", "").replace('\n', ';'));
                 return null;
             });
             ctx.breakBlock(x, arena.floorY+1, 2);
+            ctx.waitTicks(2);
             TestArena.onServer(ctx, () -> {
                 for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
                     long pos = entry.getKey();
@@ -66,17 +71,23 @@ final class ResultTestSuite{
     ResultTestSuite drops(String name, String config, String item, String material, int min, int max, boolean inventory){
         return add(name, config, item, (ctx, hooks) -> {}, (hooks, x) -> {
             int carried = hooks.inventoryItemCount(OptionTestSuite.PLAYER, material);
-            int dropped = arena.world.droppedItemCount(material, x-3, arena.floorY, -1, x+3, arena.floorY+12, 5);
+            int dropped = dropped(material,x);
             int count = inventory?carried:dropped;
             if(count<min||count>max)throw new AssertionError("Expected "+material+" count "+min+".."+max+", got "+count);
             if((inventory?dropped:carried)!=0)throw new AssertionError("Items delivered to incorrect destination");
         });
     }
+    int dropped(String material,int x){
+        int count=0;
+        for(ITestPlatform.ItemObservation item:capture.items())if(item.material.equals(material)&&item.x>=x-6&&item.x<=x+7&&item.z>=-6&&item.z<=10)count+=item.count;
+        return count;
+    }
     void register(ITestPlatform platform){suite.register(platform);}
     private void prepare(TestContext ctx, ITestPlatform hooks){
-        arena = TestArena.setup(ctx, hooks, OptionTestSuite.PLAYER, -4, -6, Math.max(20, fixtures*8+4), 99);
+        restorePickup=TestArena.onServer(ctx,() -> hooks.preventItemPickup(OptionTestSuite.PLAYER));
+        arena = TestArena.setup(ctx, hooks, OptionTestSuite.PLAYER, -8, -8, Math.max(28, fixtures*16+16), 99);
         int[][] origins = new int[fixtures][2];
-        for(int i = 0; i<fixtures; i++)origins[i] = new int[]{i*8, 2};
+        for(int i = 0; i<fixtures; i++)origins[i] = new int[]{i*16, 2};
         arena.spawnAll(tree, origins);
         TestArena.onServer(ctx, () -> {
             arena.world.removeDroppedItems(arena.minX, arena.floorY, arena.minZ, arena.minX+arena.size, arena.world.maxHeight(), arena.minZ+arena.size);
@@ -84,19 +95,19 @@ final class ResultTestSuite{
                 if(replacement!=null)for(Map.Entry<Long, TestTrees.Block> entry : tree.blocks.entrySet()){
                     if((entry.getValue().axis!=null)!=group.equals("trunk")||group.equals("decoration"))continue;
                     long pos = entry.getKey();
-                    arena.world.setBlock(i*8+BlockPos.getX(pos), arena.floorY+1+BlockPos.getY(pos), 2+BlockPos.getZ(pos), replacement, null, -1);
+                    arena.world.setBlock(i*16+BlockPos.getX(pos), arena.floorY+1+BlockPos.getY(pos), 2+BlockPos.getZ(pos), replacement, null, -1);
                 }
                 if(group.equals("decoration")&&"gravel".equals(replacement)){
                     for(int y = 0; y<2; y++)for(int[] side : new int[][]{{1, 0}, {-1, 0}, {0, 1}, {0, -1}})
-                        arena.world.setBlock(i*8+side[0], arena.floorY+1+y, 2+side[1], "gravel", null, -1);
-                }else arena.world.setBlock(i*8+1, arena.floorY+1, 2, replacement!=null&&group.equals("decoration")?replacement:"glowstone", null, -1);
+                        arena.world.setBlock(i*16+side[0], arena.floorY+1+y, 2+side[1], "gravel", null, -1);
+                }else arena.world.setBlock(i*16+1, arena.floorY+1, 2, replacement!=null&&group.equals("decoration")?replacement:"glowstone", null, -1);
             }
             return null;
         });
     }
     private void finish(TestContext ctx, ITestPlatform hooks){
         TestArena.onServer(ctx, () -> {hooks.prepareCamera(OptionTestSuite.PLAYER); return null;});
-        ctx.teleportPlayer(OptionTestSuite.PLAYER, (fixtures-1)*4+0.5, arena.floorY+20, -12.5, 0.0, 55.0);
+        ctx.teleportPlayer(OptionTestSuite.PLAYER, (fixtures-1)*8+0.5, arena.floorY+20, -12.5, 0.0, 55.0);
         ctx.waitTicks(40);
     }
     @FunctionalInterface interface Check{void run(ITestPlatform hooks, int x);}

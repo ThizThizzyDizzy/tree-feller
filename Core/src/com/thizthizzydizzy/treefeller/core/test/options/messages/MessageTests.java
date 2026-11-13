@@ -34,7 +34,7 @@ public final class MessageTests{
         int x=test*8;
         TestArena.onServer(ctx,() -> {platform.preparePlayer(OptionTestSuite.PLAYER,true);platform.setPlayerLevels(OptionTestSuite.PLAYER,20,20,20);return null;});
         ctx.teleportPlayer(OptionTestSuite.PLAYER,x+0.5,arena.floorY+1,-1.5,0.0,0.0);
-        ITestPlatform.EffectCapture capture=TestArena.onServer(ctx,() -> platform.captureEffects(OptionTestSuite.PLAYER));
+        ITestPlatform.TestOutputRecorder capture=TestArena.onServer(ctx,() -> platform.recordOutput(OptionTestSuite.PLAYER));
         try{
             TestArena.onServer(ctx,() -> {
                 platform.showTestStatus(OptionTestSuite.PLAYER,(actionbar?"actionbar":"chat")+"="+(test==2?"null":"custom")+" | food="+(test==0?0:20)+" | expect "+(test==0?"refusal":"felling"));

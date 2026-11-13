@@ -1,14 +1,17 @@
 package com.thizthizzydizzy.treefeller.core.test.options.breaking;
 import com.thizthizzydizzy.mcautotester.mod.core.TestContext;
+import com.thizthizzydizzy.treefeller.core.TreeFellerCore;
 import com.thizthizzydizzy.treefeller.core.connector.world.BlockPos;
 import com.thizthizzydizzy.treefeller.core.test.*;
 import java.util.*;
+
 /** Real client actions and observable world outcomes, shared intact fixture setup. */
 final class BreakingTestSuite{
     final TestTrees.Tree tree=TestTrees.specimen(TestTrees.Kind.SPRUCE);
     final OptionTestSuite suite;
     final String option;
     boolean cutRoot;
+    boolean observeFalling;
     final List<Fixture> fixtures=new ArrayList<>();
     final List<ITestPlatform.TestTarget> targets=new ArrayList<>();
     TestArena arena;
@@ -36,11 +39,33 @@ final class BreakingTestSuite{
             });
             before.run(ctx,hooks,f);
             TestArena.onServer(ctx,() -> {hooks.showTestStatus(OptionTestSuite.PLAYER,option+" | "+name+" | "+values(config));return null;});
-            ctx.breakBlock(f.x-(cutRoot?1:0),arena.floorY+1,f.z);
+            if(observeFalling)TestArena.onServer(ctx,() -> {
+                f.observing=true;
+                observe(f);
+                return null;
+            });
+            try{
+                ctx.breakBlock(f.x-(cutRoot?1:0),arena.floorY+1,f.z);
+                // Older servers publish newly spawned entities at the end of the tick.
+                ctx.waitTicks(1);
+            }finally{if(observeFalling)TestArena.onServer(ctx,() -> {
+                recordFalling(f);
+                f.observing=false;return null;
+            });}
             check.run(ctx,hooks,f);
         });
         return this;
     }
+    private void observe(Fixture f){
+        if(!f.observing)return;
+        recordFalling(f);
+        TreeFellerCore.connector.schedule(1,() -> observe(f));
+    }
+    private void recordFalling(Fixture f){
+        List<ITestPlatform.FallingObservation> entities=falling(f);
+        if(!entities.isEmpty()&&!f.sawFalling){f.initialFalling=entities;f.sawFalling=true;}
+    }
+    List<ITestPlatform.FallingObservation> motion(Fixture f){return f.sawFalling?f.initialFalling:falling(f);}
     private String values(String config){
         StringBuilder values=new StringBuilder();
         String prefix="global."+option;
@@ -100,6 +125,8 @@ final class BreakingTestSuite{
     }
     static final class Fixture{
         final int x,z;
+        boolean observing,sawFalling;
+        List<ITestPlatform.FallingObservation> initialFalling=Collections.emptyList();
         Fixture(int x,int z){this.x=x;this.z=z;}
     }
     @FunctionalInterface interface Check{void run(TestContext ctx,ITestPlatform hooks,Fixture fixture);}

@@ -4,7 +4,7 @@ public final class AttributesTests{
     private AttributesTests(){}
     public static void register(ITestPlatform platform){
         ItemTestSuite tests = new ItemTestSuite("attributes");
-        String hidden = "iron_axe[tooltip_display={hidden_components:['minecraft:enchantments']}]";
+        String hidden = "iron_axe[enchantments={unbreaking:1},tooltip_display={hidden_components:['minecraft:enchantments']}]";
         for(String list : new String[]{"whitelist", "blacklist"}){
             boolean required = list.equals("whitelist");
             String definition = "material = IRON_AXE, attributes = { "+list+" = [HIDE_ENCHANTS] }";
